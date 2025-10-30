@@ -140,7 +140,7 @@ class WelcomeFormHandler {
     const monthNumber = Number(birthMonth);
     if (Number.isNaN(monthNumber) || monthNumber < 1 || monthNumber > 12) {
       this.setNotification({
-        message: 'Birth month must be a legit.',
+        message: 'Birth month must be valid.',
         type: 'error',
       });
       return false;
