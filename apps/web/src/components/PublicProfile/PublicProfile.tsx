@@ -124,7 +124,6 @@ const PublicProfile: React.FC = () => {
   if (loading) return <Spinner />;
   if (error) return <div>{error}</div>;
 
-  console.log('Current User ID:', currentUserId);
 
   return (
     <div className="public-profile">
