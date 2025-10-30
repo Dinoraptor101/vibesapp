@@ -1,0 +1,59 @@
+@import url('../../theme.css');
+
+.add-to-home-screen-overlay {
+  z-index: 60; /* Below the prompt */
+}
+
+.add-to-home-screen-prompt {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--card-background-color);
+  border: 1px solid var(--card-border-color);
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  text-align: center;
+  z-index: 61; /* Above the overlay */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--text-color);
+  max-width: 90%;
+  width: 400px;
+}
+
+.prompt-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.prompt-content p {
+  margin-bottom: 10px;
+  font-size: 1em;
+  color: var(--text-color);
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.dismiss-button,
+.never-show-button {
+  background: var(--button-background-color);
+  color: var(--text-color);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.dismiss-button:hover,
+.never-show-button:hover {
+  background: var(--button-hover-background-color);
+}

@@ -1,0 +1,233 @@
+@import url('../../theme.css');
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color var(--transition-duration);
+}
+
+/* Body adjustment when Legend is shown */
+body.show-legend {
+  overflow-y: auto;
+  height: 100%;
+}
+
+.user-profile {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* Карточка профиля */
+.profile-card {
+  background: var(--card-background-color);
+  border-radius: 15px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.user-info table {
+  width: 100%;
+  margin-bottom: 10px;
+  border-collapse: collapse;
+}
+
+.user-info td {
+  padding: 10px 5px 10px 5px;
+  font-size: 18px;
+  color: var(--text-color);
+  border-bottom: 1px solid var(--card-border-color);
+  max-width: 150px;
+  overflow-wrap: break-word;
+  vertical-align: center; /* Align dropdowns horizontally */
+}
+
+.user-info td:first-child {
+  font-weight: bold;
+  text-align: left;
+}
+
+.profile-links {
+  margin-top: auto; /* Pushes links to bottom */
+  width: 100%;
+  border-top: 1px solid var(--card-border-color);
+  padding-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.profile-links table {
+  width: auto;
+  margin: 0 auto;
+}
+
+.profile-links td {
+  padding: 5px 0;
+  text-align: center;
+}
+
+.profile-link {
+  padding: 5px 15px;
+  color: var(--button-hover-background-color);
+  text-decoration: none;
+  font-size: 16px;
+  text-align: center;
+  transition: color 0.6s ease;
+}
+
+.profile-link button {
+  background: none;
+  border: none;
+  color: var(--button-hover-background-color);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.logout-icon {
+  margin-right: 5px;
+}
+
+.logout-button {
+  background: var(--button-background-color);
+  border: none;
+  color: var(--text-color);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 10px;
+  border-radius: 5px;
+  transition: background-color var(--transition-duration);
+}
+
+.logout-button:hover {
+  background: var(--button-hover-background-color);
+}
+
+.profile-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: center; /* Changed to center */
+  align-items: flex-start;
+  gap: 0;
+  margin-bottom: 10px;
+  flex-wrap: nowrap;
+  min-width: 310px;
+  padding: 10px 20px; /* Added padding */
+  box-sizing: border-box; /* Ensure it contains user info */
+}
+
+.user-info {
+  flex: 0 0 240px;
+  width: 240px;
+  padding: 10px 15px 10px 0; /* Added right padding */
+  overflow: visible; /* Ensure elements are not clipped */
+  box-sizing: border-box; /* Ensure it doesn't exceed the profile content */
+}
+
+.vibes-section {
+  flex: 0 0 70px;
+  min-width: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left: 10px;
+}
+
+.pigeon-tag {
+  cursor: pointer;
+  color: var(--button-background-color);
+  display: flex;
+  align-items: center;
+}
+
+.pigeon-tag:hover {
+  color: var(--button-hover-background-color);
+}
+
+.copy-icon {
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+.development-version {
+  position: fixed;
+  color: var(--note-color);
+  bottom: 90px;
+  right: 50%;
+  transform: translateX(50%);
+  font-size: 1rem;
+  font-weight: 300;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 370px) {
+  .profile-card {
+    padding: 10px;
+  }
+
+  .profile-content {
+    padding: 0;
+  }
+
+  .user-info {
+    flex: 0 0 220px;
+    width: 220px;
+    padding: 10px 0;
+  }
+
+  .karma-section {
+    flex: 0 0 60px;
+    min-width: 60px;
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 396px) {
+  .profile-card {
+    padding: 10px;
+    width: 100%; /* Ensure it fits within the screen */
+  }
+
+  .profile-content {
+    padding: 0;
+  }
+
+  .user-info {
+    flex: 0 0 220px;
+    width: 220px;
+    padding: 10px 0;
+  }
+
+  .karma-section {
+    flex: 0 0 60px;
+    min-width: 60px;
+    padding-left: 0;
+  }
+}
+
+.user-profile .custom-selector__selected {
+  width: 160px;
+  margin-bottom: 0;
+  border: 1px solid var(--input-border-color);
+  background-color: var(--input-background-color);
+  border-radius: 5px;
+  font-size: 16px;
+  color: var(--text-color);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-duration),
+    border-color var(--transition-duration);
+}
