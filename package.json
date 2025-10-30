@@ -1,66 +1,66 @@
 {
-  "name": "vibesapp",
-  "version": "0.20.1",
-  "description": "Picture based social network",
-  "license": "MIT",
-  "homepage": "https://vibesapp.net",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Dinoraptor101/vibesapp.git"
-  },
-  "scripts": {
-    "dev": "concurrently \"npm run start:api\" \"npm run start:web\"",
-    "start": "npm run dev",
-    "start:web": "cd apps/web && npm start",
-    "start:api": "cd apps/api && npm run dev",
-    "build": "nx build web && nx build api",
-    "build:web": "cd apps/web && npm run build",
-    "build:api": "cd apps/api && npm run build",
-    "test": "nx test web && nx test api",
-    "test:web": "cd apps/web && npm test",
-    "test:api": "cd apps/api && npm test",
-    "test:e2e": "cd libs/e2e-testing && npm test",
-    "lint": "nx lint web && nx lint api",
-    "lint:web": "cd apps/web && npm run lint",
-    "lint:api": "cd apps/api && npm run lint",
-    "lint:fix": "nx lint web --fix && nx lint api --fix",
-    "deploy:web": "cd apps/web && npm run deploy",
-    "deploy:api": "cd apps/api && npm run deploy",
-    "clean": "nx reset && rm -rf node_modules apps/*/node_modules libs/*/node_modules",
-    "graph": "nx graph",
-    "affected:build": "nx affected:build",
-    "affected:test": "nx affected:test",
-    "affected:lint": "nx affected:lint",
-    "version:patch": "node scripts/update-version.js patch",
-    "version:minor": "node scripts/update-version.js minor",
-    "version:major": "node scripts/update-version.js major",
-    "install:deps": "cd apps/web && npm install --ignore-scripts && cd ../api && npm install --ignore-scripts",
-    "postinstall": "if [ \"$SKIP_POSTINSTALL\" != \"true\" ]; then npm run install:deps; fi"
-  },
-  "private": true,
-  "devDependencies": {
-    "@nx/js": "^22.0.2",
-    "@nx/node": "^22.0.2",
-    "@nx/react": "^22.0.2",
-    "@nx/webpack": "^22.0.2",
-    "concurrently": "^9.2.1",
-    "nx": "22.0.2"
-  },
-  "workspaces": [
-    "apps/*",
-    "libs/*"
-  ],
-  "engines": {
-    "node": ">=20.0.0",
-    "npm": ">=10.0.0"
-  },
-  "keywords": [
-    "social-network",
-    "react",
-    "nodejs",
-    "mongodb",
-    "monorepo",
-    "nx",
-    "typescript"
-  ]
+	"name": "vibesapp",
+	"version": "0.20.1",
+	"description": "Picture based social network",
+	"license": "MIT",
+	"homepage": "https://vibesapp.net",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Dinoraptor101/vibesapp.git"
+	},
+	"scripts": {
+		"dev": "concurrently \"npm run start:api\" \"npm run start:web\"",
+		"start": "npm run dev",
+		"start:web": "cd apps/web && npm start",
+		"start:api": "cd apps/api && npm run dev",
+		"build": "nx build web && nx build api",
+		"build:web": "cd apps/web && npm run build",
+		"build:api": "cd apps/api && npm run build",
+		"test": "nx test web && nx test api",
+		"test:web": "cd apps/web && npm test",
+		"test:api": "cd apps/api && npm test",
+		"test:e2e": "cd libs/e2e-testing && npm test",
+		"lint": "nx lint web && nx lint api",
+		"lint:web": "cd apps/web && npm run lint",
+		"lint:api": "cd apps/api && npm run lint",
+		"lint:fix": "nx lint web --fix && nx lint api --fix",
+		"deploy:web": "cd apps/web && npm run deploy",
+		"deploy:api": "cd apps/api && npm run deploy",
+		"clean": "nx reset && rm -rf node_modules apps/*/node_modules libs/*/node_modules",
+		"graph": "nx graph",
+		"affected:build": "nx affected:build",
+		"affected:test": "nx affected:test",
+		"affected:lint": "nx affected:lint",
+		"version:patch": "node scripts/update-version.js patch",
+		"version:minor": "node scripts/update-version.js minor",
+		"version:major": "node scripts/update-version.js major",
+		"install:deps": "cd apps/web && npm install --ignore-scripts && cd ../api && npm install --ignore-scripts",
+		"postinstall": "if [ \"$SKIP_POSTINSTALL\" != \"true\" ]; then npm run install:deps; fi"
+	},
+	"private": true,
+	"devDependencies": {
+		"@nx/js": "^22.0.2",
+		"@nx/node": "^22.0.2",
+		"@nx/react": "^22.0.2",
+		"@nx/webpack": "^22.0.2",
+		"concurrently": "^9.2.1",
+		"nx": "22.0.2"
+	},
+	"workspaces": [
+		"apps/*",
+		"libs/*"
+	],
+	"engines": {
+		"node": ">=20.0.0",
+		"npm": ">=10.0.0"
+	},
+	"keywords": [
+		"social-network",
+		"react",
+		"nodejs",
+		"mongodb",
+		"monorepo",
+		"nx",
+		"typescript"
+	]
 }

@@ -27,12 +27,12 @@ const VERSION_FILES = [
   // Code files with hardcoded versions
   {
     file: 'apps/web/src/App.tsx',
-    pattern: /const VERSION = '[^']+';/,
+    pattern: /const VERSION = ['"][^'"]+['"];/,
     replacement: (version) => `const VERSION = '${version}';`
   },
   {
     file: 'libs/shared/src/lib/constants.ts',
-    pattern: /VERSION: '[^']+',/,
+    pattern: /VERSION: ['"][^'"]+['"],/,
     replacement: (version) => `VERSION: '${version}',`
   },
   {
