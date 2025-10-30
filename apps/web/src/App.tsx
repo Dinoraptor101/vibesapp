@@ -43,7 +43,7 @@ import { logDebug } from './utils/utils';
 
 const USER_COOKIE = 'userId';
 const PIGEON_COOKIE = 'pigeonId';
-const VERSION = '0.12.23';
+const VERSION = '0.20.1';
 
 const App = () => {
   const [userId] = useState<string>(() => {
