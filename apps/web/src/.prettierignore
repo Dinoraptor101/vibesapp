@@ -1,0 +1,5 @@
+node_modules
+build
+.env
+.vscode/settings.json
+test-automation/test-results

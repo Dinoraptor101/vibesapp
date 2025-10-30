@@ -1,0 +1,145 @@
+@import url('../../theme.css');
+
+.form-container {
+  max-width: min(800px, 90%);
+  margin: 1rem auto;
+  padding: min(3vw, 1.5rem);
+  border: 1px solid var(--card-border-color);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  background-color: var(--card-background-color);
+  transition: all var(--transition-duration);
+}
+
+.form-header {
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.form-title {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+  font-weight: 700;
+}
+
+.form-field {
+  margin-bottom: 0.75rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.required-mark {
+  color: #e53e3e;
+  margin-left: 0.25rem;
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.75rem;
+  word-wrap: break-word;
+  font-size: 1rem;
+  border: 2px solid var(--input-border-color);
+  border-radius: 8px;
+  background-color: var(--input-background-color);
+  color: var(--text-color);
+  transition: all 0.2s ease;
+}
+
+.form-input:hover:not(:disabled),
+.form-textarea:hover:not(:disabled) {
+  border-color: var(--input-hover-border-color);
+}
+
+.form-input:focus:not(:disabled),
+.form-textarea:focus:not(:disabled) {
+  border-color: var(--input-focus-border-color);
+  box-shadow: 0 0 0 3px var(--input-focus-shadow);
+  outline: none;
+}
+
+.form-input:disabled,
+.form-textarea:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.form-textarea {
+  min-height: 100px;
+  max-height: 200px;
+  resize: vertical;
+}
+
+.form-submit {
+  width: 100%;
+  padding: 0.75rem;
+  min-height: 2.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: var(--button-background-color);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.form-submit:not(:disabled):hover {
+  background-color: var(--button-hover-background-color);
+  transform: translateY(-1px);
+}
+
+.form-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.form-submit .logo-spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .form-container {
+    width: 100%;
+    margin: 0.25rem auto;
+    padding: 0.75rem;
+    border-radius: 0;
+  }
+
+  .form-field {
+    margin-bottom: 0.5rem;
+  }
+
+  .form-input,
+  .form-textarea {
+    font-size: 16px; /* Prevents zoom on mobile */
+    padding: 0.4rem 0.5rem;
+  }
+}

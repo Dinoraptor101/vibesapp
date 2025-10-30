@@ -1,0 +1,253 @@
+.conversation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 15px;
+  width: 100%;
+  max-width: 500px; /* Ensure it doesn't exceed the screen width */
+  margin: 0 auto;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.conversation-item {
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  border-radius: 10px;
+  background-color: var(--card-background-color);
+  box-shadow: 0 2px 8px var(--post-shadow-color);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    background-color var(--transition-duration);
+}
+
+/* Common header styling */
+.conversation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.conversation-username {
+  font-weight: bold;
+  font-size: 16px;
+  color: var(--text-color);
+}
+
+/* Scenario 1: User made a request (pending outgoing) */
+.conversation-item.pending-outgoing {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.pending-icon {
+  display: flex;
+  align-items: center;
+  color: var(--button-background-color);
+  font-size: 14px;
+}
+
+.pending-icon svg {
+  margin-right: 5px;
+}
+
+/* Scenario 2: User received a request (pending incoming) */
+.conversation-item.pending-incoming {
+  border: 1px solid var(--button-background-color);
+  background-color: var(--card-background-color);
+}
+
+.request-label {
+  font-size: 14px;
+  color: var(--button-background-color);
+  font-weight: bold;
+}
+
+.dm-request-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  justify-content: center; /* Center justify the actions */
+}
+
+.dm-request-actions button {
+  flex: 1;
+  padding: 6px; /* Adjusted padding */
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+  max-width: 100px; /* Added max-width for narrower buttons */
+}
+
+.dm-request-actions .accept-button {
+  background-color: var(--button-background-color);
+  color: white;
+}
+
+.dm-request-actions .accept-button:hover {
+  background-color: var(--button-hover-background-color);
+}
+
+.dm-request-actions .decline-button {
+  background-color: #e04444;
+  color: white;
+}
+
+.dm-request-actions .decline-button:hover {
+  background-color: #e81111;
+}
+
+.dm-request-actions .profile-button {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.dm-request-actions .profile-button:hover {
+  background-color: #e0e0e0;
+}
+
+/* Scenario 3: Approved conversation */
+.conversation-item.approved {
+  cursor: pointer;
+}
+
+.conversation-item.approved:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--post-shadow-color);
+}
+
+.last-message {
+  color: var(--text-color);
+  opacity: 0.8;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.last-message.unread {
+  font-weight: bold;
+  opacity: 1;
+}
+
+.unread-dot {
+  width: 10px;
+  height: 10px;
+  background-color: #d32f2f;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Closed conversation styling updated to be similar to pending outgoing */
+.conversation-item.closed {
+  opacity: 0.7;
+  cursor: pointer; /* Changed from default to pointer to indicate clickable */
+}
+
+.conversation-item.closed:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--post-shadow-color);
+}
+
+.archived-icon {
+  display: flex;
+  align-items: center;
+  color: #888; /* Different color from pending to indicate archive status */
+  font-size: 14px;
+}
+
+.archived-icon svg {
+  margin-right: 5px;
+}
+
+.closed-label {
+  font-size: 14px;
+  color: #888;
+}
+
+/* Loading and error states */
+.conversation-loading,
+.conversation-error,
+.no-conversations {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-color);
+}
+
+.conversation-error {
+  color: #d32f2f;
+}
+
+/* Enhanced no conversations styling */
+.no-conversations {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 20px;
+  margin: 20px;
+  border-radius: 10px;
+  background-color: var(--card-background-color);
+  box-shadow: 0 2px 8px var(--post-shadow-color);
+}
+
+.no-conversations-icon {
+  font-size: 48px;
+  color: var(--button-background-color);
+  opacity: 0.6;
+}
+
+.no-conversations-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--text-color);
+}
+
+.no-conversations-tip {
+  font-size: 14px;
+  color: var(--text-color);
+  opacity: 0.7;
+  max-width: 300px;
+  line-height: 1.4;
+}
+
+.no-conversations-instructions {
+  font-size: 14px;
+  color: var(--button-background-color);
+  font-weight: 500;
+  max-width: 320px;
+  line-height: 1.4;
+  margin-top: 8px;
+}
+
+.no-permission {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 18px;
+  color: var(--text-color);
+  text-align: center;
+  padding: 20px;
+}
+
+.no-permission strong {
+  font-weight: bold;
+  color: var(--link-color);
+}
+
+.no-permission svg {
+  margin-right: 10px;
+  font-size: 24px;
+  color: var(--button-background-color);
+}

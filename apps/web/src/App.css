@@ -1,0 +1,182 @@
+@import url('theme.css');
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap');
+
+/* Globally removes decorations from links */
+a:hover {
+  text-decoration: none;
+}
+
+/* Global styling for the body and html elements */
+body,
+html {
+  margin: 0;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition:
+    background-color var(--transition-duration),
+    color var(--transition-duration);
+}
+
+.theme-toggle-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  /* Keep the button at the top left */
+  background-color: var(--button-background-color);
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  /* Same size as the bug button */
+  height: 50px;
+  /* Same size as the bug button */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: background-color var(--transition-duration);
+}
+
+.theme-toggle-button svg {
+  font-size: 24px !important;
+  /* Increase the size of the icon */
+  color: #ffffff !important;
+}
+
+.theme-toggle-button:hover {
+  background-color: var(--button-hover-background-color);
+  transition: background-color var(--transition-duration);
+}
+
+/* Dim images in dark mode */
+[data-theme='dark'] img {
+  filter: brightness(0.8) contrast(1.2);
+  /* Adjust brightness and contrast for dark mode */
+}
+
+.app {
+  font-family: 'Arial', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color var(--transition-duration);
+}
+.page-header {
+  background-color: var(--card-background-color-transparent);
+  padding: 0px 5%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.24);
+  border-bottom-left-radius: 40px;
+  border-bottom-right-radius: 40px;
+  text-align: center;
+  position: fixed;
+  top: 0;
+  width: 90%;
+  height: 65px; /* Adjusted height */
+  z-index: 50; /* Ensure it's above all elements but expanded */
+  transition: background-color var(--transition-duration);
+  backdrop-filter: blur(10px);
+}
+
+.page-header h2 {
+  color: var(--button-hover-background-color);
+  text-decoration: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin: 0;
+  font-family: 'Merriweather', serif;
+  font-weight: 700;
+  font-size: 2.2em; /* Adjust font size as needed */
+  letter-spacing: 1px; /* Add some letter spacing for style */
+}
+
+.header-content {
+  padding: 50px 10px 70px 7px;
+  background-color: var(--background-color);
+  transition: background-color var(--transition-duration);
+}
+
+/* all pages must declare content class, this must match the height of the header in (px) */
+.app-content {
+  margin-top: 70px; /* Adjusted to match the height of the header */
+  margin-bottom: 100px; /* Avoid nav bar from covering the content */
+}
+
+/* Overlay when components expand like GroupChat and Floating Editor */
+.overlay {
+  position: fixed;
+  top: 0; /* Ensure the overlay starts from the top */
+  left: 0; /* Ensure the overlay starts from the left */
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  opacity: 0;
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.user-profile-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: var(--button-background-color);
+  color: #ffffff;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: background-color var(--transition-duration);
+}
+
+.user-profile-button:hover {
+  background-color: var(--button-hover-background-color);
+  transition: background-color var(--transition-duration);
+}
+
+.user-profile-button .fa-user {
+  font-size: 24px;
+  color: #ffffff !important;
+}
+
+/* this is SVG and requires additional styling */
+.activity {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  transition:
+    background-color var(--transition-duration),
+    border-color var(--transition-duration);
+}
+
+/* Red dot for unread notifications */
+.activity.unread::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  border-radius: 50%;
+  border: 2px solid var(--background-color);
+  z-index: 2; /* Ensure the dot appears over the bell icon */
+  pointer-events: none; /* Ensure the dot does not interfere with interactions */
+}

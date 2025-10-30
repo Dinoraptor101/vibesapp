@@ -1,0 +1,15 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    assignees:
+      - Dinoraptor101
+
+  - package-ecosystem: npm
+    directory: /test-automation
+    schedule:
+      interval: weekly
+    assignees:
+      - Dinoraptor101

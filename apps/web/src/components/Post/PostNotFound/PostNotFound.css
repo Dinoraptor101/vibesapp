@@ -1,0 +1,59 @@
+.posts-not-found {
+  text-align: center;
+  margin-top: 50px;
+  padding: 20px;
+}
+
+.posts-not-found h1 {
+  font-size: 2em;
+  margin-bottom: 20px;
+}
+
+.posts-not-found p {
+  font-size: 1.2em;
+  margin-bottom: 30px;
+}
+
+.return-home-button {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 1em;
+  color: #fff;
+  background-color: var(--button-background-color);
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background-color var(--transition-duration);
+}
+
+.return-home-button:hover {
+  background-color: var(--button-hover-background-color);
+  /* Updated hover color */
+}
+
+.return-home-button .fa-home {
+  margin-right: 8px;
+  /* Space between icon and text */
+}
+
+/* Mobile friendly adjustments */
+@media (max-width: 600px) {
+  .posts-not-found {
+    margin-top: 20px;
+    padding: 10px;
+  }
+
+  .posts-not-found h1 {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+  }
+
+  .posts-not-found p {
+    font-size: 1em;
+    margin-bottom: 20px;
+  }
+
+  .return-home-button {
+    padding: 8px 16px;
+    font-size: 0.9em;
+  }
+}

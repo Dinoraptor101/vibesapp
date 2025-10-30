@@ -1,0 +1,75 @@
+name: Deploy to GitHub Pages on PR Merge
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+jobs:
+  deploy:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    environment: github-pages
+    concurrency: deploy # Cancel other pending deployments
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GIT_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Cache Node.js modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci --omit=dev
+
+      - name: Lint with Biome
+        run: npm run lint:ci
+
+      - name: Build project
+        env:
+          NODE_ENV: ${{ vars.NODE_ENV }}
+          REACT_APP_CDN_URL: ${{ vars.REACT_APP_CDN_URL }}
+          REACT_APP_BACKEND_URI: ${{ vars.REACT_APP_BACKEND_URI }}
+          REACT_APP_S3_BUCKET: ${{ vars.REACT_APP_S3_BUCKET }}
+          REACT_APP_S3_REGION: ${{ vars.REACT_APP_S3_REGION }}
+          REACT_APP_PUBLIC_POSTHOG_HOST: ${{ vars.REACT_APP_PUBLIC_POSTHOG_HOST }}
+          REACT_APP_DEBUG: ${{ vars.REACT_APP_DEBUG }}
+          REACT_APP_ENABLE_RECAPTCHA: ${{ vars.REACT_APP_ENABLE_RECAPTCHA }}
+          REACT_APP_BACKEND_API_KEY: ${{ secrets.REACT_APP_BACKEND_API_KEY }}
+          REACT_APP_PUBLIC_POSTHOG_KEY: ${{ secrets.REACT_APP_PUBLIC_POSTHOG_KEY }}
+          REACT_APP_RECAPTCHA_SITE_KEY: ${{ secrets.REACT_APP_RECAPTCHA_SITE_KEY }}
+        run: npm run build
+
+      - name: Deploy to GitHub Pages
+        env:
+          NODE_ENV: ${{ vars.NODE_ENV }}
+          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+          REACT_APP_CDN_URL: ${{ vars.REACT_APP_CDN_URL }}
+          REACT_APP_BACKEND_URI: ${{ vars.REACT_APP_BACKEND_URI }}
+          REACT_APP_S3_BUCKET: ${{ vars.REACT_APP_S3_BUCKET }}
+          REACT_APP_S3_REGION: ${{ vars.REACT_APP_S3_REGION }}
+          REACT_APP_PUBLIC_POSTHOG_HOST: ${{ vars.REACT_APP_PUBLIC_POSTHOG_HOST }}
+          REACT_APP_DEBUG: ${{ vars.REACT_APP_DEBUG }}
+          REACT_APP_ENABLE_RECAPTCHA: ${{ vars.REACT_APP_ENABLE_RECAPTCHA }}
+          REACT_APP_BACKEND_API_KEY: ${{ secrets.REACT_APP_BACKEND_API_KEY }}
+          REACT_APP_PUBLIC_POSTHOG_KEY: ${{ secrets.REACT_APP_PUBLIC_POSTHOG_KEY }}
+          REACT_APP_RECAPTCHA_SITE_KEY: ${{ secrets.REACT_APP_RECAPTCHA_SITE_KEY }}
+        run: |
+          git config user.email "digitals.organization101@gmail.com"
+          git config user.name "Dinoraptor101"
+          git remote set-url origin "https://${GITHUB_TOKEN}@github.com/Dinoraptor101/vibesapp.git"
+          npx gh-pages -d build

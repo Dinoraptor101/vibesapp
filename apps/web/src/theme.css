@@ -1,0 +1,147 @@
+/* theme.css */
+:root {
+  --background-color: #f8f8f8;
+  --text-color: #000000;
+  --note-color: rgba(0, 0, 0, 0.6);
+  --card-background-color-transparent: #ffffffd0;
+  --card-background-color: #ffffff;
+  --card-border-color: #e0e0e0;
+  --button-background-color: #61dafb;
+  --button-hover-background-color: #21a1f1;
+  --error-color: #555555;
+  --button-disabled-color: #95e8ff;
+  --activity-item-background-color: #f8f8f8;
+  --activity-item-border-color: #e0e0e0;
+  --activity-item-hover-background-color: #e0e0e0;
+  --input-background-color: #ffffff;
+  --input-border-color: #ccc;
+  --input-focus-border-color: #007bff;
+  --input-focus-shadow: rgba(0, 123, 255, 0.5);
+  --link-color: #007bff;
+  --menu-text-color: #000000;
+  --menu-background-color: #ffffff;
+  --menu-border-color: #ccc;
+  --menu-hover-background-color: #f0f0f0;
+  --post-shadow-color: rgba(0, 0, 0, 0.24);
+  --post-hover-shadow-color: rgba(0, 0, 0, 0.2);
+  --notification-error-bg-color: #ab1c1c;
+  --notification-error-text-color: #ffffff;
+  --notification-success-bg-color: #4caf50;
+  --notification-success-text-color: #ffffff;
+  --notification-shadow-color: rgba(0, 0, 0, 0.2);
+  --notification-font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
+  --toggle-background-color: #ccc;
+  --toggle-checked-background-color: #21a1f1;
+  --vibes-card-background-color: #fafafa;
+  --ql-toolbar-background-color: #f8f8f8;
+  --ql-toolbar-color: #000000;
+  --ql-toolbar-border-color: #e0e0e0;
+  --ql-picker-background-color: #ffffff;
+  --ql-picker-color: #000000;
+  --ql-picker-hover-background-color: #e0e0e0;
+  --ql-button-color: #000000;
+  --ql-stroke-color: #000000;
+  --transition-duration: 0.6s ease;
+  --message-bubble-color: #e0e0e0;
+  --message-bubble-color-current-user: #a4e4ff;
+}
+
+[data-theme='dim'] {
+  --background-color: #333333;
+  --text-color: #f8f8f8;
+  --note-color: rgba(248, 248, 248, 0.6);
+  --card-background-color-transparent: #444444d0;
+  --card-background-color: #444444;
+  --card-border-color: #555555;
+  --button-background-color: #56c95a;
+  --button-hover-background-color: #45a049;
+  --error-color: #000000;
+  --button-disabled-color: #5e9673;
+  --activity-item-background-color: #444444;
+  --activity-item-border-color: #555555;
+  --activity-item-hover-background-color: #555555;
+  --input-background-color: #555555;
+  --input-border-color: #666666;
+  --input-focus-border-color: #4caf50;
+  --input-focus-shadow: rgba(76, 175, 80, 0.5);
+  --link-color: #4caf50;
+  --menu-text-color: #ffffff;
+  --menu-background-color: #555555;
+  --menu-border-color: #777777;
+  --menu-hover-background-color: #666666;
+  --post-shadow-color: rgba(0, 0, 0, 0.5);
+  --post-hover-shadow-color: rgba(0, 0, 0, 0.6);
+  --notification-error-bg-color: #ab1c1c;
+  --notification-error-text-color: #ffffff;
+  --notification-success-bg-color: #137c18;
+  --notification-success-text-color: #ffffff;
+  --notification-shadow-color: rgba(0, 0, 0, 0.4);
+  --notification-font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
+  --toggle-background-color: #666666;
+  --toggle-checked-background-color: #4caf50;
+  --vibes-card-background-color: #555555;
+  --ql-toolbar-background-color: #444444;
+  --ql-toolbar-color: #f8f8f8;
+  --ql-toolbar-border-color: #555555;
+  --ql-picker-background-color: #555555;
+  --ql-picker-color: #f8f8f8;
+  --ql-picker-hover-background-color: #555555;
+  --ql-button-color: #f8f8f8;
+  --ql-stroke-color: #f8f8f8;
+  --transition-duration: 0.6s ease;
+  --message-bubble-color: #555555;
+  --message-bubble-color-current-user: #337f35;
+}
+
+[data-theme='dark'] {
+  --background-color: #000000;
+  --text-color: #f8f8f8;
+  --note-color: rgba(248, 248, 248, 0.6);
+  --card-background-color-transparent: #111111d0;
+  --card-background-color: #111111;
+  --card-border-color: #555555;
+  --button-background-color: #4caf50;
+  --button-hover-background-color: #45a049;
+  --error-color: #bbb;
+  --button-disabled-color: #5e9673;
+  --activity-item-background-color: #111111;
+  --activity-item-border-color: #555555;
+  --activity-item-hover-background-color: #333333;
+  --input-background-color: #555555;
+  --input-border-color: #666666;
+  --input-focus-border-color: #4caf50;
+  --input-focus-shadow: rgba(76, 175, 80, 0.5);
+  --link-color: #4caf50;
+  --menu-text-color: #ffffff;
+  --menu-background-color: #555555;
+  --menu-border-color: #777777;
+  --menu-hover-background-color: #666666;
+  --post-shadow-color: rgba(128, 128, 128, 0.5);
+  --post-hover-shadow-color: rgba(128, 128, 128, 0.6);
+  --notification-error-bg-color: #ab1c1c;
+  --notification-error-text-color: #ffffff;
+  --notification-success-bg-color: #137c18;
+  --notification-success-text-color: #ffffff;
+  --notification-shadow-color: rgba(0, 0, 0, 0.4);
+  --notification-font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
+  --toggle-background-color: #666666;
+  --toggle-checked-background-color: #4caf50;
+  --vibes-card-background-color: #222222;
+  --ql-toolbar-background-color: #333333;
+  --ql-toolbar-color: #ffffff;
+  --ql-toolbar-border-color: #555555;
+  --ql-picker-background-color: #555555;
+  --ql-picker-color: #ffffff;
+  --ql-picker-hover-background-color: #555555;
+  --ql-button-color: #ffffff;
+  --ql-stroke-color: #ffffff;
+  --transition-duration: 0.6s ease;
+  --message-bubble-color: #252525;
+  --message-bubble-color-current-user: #0e4210;
+}
+
+/* Apply invert filter to Spinner for dim or dark themes */
+[data-theme='dim'] .logo-image,
+[data-theme='dark'] .logo-image {
+  filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(360deg) brightness(100%) contrast(100%);
+}

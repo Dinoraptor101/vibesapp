@@ -1,0 +1,51 @@
+@import url('../../theme.css');
+
+.notification {
+  position: fixed;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--notification-error-bg-color);
+  color: var(--notification-error-text-color) !important;
+  padding: 10px 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px var(--notification-shadow-color);
+  z-index: 60; /* Ensure it's above all elements globally */
+  opacity: 0;
+  animation:
+    slideDown 0.6s forwards,
+    slideUp 0.6s 4.5s forwards;
+  font-family: var(--notification-font-family);
+  font-weight: bold;
+  max-width: 90%; /* Ensure it doesn't exceed viewport width */
+  box-sizing: border-box; /* Include padding and border in width */
+}
+
+.notification.success {
+  background-color: var(--notification-success-bg-color);
+  color: var(--notification-success-text-color);
+}
+
+@keyframes slideDown {
+  0% {
+    top: -50px;
+    opacity: 0;
+  }
+
+  100% {
+    top: 20px;
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    top: 20px;
+    opacity: 1;
+  }
+
+  100% {
+    top: -50px;
+    opacity: 0;
+  }
+}
