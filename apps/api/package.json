@@ -1,6 +1,6 @@
 {
   "name": "vibesapp-backend",
-  "version": "0.12.23",
+  "version": "0.20.1",
   "description": "",
   "main": "index.js",
   "scripts": {
