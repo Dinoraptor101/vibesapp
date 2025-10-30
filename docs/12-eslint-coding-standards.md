@@ -310,10 +310,9 @@ Add to `.vscode/settings.json`:
 
 Recommended extensions:
 
-- ESLint
+- Biome - Code formatter and linter
 - TypeScript Importer
 - Auto Rename Tag
-- Prettier - Code formatter
 
 ## Migration Strategy
 

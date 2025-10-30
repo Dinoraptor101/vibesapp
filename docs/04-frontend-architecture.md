@@ -16,8 +16,7 @@ The VibesApp frontend is a modern React application built with TypeScript, focus
 
 - **Create React App** - Project bootstrapping and build configuration
 - **Webpack** - Module bundling and asset optimization
-- **ESLint** - Code quality and consistency
-- **Prettier** - Code formatting
+- **Biome** - Code formatting and linting
 - **Playwright** - End-to-end testing
 
 ### Deployment & Hosting
@@ -372,8 +371,8 @@ npm run lint
 ### Code Quality
 
 - **TypeScript strict mode** - Enforces type safety
-- **ESLint configuration** - Consistent code style
-- **Prettier integration** - Automatic code formatting
+- **Biome configuration** - Consistent code style and formatting
+- **Automated formatting** - Single formatter across entire monorepo
 - **Pre-commit hooks** - Automated quality checks
 
 ### Testing Strategy

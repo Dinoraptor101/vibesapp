@@ -12,8 +12,7 @@ This document outlines the development practices, Git workflow, QA processes, an
 
 ### Required VS Code Extensions
 
-- **ESLint** - Code quality and linting
-- **Prettier** - Code formatting
+- **Biome** - Code formatting and linting
 - **GitHub Pull Requests** - PR management within VS Code
 - **GitHub Codespaces** - Cloud development environment support
 
@@ -136,16 +135,23 @@ chore(deps): update React to version 18.2
 }
 ```
 
-### Prettier Configuration
+### Biome Configuration
 
 ```json
 {
-  "semi": true,
-  "trailingComma": "es5",
-  "singleQuote": true,
-  "printWidth": 80,
-  "tabWidth": 2,
-  "useTabs": false
+  "$schema": "https://biomejs.dev/schemas/2.1.3/schema.json",
+  "formatter": {
+    "enabled": true,
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "javascript": {
+    "formatter": {
+      "semicolons": "always",
+      "trailingCommas": "es5",
+      "quoteStyle": "single"
+    }
+  }
 }
 ```
 
