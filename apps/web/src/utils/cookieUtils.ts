@@ -3,8 +3,8 @@
  * Provides functions for setting and retrieving browser cookies
  * used for storing user preferences and session information.
  */
+/** biome-ignore-all lint/suspicious/noDocumentCookie: Cookies are used for storing user preferences and session information. */
 
-// prettier-ignore
 export function setCookie(name: string, value: string, days: number): void {
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;

@@ -30,7 +30,6 @@ Replace current configuration with:
     "@typescript-eslint/recommended",
     "plugin:react-hooks/recommended",
     "plugin:jsx-a11y/recommended",
-    "prettier",
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -44,7 +43,7 @@ Replace current configuration with:
     "ecmaVersion": 2020,
     "sourceType": "module",
   },
-  "plugins": ["react", "react-hooks", "prettier", "@typescript-eslint", "jsx-a11y"],
+  "plugins": ["react", "react-hooks", "@typescript-eslint", "jsx-a11y"],
   "settings": {
     "react": {
       "version": "detect",
@@ -108,7 +107,7 @@ Add to `package.json`:
     "pre-commit": "lint-staged"
   },
   "lint-staged": {
-    "src/**/*.{ts,tsx}": ["eslint --fix", "prettier --write", "git add"]
+    "src/**/*.{ts,tsx}": ["biome check --write", "git add"]
   },
   "husky": {
     "hooks": {
@@ -687,8 +686,7 @@ npm install --save-dev \
 
 ### VS Code Extensions
 
-- ESLint
-- Prettier
+- Biome
 - TypeScript Hero
 - GitLens
 - Auto Rename Tag

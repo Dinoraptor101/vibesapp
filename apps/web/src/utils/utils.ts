@@ -4,7 +4,6 @@
  * UUID generation, and debugging utilities.
  */
 
-// prettier-ignore
 export const calculateDistance = (
   lat1: number,
   lon1: number,

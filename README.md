@@ -147,7 +147,7 @@ cp .env.example .env
 
 - **Frontend**: Biome for TypeScript/React
 - **Backend**: ESLint for JavaScript/Node.js
-- **Formatting**: Prettier with unified configuration
+- **Formatting**: Biome with unified configuration across monorepo
 - **NX**: Intelligent task caching and dependency management
 
 ## 🚢 Deployment

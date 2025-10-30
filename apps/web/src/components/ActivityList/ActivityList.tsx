@@ -142,7 +142,6 @@ const ActivityList: React.FC<{ userId: string }> = ({ userId }) => {
    * Calculate dimensions for the virtualized list
    * Responsive to window size changes
    */
-  // prettier-ignore
   const listDimensions = useMemo(
     () => ({
       height: height - 145, // Subtract header and footer heights from the dynamic list
