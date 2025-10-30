@@ -44,7 +44,7 @@
     "postinstall": "if [ \"$SKIP_POSTINSTALL\" != \"true\" ]; then npm run install:deps; fi"
   },
   "private": true,
-  "devDependencies": {
+  "dependencies": {
     "@nx/js": "^22.0.2",
     "@nx/node": "^22.0.2",
     "@nx/react": "^22.0.2",
