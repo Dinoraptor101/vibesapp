@@ -53,7 +53,7 @@ const Issue: React.FC<IssueProps> = ({ setNotification }) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setNotification({
-        message: 'I promise not to sell this! Needd this if I have questions.',
+        message: 'I promise not to sell this! I need this if I have questions.',
         type: 'error',
       });
       logDebug('Invalid email address');
