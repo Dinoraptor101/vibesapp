@@ -7,7 +7,7 @@ export interface UserEndpoints {
     request: void;
     response: ApiResponse<IUserData>;
   };
-  
+
   // PUT /api/users/profile
   updateProfile: {
     request: {
@@ -18,7 +18,7 @@ export interface UserEndpoints {
     };
     response: ApiResponse<IUserData>;
   };
-  
+
   // GET /api/users/search
   searchUsers: {
     request: {
@@ -28,7 +28,7 @@ export interface UserEndpoints {
     };
     response: PaginatedResponse<IUserData>;
   };
-  
+
   // GET /api/users/nearby
   getUsersNearby: {
     request: {
@@ -40,7 +40,7 @@ export interface UserEndpoints {
     };
     response: PaginatedResponse<IUserData>;
   };
-  
+
   // PUT /api/users/{userId}/polarity
   updateUserPolarity: {
     request: {
@@ -64,7 +64,7 @@ export interface AuthEndpoints {
       refreshToken?: string;
     }>;
   };
-  
+
   // POST /api/auth/register
   register: {
     request: {
@@ -78,13 +78,13 @@ export interface AuthEndpoints {
       token: string;
     }>;
   };
-  
+
   // POST /api/auth/logout
   logout: {
     request: void;
     response: ApiResponse<void>;
   };
-  
+
   // POST /api/auth/refresh
   refreshToken: {
     request: {

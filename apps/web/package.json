@@ -7,6 +7,7 @@
     "lint": "biome check src/",
     "lint:fix": "biome check src/ --write",
     "format": "biome format src/ --write",
+    "format:check": "biome format src/",
     "check": "biome check src/ --write",
     "lint:ci": "biome ci src/",
     "prebuild": "echo 'Skipping lint check for now'",
