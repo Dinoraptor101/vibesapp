@@ -25,7 +25,7 @@ export const formatRelativeTime = (date: Date): string => {
   if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
   if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
   if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-  
+
   return date.toLocaleDateString();
 };
 
@@ -52,27 +52,28 @@ export const isValidUsername = (username: string): boolean => {
 };
 
 export const isValidPassword = (password: string): boolean => {
-  return password.length >= 8 && 
-         /[A-Z]/.test(password) && 
-         /[a-z]/.test(password) && 
-         /\d/.test(password);
+  return (
+    password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /\d/.test(password)
+  );
 };
 
 // ===== LOCATION UTILITIES =====
 export const calculateDistance = (
-  lat1: number, 
-  lon1: number, 
-  lat2: number, 
+  lat1: number,
+  lon1: number,
+  lat2: number,
   lon2: number
 ): number => {
   const R = 6371; // Radius of the Earth in kilometers
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in kilometers
 };
 
@@ -85,7 +86,7 @@ export const formatDistance = (distance: number): string => {
 // ===== ARRAY UTILITIES =====
 export const uniqueBy = <T>(array: T[], key: keyof T): T[] => {
   const seen = new Set();
-  return array.filter(item => {
+  return array.filter((item) => {
     const value = item[key];
     if (seen.has(value)) return false;
     seen.add(value);
@@ -94,19 +95,22 @@ export const uniqueBy = <T>(array: T[], key: keyof T): T[] => {
 };
 
 export const groupBy = <T>(array: T[], key: keyof T): Record<string, T[]> => {
-  return array.reduce((groups, item) => {
-    const value = String(item[key]);
-    if (!groups[value]) groups[value] = [];
-    groups[value].push(item);
-    return groups;
-  }, {} as Record<string, T[]>);
+  return array.reduce(
+    (groups, item) => {
+      const value = String(item[key]);
+      if (!groups[value]) groups[value] = [];
+      groups[value].push(item);
+      return groups;
+    },
+    {} as Record<string, T[]>
+  );
 };
 
 // ===== DEBOUNCE UTILITY =====
 export const debounce = <T extends (...args: any[]) => any>(
   func: T,
   wait: number
-): (...args: Parameters<T>) => void => {
+): ((...args: Parameters<T>) => void) => {
   let timeout: NodeJS.Timeout;
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);

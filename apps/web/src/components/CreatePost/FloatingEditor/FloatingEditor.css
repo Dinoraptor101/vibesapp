@@ -61,7 +61,10 @@
   transform: translateX(-50%);
   z-index: 51;
   cursor: default;
-  max-height: calc(100vh - 20px); /* Adjust the max height to keep toolbar in view when using iphone keyboard */
+  max-height: calc(
+    100vh -
+    20px
+  ); /* Adjust the max height to keep toolbar in view when using iphone keyboard */
 }
 
 .floating-editor .ql-container {

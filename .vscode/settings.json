@@ -10,20 +10,12 @@
     ".github/workflows/code-quality.yml"
   ],
   "git.promptToSaveFilesBeforeCommit": "staged",
-  "prettier.singleQuote": true,
-  "prettier.trailingComma": "all",
-  "prettier.printWidth": 120,
-  "prettier.tabWidth": 2,
-  "prettier.useTabs": false,
-  "prettier.semi": true,
-  "biome.lspBin": "./node_modules/@biomejs/biome/bin/biome",
+  "biome.lsp.bin": "./node_modules/@biomejs/biome/bin/biome",
   "typescript.preferences.includePackageJsonAutoImports": "on",
   "typescript.suggest.autoImports": true,
-  "eslint.workingDirectories": [
-    "apps/api"
-  ],
+  "eslint.workingDirectories": ["apps/api"],
   "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "biomejs.biome"
   },
   "[typescript]": {
     "editor.defaultFormatter": "biomejs.biome"
@@ -31,7 +23,13 @@
   "[typescriptreact]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
   "[json]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[jsonc]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
   "files.associations": {
