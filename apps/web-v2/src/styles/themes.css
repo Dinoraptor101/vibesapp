@@ -1,0 +1,105 @@
+/* VibesApp Theme System - Light, Dim, Dark */
+
+:root {
+  /* Light Theme Variables */
+  --light-bg: #f8f8f8;
+  --light-bg-elevated: #ffffff;
+  --light-text: #000000;
+  --light-text-muted: rgba(0, 0, 0, 0.6);
+  --light-border: #e0e0e0;
+
+  /* Dim Theme Variables */
+  --dim-bg: #333333;
+  --dim-bg-elevated: #424242;
+  --dim-text: #ffffff;
+  --dim-text-muted: rgba(255, 255, 255, 0.7);
+  --dim-border: #555555;
+
+  /* Dark Theme Variables */
+  --dark-bg: #000000;
+  --dark-bg-elevated: #1a1a1a;
+  --dark-text: #ffffff;
+  --dark-text-muted: rgba(255, 255, 255, 0.6);
+  --dark-border: #333333;
+
+  /* Semantic Colors (same across all themes) */
+  --brand: #21a1f1;
+  --brand-hover: #1890ff;
+  --success: #4caf50;
+  --success-hover: #45a049;
+  --error: #ab1c1c;
+  --error-hover: #991818;
+  --warning: #ff9800;
+  --warning-hover: #f57c00;
+}
+
+/* Light Theme (default) */
+body,
+body.light {
+  background-color: var(--light-bg);
+  color: var(--light-text);
+}
+
+/* Dim Theme */
+body.dim {
+  background-color: var(--dim-bg);
+  color: var(--dim-text);
+}
+
+/* Dark Theme */
+body.dark {
+  background-color: var(--dark-bg);
+  color: var(--dark-text);
+}
+
+/* Smooth theme transitions */
+body {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+/* Scrollbar styling for different themes */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--light-bg);
+}
+
+body.dim ::-webkit-scrollbar-track {
+  background: var(--dim-bg);
+}
+
+body.dark ::-webkit-scrollbar-track {
+  background: var(--dark-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--light-border);
+  border-radius: 6px;
+}
+
+body.dim ::-webkit-scrollbar-thumb {
+  background: var(--dim-border);
+}
+
+body.dark ::-webkit-scrollbar-thumb {
+  background: var(--dark-border);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand);
+}
+
+/* Selection colors */
+::selection {
+  background-color: var(--brand);
+  color: white;
+}
+
+::-moz-selection {
+  background-color: var(--brand);
+  color: white;
+}
