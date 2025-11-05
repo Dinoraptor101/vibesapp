@@ -164,6 +164,257 @@ const dismissReports = async (req, res) => {
   }
 };
 
+// Get users with filters and search
+const getUsers = async (req, res) => {
+  try {
+    const {
+      search = '',
+      filter = 'all',
+      location = '',
+      mbti = '',
+      page = 1,
+      limit = 50,
+    } = req.query;
+    const skip = (page - 1) * limit;
+
+    // Build query
+    const query = {};
+
+    // Search by username
+    if (search) {
+      query.userName = { $regex: search, $options: 'i' };
+    }
+
+    // Filter by banned status
+    if (filter === 'banned') {
+      query.isBanned = true;
+    } else if (filter === 'active') {
+      query.isBanned = { $ne: true };
+    }
+
+    // Filter by MBTI
+    if (mbti) {
+      query.mbtiPersonality = mbti;
+    }
+
+    // Filter by location (this would need more sophisticated geo logic in production)
+    if (location) {
+      query['location.lat'] = { $exists: true };
+    }
+
+    const users = await User.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+
+    // Get post count for each user
+    const usersWithPostCount = await Promise.all(
+      users.map(async (user) => {
+        const postCount = await Post.countDocuments({ 'user.userId': user.userId });
+        const flaggedPostCount = await Post.countDocuments({
+          'user.userId': user.userId,
+          proximal_dislikes: { $gt: 0 },
+        });
+
+        return {
+          ...user,
+          postCount,
+          flaggedPostCount,
+        };
+      })
+    );
+
+    const total = await User.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      users: usersWithPostCount,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching users',
+      error: error.message,
+    });
+  }
+};
+
+// Ban/Unban user
+const toggleBanUser = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await User.findOne({ userId });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    user.isBanned = !user.isBanned;
+    user.bannedAt = user.isBanned ? new Date() : null;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: user.isBanned ? 'User banned successfully' : 'User unbanned successfully',
+      user,
+    });
+  } catch (error) {
+    console.error('Error toggling ban status:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error toggling ban status',
+      error: error.message,
+    });
+  }
+};
+
+// Regenerate password (Pigeon ID)
+const regeneratePassword = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await User.findOne({ userId });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Generate new password (simple implementation - should use crypto in production)
+    const newPassword = `pigeon-${Math.random().toString(36).substring(2, 10)}-${Date.now().toString(36)}`;
+
+    user.pigeonId = newPassword;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Password regenerated successfully',
+      newPassword,
+      user: {
+        userId: user.userId,
+        userName: user.userName,
+      },
+    });
+  } catch (error) {
+    console.error('Error regenerating password:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error regenerating password',
+      error: error.message,
+    });
+  }
+};
+
+// Delete user (soft delete - ban permanently)
+const deleteUser = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await User.findOne({ userId });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Soft delete by banning and marking
+    user.isBanned = true;
+    user.bannedAt = new Date();
+    user.userName = `[deleted-${user.userId}]`;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'User deleted successfully',
+    });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting user',
+      error: error.message,
+    });
+  }
+};
+
+// Get user's posts
+const getUserPosts = async (req, res) => {
+  const { userId } = req.params;
+  const { page = 1, limit = 20 } = req.query;
+  const skip = (page - 1) * limit;
+
+  try {
+    const posts = await Post.find({ 'user.userId': userId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+
+    const total = await Post.countDocuments({ 'user.userId': userId });
+
+    res.status(200).json({
+      success: true,
+      posts,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching user posts:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching user posts',
+      error: error.message,
+    });
+  }
+};
+
+// Bulk delete user's posts
+const bulkDeleteUserPosts = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const posts = await Post.find({ 'user.userId': userId });
+
+    // Delete images from S3
+    for (const post of posts) {
+      try {
+        await s3.deleteObject({
+          Bucket: process.env.AWS_S3_BUCKET,
+          Key: post.image,
+        });
+      } catch (error) {
+        console.error(`Error deleting image for post ${post._id}:`, error);
+      }
+    }
+
+    // Delete all posts
+    const result = await Post.deleteMany({ 'user.userId': userId });
+
+    res.status(200).json({
+      success: true,
+      message: `Deleted ${result.deletedCount} posts`,
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    console.error('Error bulk deleting user posts:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error bulk deleting user posts',
+      error: error.message,
+    });
+  }
+};
+
 // Delete posts in bulk
 const deletePosts = async (req, res) => {
   const { postHexes } = req.body;
@@ -222,4 +473,10 @@ module.exports = {
   deletePosts,
   getFlaggedPosts,
   dismissReports,
+  getUsers,
+  toggleBanUser,
+  regeneratePassword,
+  deleteUser,
+  getUserPosts,
+  bulkDeleteUserPosts,
 };

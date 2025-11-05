@@ -149,14 +149,11 @@ export interface ApiResponse<T = unknown> {
 // Admin-specific types
 export interface FlaggedPost {
   _id: string;
-  text?: string;
+  text: string;
   image: string;
   user: {
     userId: string;
     userName: string;
-    birthYear: number;
-    birthMonth: number;
-    sex: string;
     location?: {
       lat: number;
       lon: number;
@@ -165,13 +162,9 @@ export interface FlaggedPost {
   reactions: Array<{
     userId: string;
     type: string;
-    location: {
-      lat: number;
-      lon: number;
-    };
   }>;
-  proximal_dislikes: number;
   proximal_likes: number;
+  proximal_dislikes: number;
   proximal_users: number;
   isHidden: boolean;
   createdAt: string;
@@ -180,4 +173,26 @@ export interface FlaggedPost {
     userId: string;
     userName: string;
   }>;
+}
+
+export interface AdminUser {
+  _id: string;
+  userId: string;
+  userName: string;
+  pigeonId: string;
+  mbtiPersonality?: string;
+  masculineFeminineScale?: number;
+  profilePictureUrl?: string;
+  bio?: string;
+  location?: {
+    lat: number;
+    lon: number;
+  };
+  isBanned?: boolean;
+  bannedAt?: string;
+  createdAt: string;
+  postCount?: number;
+  flaggedPostCount?: number;
+  isOnline?: boolean;
+  lastActive?: string;
 }

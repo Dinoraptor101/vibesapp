@@ -61,6 +61,23 @@ const UserSchema = new mongoose.Schema({
     required: true,
     default: Date.now,
   },
+  isBanned: {
+    type: Boolean,
+    default: false,
+  },
+  bannedAt: {
+    type: Date,
+  },
+  profilePictureUrl: {
+    type: String,
+  },
+  bio: {
+    type: String,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model('User', UserSchema);

@@ -13,3 +13,4 @@ export { AdminDashboardPage } from './pages/AdminDashboardPage';
 // Pages
 export { AdminLoginPage } from './pages/AdminLoginPage';
 export { FlaggedPostsPage } from './pages/FlaggedPostsPage';
+export { UsersPage } from './pages/UsersPage';
