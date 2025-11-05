@@ -33,7 +33,7 @@
 
 ---
 
-## ✅ Finalized Feature Set (Updated Nov 4, 2025)
+## ✅ Finalized Feature Set (Updated Nov 5, 2025)
 
 ### Core Features (MVP - Week 1-6)
 1. **Authentication:** Pigeon ID system (password-only, non-regeneratable by users)
@@ -42,7 +42,7 @@
    - Dislikes serve as community moderation (report functionality)
    - User polarity is Yin/Yang balance (separate profile field for masculinity/femininity identity)
 4. **Feed Types:**
-   - Nearby (location-based)
+   - Nearby (location-based, **default 100km radius**, adjustable 50-150km in settings)
    - Following (posts from people you follow)
    - No algorithmic "For You" - anti-algorithm philosophy
 5. **Comments/Replies:** Threaded discussions on posts
@@ -51,12 +51,13 @@
 8. **Group Chat:** Multi-user conversations with mentions
 9. **User Mentions:** @username in comments and group chats
 10. **Search:** Search posts by caption content and username
-11. **MBTI:** Personality type selection (required during signup)
+11. **MBTI:** Personality type selection (required during signup, changeable in settings)
 12. **Activity Feed:** Categorized notifications (Messages, Social, Your Posts)
 13. **Online Presence:** Real-time online/offline indicators
-14. **User Profiles:** Username, avatar, bio, MBTI, polarity, posts grid
-15. **Moderation:** Report system + Admin panel
-16. **Admin Panel:** Content moderation, user management, analytics
+14. **User Profiles:** Username, avatar, bio, MBTI, polarity, age (calculated), posts grid
+15. **Settings Page:** Account tab (profile editing), Preferences tab (proximity range), Support tab (feedback, help)
+16. **Moderation:** Report system + Admin panel
+17. **Admin Panel:** Content moderation, user management, analytics
 
 ### Removed/Replaced Features
 - ❌ Separate "dislike as report" - Now unified: dislike = report (community moderation)
@@ -69,9 +70,12 @@
 - 🤝 **Human connection:** Focus on genuine interactions
 - 🔐 **Simple auth:** Pigeon ID system (password only)
 - 📸 **Photography-first:** Every post requires a photo
-- 🌍 **Location-aware:** Discover nearby content and people
+- 🌍 **Location-aware:** Discover nearby content and people (default 100km, adjustable 50-150km)
 - 🛡️ **Community moderation:** Dislikes flag content for review
 - 🔒 **Privacy-first:** DM requests require approval
+- 🧘 **ZEN Design:** Auto-save on blur, no "Save" buttons, silent error handling, one action per intent (Dieter Rams principles)
+- 📱 **Mobile-First:** 95% mobile usage, optimize for mobile experience
+- 🔌 **Offline-Ready:** Seamless offline mode with silent queueing and sync
 
 ---
 
@@ -87,10 +91,11 @@
 - Email notifications (auto-hide alerts + weekly summary)
 - Analytics dashboard (posts/day, users/day, reports/day)
 
-### Key Technical Decisions (Confirmed Nov 4, 2025)
-- **Yin/Yang Polarity:** User profile fields indicating masculinity/femininity identity (NOT a score, NOT related to likes/dislikes)
+### Key Technical Decisions (Confirmed Nov 5, 2025)
+- **Yin/Yang Polarity:** User profile field indicating masculinity/femininity identity (NOT a score, NOT related to likes/dislikes) - **binary toggle in Account settings (either Yin OR Yang, no middle state)**
 - **Vibes System:** Like + Dislike/Report (community moderation system, NOT related to user polarity)
 - **3-Dislike Threshold:** Post auto-hides after 3 unique user dislikes
+- **Proximity Range:** Default 100km, adjustable 50-150km in Settings → Preferences (hidden from posts grid display)
 - **Activity Cleanup:** Read notifications deleted after 7 days, unread persist forever (capped at 100k+)
 - **DM Request Cooldown:** 2 days if request declined
 - **Search Scope:** Global search (all posts and users)
@@ -99,6 +104,81 @@
 - **Request-Based DM:** Users must approve DM requests before conversations start
 - **Photo Required:** No text-only posts allowed
 - **Location Required:** From GPS or manual selection (privacy-first)
+- **Auto-Save Pattern:** All form fields save on blur (unfocus), no "Save" buttons, invalid input silently reverts, offline changes queued
+- **Profile vs Account:** Profile = read-only public view (click username), Account = editable settings (Settings → Account tab)
+- **Age Calculation:** Calculated from birth month/year (signup), displayed on profile only, non-editable
+- **Navigation Structure:** Posts | Messages | Activities | Settings | Theme Toggle (icon)
+- **Settings Structure:** Account tab (profile editing + Pigeon ID + logout), Preferences tab (proximity), Support tab (feedback link)
+- **Loading Rule:** < 1 second = no spinner, > 1 second = show spinner (global rule)
+- **Offline Indicator:** Small grey no-wifi icon in header (non-clickable)
+- **TODO (Post-MVP):** Age-based content filtering for child protection
+
+---
+
+## 🧘 ZEN Design Philosophy (Critical)
+
+### Auto-Save Pattern (NO "Save" Buttons)
+**Philosophy:** Make actions effortless. Auto-save when user stops editing. Silent, seamless, zen.
+
+**Implementation Rules:**
+1. **Auto-save trigger:** User stops editing (field loses focus OR navigates away from page)
+2. **Debounced batch:** Group changes within 300ms into single API call
+3. **Visual feedback:** Silent (no spinners, no checkmarks on desktop)
+4. **Invalid input:** Silently revert to previous value (no error alerts)
+5. **Offline handling:** Queue changes, sync when reconnected (no error alerts)
+6. **Character limits:** Show counter only when approaching limit (e.g., 180/200 chars)
+7. **No "Save" buttons:** Except "Send" (messages) and "Post it" (create post)
+
+**Applies to:**
+- Settings → Account tab (all editable fields)
+- Settings → Preferences tab (proximity dropdown)
+- Bio editing
+- Location updates
+- Polarity toggle
+- MBTI dropdown
+- Any form field in the app
+
+**Example:**
+```tsx
+// Account settings - Bio field
+const handleBioBlur = async (e) => {
+  const newBio = e.target.value;
+  
+  // Validation
+  if (newBio.length > 200) {
+    setBio(previousBio); // Silent revert
+    return;
+  }
+  
+  // Queue change (debounced)
+  queueAccountUpdate({ bio: newBio });
+};
+
+// Debounced batch update (300ms)
+const queueAccountUpdate = debounce((changes) => {
+  if (navigator.onLine) {
+    api.updateAccount(changes); // API call
+  } else {
+    offlineQueue.add('updateAccount', changes); // Queue for later
+  }
+}, 300);
+```
+
+### Loading Indicator Rule (Global)
+- **< 1 second:** No loading indicator (action feels instant)
+- **> 1 second:** Show spinner/skeleton with tasteful fade-in (300ms animation)
+
+**Philosophy:** Avoid flickering experiences. Even "slow" actions (image upload, GPS) often complete in < 1s. Only show spinner if action genuinely takes > 1s, and fade it in smoothly.
+
+**Example:** ALL potentially slow actions
+- GPS location, image upload, searches → Usually < 1s (no spinner)
+- IF action takes > 1s → Show spinner with fade-in animation
+
+### Offline Mode (Seamless)
+- **Indicator:** Small grey no-wifi icon in header (non-clickable, subtle)
+- **Behavior:** Queue all changes, sync silently when reconnected
+- **No alerts:** User shouldn't see "You're offline" toasts
+- **Strategy:** Hybrid approach (see OFFLINE-MODE-STRATEGY.md)
 
 ---
 
@@ -376,12 +456,24 @@ export function Button({ className, variant, size, ...props }: ButtonProps) {
 
 #### App Layout
 - [ ] AppLayout component
-- [ ] Top navigation
+- [ ] Top navigation (desktop)
+  - [ ] Logo/Brand
+  - [ ] Navigation: Posts | Messages | Activities | Settings
+  - [ ] Theme toggle icon (small, right side)
+  - [ ] Offline indicator (grey wifi icon when offline)
 - [ ] Bottom navigation (mobile)
-- [ ] Theme switcher
-- [ ] User menu dropdown
-### Week 5: Post Display & Feed
+  - [ ] Posts | Messages | Activities | Settings icons
+  - [ ] Active state indicators
+- [ ] Theme switcher component (icon button, cycles: light → dim → dark)
 - [ ] Route transitions
+
+**Navigation Notes:**
+- Remove "Home" - use "Posts" instead
+- Remove "Profile" from nav - accessed by clicking usernames
+- Settings contains Account and Preferences tabs
+- Theme toggle stays in nav (frequent action, not in Settings)
+
+**Week 4 Deliverable:** User can sign up and see empty app shell
 
 **Week 3 Deliverable:** User can sign up and see empty app shell
 
@@ -399,16 +491,17 @@ export function Button({ className, variant, size, ...props }: ButtonProps) {
 - [ ] PostStats sub-component
 
 #### Post Feed
-- [ ] PostsGrid component
+- [ ] PostsGrid component (mobile-first, responsive)
 - [ ] Infinite scroll logic
-- [ ] Loading states (skeleton)
+- [ ] Loading states (skeleton loaders, show if > 1s)
 - [ ] Empty states
 - [ ] Error states
 - [ ] Filter tabs (Nearby, Following)
-  - [ ] Nearby: Location-based posts (within 50km radius)
+  - [ ] Nearby: Location-based posts (default 100km radius, adjustable in Settings)
   - [ ] Following: Posts from users you follow
+  - [ ] NO proximity indicator on grid (hidden, configured in Settings)
 - [ ] Scroll position persistence (sessionStorage)
-- [ ] Pull-to-refresh
+- [ ] Pull-to-refresh (mobile)
 
 #### API Integration
 - [ ] Post API service
@@ -470,26 +563,27 @@ export function Button({ className, variant, size, ...props }: ButtonProps) {
 
 ### Week 7: User Profiles & Following
 
-#### Profile Pages
-- [ ] UserProfile component (own profile)
-- [ ] PublicProfile component (other users)
+#### Profile Pages (Read-Only Public View)
+- [ ] PublicProfile component (accessed by clicking usernames)
 - [ ] Profile header
-  - [ ] Avatar, username, bio
+  - [ ] Avatar, username (with age next to it: "Age: 25")
+  - [ ] Bio
   - [ ] MBTI badge
   - [ ] Polarity display (Yin/Yang balance)
-  - [ ] Location (city, country)
+  - [ ] Location (displayed as distance from current user, e.g., "2.3 km away")
 - [ ] Profile stats
   - [ ] Post count
   - [ ] Followers count
   - [ ] Following count
-  - [ ] Polarity score
 - [ ] Post grid on profile
-- [ ] Edit profile modal
-  - [ ] Avatar upload with crop
-  - [ ] Bio editor
-  - [ ] MBTI selector
-  - [ ] Location update
-- [ ] Privacy settings (future)
+- [ ] Follow/Unfollow button
+- [ ] DM request button
+
+**Important Distinction:**
+- **Profile** = Read-only public page (this section)
+- **Account** = Editable settings (Settings → Account tab, see Week 10)
+- Username NOT editable (set at signup, permanent)
+- Age NOT editable (calculated from birth date at signup)
 
 #### Following System
 ### Week 8: Direct Messaging (Request-Based)n
@@ -595,7 +689,58 @@ export function Button({ className, variant, size, ...props }: ButtonProps) {
 
 ## Phase 3: Search & Discovery (Week 10)
 
-### Week 10: Search & Additional Features
+### Week 10: Settings Page & Search
+
+#### Settings Page (Route: `/settings/account` and `/settings/preferences`)
+**Tab Structure:** Account | Preferences | Support
+
+##### Account Tab (Editable Profile Fields)
+- [ ] Settings page layout (mobile-first, tabbed)
+- [ ] Avatar upload section
+  - [ ] Current avatar display
+  - [ ] Upload button with image cropping
+  - [ ] Auto-save on upload completion
+- [ ] Bio editor
+  - [ ] Textarea (200 char limit)
+  - [ ] Character counter (show at 180+ chars)
+  - [ ] Auto-save on blur
+- [ ] MBTI selector
+  - [ ] Dropdown with all 16 types
+  - [ ] Auto-save on selection
+- [ ] Location updater
+  - [ ] Zip code input field
+  - [ ] GPS button (📍 icon)
+  - [ ] GPS loading state (if > 1s)
+  - [ ] Display current location below input
+  - [ ] Auto-save on blur or GPS success
+- [ ] Polarity toggle
+  - [ ] Toggle switch: Yin [○━━] Yang
+  - [ ] Visual indication of selected state
+  - [ ] Auto-save on toggle
+- [ ] Security section
+  - [ ] "Copy Pigeon ID" button
+  - [ ] Warning message: "[!] Never Share! Anyone with your Pigeon Id can pretend to be you."
+  - [ ] Copy feedback (toast: "Copied!")
+- [ ] Logout button (bottom of page)
+
+##### Preferences Tab
+- [ ] Proximity range selector
+  - [ ] Dropdown: 50km | 100km (default) | 150km
+  - [ ] Auto-save on selection
+  - [ ] Label: "Nearby Posts Radius"
+- [ ] Placeholder for future notification settings
+
+##### Support Tab
+- [ ] App version display
+- [ ] Feedback button (opens https://t.me/Dnegai in new tab)
+- [ ] Terms of Service link (placeholder/dead link for now)
+- [ ] Privacy Policy link (placeholder/dead link for now)
+
+**Auto-Save Implementation:**
+- All fields use onBlur auto-save (no "Save" button)
+- Debounced batch updates (300ms)
+- Silent on success, silent revert on validation error
+- Offline changes queued for sync
 
 #### Search Functionality
 - [ ] Search UI component
@@ -615,39 +760,7 @@ export function Button({ className, variant, size, ...props }: ButtonProps) {
 - [ ] Recent searches
 - [ ] Clear search history
 
-#### Offline Support
-- [ ] Service worker implementation
-- [ ] Offline action queue (IndexedDB) - vibes, comments, DMs
-- [ ] Auto-sync queue on reconnect (silent, no UI notification)
-- [ ] React Query offline mutations with placeholderData
-- [ ] Show "not cached" message only when accessing uncached content
-- [ ] Seamless offline experience - user shouldn't notice they're offline for cached actions
-
-#### Performance Optimization
-- [ ] Code splitting by route
-- [ ] Lazy loading images
-- [ ] Virtual scrolling for long lists
-- [ ] React Query optimization
-- [ ] Bundle size analysis
-- [ ] Image optimization (compression, CDN)
-
-**Week 11 Deliverable:** App works seamlessly offline - queued actions sync silently, no explicit offline mode UI
-
----
-
-### Week 12: Testing & Final Polish
-- [ ] Settings page
-  - [ ] Account settings
-  - [ ] Privacy settings
-  - [ ] Notification preferences
-  - [ ] Location settings
-  - [ ] Theme settings
-- [ ] About/Help pages
-- [ ] Terms of Service
-- [ ] Privacy Policy
-- [ ] Contact/Support
-
-**Week 10 Deliverable:** Search and discovery complete
+**Week 10 Deliverable:** Settings page complete with auto-save, search functional
 
 ---
 
@@ -657,23 +770,83 @@ export function Button({ className, variant, size, ...props }: ButtonProps) {
 
 ---
 
-### Week 9: Testing & Optimization
+### Week 11: Offline Support & Performance (Hybrid Approach)
+
+#### Phase 1: Core Features Offline Support
+- [ ] Service worker setup
+- [ ] IndexedDB for offline queue
+- [ ] Offline indicator (grey wifi icon in header)
+- [ ] Posts feed caching
+  - [ ] Cache viewed posts
+  - [ ] Offline viewing of cached posts
+  - [ ] Queue new posts for sync
+- [ ] Vibes (Like/Dislike) offline
+  - [ ] Optimistic UI updates
+  - [ ] Queue vibe actions
+  - [ ] Sync on reconnect
+- [ ] Comments offline
+  - [ ] Queue new comments
+  - [ ] Optimistic comment display
+  - [ ] Sync on reconnect
+- [ ] Messages offline
+  - [ ] Queue new messages
+  - [ ] Optimistic message display
+  - [ ] Sync on reconnect
+- [ ] Activities offline
+  - [ ] Cache recent activities
+  - [ ] Mark as read queuing
+
+#### Phase 2: Settings & Profile Offline Support
+- [ ] Account updates queuing
+  - [ ] Avatar upload queue
+  - [ ] Bio changes queue
+  - [ ] MBTI changes queue
+  - [ ] Location changes queue
+  - [ ] Polarity changes queue
+- [ ] Debounced batch sync (300ms delay)
+- [ ] Conflict resolution (last write wins)
+
+#### Performance Optimization
+- [ ] Code splitting by route
+- [ ] Lazy loading images with blur placeholder
+- [ ] Virtual scrolling for long lists
+- [ ] React Query optimization (staleTime, cacheTime)
+- [ ] Bundle size analysis (target: < 500KB gzipped)
+- [ ] Image optimization (compression, CDN, WebP)
+- [ ] Lighthouse audit (target: > 90 score)
+
+**Week 11 Deliverable:** App works seamlessly offline - queued actions sync silently
+
+---
+
+### Week 12: Testing & Polish
 
 #### Testing
 - [ ] Unit tests for utilities
 - [ ] Component tests (Testing Library)
-- [ ] Hook tests
+- [ ] Hook tests (auto-save, offline queue)
 - [ ] Integration tests
 - [ ] Update E2E tests for new app
-- [ ] Cross-browser testing
-- [ ] Mobile device testing
+- [ ] Cross-browser testing (Chrome, Firefox, Safari)
+- [ ] Mobile device testing (iOS, Android)
+- [ ] Offline mode testing
+- [ ] Auto-save pattern testing
 
-#### Performance
-- [ ] Lighthouse audit (>90 score)
-- [ ] Bundle size analysis (<500KB)
-- [ ] Code splitting verification
-- [ ] Image optimization
-- [ ] Lazy loading verification
+#### Accessibility
+- [ ] Keyboard navigation test (all features accessible)
+- [ ] Screen reader test (VoiceOver, NVDA)
+- [ ] Color contrast audit (WCAG AA)
+- [ ] ARIA labels verification
+- [ ] Focus management (modals, navigation)
+
+#### Polish
+- [ ] Loading state animations (consistent with > 1s rule)
+- [ ] Route transition animations
+- [ ] Error messages polish (silent where applicable)
+- [ ] Empty state illustrations
+- [ ] Micro-interactions (hover, focus, active states)
+- [ ] Mobile touch gestures (swipe, pull-to-refresh)
+
 **Week 12 Deliverable:** Production-ready application with full test coverage
 
 ---
@@ -681,51 +854,33 @@ export function Button({ className, variant, size, ...props }: ButtonProps) {
 ## Phase 5: Deployment (Week 13)
 
 ### Deployment Preparation
-- [ ] Keyboard navigation test
-- [ ] Screen reader test
-- [ ] Color contrast audit
-- [ ] ARIA labels verification
-- [ ] Focus management
-
-#### Polish
-- [ ] Loading state animations
-- [ ] Transition animations
-- [ ] Error messages polish
-- [ ] Empty state illustrations
-- [ ] Micro-interactions
-
-**Week 9 Deliverable:** Production-ready application
-
----
-
-## Phase 4: Deployment (Week 10)
-
-### Deployment Preparation
 - [ ] Environment variables configured
-- [ ] Build optimization
-- [ ] Service worker updated
+- [ ] Build optimization (code splitting, tree shaking)
+- [ ] Service worker updated and tested
+- [ ] Offline queue tested thoroughly
+- [ ] Auto-save pattern verified across all forms
+
 ### Full Replacement Deployment
 - [ ] Deploy to staging environment
-- [ ] Internal testing (all features)
+- [ ] Internal testing (all features, offline mode, auto-save)
 - [ ] Fix critical bugs
-- [ ] Load testing
+- [ ] Load testing (offline queue sync under load)
 - [ ] Security audit
 - [ ] Deploy to production (replaces old app)
-- [ ] Monitor metrics
+- [ ] Monitor metrics (performance, error rates, offline usage)
 - [ ] Collect user feedback
-- [ ] Hot fixes if needed bugs
-- [ ] Deploy to production (beta flag)
-- [ ] Monitor metrics
-- [ ] Collect feedback
-- [ ] Full rollout
+- [ ] Hot fixes if needed
 
 ### Migration Checklist
 - [ ] All features from old app ported
 - [ ] All E2E tests passing
-- [ ] Performance targets met
-- [ ] Accessibility audit passed
+- [ ] Performance targets met (Lighthouse > 90)
+- [ ] Accessibility audit passed (WCAG AA)
 - [ ] No critical bugs
+- [ ] Offline mode working seamlessly
+- [ ] Auto-save pattern implemented everywhere
 - [ ] Documentation updated
+
 **Week 13 Deliverable:** New Vibes app live in production as major version! 🎉
 
 ---

@@ -593,6 +593,535 @@ toast.success('Post created!', { id: toastId });
 
 ---
 
+## Auto-Save Pattern (ZEN Design - Nov 5, 2025)
+
+**Philosophy:** No "Save" buttons. Make actions effortless. Auto-save when user stops editing.
+
+### Implementation Rules
+
+1. **Trigger:** User stops editing (field loses focus OR navigates away from page)
+2. **Debounce:** 300ms delay to batch changes
+3. **Visual Feedback:** Silent (no spinners, no checkmarks on desktop)
+4. **Invalid Input:** Silent revert to previous value
+5. **Offline:** Queue changes, sync when reconnected
+6. **Character Limits:** Show counter only near limit (e.g., 180/200 chars)
+
+### Example: Bio Field
+
+```tsx
+const [bio, setBio] = useState(user.bio);
+const [previousBio, setPreviousBio] = useState(user.bio);
+const [charCount, setCharCount] = useState(user.bio.length);
+
+const handleBioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const value = e.target.value;
+  setBio(value);
+  setCharCount(value.length);
+};
+
+const handleBioBlur = async () => {
+  // Validation
+  if (bio.length > 200) {
+    setBio(previousBio); // Silent revert
+    setCharCount(previousBio.length);
+    return;
+  }
+  
+  // No change, do nothing
+  if (bio === previousBio) return;
+  
+  // Queue change (debounced)
+  queueAccountUpdate({ bio });
+  setPreviousBio(bio); // Update previous state
+};
+
+<div className="space-y-2">
+  <label htmlFor="bio" className="block text-sm font-medium">
+    Bio
+  </label>
+  <textarea
+    id="bio"
+    value={bio}
+    onChange={handleBioChange}
+    onBlur={handleBioBlur}
+    maxLength={200}
+    rows={3}
+    className="w-full px-4 py-2 rounded-lg border"
+  />
+  {charCount >= 180 && (  // Show only when approaching limit
+    <p className="text-sm text-gray-500 text-right">
+      {charCount}/200 characters
+    </p>
+  )}
+</div>
+```
+
+### Debounced Batch Updates
+
+```tsx
+// Queue for batching changes
+const accountUpdates = useRef<Partial<AccountData>>({});
+const updateTimeout = useRef<NodeJS.Timeout | null>(null);
+
+const queueAccountUpdate = (changes: Partial<AccountData>) => {
+  // Merge changes
+  accountUpdates.current = { ...accountUpdates.current, ...changes };
+  
+  // Clear existing timeout
+  if (updateTimeout.current) {
+    clearTimeout(updateTimeout.current);
+  }
+  
+  // Batch update after 300ms
+  updateTimeout.current = setTimeout(() => {
+    saveAccountUpdates(accountUpdates.current);
+    accountUpdates.current = {}; // Clear queue
+  }, 300);
+};
+
+const saveAccountUpdates = async (updates: Partial<AccountData>) => {
+  if (navigator.onLine) {
+    try {
+      await api.updateAccount(updates);
+      // Silent success - no toast
+    } catch (error) {
+      // Silent revert - no error toast
+      revertChanges(updates);
+    }
+  } else {
+    // Queue for offline sync
+    offlineQueue.add('updateAccount', updates);
+  }
+};
+```
+
+### Use Cases
+
+**Applies to:**
+- Bio editing (textarea)
+- MBTI selection (dropdown)
+- Location update (input + GPS)
+- Polarity toggle (instant save)
+- Any Settings field
+
+**Does NOT apply to:**
+- Post creation (has "Post it" button - optional caption to edit)
+- Message sending (has "Send" button, but also Enter key)
+- Login/Signup forms (has explicit submit button)
+
+---
+
+## Toggle Switch Pattern (Polarity) - Nov 5, 2025
+
+**Binary Choice:** Yin OR Yang (like On/Off - no middle state)
+
+### Mobile Toggle Component
+
+```tsx
+interface ToggleSwitchProps {
+  value: 'YIN' | 'YANG';
+  onChange: (value: 'YIN' | 'YANG') => void;
+  disabled?: boolean;
+}
+
+export function PolarityToggle({ value, onChange, disabled }: ToggleSwitchProps) {
+  const handleToggle = () => {
+    if (disabled) return;
+    // Binary toggle - either YIN or YANG (no middle state)
+    const newValue = value === 'YIN' ? 'YANG' : 'YIN';
+    onChange(newValue);
+    
+    // Auto-save immediately
+    queueAccountUpdate({ polarity: newValue });
+  };
+  
+  return (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium">Polarity</label>
+      
+      <button
+        type="button"
+        onClick={handleToggle}
+        disabled={disabled}
+        className="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-light-border dark:border-dark-border hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <span className={cn(
+          "text-sm font-medium transition-colors",
+          value === 'YIN' && "text-brand"
+        )}>
+          Yin (Feminine)
+        </span>
+        
+        <div className={cn(
+          "relative w-14 h-7 rounded-full transition-colors",
+          value === 'YIN' ? 'bg-purple-200 dark:bg-purple-900' : 'bg-blue-200 dark:bg-blue-900'
+        )}>
+          <div className={cn(
+            "absolute top-1 w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-200",
+            value === 'YIN' ? 'left-1' : 'left-8'
+          )} />
+        </div>
+        
+        <span className={cn(
+          "text-sm font-medium transition-colors",
+          value === 'YANG' && "text-brand"
+        )}>
+          Yang (Masculine)
+        </span>
+      </button>
+      
+      <p className="text-xs text-gray-500">
+        Currently: <span className="font-medium">{value}</span>
+      </p>
+    </div>
+  );
+}
+```
+
+### Desktop Toggle (Simplified)
+
+```tsx
+// Desktop: Inline toggle
+<div className="flex items-center gap-4">
+  <span className={cn(value === 'YIN' && 'font-medium text-brand')}>
+    Yin
+  </span>
+  
+  <Switch checked={value === 'YANG'} onCheckedChange={(checked) => {
+    onChange(checked ? 'YANG' : 'YIN');
+  }} />
+  
+  <span className={cn(value === 'YANG' && 'font-medium text-brand')}>
+    Yang
+  </span>
+</div>
+```
+
+---
+
+## Location Picker Pattern - Nov 5, 2025
+
+### Component
+
+```tsx
+export function LocationPicker() {
+  const [zipCode, setZipCode] = useState('');
+  const [location, setLocation] = useState('');
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [showSpinner, setShowSpinner] = useState(false);
+  
+  const handleZipCodeBlur = async () => {
+    if (!zipCode || zipCode === previousZipCode) return;
+    
+    // Validate zip code
+    if (!/^\d{5}$/.test(zipCode)) {
+      setZipCode(previousZipCode); // Silent revert
+      return;
+    }
+    
+    // Geocode and save
+    const locationData = await geocodeZipCode(zipCode);
+    setLocation(`${locationData.city}, ${locationData.state}`);
+    queueAccountUpdate({ location: locationData });
+    setPreviousZipCode(zipCode);
+  };
+  
+  const handleGPSClick = async () => {
+    if (!navigator.geolocation) return;
+    
+    setGpsLoading(true);
+    
+    // Show spinner only if > 1 second (global loading rule)
+    const spinnerTimeout = setTimeout(() => {
+      setShowSpinner(true);
+    }, 1000);
+    
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        clearTimeout(spinnerTimeout);
+        setGpsLoading(false);
+        setShowSpinner(false);
+        
+        const { latitude, longitude } = position.coords;
+        
+        // Reverse geocode
+        const locationData = await reverseGeocode(latitude, longitude);
+        setZipCode(locationData.zipCode);
+        setLocation(`${locationData.city}, ${locationData.state}`);
+        
+        // Auto-save
+        queueAccountUpdate({ 
+          location: { 
+            lat: latitude, 
+            lng: longitude,
+            ...locationData 
+          }
+        });
+      },
+      (error) => {
+        // Silent fail - no error toast
+        clearTimeout(spinnerTimeout);
+        setGpsLoading(false);
+        setShowSpinner(false);
+      }
+    );
+  };
+  
+  return (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium">
+        Location (Zip Code)
+      </label>
+      
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={zipCode}
+          onChange={(e) => setZipCode(e.target.value)}
+          onBlur={handleZipCodeBlur}
+          placeholder="60601"
+          maxLength={5}
+          className="flex-1 px-4 py-2 rounded-lg border"
+        />
+        
+        <button
+          type="button"
+          onClick={handleGPSClick}
+          disabled={gpsLoading}
+          className="px-4 py-2 rounded-lg border border-light-border dark:border-dark-border hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
+          aria-label="Use current location"
+        >
+          {showSpinner ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <MapPin className="w-5 h-5" />
+          )}
+        </button>
+      </div>
+      
+      {location && (
+        <div className="flex items-center gap-1 text-sm text-gray-600">
+          <MapPin className="w-4 h-4" />
+          <span>{location}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+## Copy Button Pattern (Pigeon ID) - Nov 5, 2025
+
+```tsx
+export function CopyPigeonId({ pigeonId }: { pigeonId: string }) {
+  const [copied, setCopied] = useState(false);
+  
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(pigeonId);
+      setCopied(true);
+      toast.success('Copied!'); // Brief toast
+      
+      // Reset after 2 seconds
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      // Silent fail - clipboard API might not be available
+    }
+  };
+  
+  return (
+    <div className="space-y-3">
+      <label className="block text-sm font-medium">Security</label>
+      
+      <button
+        type="button"
+        onClick={handleCopy}
+        className={cn(
+          "w-full px-4 py-3 rounded-lg border transition-colors font-medium",
+          copied
+            ? "bg-green-50 border-green-500 text-green-700 dark:bg-green-900/20 dark:border-green-500 dark:text-green-400"
+            : "border-light-border dark:border-dark-border hover:bg-gray-50 dark:hover:bg-gray-800"
+        )}
+      >
+        {copied ? (
+          <>
+            <Check className="w-4 h-4 inline mr-2" />
+            Copied!
+          </>
+        ) : (
+          <>
+            <Copy className="w-4 h-4 inline mr-2" />
+            Copy Pigeon ID
+          </>
+        )}
+      </button>
+      
+      <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+        <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-amber-900 dark:text-amber-200">
+          <strong>Never Share!</strong> Anyone with your Pigeon Id can pretend to be you.
+        </p>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## Character Counter Pattern - Nov 5, 2025
+
+**Rule:** Show counter only when approaching limit (e.g., at 180/200 chars)
+
+```tsx
+export function CharacterCounter({ 
+  current, 
+  max, 
+  threshold = 0.9 // Show at 90% of max
+}: { 
+  current: number; 
+  max: number; 
+  threshold?: number;
+}) {
+  const shouldShow = current >= (max * threshold);
+  const isOverLimit = current > max;
+  
+  if (!shouldShow) return null;
+  
+  return (
+    <p className={cn(
+      "text-sm text-right transition-colors",
+      isOverLimit 
+        ? "text-red-600 dark:text-red-400 font-medium" 
+        : "text-gray-500"
+    )}>
+      {current}/{max} characters
+    </p>
+  );
+}
+
+// Usage
+<div className="space-y-2">
+  <textarea
+    value={bio}
+    onChange={(e) => setBio(e.target.value)}
+    onBlur={handleBioBlur}
+    maxLength={200}
+    rows={3}
+  />
+  <CharacterCounter current={bio.length} max={200} threshold={0.9} />
+</div>
+```
+
+---
+
+## Offline Indicator Pattern - Nov 5, 2025
+
+**Location:** Header (non-clickable, subtle)  
+**Style:** Small grey wifi icon (no-wifi symbol when offline)
+
+```tsx
+export function OfflineIndicator() {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+  
+  // Don't show anything when online
+  if (isOnline) return null;
+  
+  return (
+    <div 
+      className="flex items-center gap-1 text-gray-400"
+      title="You're offline. Changes will sync when reconnected."
+    >
+      <WifiOff className="w-4 h-4" />
+    </div>
+  );
+}
+
+// In header/nav
+<header className="flex items-center justify-between px-4 py-3">
+  <Logo />
+  <nav>{/* nav items */}</nav>
+  <div className="flex items-center gap-4">
+    <OfflineIndicator /> {/* Small, subtle, non-clickable */}
+    <ThemeToggle />
+  </div>
+</header>
+```
+
+---
+
+## Loading Rules (Global) - Nov 5, 2025
+
+**Rule:** Only show loading indicator if action takes > 1 second, with tasteful fade-in
+
+**Philosophy:** Avoid flickering experiences. Even "slow" actions (image upload, GPS) often complete in < 1s. Don't show spinner unless actually needed.
+
+### Implementation
+
+```tsx
+export function useLoadingIndicator(isLoading: boolean, delay = 1000) {
+  const [showSpinner, setShowSpinner] = useState(false);
+  
+  useEffect(() => {
+    if (!isLoading) {
+      setShowSpinner(false);
+      return;
+    }
+    
+    // Show spinner only after 1 second has passed with no update
+    const timer = setTimeout(() => {
+      setShowSpinner(true);
+    }, delay);
+    
+    return () => clearTimeout(timer);
+  }, [isLoading, delay]);
+  
+  return showSpinner;
+}
+
+// Usage: GPS location fetch (or any potentially slow action)
+const [gpsLoading, setGpsLoading] = useState(false);
+const showSpinner = useLoadingIndicator(gpsLoading, 1000);
+
+<button onClick={handleGPSClick} disabled={gpsLoading}>
+  {showSpinner && (
+    <Loader2 className="w-5 h-5 animate-spin animate-in fade-in duration-300" />
+  )}
+  {!showSpinner && <MapPin className="w-5 h-5" />}
+</button>
+```
+
+**Key Point:** Tasteful fade-in animation (300ms) when spinner appears - no jarring pop-in.
+
+### Examples
+
+**ALL actions:** Wait 1 second before showing spinner
+- Like/unlike post (usually < 1s → no spinner)
+- Follow/unfollow user (usually < 1s → no spinner)
+- GPS location fetch (often < 1s → no spinner, but show if > 1s)
+- Image upload (often < 1s → no spinner, but show if > 1s)
+- Complex searches (might take > 1s → show spinner with fade-in)
+- Initial page load (might take > 1s → show skeleton/spinner)
+
+**Rationale:** Modern connections are fast. Most actions complete quickly. Showing spinner for 500ms then hiding it creates a poor flickering experience. Better to wait 1 second, and if action is still pending, THEN show spinner with smooth fade-in.
+
+---
+
 ## Design Tokens Export
 
 ```typescript

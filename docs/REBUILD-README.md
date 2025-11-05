@@ -3,7 +3,7 @@
 **Created:** November 3, 2025  
 **Branch:** `rebuilding-front-end`  
 **Status:** Planning Phase Complete ✅  
-**Last Updated:** November 4, 2025
+**Last Updated:** November 5, 2025
 
 ---
 
@@ -21,17 +21,46 @@
 
 ---
 
-## ⚡ Quick Reference - Confirmed Decisions (Nov 4, 2025)
+## ⚡ Quick Reference - Confirmed Decisions (Updated Nov 5, 2025)
+
+### ZEN Design Philosophy 🧘
+- **Auto-Save Pattern:** NO "Save" buttons - blur to save, silent errors
+- **One Action, One Way:** No duplicate paths to same goal (Dieter Rams principles)
+- **Mobile-First:** 95% mobile usage - optimize for touch and small screens
+- **Loading Rules:** < 1 second = no spinner, > 1 second = show spinner
+- **Offline-Ready:** Silent queueing, seamless sync, small grey wifi icon in header
+- **Character Limits:** Show counter only when approaching limit (e.g., 180/200 chars)
+
+### Navigation Structure
+**Main Nav:** Posts | Messages | Activities | Settings | Theme Toggle (icon)
+- "Home" → Changed to "Posts"
+- "Profile" removed from nav → Accessed by clicking usernames
+- Theme toggle stays in nav (frequent action, NOT in Settings)
+
+### Settings Page (NEW)
+**Route:** `/settings/account` and `/settings/preferences`
+**Tabs:** Account | Preferences | Support
+- **Account:** Profile editing, Pigeon ID copy, Logout
+- **Preferences:** Proximity range (50/100/150km default)
+- **Support:** Feedback (Telegram), TOS, Privacy Policy
+
+### Profile vs Account (CRITICAL Distinction)
+- **Profile:** Read-only public view (click usernames) - shows username, age, bio, MBTI, polarity, location (as distance)
+- **Account:** Editable settings (Settings → Account tab) - edit avatar, bio, MBTI, location, polarity
 
 ### Feature Confirmations
-- **Yin/Yang Polarity:** User profile fields for masculinity/femininity (identity, NOT score)
+- **Yin/Yang Polarity:** User profile field for masculinity/femininity (identity, NOT score) - **Toggle switch in Account settings**
 - **Vibes System:** Like, Dislike/Report (dual purpose)
-- **Auto-Hide Threshold:** 3 unique Yin vibes
+- **Auto-Hide Threshold:** 3 unique dislikes
+- **Proximity Range:** Default 100km, adjustable 50-150km in Preferences (hidden from posts grid)
 - **Activity Cleanup:** Read after 7 days, unread capped at 100k+
 - **DM Cooldown:** 2 days if declined
 - **Search Scope:** Global (not location-filtered)
 - **@Mentions:** Comments, Group chat, AND captions
 - **Ban User:** Easy toggle, no confirmation, reversible, soft delete
+- **Age Display:** Calculated from birth date, shown on profile (NOT editable), format: "Age: 28"
+- **Username:** Set at signup, permanent (NOT editable, NOT shown in Account settings)
+- **TODO (Post-MVP):** Age-based content filtering for child protection
 
 ### Admin Panel Features
 - Delete post (single + bulk)

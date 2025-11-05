@@ -1,9 +1,9 @@
 # VibesApp Frontend Rebuild Plan
 
-**Date:** November 3, 2025  
+**Date:** November 3, 2025 (Updated: November 5, 2025)  
 **Branch:** `rebuilding-front-end`  
 **Current Version:** 0.20.1  
-**Goal:** Modernize and optimize the frontend architecture with improved developer experience and user experience
+**Goal:** Modernize and optimize the frontend architecture with improved developer experience and user experience, following ZEN design principles
 
 ## Executive Summary
 
@@ -39,6 +39,32 @@ This document outlines the comprehensive plan to rebuild the VibesApp frontend f
 5. **Feature Set:** Comprehensive social networking capabilities
 6. **Documentation:** Extensive docs covering architecture and patterns
 7. **Testing:** Playwright E2E tests provide safety net
+
+## Design Philosophy (Updated Nov 5, 2025)
+
+### ZEN Design Principles (Dieter Rams Inspired)
+1. **One Action, One Way:** No duplicate paths to achieve the same goal
+2. **Auto-Save Everything:** No "Save" buttons - blur to save, silent errors
+3. **Mobile-First:** 95% mobile usage - optimize for touch and small screens
+4. **Loading Rules:** < 1 second = no spinner, > 1 second = show spinner
+5. **Offline-Ready:** Silent queueing, seamless sync, no "offline mode" UI
+6. **Character Limits:** Show counter only when approaching limit
+7. **Minimal Feedback:** Silent success, brief toasts only when helpful
+8. **Profile vs Account:**
+   - **Profile** = Read-only public view (click usernames)
+   - **Account** = Editable settings (Settings → Account tab)
+
+### Navigation Structure (Updated Nov 5, 2025)
+**Main Nav:** Posts | Messages | Activities | Settings | Theme Toggle (icon)
+
+**Removed from Nav:**
+- "Home" → Changed to "Posts"
+- "Profile" → Accessed by clicking usernames (read-only view)
+
+**Settings Structure:**
+- Account tab: Profile editing, Pigeon ID, Logout
+- Preferences tab: Proximity range (50/100/150km)
+- Support tab: Feedback, TOS, Privacy Policy
 
 ## Rebuild Strategy
 
@@ -294,19 +320,27 @@ const buttonVariants = cva(
 - [ ] Notification
 - [ ] WelcomeForm
 
-### Features to Preserve
-- [x] Theme switching (light/dim/dark)
-- [ ] User authentication state
+### Features to Preserve & Enhance (Updated Nov 5, 2025)
+- [x] Theme switching (light/dim/dark) - **Keep in nav as icon button**
+- [ ] User authentication state (Pigeon ID system)
 - [ ] Post creation with image upload
 - [ ] Post vibes (like/dislike)
 - [ ] Reply system
-- [ ] Real-time messaging
-- [ ] Location-based features
-- [ ] MBTI integration
-- [ ] Notification system
+- [ ] Real-time messaging (request-based DM)
+- [ ] Location-based features (**default 100km, adjustable 50-150km in Settings**)
+- [ ] MBTI integration (changeable in Settings)
+- [ ] Notification system (categorized activity feed)
 - [ ] Activity tracking
+- [ ] **Settings Page (NEW):** Account/Preferences/Support tabs
+  - [ ] Auto-save pattern (no "Save" buttons)
+  - [ ] Profile editing (bio, MBTI, location, polarity)
+  - [ ] Pigeon ID copy button
+  - [ ] Proximity range selector
+  - [ ] Feedback link (Telegram)
+  - [ ] Logout button
+- [ ] **Profile Page:** Read-only public view with age display
 - [ ] PWA capabilities
-- [ ] Offline support
+- [ ] **Offline support (ENHANCED):** Silent queueing and sync
 
 ### Quality Checkers
 - [ ] All E2E tests passing
