@@ -3,8 +3,10 @@
 @tailwind utilities;
 
 @layer base {
-  * {
-    @apply border-border;
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
   }
 
   body {
