@@ -5,6 +5,60 @@
 **Usage:** Copy each prompt in order, validate deliverables, confirm before proceeding
 
 ---
+ 
+## Agent safety & git policy (READ BEFORE RUNNING ANY AGENT)
+
+IMPORTANT: Do not perform any Git operations (e.g., git add, git commit, git push, git merge, git checkout, or other repository-changing commands) unless you have explicit, written permission from the repository owner. When you finish an implementation step, always: 1) summarize the proposed changes in plain text, 2) ask the owner for permission to commit/push, and 3) wait for confirmation before running any git commands. This file documents prompts and recommendations only — no agent should modify the repository history without an explicit request.
+
+## 🤖 AI Model Recommendations
+
+**To optimize Claude Sonnet 4.5 quota usage:**
+
+### Use **GPT-5 mini** for: 💰 (Cost-effective)
+- ✅ Simple component creation (buttons, inputs, cards, badges)
+- ✅ Basic styling and CSS updates
+- ✅ Simple CRUD operations
+- ✅ Placeholder page creation
+- ✅ Documentation updates
+- ✅ Simple API endpoint additions
+- ✅ Repetitive component patterns
+- ✅ Form validation logic
+
+### Use **Claude Sonnet 4.5** for: 🎯 (Complex tasks)
+- 🔥 Complex state management (auth, messaging, real-time)
+- 🔥 Multi-step user flows (signup, post creation)
+- 🔥 Architecture decisions and file structure
+- 🔥 Backend integration with multiple services
+- 🔥 Real-time features (Socket.IO, WebSockets)
+- 🔥 Complex business logic (vibes system, recommendations)
+- 🔥 Security-critical features (authentication, authorization)
+- 🔥 Performance optimization and debugging
+
+**Each prompt below includes a recommendation tag:**
+- 💰 **GPT-5 mini** - Simple, straightforward implementation
+- 🎯 **Claude Sonnet** - Complex, requires architectural thinking
+- ⚖️ **Either** - Can use either based on availability
+
+### 📊 Quick Phase Overview
+
+| Phase | Prompt | Complexity | Recommended AI |
+|-------|--------|------------|----------------|
+| **0.1** | Initialize Vite | Simple | 💰 GPT-5 mini |
+| **0.2** | Tailwind Config | Simple | 💰 GPT-5 mini |
+| **0.3** | Project Structure | Simple | 💰 GPT-5 mini |
+| **0.4** | Admin Auth | Complex | 🎯 Claude ✅ |
+| **0.5** | Flagged Posts | Complex | 🎯 Claude |
+| **0.6** | User Management | Complex | 🎯 Claude |
+| **0.7** | Analytics | Medium | 🎯 Claude Sonnet |
+| **1.1-1.7** | Design System | Simple | 💰 GPT-5 mini (all) |
+| **2.1** | Auth Context | Complex | 🎯 Claude |
+| **2.2** | Signup Flow | Complex | 🎯 Claude |
+| **2.3** | Login Screen | Simple | 💰 GPT-5 mini |
+| **2.4** | App Layout | Medium | 🎯 Claude Sonnet |
+
+**Quota Savings Estimate:** Using GPT-5 mini for simple tasks can save ~40-50% of Claude Sonnet quota!
+
+---
 
 ## 📋 How to Use This File
 
@@ -65,7 +119,6 @@ This ensures AI agents can pick up exactly where you left off!
 - [X] 0.1 - Initialize Vite Project (✅ Complete - Nov 4)
 - [X] 0.2 - Configure Tailwind & Design Tokens (✅ Complete - Nov 4)
 - [X] 0.3 - Setup Project Structure (✅ Complete - Nov 4)
-- [X] 0.4 - Admin Authentication (✅ Complete - Nov 4)
 - [ ] 0.5 - Flagged Posts Dashboard (⏸️ Not started)
 - [ ] 0.6 - User Management Panel (⏸️ Not started)
 - [ ] 0.7 - Analytics Dashboard (⏸️ Not started)
@@ -192,6 +245,8 @@ This ensures AI agents can pick up exactly where you left off!
 
 ### Prompt 0.1: Initialize Vite Project
 
+**AI Recommendation:** 💰 **GPT-5 mini** (Simple setup task)
+
 **Status:** ✅ Complete  
 **Completed:** [X] Yes - November 4, 2025  
 **Prerequisites:** None (starting fresh)  
@@ -255,6 +310,8 @@ npm run dev
 
 ### Prompt 0.2: Configure Tailwind & Design Tokens
 
+**AI Recommendation:** 💰 **GPT-5 mini** (Configuration task with clear specs)
+
 **Status:** ✅ Complete  
 **Completed:** [X] Yes - November 4, 2025  
 **Prerequisites:** Prompt 0.1 completed  
@@ -314,6 +371,8 @@ npm run dev
 ---
 
 ### Prompt 0.3: Setup Project Structure
+
+**AI Recommendation:** 💰 **GPT-5 mini** (Boilerplate creation)
 
 **Status:** ✅ Complete  
 **Completed:** [X] Yes - November 4, 2025  
@@ -398,6 +457,8 @@ npm run dev
 
 ### Prompt 0.4: Admin Authentication
 
+**AI Recommendation:** 🎯 **Claude Sonnet** (Security-critical with session management)
+
 **Status:** ✅ Complete  
 **Completed:** [X] Yes - November 4, 2025  
 **Prerequisites:** Phase 0.1-0.3 completed  
@@ -471,6 +532,8 @@ Key Technical Decisions:
 ---
 
 ### Prompt 0.5: Flagged Posts Dashboard
+
+**AI Recommendation:** 🎯 **Claude Sonnet** (Complex CRUD with backend integration)
 
 **Status:** ⏸️ Waiting for 0.4  
 **Completed:** [ ] No  
@@ -558,6 +621,8 @@ Key Features:
 ---
 
 ### Prompt 0.6: User Management Panel
+
+**AI Recommendation:** 🎯 **Claude Sonnet** (Complex user management with security implications)
 
 **Status:** ⏸️ Waiting for 0.5  
 **Completed:** [ ] No  
@@ -647,6 +712,8 @@ Key Technical Decisions (Nov 4, 2025):
 
 ### Prompt 0.7: Analytics Dashboard
 
+**AI Recommendation:** 🎯 **Claude Sonnet** (Prefer Claude for analytics metrics & chart logic)
+
 **Status:** ⏸️ Waiting for 0.6  
 **Completed:** [ ] No  
 **Prerequisites:** Admin auth + flagged posts + user management completed  
@@ -734,6 +801,8 @@ Reference files:
 
 ### Prompt 1.1: Button Component
 
+**AI Recommendation:** 💰 **GPT-5 mini** (Simple component with clear variants)
+
 **Status:** ⏸️ Waiting for Phase 0 completion  
 **Completed:** [ ] No  
 **Prerequisites:** Foundation setup complete  
@@ -801,6 +870,8 @@ npm run dev
 
 ### Prompt 1.2: Input Component
 
+**AI Recommendation:** 💰 **GPT-5 mini** (Simple form components)
+
 **Status:** ⏸️ Waiting for 1.1  
 **Completed:** [ ] No  
 **Prerequisites:** Button component completed  
@@ -861,6 +932,8 @@ Reference files:
 
 ### Prompt 1.3: Card Component
 
+**AI Recommendation:** 💰 **GPT-5 mini** (Simple layout component)
+
 **Status:** ⏸️ Waiting for 1.2  
 **Completed:** [ ] No  
 **Prerequisites:** Button & Input completed  
@@ -911,6 +984,8 @@ Reference files:
 ---
 
 ### Prompt 1.4: Modal/Dialog Component
+
+**AI Recommendation:** 💰 **GPT-5 mini** (Radix UI wrapper with styling)
 
 **Status:** ⏸️ Waiting for 1.3  
 **Completed:** [ ] No  
@@ -968,6 +1043,8 @@ Reference files:
 
 ### Prompt 1.5: Avatar Component
 
+**AI Recommendation:** 💰 **GPT-5 mini** (Simple image component with fallbacks)
+
 **Status:** ⏸️ Waiting for 1.4  
 **Completed:** [ ] No  
 **Prerequisites:** Basic components completed  
@@ -1019,6 +1096,8 @@ Reference files:
 
 ### Prompt 1.6: Badge Component
 
+**AI Recommendation:** 💰 **GPT-5 mini** (Very simple component)
+
 **Status:** ⏸️ Waiting for 1.5  
 **Completed:** [ ] No  
 **Prerequisites:** Avatar completed  
@@ -1066,6 +1145,8 @@ Reference files:
 ---
 
 ### Prompt 1.7: Loading Components
+
+**AI Recommendation:** 💰 **GPT-5 mini** (Simple animation components)
 
 **Status:** ⏸️ Waiting for 1.6  
 **Completed:** [ ] No  
@@ -1126,6 +1207,8 @@ Reference files:
 ---
 
 ### Prompt 2.1: Auth Context & API
+
+**AI Recommendation:** 🎯 **Claude Sonnet** (Complex state management and security)
 
 **Status:** ⏸️ Waiting for Phase 1 completion  
 **Completed:** [ ] No  
@@ -1188,6 +1271,8 @@ Key Technical Details:
 ---
 
 ### Prompt 2.2: Pigeon ID Signup Flow
+
+**AI Recommendation:** 🎯 **Claude Sonnet** (Multi-step flow with validation and unique business logic)
 
 **Status:** ⏸️ Waiting for 2.1  
 **Completed:** [ ] No  
@@ -1264,6 +1349,8 @@ Key Features:
 
 ### Prompt 2.3: Login Screen
 
+**AI Recommendation:** 💰 **GPT-5 mini** (Simple form with existing auth context)
+
 **Status:** ⏸️ Waiting for 2.2  
 **Completed:** [ ] No  
 **Prerequisites:** Signup flow completed  
@@ -1318,6 +1405,8 @@ Reference files:
 ---
 
 ### Prompt 2.4: App Layout & Navigation
+
+**AI Recommendation:** 🎯 **Claude Sonnet** (Prefer Claude for navigation logic and architecture)
 
 **Status:** ⏸️ Waiting for 2.3  
 **Completed:** [ ] No  
