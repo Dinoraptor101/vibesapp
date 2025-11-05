@@ -6,6 +6,12 @@ const {
   deletePosts,
   getFlaggedPosts,
   dismissReports,
+  getUsers,
+  toggleBanUser,
+  regeneratePassword,
+  deleteUser,
+  getUserPosts,
+  bulkDeleteUserPosts,
 } = require('../controllers/admin');
 
 // Admin login (no auth required)
@@ -22,5 +28,13 @@ router.post('/posts/:postId/dismiss-reports', dismissReports);
 
 // Delete posts in bulk
 router.delete('/posts', deletePosts);
+
+// User management routes
+router.get('/users', getUsers);
+router.post('/users/:userId/toggle-ban', toggleBanUser);
+router.post('/users/:userId/regenerate-password', regeneratePassword);
+router.delete('/users/:userId', deleteUser);
+router.get('/users/:userId/posts', getUserPosts);
+router.delete('/users/:userId/posts', bulkDeleteUserPosts);
 
 module.exports = router;
