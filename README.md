@@ -143,11 +143,15 @@ The monorepo uses a unified environment system with sections for each app:
 cp .env.example .env
 ```
 
-### Code Quality
+### Code Quality & Linting
 
-- **Frontend**: Biome for TypeScript/React
-- **Backend**: ESLint for JavaScript/Node.js
-- **Formatting**: Biome with unified configuration across monorepo
+⚠️ **Important:** Different projects use different tools!
+
+- **apps/web**: Biome ONLY (linting + formatting)
+- **apps/web-v2**: ESLint (linting) + Biome (formatting)
+- **apps/api**: ESLint (linting)
+
+📖 **Full Documentation:** See [LINTING.md](./LINTING.md) and [docs/LINTING-QUICK-REFERENCE.md](./docs/LINTING-QUICK-REFERENCE.md)
 - **NX**: Intelligent task caching and dependency management
 
 ## 🚢 Deployment

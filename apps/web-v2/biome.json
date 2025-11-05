@@ -3,6 +3,12 @@
   "files": {
     "ignoreUnknown": true
   },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "main"
+  },
   "css": {
     "parser": {
       "cssModules": false,
@@ -24,7 +30,8 @@
       },
       "suspicious": {
         "noExplicitAny": "off",
-        "noUnknownAtRules": "off"
+        "noUnknownAtRules": "off",
+        "noDocumentCookie": "off"
       },
       "correctness": {
         "noUnusedVariables": "warn"

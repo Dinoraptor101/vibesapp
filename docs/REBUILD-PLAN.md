@@ -62,6 +62,9 @@ This document outlines the comprehensive plan to rebuild the VibesApp frontend f
    - **UI Components:** Headless UI or Radix UI primitives
    - **Icons:** Lucide React (modern, tree-shakeable)
    - **Animations:** Framer Motion for smooth transitions
+   - **Linting:** ESLint + TypeScript ESLint
+   - **Formatting:** Biome (fast Rust-based formatter)
+   - **Note:** ⚠️ apps/web-v2 uses ESLint (unlike apps/web which uses Biome for both linting and formatting)
 
 2. **Setup New Project Structure**
    ```

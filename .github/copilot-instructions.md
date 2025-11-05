@@ -42,8 +42,17 @@ vibesapp/
 - **State Management**: React Query + Context API
 - **Styling**: Custom CSS with theme system
 - **Build Tool**: Webpack with custom configuration
-- **Linting**: Biome (replaced Prettier/ESLint)
+- **Linting & Formatting**: Biome (replaced Prettier/ESLint) - **⚠️ DO NOT use ESLint in web project**
 - **Testing**: Jest + React Testing Library
+
+### Frontend V2 (`apps/web-v2`) - New Vite-based rebuild
+- **Framework**: React 18 with TypeScript
+- **State Management**: Zustand + React Query
+- **Styling**: Tailwind CSS with custom design tokens
+- **Build Tool**: Vite
+- **Linting**: ESLint + TypeScript ESLint
+- **Formatting**: Biome (for formatting only)
+- **Testing**: Vitest + React Testing Library
 
 ### Backend (`apps/api`)
 - **Runtime**: Node.js with Express
@@ -116,9 +125,14 @@ npm run build:api            # Build backend only
 npm run test                  # Run all tests
 npm run test:e2e             # Run Playwright tests
 
-# Linting
-npm run lint                  # Lint all code
+# Linting & Formatting
+npm run lint                  # Lint all code (uses Biome for web, ESLint for api)
 npm run lint:fix             # Fix linting issues
+npm run format               # Format code with Biome
+npm run format:check         # Check formatting without changes
+
+# Important: apps/web uses Biome, apps/web-v2 uses ESLint
+# Never add ESLint config to apps/web - it uses Biome exclusively
 
 # NX Commands
 nx graph                      # View dependency graph

@@ -7,6 +7,20 @@
 
 ---
 
+## ⚠️ Important: Linting & Formatting
+
+**Different projects use different tools!**
+
+- **apps/web** (V1): Biome ONLY (linting + formatting)
+- **apps/web-v2** (V2 Rebuild): ESLint (linting) + Biome (formatting)
+- **apps/api**: ESLint (linting)
+
+📖 **See:** [LINTING-QUICK-REFERENCE.md](./LINTING-QUICK-REFERENCE.md) for complete guide
+
+❌ **DO NOT** add ESLint to apps/web - it uses Biome exclusively!
+
+---
+
 ## ⚡ Quick Reference - Confirmed Decisions (Nov 4, 2025)
 
 ### Feature Confirmations
