@@ -17,12 +17,10 @@ function getCookie(name: string): string | undefined {
 function setCookie(name: string, value: string, days = 7): void {
   const expires = new Date();
   expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
-  // biome-ignore lint/suspicious/noDocumentCookie: <The cookie doesn't require body>
   document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
 }
 
 function deleteCookie(name: string): void {
-  // biome-ignore lint/suspicious/noDocumentCookie: <The cookie doesn't require body>
   document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
 }
 

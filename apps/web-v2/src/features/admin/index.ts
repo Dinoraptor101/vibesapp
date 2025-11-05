@@ -12,3 +12,4 @@ export { useAdminAuth } from './hooks/useAdminAuth';
 export { AdminDashboardPage } from './pages/AdminDashboardPage';
 // Pages
 export { AdminLoginPage } from './pages/AdminLoginPage';
+export { FlaggedPostsPage } from './pages/FlaggedPostsPage';
