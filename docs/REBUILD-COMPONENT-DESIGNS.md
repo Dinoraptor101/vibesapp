@@ -1,7 +1,7 @@
 # Component Designs - Vibes App V2
 
-**Updated:** November 4, 2025  
-**Status:** Finalized based on requirements discussion
+**Updated:** November 5, 2025  
+**Status:** Finalized - Settings Page & Profile Page Added
 
 ---
 
@@ -968,25 +968,437 @@ const handleMarkAllRead = async (category: Category) => {
 
 ---
 
+## 8. Settings Page (Updated Nov 5, 2025)
+
+**Route:** `/settings/account` and `/settings/preferences`  
+**Access:** Via Settings button in navigation  
+**Layout:** Full page with tabs (NO modals)  
+**Tabs:** Account | Preferences | Support
+
+### Mobile Layout (Primary - 95% Usage)
+
+```
+┌─────────────────────────────────┐
+│  ← Settings                     │
+├─────────────────────────────────┤
+│ [Account] [Preferences] [Support]│ ← Tabs
+├─────────────────────────────────┤
+│                                 │
+│  ACCOUNT TAB                    │
+│                                 │
+│  Profile Photo                  │
+│  ┌─────────────────────────┐   │
+│  │                         │   │
+│  │      [@]                │   │
+│  │                         │   │
+│  │  [Change Photo]         │   │
+│  └─────────────────────────┘   │
+│                                 │
+│  Bio                            │
+│  ┌─────────────────────────┐   │
+│  │ Coffee lover, INFJ      │   │
+│  │ Love photography! 📷    │   │
+│  └─────────────────────────┘   │
+│  142/200 characters             │ ← Shown at 180+
+│                                 │
+│  MBTI Type                      │
+│  [INFJ ▼]                       │
+│                                 │
+│  Location (Zip Code)            │
+│  [60601____] [📍]               │ ← GPS button
+│  📍 Chicago, IL                 │
+│                                 │
+│  Polarity                       │
+│  Yin [━━○] Yang                 │ ← Toggle
+│      (Currently: Yang)          │
+│                                 │
+│  ───────────────────────────    │
+│                                 │
+│  Security                       │
+│  [Copy Pigeon ID]               │
+│                                 │
+│  [!] Never Share! Anyone with   │
+│  your Pigeon Id can pretend     │
+│  to be you.                     │
+│                                 │
+│  ───────────────────────────    │
+│                                 │
+│  [Logout]                       │ ← Bottom of page
+│                                 │
+└─────────────────────────────────┘
+```
+
+### Preferences Tab
+
+```
+┌─────────────────────────────────┐
+│  ← Settings                     │
+├─────────────────────────────────┤
+│ [Account] [Preferences] [Support]│
+├─────────────────────────────────┤
+│                                 │
+│  PREFERENCES TAB                │
+│                                 │
+│  Nearby Posts Radius            │
+│  ┌─────────────────────────┐   │
+│  │ [100 kilometers ▼]      │   │
+│  │  • 50 kilometers        │   │
+│  │  ✓ 100 kilometers       │   │
+│  │  • 150 kilometers       │   │
+│  └─────────────────────────┘   │
+│                                 │
+│  Determines the range for posts │
+│  shown in your Nearby feed.     │
+│                                 │
+│  ───────────────────────────    │
+│                                 │
+│  (Future: Notification Settings)│
+│                                 │
+└─────────────────────────────────┘
+```
+
+### Support Tab
+
+```
+┌─────────────────────────────────┐
+│  ← Settings                     │
+├─────────────────────────────────┤
+│ [Account] [Preferences] [Support]│
+├─────────────────────────────────┤
+│                                 │
+│  SUPPORT TAB                    │
+│                                 │
+│  Help & Feedback                │
+│  ┌─────────────────────────┐   │
+│  │ [Send Feedback →]       │   │ ← Opens Telegram
+│  └─────────────────────────┘   │
+│                                 │
+│  Legal                          │
+│  ┌─────────────────────────┐   │
+│  │ [Terms of Service]      │   │ ← Dead link (TBD)
+│  │ [Privacy Policy]        │   │ ← Dead link (TBD)
+│  └─────────────────────────┘   │
+│                                 │
+│  ───────────────────────────    │
+│                                 │
+│  App Version: 2.0.0             │
+│                                 │
+└─────────────────────────────────┘
+```
+
+### Desktop Layout (5% Usage)
+
+```
+┌────────────────────────────────────────────────────────┐
+│  ← Back          Settings                              │
+├────────────────────────────────────────────────────────┤
+│                                                        │
+│  ┌──────────────┐  ┌──────────────────────────────┐  │
+│  │ Account      │  │  Profile Photo                │  │
+│  │              │  │  ┌────────────────────────┐   │  │
+│  │ Preferences  │  │  │        [@]             │   │  │
+│  │              │  │  │    [Change Photo]      │   │  │
+│  │ Support      │  │  └────────────────────────┘   │  │
+│  │              │  │                               │  │
+│  └──────────────┘  │  Bio                          │  │
+│                    │  ┌────────────────────────┐   │  │
+│                    │  │ Coffee lover, INFJ     │   │  │
+│                    │  └────────────────────────┘   │  │
+│                    │  142/200 characters           │  │
+│                    │                               │  │
+│                    │  MBTI Type                    │  │
+│                    │  [INFJ ▼]                     │  │
+│                    │                               │  │
+│                    │  Location (Zip Code)          │  │
+│                    │  [60601____] [📍]             │  │
+│                    │  📍 Chicago, IL               │  │
+│                    │                               │  │
+│                    │  Polarity                     │  │
+│                    │  Yin [━━○] Yang.              │  │
+│                    │                               │  │
+│                    │  Security                     │  │
+│                    │  [Copy Pigeon ID]             │  │
+│                    │  [!] Never Share! Anyone with │  │
+│                    │  your Pigeon Id can pretend   │  │
+│                    │  to be you.                   │  │
+│                    │                               │  │
+│                    │  [Logout]                     │  │
+│                    └───────────────────────────────┘  │
+└────────────────────────────────────────────────────────┘
+```
+
+### Auto-Save Behavior (ZEN Design - CRITICAL)
+
+**Philosophy:** No "Save" buttons. Auto-save on blur. Silent, seamless.
+
+```tsx
+// Bio field
+<textarea
+  value={bio}
+  onChange={(e) => setBio(e.target.value)}
+  onBlur={handleBioBlur}  // ← Auto-save trigger
+  maxLength={200}
+/>
+{bio.length >= 180 && (  // ← Show counter only near limit
+  <span className="text-sm text-gray-500">
+    {bio.length}/200 characters
+  </span>
+)}
+
+// Auto-save handler
+const handleBioBlur = async (e) => {
+  const newBio = e.target.value;
+  
+  // Validation
+  if (newBio.length > 200) {
+    setBio(previousBio); // Silent revert
+    return;
+  }
+  
+  // Queue change (debounced 300ms)
+  queueAccountUpdate({ bio: newBio });
+};
+
+// Location with GPS
+const handleGPSClick = async () => {
+  if (navigator.geolocation) {
+    setGpsLoading(true); // Show spinner if > 1s
+    
+    const timeout = setTimeout(() => {
+      setShowSpinner(true); // 1s passed, show spinner
+    }, 1000);
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        clearTimeout(timeout);
+        setGpsLoading(false);
+        setShowSpinner(false);
+        
+        // Geocode and save
+        const { latitude, longitude } = position.coords;
+        queueAccountUpdate({ 
+          location: { lat: latitude, lng: longitude }
+        });
+      },
+      (error) => {
+        clearTimeout(timeout);
+        setGpsLoading(false);
+        setShowSpinner(false);
+        // Silent fail - keep current value
+      }
+    );
+  }
+};
+
+// Polarity toggle (single tap - binary: either YIN or YANG, no middle)
+const handlePolarityToggle = () => {
+  const newPolarity = polarity === 'YIN' ? 'YANG' : 'YIN';
+  setPolarity(newPolarity);
+  queueAccountUpdate({ polarity: newPolarity });
+};
+
+// Copy Pigeon ID
+const handleCopyPigeonId = async () => {
+  await navigator.clipboard.writeText(pigeonId);
+  toast.success('Copied!'); // Brief toast
+};
+```
+
+### Editable vs Read-Only Fields
+
+**Editable in Account Settings:**
+- ✅ Avatar (upload with crop)
+- ✅ Bio (textarea, 200 char limit)
+- ✅ MBTI (dropdown, can change)
+- ✅ Location (zip code or GPS)
+- ✅ Polarity (binary toggle: Yin OR Yang - no middle state)
+
+**View-Only in Account Settings:**
+- 🔒 Pigeon ID (copy button only)
+- 🔒 Username (NOT shown - permanent, set at signup)
+- 🔒 Age (NOT shown - calculated from birth date)
+
+**Account vs Profile Distinction:**
+- **Account (Settings):** Editable fields for user to update
+- **Profile (Public):** Read-only view others see when clicking username
+
+---
+
+## 9. Profile Page (Public Read-Only View) - Updated Nov 5, 2025
+
+**Route:** `/profile/:username`  
+**Access:** Click any username throughout the app  
+**Purpose:** View someone's public profile (or your own)
+
+### Mobile Layout (Primary)
+
+```
+┌─────────────────────────────────┐
+│  ← Back                         │
+├─────────────────────────────────┤
+│                                 │
+│  ┌─────────────────────────┐   │
+│  │        [@]              │   │ ← Avatar
+│  └─────────────────────────┘   │
+│                                 │
+│  @johndoe            Age: 28    │ ← Username + Age
+│  INFJ • YANG                    │ ← MBTI + Polarity
+│  📍 2.3 km away                 │ ← Distance from you
+│                                 │
+│  Coffee lover, photographer     │ ← Bio
+│  Love exploring Chicago! 📷     │
+│                                 │
+│  ┌─────────────────────────┐   │
+│  │ 24    │  156  │   89    │   │
+│  │ Posts │ Followers │ Following│   │
+│  └─────────────────────────┘   │
+│                                 │
+│  [Follow] [Message]             │ ← Actions
+│                                 │
+├─────────────────────────────────┤
+│  Posts                          │
+├─────────────────────────────────┤
+│                                 │
+│  ┌───────┐ ┌───────┐ ┌───────┐ │
+│  │ IMG   │ │ IMG   │ │ IMG   │ │
+│  │       │ │       │ │       │ │
+│  └───────┘ └───────┘ └───────┘ │
+│                                 │
+│  ┌───────┐ ┌───────┐ ┌───────┐ │
+│  │ IMG   │ │ IMG   │ │ IMG   │ │
+│  │       │ │       │ │       │ │
+│  └───────┘ └───────┘ └───────┘ │
+│                                 │
+│  [Load more...]                │
+└─────────────────────────────────┘
+```
+
+### Desktop Layout
+
+```
+┌────────────────────────────────────────────────────────┐
+│  ← Back to Posts                                       │
+├────────────────────────────────────────────────────────┤
+│                                                        │
+│  ┌────────┐  @johndoe                    Age: 28      │
+│  │        │  INFJ • YANG                              │
+│  │  [@]   │  📍 2.3 km away                           │
+│  │        │                                           │
+│  └────────┘  Coffee lover, photographer               │
+│              Love exploring Chicago! 📷               │
+│                                                        │
+│  ┌──────────────────────────────────────────────┐    │
+│  │  24 Posts  │  156 Followers  │  89 Following  │    │
+│  └──────────────────────────────────────────────┘    │
+│                                                        │
+│  [Follow] [Message]                                   │
+│                                                        │
+├────────────────────────────────────────────────────────┤
+│  Posts                                                │
+├────────────────────────────────────────────────────────┤
+│                                                        │
+│  ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐        │
+│  │  IMG   │ │  IMG   │ │  IMG   │ │  IMG   │        │
+│  │        │ │        │ │        │ │        │        │
+│  └────────┘ └────────┘ └────────┘ └────────┘        │
+│                                                        │
+│  ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐        │
+│  │  IMG   │ │  IMG   │ │  IMG   │ │  IMG   │        │
+│  │        │ │        │ │        │ │        │        │
+│  └────────┘ └────────┘ └────────┘ └────────┘        │
+│                                                        │
+│  [Load more...]                                       │
+└────────────────────────────────────────────────────────┘
+```
+
+### Profile Display Rules
+
+**Shown on Profile:**
+- ✅ Username (permanent, set at signup)
+- ✅ Age (calculated from birth month/year, e.g., "Age: 28")
+- ✅ Avatar
+- ✅ Bio
+- ✅ MBTI
+- ✅ Polarity (Yin/Yang)
+- ✅ Location (as distance from viewer, e.g., "2.3 km away")
+- ✅ Stats (posts, followers, following)
+- ✅ Post grid
+
+**NOT Shown on Profile:**
+- ❌ Pigeon ID (security - only in Account settings)
+- ❌ Birth date (privacy - only used for age calculation)
+- ❌ Exact coordinates (privacy - only distance shown)
+
+### Age Display Format
+
+```tsx
+// Calculate age from birth date
+const calculateAge = (birthYear: number, birthMonth: number) => {
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth() + 1; // 0-indexed
+  
+  let age = currentYear - birthYear;
+  if (currentMonth < birthMonth) {
+    age--; // Birthday hasn't occurred yet this year
+  }
+  
+  return age;
+};
+
+// Display in profile header
+<div className="flex items-center gap-3">
+  <h1 className="text-2xl font-bold">@{username}</h1>
+  <span className="text-sm text-gray-500">Age: {age}</span>
+</div>
+```
+
+### Location Display
+
+```tsx
+// Calculate distance from current user
+const distance = calculateDistance(
+  currentUser.location.lat,
+  currentUser.location.lng,
+  profileUser.location.lat,
+  profileUser.location.lng
+);
+
+// Display
+<div className="flex items-center gap-1 text-gray-600">
+  <MapPin className="w-4 h-4" />
+  <span>{distance.toFixed(1)} km away</span>
+</div>
+```
+
+---
+
 ## Summary
 
-**Total Component Count:** 30+ major components
+**Total Component Count:** 35+ major components
 
 ### Week-by-Week Priorities:
 1. **Week 1-2:** Admin Panel (8 components)
 2. **Week 3:** Design System (8 base components)
 3. **Week 4-6:** Posts & Auth (10 components)
-4. **Week 7-9:** Social Features (15 components)
+4. **Week 7:** Profiles (public read-only view)
+5. **Week 8-9:** Social Features (15 components)
    - **Activity Feed with Zen Mode** (unread focus + read tab)
-5. **Week 10-12:** Search, Polish, Testing
+6. **Week 10:** Settings Page (3 tabs) + Search
+7. **Week 11-13:** Offline Support, Testing, Deployment
 
-### Key Activity Feed Features:
-✅ **Zen Mode** - Unread only by default
-✅ **Separate Read Tab** - Archive without clutter
-✅ **Smart Grouping** - Similar notifications grouped
-✅ **Auto-cleanup** - Read items deleted after 7 days
-✅ **Categorized Tabs** - Messages, Social, Me
-✅ **Badge Counts** - Unread counts only
+### Key Features (Updated Nov 5, 2025):
+✅ **Settings Page** - Account/Preferences/Support tabs (no modals!)
+✅ **Auto-Save Pattern** - No "Save" buttons, blur to save, silent errors (ZEN design)
+✅ **Profile Page** - Read-only public view with age display
+✅ **Polarity Toggle** - Single tap to switch Yin ↔ Yang
+✅ **Proximity Range** - 50/100/150km dropdown (hidden from grid, in Preferences)
+✅ **Pigeon ID Copy** - Simple copy button with security warning
+✅ **Location Picker** - Zip code + GPS button (spinner if > 1s)
+✅ **Activity Feed Zen Mode** - Unread only, separate Read tab
+✅ **Mobile-First** - 95% mobile usage, optimize accordingly
+✅ **Offline Indicator** - Small grey wifi icon in header
+✅ **Character Counter** - Show only near limit (e.g., 180/200)
 
 All designs are **finalized** and ready for implementation! 🎉
 
