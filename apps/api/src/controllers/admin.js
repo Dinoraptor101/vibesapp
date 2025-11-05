@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
 const Post = require('../models/Post');
 const User = require('../models/User');
 const { S3 } = require('@aws-sdk/client-s3');
+const crypto = require('node:crypto');
 
 // Initialize S3 with correct AWS configuration
 const s3 = new S3({
@@ -11,6 +11,39 @@ const s3 = new S3({
   },
   region: process.env.AWS_REGION,
 });
+
+// Admin login
+const adminLogin = async (req, res) => {
+  const { password } = req.body;
+
+  try {
+    // Check if password matches admin password from environment
+    const adminPassword = process.env.ADMIN_PASSWORD || 'vibes_admin_2025';
+
+    if (password !== adminPassword) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid password',
+      });
+    }
+
+    // Generate a simple session token (in production, use JWT)
+    const token = crypto.randomBytes(32).toString('hex');
+
+    res.status(200).json({
+      success: true,
+      token,
+      message: 'Login successful',
+    });
+  } catch (error) {
+    console.error('Admin login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error during login',
+      error: error.message,
+    });
+  }
+};
 
 // Update Vibes balance
 const updateBalance = async (req, res) => {
@@ -83,6 +116,7 @@ const deletePosts = async (req, res) => {
 };
 
 module.exports = {
+  adminLogin,
   updateBalance,
   deletePosts,
 };

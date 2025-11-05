@@ -4,7 +4,7 @@
  * authentication, and request/response interceptors.
  */
 
-import axios, { type AxiosInstance, type AxiosError } from 'axios';
+import axios, { type AxiosError, type AxiosInstance } from 'axios';
 
 // Cookie utility functions
 function getCookie(name: string): string | undefined {
@@ -17,11 +17,13 @@ function getCookie(name: string): string | undefined {
 function setCookie(name: string, value: string, days = 7): void {
   const expires = new Date();
   expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
-  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`; // eslint-disable-line
+  // biome-ignore lint/suspicious/noDocumentCookie: <The cookie doesn't require body>
+  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
 }
 
 function deleteCookie(name: string): void {
-  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`; // eslint-disable-line
+  // biome-ignore lint/suspicious/noDocumentCookie: <The cookie doesn't require body>
+  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
 }
 
 // API Response type

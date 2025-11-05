@@ -124,7 +124,6 @@ const PublicProfile: React.FC = () => {
   if (loading) return <Spinner />;
   if (error) return <div>{error}</div>;
 
-
   return (
     <div className="public-profile">
       <div className="public-profile-card">

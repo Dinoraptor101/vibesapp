@@ -27,12 +27,15 @@ Rebuild the VibesApp frontend using modern tools while keeping all the great fea
 - ❌ Custom CSS (hard to maintain)
 - ❌ FontAwesome (heavy)
 - ❌ Mixed state management
+- ❌ Biome (linting + formatting)
 
 **New Stack:**
 - ✅ Vite (lightning fast)
 - ✅ Tailwind CSS (utility-first)
 - ✅ Lucide Icons (lightweight)
 - ✅ React Query + Zustand (clean state)
+- ✅ ESLint (linting) + Biome (formatting)
+- ⚠️ **Note:** apps/web uses Biome only; apps/web-v2 uses ESLint + Biome
 
 ### Timeline: 8-10 Weeks
 ```

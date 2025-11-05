@@ -5,13 +5,13 @@
 
 // Re-export shared types from the monorepo
 export type {
-  IUserData,
-  IPost,
+  IActivity,
   IComment,
-  IMessage,
   IConversation,
   IGroupChat,
-  IActivity,
+  IMessage,
+  IPost,
+  IUserData,
 } from '@vibesapp/shared';
 
 // Frontend-specific types

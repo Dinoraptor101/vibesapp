@@ -3,9 +3,10 @@
  * Wraps the app with all necessary context providers
  */
 
-import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import type React from 'react';
+import { AdminAuthProvider } from '@/features/admin';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -25,8 +26,10 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps): JSX.Element {
   return (
     <QueryClientProvider client={queryClient}>
-      {children as any}
-      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+      <AdminAuthProvider>
+        {children}
+        {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+      </AdminAuthProvider>
     </QueryClientProvider>
   );
 }

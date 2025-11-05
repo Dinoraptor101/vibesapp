@@ -3,7 +3,8 @@
  * Defines all routes and navigation structure
  */
 
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { AdminDashboardPage, AdminLoginPage, ProtectedAdminRoute } from '@/features/admin';
 
 // Placeholder pages (will be created in future phases)
 function HomePage() {
@@ -59,8 +60,49 @@ export function Router() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
 
-        {/* Admin routes (will be implemented in Phase 0.4) */}
-        <Route path="/admin/*" element={<div>Admin Panel Coming Soon</div>} />
+        {/* Admin routes */}
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedAdminRoute>
+              <AdminDashboardPage />
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/admin/flagged"
+          element={
+            <ProtectedAdminRoute>
+              <div className="p-8 text-center">
+                <h1 className="text-2xl font-bold mb-4">Flagged Posts</h1>
+                <p className="text-text-secondary">Coming in Phase 0.5</p>
+              </div>
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedAdminRoute>
+              <div className="p-8 text-center">
+                <h1 className="text-2xl font-bold mb-4">User Management</h1>
+                <p className="text-text-secondary">Coming in Phase 0.6</p>
+              </div>
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/admin/settings"
+          element={
+            <ProtectedAdminRoute>
+              <div className="p-8 text-center">
+                <h1 className="text-2xl font-bold mb-4">Admin Settings</h1>
+                <p className="text-text-secondary">Coming in Phase 0.7</p>
+              </div>
+            </ProtectedAdminRoute>
+          }
+        />
 
         {/* Catch-all for 404 */}
         <Route path="*" element={<NotFoundPage />} />
