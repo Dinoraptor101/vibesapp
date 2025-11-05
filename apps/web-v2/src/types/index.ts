@@ -145,3 +145,39 @@ export interface ApiResponse<T = unknown> {
   message?: string;
   error?: string;
 }
+
+// Admin-specific types
+export interface FlaggedPost {
+  _id: string;
+  text?: string;
+  image: string;
+  user: {
+    userId: string;
+    userName: string;
+    birthYear: number;
+    birthMonth: number;
+    sex: string;
+    location?: {
+      lat: number;
+      lon: number;
+    };
+  };
+  reactions: Array<{
+    userId: string;
+    type: string;
+    location: {
+      lat: number;
+      lon: number;
+    };
+  }>;
+  proximal_dislikes: number;
+  proximal_likes: number;
+  proximal_users: number;
+  isHidden: boolean;
+  createdAt: string;
+  dislikeCount: number;
+  reporters: Array<{
+    userId: string;
+    userName: string;
+  }>;
+}

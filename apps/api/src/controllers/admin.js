@@ -62,6 +62,108 @@ const updateBalance = async (req, res) => {
   }
 };
 
+// Get flagged posts (posts with dislikes or auto-hidden)
+const getFlaggedPosts = async (req, res) => {
+  try {
+    const { filter = 'all', sort = 'most-reports', page = 1, limit = 20 } = req.query;
+    const skip = (page - 1) * limit;
+
+    // Build query based on filter
+    const query = {};
+    if (filter === 'auto-hidden') {
+      query.isHidden = true;
+    } else if (filter === 'under-review') {
+      // Posts with dislikes but not auto-hidden yet
+      query.isHidden = false;
+      query.proximal_dislikes = { $gt: 0 };
+    } else {
+      // All flagged posts (any posts with dislikes)
+      query.proximal_dislikes = { $gt: 0 };
+    }
+
+    // Build sort
+    const sortQuery = {};
+    if (sort === 'most-reports') {
+      sortQuery.proximal_dislikes = -1;
+    } else if (sort === 'recent') {
+      sortQuery.createdAt = -1;
+    } else if (sort === 'oldest') {
+      sortQuery.createdAt = 1;
+    }
+
+    const posts = await Post.find(query).sort(sortQuery).skip(skip).limit(parseInt(limit)).lean();
+
+    // Get reporters for each post (users who disliked)
+    const postsWithReporters = await Promise.all(
+      posts.map(async (post) => {
+        const dislikeReactions = post.reactions.filter((r) => r.type === 'dislike');
+        const reporterIds = dislikeReactions.map((r) => r.userId);
+        const reporters = await User.find({ userId: { $in: reporterIds } }).select(
+          'userId userName'
+        );
+
+        return {
+          ...post,
+          reporters: reporters.map((u) => ({ userId: u.userId, userName: u.userName })),
+          dislikeCount: post.proximal_dislikes,
+        };
+      })
+    );
+
+    const total = await Post.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      posts: postsWithReporters,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching flagged posts:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching flagged posts',
+      error: error.message,
+    });
+  }
+};
+
+// Dismiss reports for a post (clear dislike reactions)
+const dismissReports = async (req, res) => {
+  const { postId } = req.params;
+
+  try {
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ success: false, message: 'Post not found' });
+    }
+
+    // Remove dislike reactions
+    post.reactions = post.reactions.filter((r) => r.type !== 'dislike');
+    post.proximal_dislikes = 0;
+    post.isHidden = false;
+
+    await post.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Reports dismissed successfully',
+      post,
+    });
+  } catch (error) {
+    console.error('Error dismissing reports:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error dismissing reports',
+      error: error.message,
+    });
+  }
+};
+
 // Delete posts in bulk
 const deletePosts = async (req, res) => {
   const { postHexes } = req.body;
@@ -72,29 +174,28 @@ const deletePosts = async (req, res) => {
 
     for (const postHex of postHexes) {
       try {
-        const post = Post.findById(postHex);
+        const post = await Post.findById(postHex);
         if (!post) {
           failedDeletes.push({ postHex, reason: 'Post not found' });
           continue;
         }
 
         // Try to delete image from S3 if it exists
-
         try {
           const deleteParams = {
             Bucket: process.env.AWS_S3_BUCKET,
             Key: post.image,
           };
-          await s3.deleteObject(deleteParams).promise();
+          await s3.deleteObject(deleteParams);
         } catch (error) {
           console.error(`Error deleting image for post with ID ${postHex}: ${error}`);
         }
 
-        await Post.findOneAndDelete(post);
+        await Post.findByIdAndDelete(postHex);
 
         console.log(`Post with ID ${postHex} deleted successfully.`);
       } catch (error) {
-        console.error(`Failed to delete post with ID ${post._id}: ${error}`);
+        console.error(`Failed to delete post with ID ${postHex}: ${error}`);
         failedDeletes.push({
           postHex,
           reason: `Failed to delete post: ${error.message}`,
@@ -108,10 +209,10 @@ const deletePosts = async (req, res) => {
     }
 
     console.log('All posts deleted successfully.');
-    res.status(200).json({ message: 'All posts deleted successfully' });
+    res.status(200).json({ success: true, message: 'All posts deleted successfully' });
   } catch (error) {
     console.error('Error deleting posts:', error);
-    res.status(500).json({ message: 'Error deleting posts', error });
+    res.status(500).json({ success: false, message: 'Error deleting posts', error });
   }
 };
 
@@ -119,4 +220,6 @@ module.exports = {
   adminLogin,
   updateBalance,
   deletePosts,
+  getFlaggedPosts,
+  dismissReports,
 };

@@ -4,7 +4,12 @@
  */
 
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { AdminDashboardPage, AdminLoginPage, ProtectedAdminRoute } from '@/features/admin';
+import {
+  AdminDashboardPage,
+  AdminLoginPage,
+  FlaggedPostsPage,
+  ProtectedAdminRoute,
+} from '@/features/admin';
 
 // Placeholder pages (will be created in future phases)
 function HomePage() {
@@ -74,10 +79,7 @@ export function Router() {
           path="/admin/flagged"
           element={
             <ProtectedAdminRoute>
-              <div className="p-8 text-center">
-                <h1 className="text-2xl font-bold mb-4">Flagged Posts</h1>
-                <p className="text-text-secondary">Coming in Phase 0.5</p>
-              </div>
+              <FlaggedPostsPage />
             </ProtectedAdminRoute>
           }
         />
