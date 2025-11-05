@@ -10,8 +10,9 @@
 - 🚫 **Anti-Algorithm:** No AI/ML content manipulation
 - 🤝 **Human Connection:** Genuine interactions over engagement metrics
 - 📸 **Photography-First:** Every post requires a photo
-- ⚖️ **Yin/Yang Balance:** Vibes represent polarity, not popularity
-- 🛡️ **Community Moderation:** Dislikes flag content + affect polarity
+- 👍 **Likes/Dislikes:** Vibes score represents content quality (thumbs up/down)
+- 🛡️ **Community Moderation:** Dislikes flag content + affect vibes score
+- ⚖️ **User Polarity:** YIN/YANG is a user profile field (masculinity/femininity identity)
 - 🔐 **Privacy-First:** DM requests require approval
 
 ---
@@ -62,8 +63,8 @@
 │                                                    │
 │  📸 Your Posts (5)                  [Mark all ✓]  │
 │  ┌──────────────────────────────────────────────┐ │
-│  │ 12 Yang vibes on "Sunset photo"        2h  │ │
-│  │ [Thumbnail] Yang: 12 • Yin: 2               │ │
+│  │ 12 people liked "Sunset photo"         2h  │ │
+│  │ [Thumbnail] 👍 12 • 👎 2                    │ │
 │  │ [View Post]                                  │ │
 │  └──────────────────────────────────────────────┘ │
 │  ┌──────────────────────────────────────────────┐ │
@@ -101,7 +102,7 @@
 │                                                    │
 │  Yesterday                                         │
 │  ┌──────────────────────────────────────────────┐ │
-│  │ ✓ 8 Yang vibes on "Coffee shop"       1d   │ │
+│  │ ✓ 8 people liked "Coffee shop"        1d   │ │
 │  │ [Thumbnail]                                 │ │
 │  └──────────────────────────────────────────────┘ │
 │  ┌──────────────────────────────────────────────┐ │
@@ -155,8 +156,8 @@
 7. **Nearby Posts** - Someone posted nearby (if enabled)
 
 #### Low Priority (🔵 Me Tab - Unread Only)
-8. **Yang Vibes** - Likes on your posts (grouped: "12 people liked your post")
-9. **Yin Vibes** - Dislikes on your posts (affects polarity)
+8. **Likes** - Likes on your posts (grouped: "12 people liked your post") 👍
+9. **Dislikes** - Dislikes on your posts (affects vibes score) 👎
 10. **Comments** - Someone commented
 11. **Replies** - Someone replied to your comment
 12. **Auto-Hidden Post** - Your post was hidden (3+ dislikes, stays unread until dismissed)
@@ -191,8 +192,8 @@
 7. **Nearby Posts** - Someone posted nearby (if enabled)
 
 #### Low Priority (🔵 Me Tab)
-8. **Yang Vibes** - Likes on your posts
-9. **Yin Vibes** - Dislikes on your posts (affects polarity)
+8. **Likes** - Likes on your posts 👍
+9. **Dislikes** - Dislikes on your posts (affects vibes score) 👎
 10. **Comments** - Someone commented
 11. **Replies** - Someone replied to your comment
 12. **Auto-Hidden Post** - Your post was hidden (3+ dislikes)
@@ -238,8 +239,8 @@ type ActivityType =
   | 'new_follower'
   | 'post_from_following'
   | 'nearby_post'
-  | 'post_yang'
-  | 'post_yin'
+  | 'post_like'
+  | 'post_dislike'
   | 'post_comment'
   | 'comment_reply'
   | 'post_hidden';
@@ -254,11 +255,11 @@ interface GroupedActivity extends Activity {
 
 // Example: Grouped likes
 {
-  id: 'group_post_123_yang',
-  type: 'post_yang',
+  id: 'group_post_123_like',
+  type: 'post_like',
   category: 'me',
   isRead: false,
-  groupKey: 'post:123:yang',
+  groupKey: 'post:123:like',
   groupCount: 12,
   groupActors: [sarah, mike, alex],
   groupPreview: '@sarah, @mike, @alex and 9 others',
@@ -300,12 +301,13 @@ interface ActivitySettings {
 
 ---
 
-## 2. Vibes System (Dual Purpose) - CONFIRMED Nov 4, 2025
+## 2. Vibes System (Likes/Dislikes) - CORRECTED Nov 4, 2025
 
-> **Key Clarification:**
-> - **Vibes System:** Like, Dislike/Report (affects post visibility + poster's vibes score)
-> - **User Polarity:** Yin/Yang fields on user profile indicating masculinity/femininity
-> - **NOT THE SAME:** Polarity is identity (like gender), NOT a score from likes/dislikes
+> **CRITICAL CLARIFICATION:**
+> - **Vibes System:** Like 👍 / Dislike 👎 (affects post visibility + poster's vibes score)
+> - **User Polarity (YIN/YANG):** Separate user profile field indicating masculinity/femininity identity
+> - **NOT THE SAME:** Polarity (YIN/YANG) is NOT related to likes/dislikes
+> - **Icons:** Use thumbs up/down for likes/dislikes, NOT YinYang symbols
 
 ### Post Vibes Display
 
@@ -314,10 +316,10 @@ interface ActivitySettings {
 │  Post Actions                      │
 ├────────────────────────────────────┤
 │                                    │
-│  [☯ 15 Yang] [☯ 3 Yin] [💬 8]    │
-│   ↑ Like       ↑ Dislike  ↑ Reply │
+│  [👍 15] [👎 3] [💬 8]            │
+│   ↑ Like  ↑ Dislike  ↑ Reply      │
 │                                    │
-│  Your vibe: Yang (can change)     │
+│  You liked this post               │
 │                                    │
 └────────────────────────────────────┘
 ```
@@ -327,74 +329,83 @@ interface ActivitySettings {
 ```typescript
 interface VibeAction {
   postId: string;
-  vibeType: 'yang' | 'yin' | null; // null = remove vibe
+  vibeType: 'like' | 'dislike' | null; // null = remove vibe
   effects: {
-    // Effect 1: Update post vibe counts
-    postYangCount: number;
-    postYinCount: number;
+    // Effect 1: Update post counts
+    postLikeCount: number;
+    postDislikeCount: number;
     
-    // Effect 2: Update poster's polarity
-    posterPolarityDelta: number; // +1 for yang, -1 for yin
+    // Effect 2: Update poster's vibes score (karma)
+    posterVibesScoreDelta: number; // +4 for like, -10 for dislike
     
-    // Effect 3: Moderation check (for yin only)
-    shouldAutoHide: boolean; // true if >= 3 unique yin vibes
+    // Effect 3: Moderation check (for dislikes only)
+    shouldAutoHide: boolean; // true if >= 3 unique dislikes
     shouldNotifyAdmin: boolean; // true if auto-hidden
   };
 }
 
-// Yin vibe = dislike + report
-const handleYinVibe = async (postId: string) => {
-  // 1. Add yin vibe to post
-  await api.addVibe(postId, 'yin');
+// Dislike = report (auto-hide at 3+ unique dislikes)
+const handleDislike = async (postId: string) => {
+  // 1. Add dislike to post
+  await api.addVibe(postId, 'dislike');
   
-  // 2. Decrease poster's polarity
-  await api.updateUserPolarity(post.authorId, -1);
+  // 2. Decrease poster's vibes score (karma penalty)
+  await api.updateUserVibesScore(post.authorId, -10);
   
-  // 3. Check if should auto-hide (CONFIRMED: 3+ unique yin vibes)
-  const yinCount = await api.getUniqueYinCount(postId);
-  if (yinCount >= 3) { // THRESHOLD = 3 (Nov 4, 2025)
+  // 3. Check if should auto-hide (CONFIRMED: 3+ unique dislikes)
+  const dislikeCount = await api.getUniqueDislikeCount(postId);
+  if (dislikeCount >= 3) { // THRESHOLD = 3 (Nov 4, 2025)
     await api.hidePost(postId);
     await api.notifyAdmin({
       type: 'auto_hidden',
       postId,
-      yinCount,
+      dislikeCount,
     });
   }
   
   // 4. Update UI optimistically
   queryClient.setQueryData(['post', postId], (old) => ({
     ...old,
-    yinCount: old.yinCount + 1,
-    userVibe: 'yin',
-    isHidden: yinCount >= 3,
+    dislikeCount: old.dislikeCount + 1,
+    userVibe: 'dislike',
+    isHidden: dislikeCount >= 3,
   }));
 };
 ```
 
-### User Polarity Display on Profile (CONFIRMED Nov 4, 2025)
+### User Profile Display (CORRECTED Nov 4, 2025)
 
-> **Important:** User polarity (Yin/Yang balance) is a **profile field indicating masculinity/femininity** - it is NOT calculated from post likes/dislikes. It's an identity characteristic (similar to gender), not a score system.
+> **Important:** User polarity (YIN/YANG) is a **user-set profile field** indicating masculinity/femininity identity. It is NOT displayed as a score or bar. It's NOT related to likes/dislikes on posts.
 
 ```
 ┌────────────────────────────────────┐
 │  @username                   🟢    │
 │  John Doe • INFJ                   │
-│                                    │
-│  ☯ Polarity: 65% Yang (Masculine)  │
-│  ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░              │
-│  ← Yin (Feminine)   Yang (Masculine) → │
-│                                    │
-│  Identity characteristic           │
-│  (not based on likes/dislikes)     │
+│  Polarity: YANG (Masculine)        │
 │                                    │
 │  📍 Chicago, IL                    │
 │  🎂 Joined Oct 2025                │
 │                                    │
-│  📸 Posts: 42                      │
+│  � Posts: 42                      │
 │  👥 Followers: 128                 │
 │  ➕ Following: 95                  │
+│                                    │
+│  Vibes Score: 245 (private)        │
+│                                    │
 └────────────────────────────────────┘
 ```
+
+**Polarity Field:**
+- User selects: YIN (Feminine) or YANG (Masculine) in profile settings
+- Displayed as simple text, not a percentage or bar
+- Optional field (user can leave blank)
+- Used for personality-based matching/recommendations (like MBTI)
+
+**Vibes Score:**
+- Private karma score (195-399 range)
+- Affected by likes/dislikes received on posts
+- Controls feature access (DMs at 200+, etc.)
+- NOT related to polarity field
 
 ---
 
@@ -683,14 +694,14 @@ interface Conversation {
 │  │ [Thumbnail] "Chicago sunset"       │   │
 │  │ "Beautiful sunset at the pier      │   │
 │  │  today! #Chicago"                  │   │
-│  │ 📍 Chicago • ☯ 42 Yang, 3 Yin      │   │
+│  │ 📍 Chicago • 👍 42 👎 3             │   │
 │  └─────────────────────────────────────┘   │
 │                                             │
 │  ┌─────────────────────────────────────┐   │
 │  │ [@] @chris                     1d   │   │
 │  │ [Thumbnail] "Sunset vibes"         │   │
 │  │ "Another gorgeous Chicago sunset"  │   │
-│  │ 📍 Chicago • ☯ 28 Yang, 1 Yin      │   │
+│  │ 📍 Chicago • 👍 28 👎 1             │   │
 │  └─────────────────────────────────────┘   │
 │                                             │
 │  [Load more...]                             │
@@ -714,7 +725,7 @@ interface Conversation {
 │  │ 🟢 [@] @sarah                       │   │
 │  │     Sarah Johnson • INFJ            │   │
 │  │     📍 Chicago, IL                  │   │
-│  │     ☯ +15 (Yang) • 42 posts         │   │
+│  │     Polarity: YANG • 42 posts       │   │
 │  │     [View Profile] [Request DM]     │   │
 │  └─────────────────────────────────────┘   │
 │                                             │
@@ -722,7 +733,7 @@ interface Conversation {
 │  │ ⚫ [@] @sarahM                      │   │
 │  │     Sarah Martinez • ENFP           │   │
 │  │     📍 Los Angeles, CA              │   │
-│  │     ☯ +8 (Yang) • 18 posts          │   │
+│  │     Polarity: YIN • 18 posts        │   │
 │  │     [View Profile] [Request DM]     │   │
 │  └─────────────────────────────────────┘   │
 │                                             │
@@ -812,7 +823,7 @@ interface Conversation {
 │  │ 📍 Chicago                                           │   │
 │  │ "Inappropriate content text..."                      │   │
 │  │                                                       │   │
-│  │ ⚠️ Auto-hidden (5 Yin vibes from unique users)       │   │
+│  │ ⚠️ Auto-hidden (5 dislikes 👎 from unique users)     │   │
 │  │                                                       │   │
 │  │ Reporters: @user1, @user2, @user3, @user4, @user5   │   │
 │  │                                                       │   │
@@ -828,7 +839,7 @@ interface Conversation {
 │  │ 📍 New York                                          │   │
 │  │ "Spam content..."                                    │   │
 │  │                                                       │   │
-│  │ ⚠️ 3 Yin vibes from unique users (threshold met)     │   │
+│  │ ⚠️ 3 dislikes 👎 from unique users (threshold met)   │   │
 │  │                                                       │   │
 │  │ Reporters: @user6, @user7, @user8                   │   │
 │  │                                                       │   │
@@ -857,7 +868,8 @@ interface Conversation {
 │  │ 🟢 [@] @sarah                                        │   │
 │  │     Sarah Johnson • INFJ                             │   │
 │  │     📍 Chicago, IL                                   │   │
-│  │     ☯ Polarity: 65% Yang (Masculine)                │   │
+│  │     Polarity: YANG (Masculine)                       │   │
+│  │     Vibes Score: 245 (private)                       │   │
 │  │     42 posts • Joined Oct 2025                       │   │
 │  │                                                       │   │
 │  │     [View Profile] [Regenerate Password]             │   │
@@ -868,7 +880,8 @@ interface Conversation {
 │  │ ⚫ [@] @baduser (BANNED)                             │   │
 │  │     Bad Actor • INTJ                                 │   │
 │  │     📍 Unknown                                       │   │
-│  │     ☯ Polarity: 20% Yang (Yin-dominant)             │   │
+│  │     Polarity: YIN (Feminine)                         │   │
+│  │     Vibes Score: 45 (low - restricted access)        │   │
 │  │     8 posts • Joined Nov 2025                        │   │
 │  │     ⚠️ 3 posts auto-hidden                           │   │
 │  │                                                       │   │
@@ -886,10 +899,10 @@ interface Conversation {
 
 ### Smart Grouping Examples
 
-#### Grouped Likes (Yang Vibes)
+#### Grouped Likes
 ```
 ┌─────────────────────────────────┐
-│ ☯ 12 people liked your post    │
+│ 👍 12 people liked your post   │
 │ [@][@][@] @sarah, @mike and    │
 │            10 others       2h   │
 │ [Thumbnail] "Sunset photo"     │
@@ -912,7 +925,7 @@ interface Conversation {
 ┌─────────────────────────────────┐
 │ 🚨 Your post was auto-hidden    │
 │ "Coffee shop vibes" received    │
-│ 3 Yin vibes from community      │
+│ 3 dislikes from community       │
 │ [View Post] [Contact Support]   │
 └─────────────────────────────────┘
 ```
