@@ -38,9 +38,10 @@ export function UserDetailModal({
 
       try {
         const response = (await api.get(`/admin/users/${user.userId}/posts`)) as {
-          data: { posts: FlaggedPost[] };
+          success: boolean;
+          posts: FlaggedPost[];
         };
-        setUserPosts(response.data.posts || []);
+        setUserPosts(response.posts || []);
       } catch (err) {
         console.error('Error fetching user posts:', err);
         setError('Failed to load user posts');

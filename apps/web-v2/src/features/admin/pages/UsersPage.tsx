@@ -5,6 +5,7 @@ import { Button } from '../../../components/ui/button';
 import type { AdminUser } from '../../../types';
 import { UserCard } from '../components/UserCard';
 import { UserDetailModal } from '../components/UserDetailModal';
+import { RegeneratePasswordModal } from '../components/RegeneratePasswordModal';
 
 export function UsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -28,6 +29,11 @@ export function UsersPage() {
   // Modal
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Password modal
+  const [regeneratedPassword, setRegeneratedPassword] = useState<string | null>(null);
+  const [passwordUser, setPasswordUser] = useState<string>('');
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
   const mbtiTypes = [
     'INTJ',
@@ -53,31 +59,27 @@ export function UsersPage() {
     setError(null);
 
     try {
-      const params = {
+      const response = (await api.get('/admin/users', {
         search: searchQuery,
         filter: filterStatus,
         mbti: filterMBTI,
         location: '',
         page: currentPage,
         limit: 50,
-      };
-
-      const response = (await api.get('/admin/users', { params })) as {
-        data: {
-          success: boolean;
-          users: AdminUser[];
-          pagination: {
-            page: number;
-            limit: number;
-            total: number;
-            pages: number;
-          };
+      })) as {
+        success: boolean;
+        users: AdminUser[];
+        pagination: {
+          page: number;
+          limit: number;
+          total: number;
+          pages: number;
         };
       };
 
-      setUsers(response.data.users);
-      setTotalPages(response.data.pagination.pages);
-      setTotalUsers(response.data.pagination.total);
+      setUsers(response.users);
+      setTotalPages(response.pagination.pages);
+      setTotalUsers(response.pagination.total);
       setSelectedUserIds([]);
       setSelectAll(false);
     } catch (err) {
@@ -110,13 +112,17 @@ export function UsersPage() {
   const handleRegeneratePassword = async (userId: string) => {
     try {
       const response = (await api.post(`/admin/users/${userId}/regenerate-password`)) as {
-        data: {
-          success: boolean;
-          newPassword: string;
+        success: boolean;
+        newPassword: string;
+        user: {
+          userId: string;
+          userName: string;
         };
       };
 
-      alert(`New Password: ${response.data.newPassword}`);
+      setRegeneratedPassword(response.newPassword);
+      setPasswordUser(response.user.userName);
+      setIsPasswordModalOpen(true);
     } catch (err) {
       console.error('Error regenerating password:', err);
       alert('Failed to regenerate password');
@@ -290,6 +296,7 @@ export function UsersPage() {
               key={user.userId}
               user={user}
               onViewDetails={handleViewDetails}
+              onViewPosts={handleViewDetails}
               onToggleBan={handleToggleBan}
               isSelected={selectedUserIds.includes(user.userId)}
               onSelect={handleSelectUser}
@@ -345,6 +352,18 @@ export function UsersPage() {
         onRegeneratePassword={handleRegeneratePassword}
         onDeleteUser={handleDeleteUser}
         onDeleteAllPosts={handleDeleteAllPosts}
+      />
+
+      {/* Regenerate Password Modal */}
+      <RegeneratePasswordModal
+        isOpen={isPasswordModalOpen}
+        onClose={() => {
+          setIsPasswordModalOpen(false);
+          setRegeneratedPassword(null);
+          setPasswordUser('');
+        }}
+        password={regeneratedPassword}
+        userName={passwordUser}
       />
     </div>
   );
