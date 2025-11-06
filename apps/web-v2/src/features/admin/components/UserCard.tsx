@@ -8,6 +8,7 @@ interface UserCardProps {
   user: AdminUser;
   onViewDetails: (user: AdminUser) => void;
   onToggleBan: (userId: string) => void;
+  onViewPosts?: (user: AdminUser) => void;
   isSelected?: boolean;
   onSelect?: (userId: string) => void;
 }
@@ -16,6 +17,7 @@ export function UserCard({
   user,
   onViewDetails,
   onToggleBan,
+  onViewPosts,
   isSelected = false,
   onSelect,
 }: UserCardProps) {
@@ -110,10 +112,15 @@ export function UserCard({
             </div>
 
             {/* Actions */}
-            <div className="mt-4 flex gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
               <Button variant="primary" size="sm" onClick={() => onViewDetails(user)}>
                 View Details
               </Button>
+              {onViewPosts && (
+                <Button variant="outline" size="sm" onClick={() => onViewPosts(user)}>
+                  View Posts
+                </Button>
+              )}
               <Button
                 variant={user.isBanned ? 'outline' : 'destructive'}
                 size="sm"
