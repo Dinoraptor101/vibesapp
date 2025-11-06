@@ -415,6 +415,201 @@ const bulkDeleteUserPosts = async (req, res) => {
   }
 };
 
+// Get dashboard metrics
+const getDashboardMetrics = async (req, res) => {
+  try {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const twoWeeksAgo = new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000);
+
+    // Active users (posted or reacted in last 7 days)
+    const activeUserIds = await Post.distinct('user.userId', {
+      createdAt: { $gte: lastWeek },
+    });
+    const activeUsersCount = activeUserIds.length;
+
+    // Total users
+    const totalUsers = await User.countDocuments();
+
+    // Posts today
+    const postsToday = await Post.countDocuments({
+      createdAt: { $gte: today },
+    });
+
+    // Posts last week (for comparison)
+    const postsLastWeek = await Post.countDocuments({
+      createdAt: { $gte: lastWeek, $lt: today },
+    });
+
+    // Posts two weeks ago (for % change)
+    const postsTwoWeeksAgo = await Post.countDocuments({
+      createdAt: { $gte: twoWeeksAgo, $lt: lastWeek },
+    });
+
+    // Flagged posts (reports today)
+    const reportsToday = await Post.countDocuments({
+      proximal_dislikes: { $gt: 0 },
+      createdAt: { $gte: today },
+    });
+
+    // Reports last week
+    const reportsLastWeek = await Post.countDocuments({
+      proximal_dislikes: { $gt: 0 },
+      createdAt: { $gte: lastWeek, $lt: today },
+    });
+
+    // Auto-hidden posts
+    const autoHiddenPosts = await Post.countDocuments({
+      isHidden: true,
+    });
+
+    // Auto-hidden in last hour
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+    const autoHiddenLastHour = await Post.countDocuments({
+      isHidden: true,
+      createdAt: { $gte: oneHourAgo },
+    });
+
+    // Unreviewed flagged posts (proximal_dislikes > 0 but not hidden)
+    const unreviewedFlagged = await Post.countDocuments({
+      proximal_dislikes: { $gt: 0 },
+      isHidden: false,
+    });
+
+    // Calculate percentage changes
+    const postsChange =
+      postsLastWeek > 0 ? ((postsToday - postsLastWeek) / postsLastWeek) * 100 : 0;
+    const reportsChange =
+      reportsLastWeek > 0 ? ((reportsToday - reportsLastWeek) / reportsLastWeek) * 100 : 0;
+
+    res.status(200).json({
+      success: true,
+      metrics: {
+        activeUsers: {
+          today: activeUsersCount,
+          thisWeek: activeUsersCount,
+          total: totalUsers,
+        },
+        posts: {
+          today: postsToday,
+          thisWeek: postsLastWeek,
+          change: Math.round(postsChange * 10) / 10,
+        },
+        reports: {
+          today: reportsToday,
+          thisWeek: reportsLastWeek,
+          change: Math.round(reportsChange * 10) / 10,
+        },
+        autoHidden: {
+          total: autoHiddenPosts,
+          lastHour: autoHiddenLastHour,
+        },
+        urgent: {
+          autoHiddenLastHour,
+          unreviewedFlagged,
+        },
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching dashboard metrics:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching dashboard metrics',
+      error: error.message,
+    });
+  }
+};
+
+// Get activity data for charts (last 7 days)
+const getActivityData = async (req, res) => {
+  try {
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    // Aggregate posts per day
+    const postsPerDay = await Post.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: sevenDaysAgo },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // Aggregate reports per day (posts with dislikes)
+    const reportsPerDay = await Post.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: sevenDaysAgo },
+          proximal_dislikes: { $gt: 0 },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // Aggregate auto-hidden per day
+    const autoHiddenPerDay = await Post.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: sevenDaysAgo },
+          isHidden: true,
+        },
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // Create full 7-day array with all dates
+    const last7Days = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+      const dateStr = date.toISOString().split('T')[0];
+      last7Days.push({
+        date: dateStr,
+        posts: postsPerDay.find((d) => d._id === dateStr)?.count || 0,
+        reports: reportsPerDay.find((d) => d._id === dateStr)?.count || 0,
+        autoHidden: autoHiddenPerDay.find((d) => d._id === dateStr)?.count || 0,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      activityData: last7Days,
+    });
+  } catch (error) {
+    console.error('Error fetching activity data:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching activity data',
+      error: error.message,
+    });
+  }
+};
+
 // Delete posts in bulk
 const deletePosts = async (req, res) => {
   const { postHexes } = req.body;
@@ -479,4 +674,6 @@ module.exports = {
   deleteUser,
   getUserPosts,
   bulkDeleteUserPosts,
+  getDashboardMetrics,
+  getActivityData,
 };

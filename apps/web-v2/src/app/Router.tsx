@@ -7,6 +7,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import {
   AdminDashboardPage,
   AdminLoginPage,
+  AdminSettingsPage,
   FlaggedPostsPage,
   ProtectedAdminRoute,
   UsersPage,
@@ -96,10 +97,7 @@ export function Router() {
           path="/admin/settings"
           element={
             <ProtectedAdminRoute>
-              <div className="p-8 text-center">
-                <h1 className="text-2xl font-bold mb-4">Admin Settings</h1>
-                <p className="text-text-secondary">Coming in Phase 0.7</p>
-              </div>
+              <AdminSettingsPage />
             </ProtectedAdminRoute>
           }
         />
