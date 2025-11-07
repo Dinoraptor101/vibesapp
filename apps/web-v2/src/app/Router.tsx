@@ -3,6 +3,10 @@
  * Defines all routes and navigation structure
  */
 
+import { ButtonExamplesPage } from '@/app/pages/ButtonExamplesPage';
+import { CardExamplesPage } from '@/app/pages/CardExamplesPage';
+import { DialogExamplesPage } from '@/app/pages/DialogExamplesPage';
+import { InputExamplesPage } from '@/app/pages/InputExamplesPage';
 import {
   AdminDashboardPage,
   AdminLoginPage,
@@ -66,6 +70,12 @@ export function Router() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+
+        {/* Component Examples */}
+        <Route path="/examples/button" element={<ButtonExamplesPage />} />
+        <Route path="/examples/input" element={<InputExamplesPage />} />
+        <Route path="/examples/card" element={<CardExamplesPage />} />
+        <Route path="/examples/dialog" element={<DialogExamplesPage />} />
 
         {/* Admin routes */}
         <Route path="/admin/login" element={<AdminLoginPage />} />
