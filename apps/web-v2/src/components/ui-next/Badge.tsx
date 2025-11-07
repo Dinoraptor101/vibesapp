@@ -1,5 +1,5 @@
+import { type VariantProps, cva } from 'class-variance-authority';
 import { forwardRef } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/cn';
 
 /**
@@ -99,8 +99,7 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
         <span
           ref={ref}
           className={cn(dotVariants({ variant, size }), className)}
-          role="status"
-          aria-label={variant === 'success' ? 'Active' : variant === 'error' ? 'Error' : 'Status'}
+          aria-hidden="true"
           {...props}
         />
       );

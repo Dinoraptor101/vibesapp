@@ -1,7 +1,7 @@
-import { forwardRef } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@/lib/cn';
+import { type VariantProps, cva } from 'class-variance-authority';
 import { Loader2 } from 'lucide-react';
+import { forwardRef } from 'react';
+import { cn } from '@/lib/cn';
 
 /**
  * Spinner Component
@@ -131,7 +131,6 @@ export const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>(
           ref={ref}
           className={cn(skeletonVariants({ variant }), className)}
           style={inlineStyle}
-          role="status"
           aria-live="polite"
           aria-busy="true"
           {...props}

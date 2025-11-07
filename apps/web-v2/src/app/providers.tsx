@@ -3,10 +3,10 @@
  * Wraps the app with all necessary context providers
  */
 
-import { AdminAuthProvider } from '@/features/admin';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import type React from 'react';
+import { AdminAuthProvider } from '@/features/admin';
 
 // Create a client
 const queryClient = new QueryClient({

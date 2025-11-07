@@ -3,9 +3,9 @@
  * Manages admin session state and authentication
  */
 
-import { deleteCookie, getCookie, setCookie } from '@/lib/api';
 import type { ReactNode } from 'react';
 import { createContext, useCallback, useEffect, useState } from 'react';
+import { deleteCookie, getCookie, setCookie } from '@/lib/api';
 
 interface AdminAuthState {
   isAuthenticated: boolean;

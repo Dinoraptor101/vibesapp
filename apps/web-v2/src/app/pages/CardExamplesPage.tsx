@@ -5,12 +5,12 @@
  * Demonstrates composable sub-components, hover effects, and clickable cards.
  */
 
+import { Calendar, Heart, MapPin, MessageCircle, MoreVertical, Share2, User } from 'lucide-react';
+import { useState } from 'react';
 import { Avatar } from '@/components/ui-next/Avatar';
 import { Badge } from '@/components/ui-next/Badge';
 import { Button } from '@/components/ui-next/Button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui-next/Card';
-import { Calendar, Heart, MapPin, MessageCircle, MoreVertical, Share2, User } from 'lucide-react';
-import { useState } from 'react';
 
 export function CardExamplesPage() {
   const [clickedCard, setClickedCard] = useState<string | null>(null);

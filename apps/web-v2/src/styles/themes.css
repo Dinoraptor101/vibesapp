@@ -54,7 +54,9 @@ body.dark {
 
 /* Smooth theme transitions */
 body {
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 /* Scrollbar styling for different themes */

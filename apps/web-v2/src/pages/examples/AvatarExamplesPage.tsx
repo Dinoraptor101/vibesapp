@@ -1,5 +1,5 @@
 import { Avatar } from '@/components/ui-next';
-import { Card, CardHeader, CardContent } from '@/components/ui-next/Card';
+import { Card, CardContent, CardHeader } from '@/components/ui-next/Card';
 
 export default function AvatarExamplesPage() {
   return (

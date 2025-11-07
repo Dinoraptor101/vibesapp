@@ -1,9 +1,15 @@
-import { Spinner, Skeleton } from '@/components/ui-next';
-import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui-next/Card';
-import { Button } from '@/components/ui-next/Button';
-import { Avatar } from '@/components/ui-next/Avatar';
-import { Badge } from '@/components/ui-next/Badge';
 import { Heart, MessageCircle, Share2 } from 'lucide-react';
+import {
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  Skeleton,
+  Spinner,
+} from '@/components/ui-next';
 
 export default function LoadingExamplesPage() {
   return (

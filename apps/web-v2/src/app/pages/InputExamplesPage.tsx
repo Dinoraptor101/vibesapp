@@ -5,11 +5,11 @@
  * with all variants, states, and features.
  */
 
+import { useState } from 'react';
 import { Button } from '@/components/ui-next/Button';
 import { Input } from '@/components/ui-next/Input';
 import { Label } from '@/components/ui-next/Label';
 import { Textarea } from '@/components/ui-next/Textarea';
-import { useState } from 'react';
 
 export function InputExamplesPage() {
   const [password, setPassword] = useState('');
