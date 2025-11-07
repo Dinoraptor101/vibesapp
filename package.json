@@ -10,8 +10,10 @@
   },
   "scripts": {
     "dev": "concurrently \"npm run start:api\" \"npm run start:web\"",
+    "dev:v2": "concurrently \"npm run start:api\" \"npm run start:web-v2\"",
     "start": "npm run dev",
     "start:web": "cd apps/web && npm start",
+    "start:web-v2": "cd apps/web-v2 && npm run dev",
     "start:api": "cd apps/api && npm run dev",
     "build": "nx build web && nx build api",
     "build:web": "cd apps/web && npm run build",
