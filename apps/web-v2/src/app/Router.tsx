@@ -16,6 +16,8 @@ import {
   ProtectedAdminRoute,
   UsersPage,
 } from '@/features/admin';
+import { AuthProvider } from '@/features/auth';
+import { AuthTest } from '@/pages/AuthTest';
 import AvatarExamplesPage from '@/pages/examples/AvatarExamplesPage';
 import BadgeExamplesPage from '@/pages/examples/BadgeExamplesPage';
 import LoadingExamplesPage from '@/pages/examples/LoadingExamplesPage';
@@ -68,59 +70,64 @@ function NotFoundPage() {
 export function Router() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
+      <AuthProvider>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
 
-        {/* Component Examples */}
-        <Route path="/examples/button" element={<ButtonExamplesPage />} />
-        <Route path="/examples/input" element={<InputExamplesPage />} />
-        <Route path="/examples/card" element={<CardExamplesPage />} />
-        <Route path="/examples/dialog" element={<DialogExamplesPage />} />
-        <Route path="/examples/avatar" element={<AvatarExamplesPage />} />
-        <Route path="/examples/badge" element={<BadgeExamplesPage />} />
-        <Route path="/examples/loading" element={<LoadingExamplesPage />} />
+          {/* Auth Testing */}
+          <Route path="/test/auth" element={<AuthTest />} />
 
-        {/* Admin routes */}
-        <Route path="/admin/login" element={<AdminLoginPage />} />
-        <Route
-          path="/admin/dashboard"
-          element={
-            <ProtectedAdminRoute>
-              <AdminDashboardPage />
-            </ProtectedAdminRoute>
-          }
-        />
-        <Route
-          path="/admin/flagged"
-          element={
-            <ProtectedAdminRoute>
-              <FlaggedPostsPage />
-            </ProtectedAdminRoute>
-          }
-        />
-        <Route
-          path="/admin/users"
-          element={
-            <ProtectedAdminRoute>
-              <UsersPage />
-            </ProtectedAdminRoute>
-          }
-        />
-        <Route
-          path="/admin/settings"
-          element={
-            <ProtectedAdminRoute>
-              <AdminSettingsPage />
-            </ProtectedAdminRoute>
-          }
-        />
+          {/* Component Examples */}
+          <Route path="/examples/button" element={<ButtonExamplesPage />} />
+          <Route path="/examples/input" element={<InputExamplesPage />} />
+          <Route path="/examples/card" element={<CardExamplesPage />} />
+          <Route path="/examples/dialog" element={<DialogExamplesPage />} />
+          <Route path="/examples/avatar" element={<AvatarExamplesPage />} />
+          <Route path="/examples/badge" element={<BadgeExamplesPage />} />
+          <Route path="/examples/loading" element={<LoadingExamplesPage />} />
 
-        {/* Catch-all for 404 */}
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+          {/* Admin routes */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedAdminRoute>
+                <AdminDashboardPage />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/flagged"
+            element={
+              <ProtectedAdminRoute>
+                <FlaggedPostsPage />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedAdminRoute>
+                <UsersPage />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/settings"
+            element={
+              <ProtectedAdminRoute>
+                <AdminSettingsPage />
+              </ProtectedAdminRoute>
+            }
+          />
+
+          {/* Catch-all for 404 */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
