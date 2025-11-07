@@ -16,7 +16,7 @@ import {
   ProtectedAdminRoute,
   UsersPage,
 } from '@/features/admin';
-import { AuthProvider } from '@/features/auth';
+import { AuthProvider, SignupPage } from '@/features/auth';
 import { AuthTest } from '@/pages/AuthTest';
 import AvatarExamplesPage from '@/pages/examples/AvatarExamplesPage';
 import BadgeExamplesPage from '@/pages/examples/BadgeExamplesPage';
@@ -40,17 +40,6 @@ function LoginPage() {
       <div className="text-center">
         <h1 className="text-3xl font-bold mb-4">Login</h1>
         <p className="text-text-secondary">Login page coming soon</p>
-      </div>
-    </div>
-  );
-}
-
-function SignupPage() {
-  return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold mb-4">Sign Up</h1>
-        <p className="text-text-secondary">Signup page coming soon</p>
       </div>
     </div>
   );
