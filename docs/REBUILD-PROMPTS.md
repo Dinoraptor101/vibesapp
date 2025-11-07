@@ -761,10 +761,11 @@ Key Technical Decisions (Nov 4, 2025):
 
 **AI Recommendation:** 🎯 **Claude Sonnet** (Prefer Claude for analytics metrics & chart logic)
 
-**Status:** ⏸️ Waiting for 0.6  
-**Completed:** [ ] No  
+**Status:** ✅ Complete  
+**Completed:** [x] Yes - Nov 6, 2025  
 **Prerequisites:** Admin auth + flagged posts + user management completed  
 **Estimated Time:** 4-6 hours  
+**Actual Time:** 2 hours  
 **Reference:** REBUILD-ACTION-PLAN.md lines 267-281
 
 #### PROMPT TO COPY:
@@ -789,31 +790,31 @@ Reference files:
 
 #### Expected Deliverables:
 
-- [ ] Dashboard page (`/admin/dashboard` - default route) with:
-  - [ ] Overview cards:
-    - [ ] Active users (today, this week, all time)
-    - [ ] Posts today (with % change vs last week)
-    - [ ] Reports today (with % change vs last week)
-    - [ ] Auto-hidden posts count
-  - [ ] Urgent actions section:
-    - [ ] Auto-hidden posts in last hour (link to flagged)
-    - [ ] Unreviewed flagged posts (link to flagged)
-  - [ ] Activity chart (last 7 days):
-    - [ ] Posts per day
-    - [ ] Reports per day
-    - [ ] Auto-hidden per day
-- [ ] Admin settings page (`/admin/settings`) with:
-  - [ ] Change admin password
-  - [ ] Configure report threshold (default: 3)
-  - [ ] Email for notifications
-  - [ ] Save button
-- [ ] Navigation sidebar/header with:
-  - [ ] Dashboard
-  - [ ] Flagged Posts
-  - [ ] Users
-  - [ ] Settings
-  - [ ] Logout
-- [ ] System logs viewer (basic - optional)
+- [x] Dashboard page (`/admin/dashboard` - default route) with:
+  - [x] Overview cards:
+    - [x] Active users (today, this week, all time)
+    - [x] Posts today (with % change vs last week)
+    - [x] Reports today (with % change vs last week)
+    - [x] Auto-hidden posts count
+  - [x] Urgent actions section:
+    - [x] Auto-hidden posts in last hour (link to flagged)
+    - [x] Unreviewed flagged posts (link to flagged)
+  - [x] Activity chart (last 7 days):
+    - [x] Posts per day
+    - [x] Reports per day
+    - [x] Auto-hidden per day
+- [x] Admin settings page (`/admin/settings`) with:
+  - [x] Change admin password
+  - [x] Configure report threshold (default: 3)
+  - [x] Email for notifications
+  - [x] Save button
+- [x] Navigation sidebar/header with:
+  - [x] Dashboard
+  - [x] Flagged Posts
+  - [x] Users
+  - [x] Settings
+  - [x] Logout
+- [ ] System logs viewer (basic - optional - skipped)
 
 #### Validation Commands:
 

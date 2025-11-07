@@ -47,5 +47,5 @@ code {
 }
 /* Hide reCAPTCHA badge */
 .grecaptcha-badge {
-  display: none !important;
+  display: none;
 }

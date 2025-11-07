@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent, CardHeader } from '../../../components/ui/card';
+import api from '../../../lib/api';
 import { AdminLayout } from '../components/AdminLayout';
 
 export function AdminSettingsPage() {
@@ -13,7 +14,8 @@ export function AdminSettingsPage() {
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   // Form state
-  const [adminPassword, setAdminPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [reportThreshold, setReportThreshold] = useState('3');
   const [notificationEmail, setNotificationEmail] = useState('');
@@ -22,8 +24,14 @@ export function AdminSettingsPage() {
     e.preventDefault();
 
     // Validate password match if changing
-    if (adminPassword && adminPassword !== confirmPassword) {
+    if (newPassword && newPassword !== confirmPassword) {
       setSaveMessage('Passwords do not match');
+      return;
+    }
+
+    // Validate current password is provided if changing password
+    if (newPassword && !currentPassword) {
+      setSaveMessage('Current password is required to set a new password');
       return;
     }
 
@@ -31,11 +39,15 @@ export function AdminSettingsPage() {
     setSaveMessage(null);
 
     try {
-      // TODO: Implement settings API when backend is ready
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await api.put('/admin/settings', {
+        ...(newPassword && { currentPassword, newPassword }),
+        reportThreshold: Number(reportThreshold),
+        notificationEmail: notificationEmail || undefined,
+      });
 
       setSaveMessage('Settings saved successfully!');
-      setAdminPassword('');
+      setCurrentPassword('');
+      setNewPassword('');
       setConfirmPassword('');
     } catch (error) {
       console.error('Error saving settings:', error);
@@ -63,14 +75,31 @@ export function AdminSettingsPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label htmlFor="adminPassword" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="currentPassword"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Current Password
+                </label>
+                <input
+                  id="currentPassword"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  placeholder="Required to change password"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
                   New Password
                 </label>
                 <input
-                  id="adminPassword"
+                  id="newPassword"
                   type="password"
-                  value={adminPassword}
-                  onChange={(e) => setAdminPassword(e.target.value)}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
                   className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
                   placeholder="Leave blank to keep current password"
                 />

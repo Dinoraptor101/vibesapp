@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
 import type { FlaggedPost } from '@/types';
+import { useEffect, useState } from 'react';
 import { FlaggedPostCard } from '../components/FlaggedPostCard';
 import { PostDetailModal } from '../components/PostDetailModal';
 

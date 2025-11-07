@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   children: React.ReactNode;

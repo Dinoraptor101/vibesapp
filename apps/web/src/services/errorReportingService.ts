@@ -165,7 +165,7 @@ export class ErrorReportingService {
   }
 
   private static isPostHogEnabled(): boolean {
-    return typeof posthog !== 'undefined' && posthog.__loaded;
+    return posthog?.__loaded;
   }
 
   private static classifyErrorSeverity(

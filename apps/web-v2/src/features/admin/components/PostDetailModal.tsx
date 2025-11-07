@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,6 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { formatRelativeTime } from '@/lib/utils';
 import type { FlaggedPost } from '@/types';
+import { useState } from 'react';
 
 interface PostDetailModalProps {
   post: FlaggedPost | null;

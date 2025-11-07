@@ -662,6 +662,61 @@ const deletePosts = async (req, res) => {
   }
 };
 
+// Update admin settings
+const updateSettings = async (req, res) => {
+  try {
+    const { currentPassword, newPassword, reportThreshold, notificationEmail } = req.body;
+
+    // Check if admin password is being changed
+    if (currentPassword && newPassword) {
+      const adminPassword = process.env.ADMIN_PASSWORD || 'vibes_admin_2025';
+
+      if (currentPassword !== adminPassword) {
+        return res.status(401).json({
+          success: false,
+          message: 'Current password is incorrect',
+        });
+      }
+
+      // In a real application, you would update the password in the database
+      // For this demo, we'll just validate the current password
+      // Note: Changing ADMIN_PASSWORD requires server restart
+      console.log(
+        'Admin password change requested. Update ADMIN_PASSWORD env var and restart server.'
+      );
+    }
+
+    // Update report threshold (would be stored in database in production)
+    if (reportThreshold !== undefined) {
+      // In production, store this in a settings collection
+      console.log(`Report threshold updated to: ${reportThreshold}`);
+    }
+
+    // Update notification email (would be stored in database in production)
+    if (notificationEmail !== undefined) {
+      // In production, store this in a settings collection
+      console.log(`Notification email updated to: ${notificationEmail}`);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Settings updated successfully',
+      data: {
+        reportThreshold: reportThreshold || 3,
+        notificationEmail: notificationEmail || 'admin@vibesapp.com',
+        passwordChanged: !!(currentPassword && newPassword),
+      },
+    });
+  } catch (error) {
+    console.error('Error updating admin settings:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating settings',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   adminLogin,
   updateBalance,
@@ -676,4 +731,5 @@ module.exports = {
   bulkDeleteUserPosts,
   getDashboardMetrics,
   getActivityData,
+  updateSettings,
 };

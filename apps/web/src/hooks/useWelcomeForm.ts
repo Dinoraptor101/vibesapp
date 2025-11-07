@@ -71,13 +71,13 @@ const validateUserName = (userName: string): boolean => {
 };
 
 const validateBirthYear = (birthYear: string): boolean => {
-  const year = parseInt(birthYear);
+  const year = parseInt(birthYear, 10);
   const currentYear = new Date().getFullYear();
   return year >= currentYear - 100 && year <= currentYear - 13;
 };
 
 const validateBirthMonth = (birthMonth: string): boolean => {
-  const month = parseInt(birthMonth);
+  const month = parseInt(birthMonth, 10);
   return month >= 1 && month <= 12;
 };
 

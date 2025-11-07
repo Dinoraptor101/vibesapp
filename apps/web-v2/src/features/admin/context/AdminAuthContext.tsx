@@ -3,9 +3,9 @@
  * Manages admin session state and authentication
  */
 
+import { deleteCookie, getCookie, setCookie } from '@/lib/api';
 import type { ReactNode } from 'react';
 import { createContext, useCallback, useEffect, useState } from 'react';
-import { deleteCookie, getCookie, setCookie } from '@/lib/api';
 
 interface AdminAuthState {
   isAuthenticated: boolean;
@@ -38,7 +38,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       const expiry = getCookie('adminSessionExpiry');
 
       if (adminToken && expiry) {
-        const expiryTime = parseInt(expiry, 10);
+        const expiryTime = Number.parseInt(expiry, 10);
         const now = Date.now();
 
         if (now < expiryTime) {

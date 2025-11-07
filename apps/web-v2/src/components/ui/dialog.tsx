@@ -1,6 +1,6 @@
+import { cn } from '@/lib/cn';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { type ComponentPropsWithoutRef, type ElementRef, forwardRef } from 'react';
-import { cn } from '@/lib/cn';
 
 const Dialog = DialogPrimitive.Root;
 
