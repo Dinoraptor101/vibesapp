@@ -7,6 +7,9 @@ import { ButtonExamplesPage } from '@/app/pages/ButtonExamplesPage';
 import { CardExamplesPage } from '@/app/pages/CardExamplesPage';
 import { DialogExamplesPage } from '@/app/pages/DialogExamplesPage';
 import { InputExamplesPage } from '@/app/pages/InputExamplesPage';
+import AvatarExamplesPage from '@/pages/examples/AvatarExamplesPage';
+import BadgeExamplesPage from '@/pages/examples/BadgeExamplesPage';
+import LoadingExamplesPage from '@/pages/examples/LoadingExamplesPage';
 import {
   AdminDashboardPage,
   AdminLoginPage,
@@ -76,6 +79,9 @@ export function Router() {
         <Route path="/examples/input" element={<InputExamplesPage />} />
         <Route path="/examples/card" element={<CardExamplesPage />} />
         <Route path="/examples/dialog" element={<DialogExamplesPage />} />
+        <Route path="/examples/avatar" element={<AvatarExamplesPage />} />
+        <Route path="/examples/badge" element={<BadgeExamplesPage />} />
+        <Route path="/examples/loading" element={<LoadingExamplesPage />} />
 
         {/* Admin routes */}
         <Route path="/admin/login" element={<AdminLoginPage />} />
