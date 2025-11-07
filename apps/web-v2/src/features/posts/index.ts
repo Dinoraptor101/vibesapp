@@ -12,23 +12,31 @@ export type {
   PostStats,
   CreatePostPayload,
   PostFilters,
+  PostsResponse,
 } from './types';
 
 // Components
-export { UserBadge } from './components/UserBadge';
+export { FilterBar } from './components/FilterBar';
+export { ImageViewer } from './components/ImageViewer';
+export { PostActions } from './components/PostActions';
 export { PostCard } from './components/PostCard';
 export { PostSkeleton } from './components/PostSkeleton';
-export { PostActions } from './components/PostActions';
-export { ImageViewer } from './components/ImageViewer';
+export { PostsFeed } from './components/PostsFeed';
+export { UserBadge } from './components/UserBadge';
+
+// Hooks
+export { useInfinitePosts } from './hooks/useInfinitePosts';
+export { usePostFilters } from './hooks/usePostFilters';
+export type { FeedFilters, SortOption } from './hooks/usePostFilters';
 
 // API Services
 export {
+  createPost,
+  deletePost,
   fetchPosts,
   getPostById,
-  createPost,
-  reactToPost,
-  deletePost,
   getNearbyPosts,
-  getUserPosts,
   getPostsByMBTI,
+  getUserPosts,
+  reactToPost,
 } from './api/postService';

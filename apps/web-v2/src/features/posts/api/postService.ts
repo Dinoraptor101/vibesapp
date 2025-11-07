@@ -6,15 +6,7 @@
  */
 
 import apiClient from '@/lib/api';
-import type { Post, CreatePostPayload, PostFilters } from '../types';
-
-interface PostsResponse {
-  posts: Post[];
-  total: number;
-  page: number;
-  limit: number;
-  hasMore: boolean;
-}
+import type { Post, CreatePostPayload, PostFilters, PostsResponse } from '../types';
 
 interface PostResponse {
   post: Post;
@@ -25,6 +17,15 @@ interface ReactionResponse {
   likes: number;
   dislikes: number;
   vibeScore: number;
+}
+
+// Backend API response format (different from our PostsResponse)
+interface ApiPostsResponse {
+  posts: Post[];
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
 }
 
 /**
@@ -47,9 +48,18 @@ export async function fetchPosts(
   params.append('page', page.toString());
   params.append('limit', limit.toString());
 
-  const response = await apiClient.get<PostsResponse>(`/api/post?${params.toString()}`);
+  const response = await apiClient.get<ApiPostsResponse>(`/api/post?${params.toString()}`);
 
-  return response;
+  // Transform to match our PostsResponse interface
+  return {
+    posts: response.posts,
+    pagination: {
+      page: response.page,
+      limit: response.limit,
+      total: response.total,
+      hasMore: response.hasMore,
+    },
+  };
 }
 
 /**
@@ -111,7 +121,7 @@ export async function getNearbyPosts(
     limit: limit.toString(),
   });
 
-  const response = await apiClient.get<PostsResponse>(`/api/post/nearby?${params.toString()}`);
+  const response = await apiClient.get<ApiPostsResponse>(`/api/post/nearby?${params.toString()}`);
 
   return response.posts;
 }
@@ -126,9 +136,18 @@ export async function getUserPosts(userId: string, page = 1, limit = 20): Promis
     limit: limit.toString(),
   });
 
-  const response = await apiClient.get<PostsResponse>(`/api/post?${params.toString()}`);
+  const response = await apiClient.get<ApiPostsResponse>(`/api/post?${params.toString()}`);
 
-  return response;
+  // Transform to match our PostsResponse interface
+  return {
+    posts: response.posts,
+    pagination: {
+      page: response.page,
+      limit: response.limit,
+      total: response.total,
+      hasMore: response.hasMore,
+    },
+  };
 }
 
 /**
@@ -145,7 +164,16 @@ export async function getPostsByMBTI(
     limit: limit.toString(),
   });
 
-  const response = await apiClient.get<PostsResponse>(`/api/post?${params.toString()}`);
+  const response = await apiClient.get<ApiPostsResponse>(`/api/post?${params.toString()}`);
 
-  return response;
+  // Transform to match our PostsResponse interface
+  return {
+    posts: response.posts,
+    pagination: {
+      page: response.page,
+      limit: response.limit,
+      total: response.total,
+      hasMore: response.hasMore,
+    },
+  };
 }
