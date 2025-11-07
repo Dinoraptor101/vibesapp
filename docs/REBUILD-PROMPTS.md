@@ -134,8 +134,8 @@ This ensures AI agents can pick up exactly where you left off!
 - [X] 1.7 - Loading Components (✅ Complete - Nov 6)
 
 ### Phase 2: Authentication (Week 4)
-- [ ] 2.1 - Auth Context & API (⏸️ Not started)
-- [ ] 2.2 - Pigeon ID Signup Flow (⏸️ Not started)
+- [X] 2.1 - Auth Context & API (✅ Complete - Nov 7)
+- [X] 2.2 - Pigeon ID Signup Flow (✅ Complete - Nov 7)
 - [ ] 2.3 - Login Screen (⏸️ Not started)
 - [ ] 2.4 - App Layout & Navigation (⏸️ Not started)
 
@@ -474,6 +474,98 @@ This ensures AI agents can pick up exactly where you left off!
 - **Issues:** Minor ARIA warnings on role="status" (acceptable)
 - **Status:** 🎉 **PHASE 1 COMPLETE - All 7 design system components ready!**
 - **Next:** Validate all components, then Phase 2.1 - Auth Context
+
+### Session 16 - November 7, 2025
+- **Completed:** Prompt 2.1 - Auth Context & API
+- **Time taken:** ~2 hours
+- **Deliverables:**
+  - **Auth Context** (`features/auth/context/AuthContext.tsx`):
+    - User state management (user, isAuthenticated, isLoading)
+    - Session initialization from cookies on app load
+    - Login/logout/refreshUser functions
+    - Global 'auth:unauthorized' event listener for 401 responses
+    - Automatic navigation integration
+  - **useAuth Hook** (`features/auth/context/useAuth.ts`):
+    - Separated from context for React fast refresh compliance
+    - Type-safe access to auth state and methods
+    - Error handling for usage outside provider
+  - **Auth API Service** (`features/auth/services/authApi.ts`):
+    - login(pigeonId) - Authenticate with Pigeon ID
+    - signup(data) - Create new user account
+    - getCurrentUser(userId) - Session validation
+    - updateProfile(userId, data) - Profile updates
+    - transformUserData() - Backend/frontend type transformation
+  - **Protected Route** (`features/auth/components/ProtectedRoute.tsx`):
+    - Loading spinner during auth check
+    - Automatic redirect to login if unauthenticated
+    - Configurable redirect path
+  - **Integration**:
+    - AuthProvider integrated in Router.tsx (inside BrowserRouter)
+    - Cookie management with 30-day expiry
+    - Type-safe with shared User interface
+    - Global 401 error handling
+  - **Test Infrastructure** (`pages/AuthTest.tsx`):
+    - Visual auth status display at /test/auth
+    - Cookie verification interface
+    - Login/logout testing
+    - Session restoration validation
+  - Created PHASE-2.1-SUMMARY.md with complete documentation
+- **Issues:** Minor fast refresh warning (non-blocking, cosmetic only)
+- **Status:** ✅ Auth system complete and ready for testing
+- **Next:** Phase 2.2 - Pigeon ID Signup Flow
+
+### Session 17 - November 7, 2025
+- **Completed:** Prompt 2.2 - Pigeon ID Signup Flow
+- **Time taken:** ~2.5 hours
+- **Deliverables:**
+  - **SignupWizard Component** (`features/auth/components/SignupWizard.tsx`):
+    - 7-step multi-step wizard with progress indicator
+    - Step 1: Welcome screen with feature overview
+    - Step 2: Pigeon ID generation with copy-to-clipboard
+    - Step 3: Username input (validation pending)
+    - Step 4: MBTI type selector (16 types grid)
+    - Step 5: Location permission or manual city input
+    - Step 6: Avatar upload (placeholder - skippable)
+    - Step 7: Bio input (skippable)
+    - Navigation: Back/Next/Skip buttons
+    - Form validation for required fields
+    - Error handling and display
+  - **Pigeon ID Generator** (`features/auth/utils/pigeonIdGenerator.ts`):
+    - Memorable format: adjective-noun-4digits (e.g., "brave-tiger-8472")
+    - 40 adjectives, 40 nouns for variety
+    - Validation function for format checking
+  - **MBTI Selector** (`features/auth/components/MBTISelector.tsx`):
+    - Interactive 4x4 grid of all 16 MBTI types
+    - Color-coded by category (Analyst, Diplomat, Sentinel, Explorer)
+    - Visual selection with ring highlight
+    - Category legend
+    - Selected type display
+  - **Location Step** (`features/auth/components/LocationStep.tsx`):
+    - GPS permission request with browser geolocation API
+    - Manual city input fallback
+    - OpenStreetMap Nominatim geocoding (free, no API key)
+    - Coordinate display when set
+    - Change location option
+    - Error handling for permissions and API failures
+  - **SignupPage** (`features/auth/pages/SignupPage.tsx`):
+    - Simple wrapper for SignupWizard
+    - Full-height layout
+  - **API Integration**:
+    - authApi.signup() integration
+    - Backend POST /api/user/create with all fields
+    - Auto-login after successful signup
+    - Navigate to home after completion
+  - **Router Updates**:
+    - /signup route now uses real SignupPage component
+    - Removed placeholder signup page
+- **Issues:** 
+  - Avatar upload not yet implemented (optional, can skip)
+  - Username validation not implemented (optional)
+  - Module resolution warnings (stale, files exist)
+- **Status:** ✅ Core signup flow complete, optional enhancements pending
+- **Next:** Phase 2.3 - Login Screen
+
+---
 - **Deliverables:**
   - Created complete folder structure (app/, components/, features/, hooks/, lib/, styles/, types/)
   - Built lib/cn.ts utility with clsx + tailwind-merge
@@ -1516,8 +1608,8 @@ Reference files:
 
 **AI Recommendation:** 🎯 **Claude Sonnet** (Complex state management and security)
 
-**Status:** ⏸️ Waiting for Phase 1 completion  
-**Completed:** [ ] No  
+**Status:** ✅ Complete  
+**Completed:** [X] Yes - November 7, 2025  
 **Prerequisites:** Design system components complete  
 **Estimated Time:** 3-4 hours  
 **Reference:** REBUILD-ACTION-PLAN.md Week 4
@@ -1580,8 +1672,8 @@ Key Technical Details:
 
 **AI Recommendation:** 🎯 **Claude Sonnet** (Multi-step flow with validation and unique business logic)
 
-**Status:** ⏸️ Waiting for 2.1  
-**Completed:** [ ] No  
+**Status:** ✅ Complete  
+**Completed:** [X] Yes - November 7, 2025  
 **Prerequisites:** Auth context setup  
 **Estimated Time:** 6-8 hours  
 **Reference:** REBUILD-ACTION-PLAN.md lines 329-346
