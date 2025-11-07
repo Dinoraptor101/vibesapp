@@ -3,13 +3,11 @@
  * Defines all routes and navigation structure
  */
 
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { ButtonExamplesPage } from '@/app/pages/ButtonExamplesPage';
 import { CardExamplesPage } from '@/app/pages/CardExamplesPage';
 import { DialogExamplesPage } from '@/app/pages/DialogExamplesPage';
 import { InputExamplesPage } from '@/app/pages/InputExamplesPage';
-import AvatarExamplesPage from '@/pages/examples/AvatarExamplesPage';
-import BadgeExamplesPage from '@/pages/examples/BadgeExamplesPage';
-import LoadingExamplesPage from '@/pages/examples/LoadingExamplesPage';
 import {
   AdminDashboardPage,
   AdminLoginPage,
@@ -18,7 +16,9 @@ import {
   ProtectedAdminRoute,
   UsersPage,
 } from '@/features/admin';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import AvatarExamplesPage from '@/pages/examples/AvatarExamplesPage';
+import BadgeExamplesPage from '@/pages/examples/BadgeExamplesPage';
+import LoadingExamplesPage from '@/pages/examples/LoadingExamplesPage';
 
 // Placeholder pages (will be created in future phases)
 function HomePage() {

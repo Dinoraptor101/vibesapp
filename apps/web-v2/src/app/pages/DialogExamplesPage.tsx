@@ -1,3 +1,5 @@
+import { AlertCircle, ImagePlus, Mail, Settings, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import {
   Button,
   Dialog,
@@ -12,8 +14,6 @@ import {
   Label,
   Textarea,
 } from '@/components/ui-next';
-import { AlertCircle, ImagePlus, Mail, Settings, Trash2 } from 'lucide-react';
-import { useState } from 'react';
 
 export const DialogExamplesPage = () => {
   const [basicOpen, setBasicOpen] = useState(false);

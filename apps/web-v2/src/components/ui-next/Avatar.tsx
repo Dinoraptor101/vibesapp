@@ -1,5 +1,5 @@
+import { type VariantProps, cva } from 'class-variance-authority';
 import { type ImgHTMLAttributes, forwardRef, useState } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/cn';
 
 /**
@@ -180,6 +180,7 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
         {!showInitials ? (
           <>
             <img
+              {...props}
               src={src || undefined}
               alt={alt || name || 'User avatar'}
               className={cn(
@@ -188,7 +189,6 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
               )}
               onError={() => setImageError(true)}
               onLoad={() => setImageLoaded(true)}
-              {...props}
             />
             {/* Show skeleton while image loads */}
             {!imageLoaded && (

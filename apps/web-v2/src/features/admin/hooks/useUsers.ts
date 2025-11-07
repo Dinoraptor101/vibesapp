@@ -1,9 +1,9 @@
+import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import type { AdminUser } from '@/types';
 /**
  * React Query hook for fetching and managing users list
  */
-import { useQuery } from '@tanstack/react-query';
 
 interface UseUsersParams {
   search?: string;

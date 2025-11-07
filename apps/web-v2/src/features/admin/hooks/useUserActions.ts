@@ -1,8 +1,8 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 /**
  * React Query mutations for admin user actions
  */
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 // Simple toast replacement for now (will be replaced with proper toast later)
 const toast = (options: { title: string; description: string; variant?: string }) => {

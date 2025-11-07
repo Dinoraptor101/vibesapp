@@ -5,7 +5,6 @@
  * Used for testing and documentation purposes.
  */
 
-import { Button } from '@/components/ui-next/Button';
 import {
   ChevronRight,
   Download,
@@ -19,6 +18,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { useState } from 'react';
+import { Button } from '@/components/ui-next/Button';
 
 export function ButtonExamplesPage() {
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});

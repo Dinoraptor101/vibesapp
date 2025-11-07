@@ -1,6 +1,6 @@
-import { cn } from '@/lib/cn';
 import type React from 'react';
 import { forwardRef, useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/cn';
 
 /**
  * Textarea Component
@@ -143,8 +143,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         textarea.style.height = 'auto';
         textarea.style.height = `${textarea.scrollHeight}px`;
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [value, autoResize]);
+    }, [autoResize, textareaRef]);
 
     // Handle change with auto-resize
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

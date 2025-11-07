@@ -1,7 +1,7 @@
+import { Bell, Mail, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui-next';
-import { Card, CardHeader, CardContent } from '@/components/ui-next/Card';
 import { Avatar } from '@/components/ui-next/Avatar';
-import { Bell, MessageSquare, Mail } from 'lucide-react';
+import { Card, CardContent, CardHeader } from '@/components/ui-next/Card';
 
 export default function BadgeExamplesPage() {
   return (
