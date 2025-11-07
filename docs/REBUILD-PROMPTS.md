@@ -142,7 +142,7 @@ This ensures AI agents can pick up exactly where you left off!
 ### Phase 3: Posts (Week 5-6)
 - [X] 3.1 - Post Components (✅ Complete - Jan 2025)
 - [X] 3.2 - Posts Feed (✅ Complete - Nov 7)
-- [ ] 3.3 - Create Post (⏸️ Not started)
+- [X] 3.3 - Create Post (✅ Complete - Nov 7)
 - [ ] 3.4 - Vibes System (⏸️ Not started)
 - [ ] 3.5 - Comments System (⏸️ Not started)
 
@@ -721,6 +721,101 @@ This ensures AI agents can pick up exactly where you left off!
 - **Issues:** None - all TypeScript/linting errors resolved, build successful (615.88 KB, 176.42 KB gzipped)
 - **Status:** ✅ Phase 3.1 complete - all post components functional and documented
 - **Next:** Phase 3.2 - Posts Feed (infinite scroll, filtering, real-time updates)
+
+### Session 21 - November 7, 2025
+- **Completed:** Prompt 3.2 - Posts Feed
+- **Time taken:** ~2 hours
+- **Deliverables:**
+  - **usePostFilters Hook** (`features/posts/hooks/usePostFilters.ts`):
+    - Geolocation integration with 10km radius (5min cache, 5s timeout)
+    - Nearby, following, and sort filters (recent/popular/nearby)
+    - Reset filters functionality
+    - isFiltering flag for conditional UI
+  - **useInfinitePosts Hook** (`features/posts/hooks/useInfinitePosts.ts`):
+    - React Query infinite scroll with useInfiniteQuery
+    - Optimistic UI updates for like/dislike
+    - Automatic rollback on error
+    - Query invalidation on mutations
+    - Flattened posts array from all pages
+    - 5-minute stale time, 30-minute garbage collection
+  - **FilterBar Component** (`features/posts/components/FilterBar.tsx`):
+    - Nearby toggle with MapPin icon
+    - Following toggle with Users icon
+    - Sort buttons (Recent, Popular, Nearby)
+    - Horizontal scrollable layout for mobile
+    - Active state styling with purple brand color
+  - **PostsFeed Container** (`features/posts/components/PostsFeed.tsx`):
+    - Infinite scroll with Intersection Observer
+    - Loading state with 3 PostSkeleton components
+    - Error state with retry button
+    - Empty state with contextual messaging (pigeon emoji 🕊️)
+    - Load more trigger at bottom
+    - "You've reached the end!" message
+    - Optimistic like/dislike integration
+  - **API Service Updates** (`features/posts/api/postService.ts`):
+    - Fixed PostsResponse type mismatch
+    - Added ApiPostsResponse interface for backend format
+    - Transform responses to PostsResponse with nested pagination object
+  - **Integration:**
+    - HomePage now renders PostsFeed component
+    - Updated barrel exports with all new components and hooks
+    - All components exported from features/posts/index.ts
+  - **Documentation:**
+    - Created PHASE-3.2-SUMMARY.md with comprehensive documentation
+- **Issues:** None - all TypeScript/linting errors resolved, build successful (635.66 KB, 182.14 KB gzipped)
+- **Status:** 🎉 Phase 3.2 complete - Posts feed with infinite scroll, filtering, and optimistic updates fully functional
+- **Notes:** Pull-to-refresh skipped as future enhancement (not critical for MVP)
+- **Next:** Phase 3.3 - Create Post (image upload, form, geolocation capture)
+
+### Session 22 - November 7, 2025
+- **Completed:** Prompt 3.3 - Create Post
+- **Time taken:** ~3 hours
+- **Deliverables:**
+  - **Image Upload Utilities** (`features/posts/utils/imageUtils.ts`):
+    - File validation (JPEG, PNG, WebP, max 10MB)
+    - Image compression (resize to 1920x1920, 85% quality, Canvas-based)
+    - Object URL management for previews
+    - Helper functions (formatFileSize, getImageDimensions)
+  - **S3 Upload Service** (`features/posts/api/s3Service.ts`):
+    - Fetches presigned URL from backend (/api/s3Url)
+    - Direct S3 upload with XMLHttpRequest
+    - Upload progress tracking with percentage
+    - Returns S3 key for backend post creation
+  - **ImageUploader Component** (`features/posts/components/ImageUploader.tsx`):
+    - Drag-and-drop zone with visual feedback
+    - File picker with click-to-browse
+    - Image preview with remove button
+    - Automatic compression on selection
+    - File size display (original vs compressed)
+    - Validation error messages
+  - **CreatePostForm Component** (`features/posts/components/CreatePostForm.tsx`):
+    - Image upload section (required)
+    - Caption textarea (optional, 500 char limit)
+    - Character counter
+    - Automatic geolocation capture on mount
+    - Location display with update/retry button
+    - Upload progress bar during S3 upload
+    - Form validation (image + location required)
+  - **useCreatePost Hook** (`features/posts/hooks/useCreatePost.ts`):
+    - React Query mutation for creating posts
+    - Optimistic update to feed cache (adds to beginning)
+    - Query invalidation to refetch
+    - Error handling
+  - **CreatePostModal Component** (`features/posts/components/CreatePostModal.tsx`):
+    - Radix UI Dialog wrapper
+    - Success feedback (green checkmark, "Post Created!")
+    - Auto-close after 1.5 seconds on success
+    - Prevents closing during submission
+  - **Navigation Integration:**
+    - TopNav: Changed "Post" button to open CreatePostModal
+    - BottomNav: Changed Create button to open CreatePostModal
+    - Both use useState to manage modal state
+  - **Documentation:**
+    - Created PHASE-3.3-SUMMARY.md with comprehensive details
+- **Issues:** None - all TypeScript/linting errors resolved, build successful (646.81 KB, 184.69 KB gzipped)
+- **Status:** ✅ Phase 3.3 complete - Complete post creation system with S3 upload and geolocation
+- **Notes:** Image cropping, multiple images, and camera integration skipped as future enhancements
+- **Next:** Phase 3.4 - Vibes System (reaction improvements, scoring algorithm, recommendations)
 
 ### Session 21 - November 7, 2025
 - **Completed:** Prompt 3.2 - Posts Feed

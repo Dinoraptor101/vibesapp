@@ -6,9 +6,10 @@
  */
 
 import { Bell, Home, MessageSquare, Plus } from 'lucide-react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui-next';
-import { Badge } from '@/components/ui-next';
+import { Badge, Button } from '@/components/ui-next';
+import { CreatePostModal } from '@/features/posts';
 import { UserMenu } from './UserMenu';
 
 // Mock badge counts - will be replaced with real data later
@@ -17,6 +18,7 @@ const MOCK_UNREAD_MESSAGES = 5;
 
 export function TopNav() {
   const location = useLocation();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -92,20 +94,22 @@ export function TopNav() {
       {/* Right: Create Post + User Menu */}
       <div className="flex items-center gap-3">
         {/* Create Post Button */}
-        <Link to="/create-post">
-          <Button
-            variant="primary"
-            size="md"
-            leftIcon={<Plus className="w-5 h-5" />}
-            aria-label="Create post"
-          >
-            <span className="hidden lg:inline">Post</span>
-          </Button>
-        </Link>
+        <Button
+          variant="primary"
+          size="md"
+          leftIcon={<Plus className="w-5 h-5" />}
+          onClick={() => setIsCreateModalOpen(true)}
+          aria-label="Create post"
+        >
+          <span className="hidden lg:inline">Post</span>
+        </Button>
 
         {/* User Menu */}
         <UserMenu />
       </div>
+
+      {/* Create Post Modal */}
+      <CreatePostModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
     </nav>
   );
 }
