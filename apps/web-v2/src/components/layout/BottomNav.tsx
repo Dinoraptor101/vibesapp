@@ -6,9 +6,11 @@
  */
 
 import { Bell, Home, MessageSquare, Plus, User } from 'lucide-react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Badge } from '@/components/ui-next';
 import { useAuth } from '@/features/auth/context/useAuth';
+import { CreatePostModal } from '@/features/posts';
 
 // Mock badge counts - will be replaced with real data later
 const MOCK_UNREAD_ACTIVITY = 3;
@@ -17,6 +19,7 @@ const MOCK_UNREAD_MESSAGES = 5;
 export function BottomNav() {
   const location = useLocation();
   const { user } = useAuth();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -57,15 +60,16 @@ export function BottomNav() {
         </Link>
 
         {/* Create Post */}
-        <Link
-          to="/create-post"
+        <button
+          type="button"
+          onClick={() => setIsCreateModalOpen(true)}
           className="flex flex-col items-center gap-1 px-4 py-2 min-w-[64px]"
           aria-label="Create post"
         >
           <div className="bg-brand-purple text-white rounded-full p-3 shadow-lg hover:scale-110 transition-transform">
             <Plus className="w-6 h-6" strokeWidth={2.5} />
           </div>
-        </Link>
+        </button>
 
         {/* Messages */}
         <Link
@@ -100,6 +104,9 @@ export function BottomNav() {
           <span className="text-xs font-medium">Profile</span>
         </Link>
       </div>
+
+      {/* Create Post Modal */}
+      <CreatePostModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
     </nav>
   );
 }
