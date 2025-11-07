@@ -3,9 +3,9 @@
  * Overview of admin metrics and urgent actions
  */
 
+import api from '@/lib/api';
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import api from '@/lib/api';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent, CardHeader } from '../../../components/ui/card';
@@ -59,15 +59,17 @@ export function AdminDashboardPage() {
     try {
       const [metricsResponse, activityResponse] = await Promise.all([
         api.get('/admin/metrics') as Promise<{
-          data: { success: boolean; metrics: DashboardMetrics };
+          success: boolean;
+          metrics: DashboardMetrics;
         }>,
         api.get('/admin/activity') as Promise<{
-          data: { success: boolean; activityData: ActivityDataPoint[] };
+          success: boolean;
+          activityData: ActivityDataPoint[];
         }>,
       ]);
 
-      setMetrics(metricsResponse.data.metrics);
-      setActivityData(activityResponse.data.activityData);
+      setMetrics(metricsResponse.metrics);
+      setActivityData(activityResponse.activityData);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
       setError('Failed to load dashboard data');

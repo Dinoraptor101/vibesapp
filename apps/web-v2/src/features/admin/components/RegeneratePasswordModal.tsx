@@ -1,10 +1,10 @@
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Check, Copy } from 'lucide-react';
 /**
  * Modal for displaying regenerated password with copy functionality
  */
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Copy, Check } from 'lucide-react';
 
 interface RegeneratePasswordModalProps {
   isOpen: boolean;

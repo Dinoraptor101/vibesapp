@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
 import api from '@/lib/api';
+import { useCallback, useEffect, useState } from 'react';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import type { AdminUser } from '../../../types';
+import { RegeneratePasswordModal } from '../components/RegeneratePasswordModal';
 import { UserCard } from '../components/UserCard';
 import { UserDetailModal } from '../components/UserDetailModal';
-import { RegeneratePasswordModal } from '../components/RegeneratePasswordModal';
 
 export function UsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);

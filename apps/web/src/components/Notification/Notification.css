@@ -6,7 +6,7 @@
   left: 50%;
   transform: translateX(-50%);
   background-color: var(--notification-error-bg-color);
-  color: var(--notification-error-text-color) !important;
+  color: var(--notification-error-text-color);
   padding: 10px 20px;
   border-radius: 10px;
   box-shadow: 0 2px 10px var(--notification-shadow-color);

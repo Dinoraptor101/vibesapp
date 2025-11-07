@@ -38,9 +38,9 @@ html {
 }
 
 .theme-toggle-button svg {
-  font-size: 24px !important;
+  font-size: 24px;
   /* Increase the size of the icon */
-  color: #ffffff !important;
+  color: #ffffff;
 }
 
 .theme-toggle-button:hover {
@@ -150,7 +150,7 @@ html {
 
 .user-profile-button .fa-user {
   font-size: 24px;
-  color: #ffffff !important;
+  color: #ffffff;
 }
 
 /* this is SVG and requires additional styling */

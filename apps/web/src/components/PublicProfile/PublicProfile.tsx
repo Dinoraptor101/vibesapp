@@ -37,7 +37,7 @@ const PublicProfile: React.FC = () => {
   const [hasMore, setHasMore] = useState(true);
   const loader = useRef<HTMLDivElement | null>(null);
   const [notification, setNotification] = useState<INotification | null>(null);
-  const currentUserId = getCookie('userId');
+  const _currentUserId = getCookie('userId');
 
   const getPolarityDisplay = (polarity: string) => {
     if (polarity.toLowerCase() === 'yin') {

@@ -3,7 +3,6 @@
  * Defines all routes and navigation structure
  */
 
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import {
   AdminDashboardPage,
   AdminLoginPage,
@@ -12,6 +11,7 @@ import {
   ProtectedAdminRoute,
   UsersPage,
 } from '@/features/admin';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 // Placeholder pages (will be created in future phases)
 function HomePage() {

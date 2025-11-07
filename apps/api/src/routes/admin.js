@@ -14,6 +14,7 @@ const {
   bulkDeleteUserPosts,
   getDashboardMetrics,
   getActivityData,
+  updateSettings,
 } = require('../controllers/admin');
 
 // Admin login (no auth required)
@@ -42,5 +43,8 @@ router.delete('/users/:userId/posts', bulkDeleteUserPosts);
 // Analytics routes
 router.get('/metrics', getDashboardMetrics);
 router.get('/activity', getActivityData);
+
+// Settings route
+router.put('/settings', updateSettings);
 
 module.exports = router;

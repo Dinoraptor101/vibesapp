@@ -12,8 +12,7 @@
   "css": {
     "parser": {
       "cssModules": false,
-      "allowWrongLineComments": true,
-      "tailwindDirectives": true
+      "allowWrongLineComments": true
     },
     "linter": {
       "enabled": false
@@ -29,9 +28,7 @@
         "useNodejsImportProtocol": "error"
       },
       "suspicious": {
-        "noExplicitAny": "off",
-        "noUnknownAtRules": "off",
-        "noDocumentCookie": "off"
+        "noExplicitAny": "off"
       },
       "correctness": {
         "noUnusedVariables": "warn"
