@@ -136,8 +136,8 @@ This ensures AI agents can pick up exactly where you left off!
 ### Phase 2: Authentication (Week 4)
 - [X] 2.1 - Auth Context & API (✅ Complete - Nov 7)
 - [X] 2.2 - Pigeon ID Signup Flow (✅ Complete - Nov 7)
-- [ ] 2.3 - Login Screen (⏸️ Not started)
-- [ ] 2.4 - App Layout & Navigation (⏸️ Not started)
+- [X] 2.3 - Login Screen (✅ Complete - Nov 7)
+- [X] 2.4 - App Layout & Navigation (✅ Complete - Nov 7)
 
 ### Phase 3: Posts (Week 5-6)
 - [ ] 3.1 - Post Components (⏸️ Not started)
@@ -564,6 +564,99 @@ This ensures AI agents can pick up exactly where you left off!
   - Module resolution warnings (stale, files exist)
 - **Status:** ✅ Core signup flow complete, optional enhancements pending
 - **Next:** Phase 2.3 - Login Screen
+
+### Session 18 - November 7, 2025
+- **Completed:** Prompt 2.3 - Login Screen
+- **Time taken:** ~45 minutes
+- **Deliverables:**
+  - **LoginForm Component** (`features/auth/components/LoginForm.tsx`):
+    - Single Pigeon ID input field (password type)
+    - Show/hide password toggle (built into Input component)
+    - Login button with loading state and disabled state
+    - Error message display with AlertCircle icon and styled alert box
+    - "Lost your Pigeon ID?" link opens information modal
+    - "Don't have an account? Sign up" link to /signup
+    - Form validation (required field check)
+    - API integration with authApi.login()
+    - Auto-navigation to home after successful login
+    - Full accessibility (ARIA attributes, keyboard navigation)
+    - Dark mode support throughout
+  - **LoginPage** (`features/auth/pages/LoginPage.tsx`):
+    - Full-height centered layout
+    - Background with theme support
+    - Simple wrapper for LoginForm
+  - **Forgot Password Modal**:
+    - Dialog component explaining Pigeon ID cannot be recovered
+    - Step-by-step admin contact instructions
+    - Clean UI with DialogTitle and DialogDescription
+    - ESC to close, click outside to close
+  - **Router Integration**:
+    - Removed placeholder LoginPage function
+    - Imported real LoginPage from @/features/auth
+    - /login route now uses actual component
+  - **Exports**:
+    - Added LoginPage and LoginForm to features/auth/index.ts
+  - Created PHASE-2.3-SUMMARY.md with complete documentation
+- **Issues:** None - all TypeScript/linting errors resolved
+- **Status:** ✅ Login screen complete and fully functional
+- **Next:** Phase 2.4 - App Layout & Navigation
+
+### Session 19 - November 7, 2025
+- **Completed:** Prompt 2.4 - App Layout & Navigation (Final Phase 2 prompt!)
+- **Time taken:** ~2 hours
+- **Deliverables:**
+  - **Theme System:**
+    - Created lib/theme.tsx with ThemeProvider component
+    - Created lib/useTheme.ts hook for accessing theme state
+    - Integrated ThemeProvider into app/providers.tsx
+    - localStorage persistence for theme preference
+  - **UserMenu Component** (`components/layout/UserMenu.tsx`):
+    - Radix UI DropdownMenu with full accessibility
+    - Avatar trigger with focus ring
+    - User info display (username, MBTI)
+    - Profile and Settings links
+    - Theme submenu with light/dim/dark options
+    - Logout button with destructive styling
+    - Keyboard navigation (Tab, Enter, ESC)
+    - Smooth animations and dark mode support
+  - **TopNav Component** (`components/layout/TopNav.tsx`):
+    - Desktop navigation (hidden on mobile < md)
+    - Logo with pigeon emoji 🕊️
+    - Three nav links: Home, Activity (with badge), Messages (with badge)
+    - Create Post button (primary purple)
+    - UserMenu integration
+    - Active route highlighting (purple background)
+    - Sticky positioning at top
+    - Responsive labels (icons only → icons + text)
+  - **BottomNav Component** (`components/layout/BottomNav.tsx`):
+    - Mobile navigation (visible only < md)
+    - Five nav items: Home, Activity, Create, Messages, Profile
+    - Badge indicators for unread counts
+    - Active route highlighting (purple text + filled icons)
+    - Elevated Create button (larger, circular, shadow)
+    - Safe area insets for notched devices
+    - Fixed to bottom of screen
+  - **AppLayout Component** (`components/layout/AppLayout.tsx`):
+    - Main wrapper for authenticated pages
+    - Renders TopNav (desktop) and BottomNav (mobile)
+    - Proper spacing for content (pb-20 mobile, pb-0 desktop)
+    - Full-height layout with theme background
+  - **Page Components:**
+    - Created HomePage, ActivityPage, MessagesPage, CreatePostPage, ProfilePage, SettingsPage
+    - All placeholder pages with "coming soon" content
+    - All wrapped with AppLayout
+  - **Router Integration:**
+    - Wrapped all main pages with ProtectedRoute
+    - Redirect to /login if not authenticated
+    - Protected routes: /, /activity, /messages, /create-post, /profile/:userId, /settings
+    - Public routes: /login, /signup
+  - **Mock Data:**
+    - MOCK_UNREAD_ACTIVITY = 3 (temporary)
+    - MOCK_UNREAD_MESSAGES = 5 (temporary)
+  - Created PHASE-2.4-SUMMARY.md with comprehensive documentation
+- **Issues:** None - all TypeScript errors resolved, all features working
+- **Status:** 🎉 **PHASE 2 COMPLETE - Authentication & Navigation 100% Operational!**
+- **Next:** Phase 3.1 - Post Components
 
 ---
 - **Deliverables:**
@@ -1749,8 +1842,8 @@ Key Features:
 
 **AI Recommendation:** 💰 **GPT-5 mini** (Simple form with existing auth context)
 
-**Status:** ⏸️ Waiting for 2.2  
-**Completed:** [ ] No  
+**Status:** ✅ Complete  
+**Completed:** [X] Yes - November 7, 2025  
 **Prerequisites:** Signup flow completed  
 **Estimated Time:** 2-3 hours  
 **Reference:** REBUILD-ACTION-PLAN.md
@@ -1806,8 +1899,8 @@ Reference files:
 
 **AI Recommendation:** 🎯 **Claude Sonnet** (Prefer Claude for navigation logic and architecture)
 
-**Status:** ⏸️ Waiting for 2.3  
-**Completed:** [ ] No  
+**Status:** ✅ Complete  
+**Completed:** [X] Yes - November 7, 2025  
 **Prerequisites:** Auth flow completed  
 **Estimated Time:** 4-6 hours  
 **Reference:** REBUILD-ACTION-PLAN.md

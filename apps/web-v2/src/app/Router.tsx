@@ -16,34 +16,17 @@ import {
   ProtectedAdminRoute,
   UsersPage,
 } from '@/features/admin';
-import { AuthProvider, SignupPage } from '@/features/auth';
+import { AuthProvider, LoginPage, ProtectedRoute, SignupPage } from '@/features/auth';
+import { ActivityPage } from '@/pages/ActivityPage';
 import { AuthTest } from '@/pages/AuthTest';
+import { CreatePostPage } from '@/pages/CreatePostPage';
 import AvatarExamplesPage from '@/pages/examples/AvatarExamplesPage';
 import BadgeExamplesPage from '@/pages/examples/BadgeExamplesPage';
 import LoadingExamplesPage from '@/pages/examples/LoadingExamplesPage';
-
-// Placeholder pages (will be created in future phases)
-function HomePage() {
-  return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-brand-purple mb-4">VibesApp V2</h1>
-        <p className="text-text-secondary">Home Feed Coming Soon</p>
-      </div>
-    </div>
-  );
-}
-
-function LoginPage() {
-  return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold mb-4">Login</h1>
-        <p className="text-text-secondary">Login page coming soon</p>
-      </div>
-    </div>
-  );
-}
+import { HomePage } from '@/pages/HomePage';
+import { MessagesPage } from '@/pages/MessagesPage';
+import { ProfilePage } from '@/pages/ProfilePage';
+import { SettingsPage } from '@/pages/SettingsPage';
 
 function NotFoundPage() {
   return (
@@ -62,9 +45,58 @@ export function Router() {
       <AuthProvider>
         <Routes>
           {/* Public routes */}
-          <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+
+          {/* Protected routes */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/activity"
+            element={
+              <ProtectedRoute>
+                <ActivityPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <MessagesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/create-post"
+            element={
+              <ProtectedRoute>
+                <CreatePostPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile/:userId"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Auth Testing */}
           <Route path="/test/auth" element={<AuthTest />} />
