@@ -23,6 +23,7 @@ import { CreatePostPage } from '@/pages/CreatePostPage';
 import AvatarExamplesPage from '@/pages/examples/AvatarExamplesPage';
 import BadgeExamplesPage from '@/pages/examples/BadgeExamplesPage';
 import LoadingExamplesPage from '@/pages/examples/LoadingExamplesPage';
+import PostsExamplePage from '@/pages/examples/PostsExamplePage';
 import { HomePage } from '@/pages/HomePage';
 import { MessagesPage } from '@/pages/MessagesPage';
 import { ProfilePage } from '@/pages/ProfilePage';
@@ -109,6 +110,7 @@ export function Router() {
           <Route path="/examples/avatar" element={<AvatarExamplesPage />} />
           <Route path="/examples/badge" element={<BadgeExamplesPage />} />
           <Route path="/examples/loading" element={<LoadingExamplesPage />} />
+          <Route path="/examples/posts" element={<PostsExamplePage />} />
 
           {/* Admin routes */}
           <Route path="/admin/login" element={<AdminLoginPage />} />
