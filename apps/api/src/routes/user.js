@@ -14,6 +14,9 @@ router.get('/:userId/posts', userController.getUserPosts);
 // GET endpoint to retrieve user details by userId
 router.get('/:userId', userController.getUserById);
 
+// GET endpoint to retrieve user strikes (Phase 3.4)
+router.get('/:userId/strikes', userController.getUserStrikes);
+
 // PUT endpoint to update existing user details
 router.put('/:userId', userController.updateUser);
 

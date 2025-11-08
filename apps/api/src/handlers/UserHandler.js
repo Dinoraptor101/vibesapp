@@ -2,13 +2,6 @@ const karma = require('../controllers/karma');
 const User = require('../models/User');
 
 class UserHandler {
-  // Helper function to generate a unique pigeonId
-  static generatePigeonId() {
-    const timestamp = new Date().getTime().toString(36);
-    const randomStr = Math.random().toString(36).substring(2, 8);
-    return `PIGEON${timestamp}${randomStr}`.toUpperCase();
-  }
-
   // Helper function to generate a UUID
   static generateUUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {

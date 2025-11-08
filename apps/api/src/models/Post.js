@@ -48,6 +48,7 @@ const ReactionSchema = new mongoose.Schema({
   type: {
     type: String,
     required: true,
+    enum: ['like'], // Only 'like' (heart) supported - Phase 3.4
   },
   location: {
     lat: {
@@ -58,6 +59,33 @@ const ReactionSchema = new mongoose.Schema({
       type: Number,
       required: true,
     },
+  },
+});
+
+const ReportSchema = new mongoose.Schema({
+  userId: {
+    type: String,
+    required: true,
+    ref: 'User',
+  },
+  reason: {
+    type: String,
+    required: true,
+    enum: ['pornographic', 'spam', 'hate_speech'],
+  },
+  location: {
+    lat: {
+      type: Number,
+      required: true,
+    },
+    lon: {
+      type: Number,
+      required: true,
+    },
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now,
   },
 });
 
@@ -80,6 +108,7 @@ const postSchema = new mongoose.Schema({
     default: null,
   },
   reactions: [ReactionSchema],
+  reports: [ReportSchema], // Phase 3.4: Community moderation
   proximal_dislikes: {
     type: Number,
     default: 0,
@@ -100,20 +129,26 @@ const postSchema = new mongoose.Schema({
     default: false,
     required: true,
   },
+  isDeleted: {
+    type: Boolean,
+    default: false,
+    required: true,
+  },
+  hiddenAt: {
+    type: Date,
+    default: null,
+  },
+  hiddenBy: {
+    type: String,
+    enum: ['auto', 'admin', null],
+    default: null,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
 
-// Middleware to update isHidden status before saving
-postSchema.pre('save', function (next) {
-  if (this.proximal_dislikes > this.proximal_users / 3) {
-    this.isHidden = true;
-  } else {
-    this.isHidden = false;
-  }
-  next();
-});
+// Note: Pre-save middleware removed (Phase 3.4) - isHidden now controlled by community reports only
 
 module.exports = mongoose.model('Post', postSchema);

@@ -8,13 +8,13 @@ VibesApp is a picture-based social network built as an NX monorepo with React fr
 ```
 vibesapp/
 ├── apps/
-│   ├── web/                    # React TypeScript frontend
+│   ├── web-v2/                 # React TypeScript frontend (Vite + Tailwind)
 │   │   ├── src/
-│   │   │   ├── components/     # React components
-│   │   │   ├── services/       # API services  
-│   │   │   ├── hooks/          # Custom React hooks
-│   │   │   ├── types/          # TypeScript type definitions
-│   │   │   └── utils/          # Frontend utilities
+│   │   │   ├── components/     # Shared UI components
+│   │   │   ├── features/       # Feature-based modules
+│   │   │   ├── lib/            # Utilities and API client
+│   │   │   ├── pages/          # Route pages
+│   │   │   └── styles/         # Global styles and Tailwind
 │   │   ├── public/             # Static assets
 │   │   ├── package.json        # Frontend dependencies
 │   │   └── tsconfig.json       # TypeScript configuration
@@ -37,15 +37,7 @@ vibesapp/
 
 ## Technology Stack
 
-### Frontend (`apps/web`)
-- **Framework**: React 18 with TypeScript
-- **State Management**: React Query + Context API
-- **Styling**: Custom CSS with theme system
-- **Build Tool**: Webpack with custom configuration
-- **Linting & Formatting**: Biome (replaced Prettier/ESLint) - **⚠️ DO NOT use ESLint in web project**
-- **Testing**: Jest + React Testing Library
-
-### Frontend V2 (`apps/web-v2`) - New Vite-based rebuild
+### Frontend (`apps/web-v2`)
 - **Framework**: React 18 with TypeScript
 - **State Management**: Zustand + React Query
 - **Styling**: Tailwind CSS with custom design tokens
@@ -113,12 +105,12 @@ vibesapp/
 ```bash
 # Development
 npm run dev                    # Start both frontend and backend
-npm run start:web             # Frontend only (localhost:3000)
+npm run start:web-v2          # Frontend only (localhost:5173)
 npm run start:api             # Backend only (localhost:5001)
 
 # Building
 npm run build                 # Build all applications
-npm run build:web            # Build frontend only
+npm run build:web-v2         # Build frontend only
 npm run build:api            # Build backend only
 
 # Testing
@@ -126,13 +118,13 @@ npm run test                  # Run all tests
 npm run test:e2e             # Run Playwright tests
 
 # Linting & Formatting
-npm run lint                  # Lint all code (uses Biome for web, ESLint for api)
+npm run lint                  # Lint all code
 npm run lint:fix             # Fix linting issues
 npm run format               # Format code with Biome
 npm run format:check         # Check formatting without changes
 
-# Important: apps/web uses Biome, apps/web-v2 uses ESLint
-# Never add ESLint config to apps/web - it uses Biome exclusively
+# Important: apps/web-v2 uses ESLint for linting + Biome for formatting
+# apps/api uses ESLint only
 
 # NX Commands
 nx graph                      # View dependency graph

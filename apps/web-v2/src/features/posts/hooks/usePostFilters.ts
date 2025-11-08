@@ -8,7 +8,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { PostFilters } from '../types';
 
-export type SortOption = 'recent' | 'popular' | 'nearby';
+// Design Change (Nov 7, 2025): Removed 'popular' sort - no vibe score calculation
+export type SortOption = 'recent' | 'nearby';
 
 export interface FeedFilters extends PostFilters {
   sort: SortOption;

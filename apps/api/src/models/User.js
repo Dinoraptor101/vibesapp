@@ -68,6 +68,22 @@ const UserSchema = new mongoose.Schema({
   bannedAt: {
     type: Date,
   },
+  strikes: [
+    {
+      reason: {
+        type: String,
+        required: true,
+      },
+      timestamp: {
+        type: Date,
+        default: Date.now,
+      },
+      expiresAt: {
+        type: Date,
+        required: true,
+      },
+    },
+  ],
   profilePictureUrl: {
     type: String,
   },
@@ -79,5 +95,52 @@ const UserSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+// Phase 3.4: Strike system methods
+UserSchema.methods.getActiveStrikes = function () {
+  const now = new Date();
+  return this.strikes.filter((strike) => strike.expiresAt > now);
+};
+
+UserSchema.methods.getCurrentRestrictions = function () {
+  const activeStrikes = this.getActiveStrikes();
+  const strikeCount = activeStrikes.length;
+
+  // Strike 4 = permanent ban
+  if (this.isBanned || strikeCount >= 4) {
+    return {
+      canPost: false,
+      canComment: false,
+      canReact: false,
+      isBanned: true,
+      strikeCount,
+    };
+  }
+
+  // Strike 1-3 = 24-hour cooldowns
+  if (strikeCount >= 1) {
+    const latestStrike = activeStrikes.sort((a, b) => b.timestamp - a.timestamp)[0];
+    const cooldownEnd = new Date(latestStrike.timestamp.getTime() + 24 * 60 * 60 * 1000);
+    const inCooldown = new Date() < cooldownEnd;
+
+    return {
+      canPost: !inCooldown,
+      canComment: !inCooldown,
+      canReact: true, // Can always react (hearts)
+      isBanned: false,
+      strikeCount,
+      cooldownEnd: inCooldown ? cooldownEnd : null,
+    };
+  }
+
+  // No strikes = no restrictions
+  return {
+    canPost: true,
+    canComment: true,
+    canReact: true,
+    isBanned: false,
+    strikeCount: 0,
+  };
+};
 
 module.exports = mongoose.model('User', UserSchema);

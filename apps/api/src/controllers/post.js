@@ -572,6 +572,123 @@ function getDistanceFromLatLonInMiles(lat1, lon1, lat2, lon2) {
   return distance;
 }
 
+// Phase 3.4: Report a post
+const reportPost = async (req, res) => {
+  const { userId, reason, location } = req.body;
+  const { id: postHex } = req.params;
+
+  try {
+    // Validate required fields
+    if (!userId || !reason || !location || !location.lat || !location.lon) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: userId, reason, location',
+      });
+    }
+
+    // Validate reason enum
+    const validReasons = ['pornographic', 'spam', 'hate_speech'];
+    if (!validReasons.includes(reason)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid reason. Must be one of: pornographic, spam, hate_speech',
+      });
+    }
+
+    // Fetch the post
+    const post = await Post.findById(postHex);
+    if (!post) {
+      return res.status(404).json({ success: false, message: 'Post not found' });
+    }
+
+    // Prevent reporting own post
+    if (post.user.userId === userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'You cannot report your own post',
+      });
+    }
+
+    // Check if user already reported this post
+    const existingReport = post.reports.find((report) => report.userId === userId);
+    if (existingReport) {
+      return res.status(409).json({
+        success: false,
+        message: 'You already reported this post',
+      });
+    }
+
+    // Add the report
+    post.reports.push({
+      userId,
+      reason,
+      location,
+      timestamp: new Date(),
+    });
+
+    // Calculate nearby reports (within 50 miles of post location)
+    const nearbyReports = post.reports.filter((report) => {
+      const distance = getDistanceFromLatLonInMiles(
+        report.location.lat,
+        report.location.lon,
+        post.user.location.lat,
+        post.user.location.lon
+      );
+      return distance <= 50;
+    });
+
+    let isHidden = false;
+    let message = 'Report submitted successfully';
+
+    // Auto-hide if 3+ nearby reports
+    if (nearbyReports.length >= 3 && !post.isHidden) {
+      post.isHidden = true;
+      post.hiddenAt = new Date();
+      post.hiddenBy = 'auto';
+      isHidden = true;
+      message = 'Post auto-hidden due to community reports';
+
+      // Add strike to post author
+      const postAuthor = await User.findOne({ userId: post.user.userId });
+      if (postAuthor) {
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 30); // 30-day expiry
+
+        postAuthor.strikes.push({
+          reason: `Post auto-hidden: ${nearbyReports.length} community reports`,
+          timestamp: new Date(),
+          expiresAt,
+        });
+
+        // Check if Strike 4 - permanent ban
+        const activeStrikes = postAuthor.getActiveStrikes();
+        if (activeStrikes.length >= 4) {
+          postAuthor.isBanned = true;
+          postAuthor.bannedAt = new Date();
+          message = 'Post auto-hidden. User banned (Strike 4).';
+        }
+
+        await postAuthor.save();
+      }
+    }
+
+    await post.save();
+
+    return res.status(200).json({
+      success: true,
+      reportCount: nearbyReports.length,
+      isHidden,
+      message,
+    });
+  } catch (error) {
+    console.error('Error reporting post:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+};
+
 module.exports = {
   createPost,
   getPosts,
@@ -579,5 +696,6 @@ module.exports = {
   deletePost,
   likePost,
   dislikePost,
+  reportPost,
   getDistanceFromLatLonInMiles,
 };

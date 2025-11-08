@@ -6,7 +6,18 @@ const UserHandler = require('../handlers/UserHandler');
 // Controller function to create a new user
 const createUser = async (req, res) => {
   console.log('Creating a new user...');
-  const { userName, birthYear, birthMonth, sex, location, polarity, mbtiPersonality } = req.body;
+  const {
+    userName,
+    birthYear,
+    birthMonth,
+    sex,
+    location,
+    polarity,
+    mbtiPersonality,
+    pigeonId,
+    profilePictureUrl,
+    bio,
+  } = req.body;
 
   // Log the received data
   console.log('Received data:', {
@@ -17,6 +28,9 @@ const createUser = async (req, res) => {
     location,
     polarity,
     mbtiPersonality,
+    pigeonId,
+    profilePictureUrl,
+    bio,
   });
 
   // Check for missing required fields
@@ -27,20 +41,20 @@ const createUser = async (req, res) => {
     !sex ||
     !location ||
     !location.lat ||
-    !location.lon
+    !location.lon ||
+    !pigeonId
   ) {
     console.error('Missing required fields');
     return res.status(400).json({ message: 'Missing required fields' });
   }
 
   try {
-    const pigeonId = UserHandler.generatePigeonId();
     const userId = UserHandler.generateUUID();
 
-    // Create new user
+    // Create new user with pigeonId from frontend
     const user = new User({
       userId,
-      pigeonId,
+      pigeonId, // Use pigeonId from request body (frontend generates it)
       userName,
       birthYear,
       birthMonth,
@@ -48,6 +62,8 @@ const createUser = async (req, res) => {
       location,
       polarity,
       mbtiPersonality,
+      profilePictureUrl,
+      bio,
       lastActiveAt: new Date(),
     });
 
@@ -237,10 +253,36 @@ const getUserPosts = async (req, res) => {
   }
 };
 
+// Phase 3.4: Get user strikes and restrictions
+const getUserStrikes = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await User.findOne({ userId });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const activeStrikes = user.getActiveStrikes();
+    const restrictions = user.getCurrentRestrictions();
+
+    return res.status(200).json({
+      strikes: user.strikes, // All strikes for history
+      activeStrikes, // Only non-expired strikes
+      activeStrikeCount: activeStrikes.length,
+      restrictions, // Current permissions and cooldown
+    });
+  } catch (error) {
+    console.error('Error getting user strikes:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 module.exports = {
   createUser,
   login,
   updateUser,
   getUserById,
   getUserPosts,
+  getUserStrikes,
 };

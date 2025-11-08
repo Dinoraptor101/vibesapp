@@ -43,27 +43,28 @@ npm install
 npm run dev
 ```
 
-This starts both the frontend (localhost:3000) and backend (localhost:5001) in development mode.
+This starts both the frontend (localhost:5173) and backend (localhost:5001) in development mode.
 
 ## 📦 Applications
 
-### Web App (`apps/web`)
+### Web App (`apps/web-v2`)
 - **Technology**: React 18 + TypeScript
-- **Styling**: Custom CSS with theme system
-- **State Management**: React Query + Context API
-- **Build Tool**: Webpack with custom configuration
-- **Linting**: Biome
-- **Testing**: Jest + React Testing Library
+- **Styling**: Tailwind CSS with custom design tokens
+- **State Management**: Zustand + React Query
+- **Build Tool**: Vite
+- **Linting**: ESLint + TypeScript ESLint
+- **Formatting**: Biome
+- **Testing**: Vitest + React Testing Library
 
 ```bash
 # Development
-npm run start:web
+npm run start:web-v2
 
 # Build for production
-npm run build:web
+npm run build:web-v2
 
 # Run tests
-npm run test:web
+npm run test:web-v2
 ```
 
 ### API Server (`apps/api`)
@@ -147,7 +148,6 @@ cp .env.example .env
 
 ⚠️ **Important:** Different projects use different tools!
 
-- **apps/web**: Biome ONLY (linting + formatting)
 - **apps/web-v2**: ESLint (linting) + Biome (formatting)
 - **apps/api**: ESLint (linting)
 
@@ -160,7 +160,7 @@ cp .env.example .env
 The React application is deployed to Heroku with static file serving.
 
 ```bash
-nx deploy web
+npm run deploy:web-v2
 ```
 
 ### Backend (Heroku)
