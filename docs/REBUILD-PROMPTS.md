@@ -143,7 +143,7 @@ This ensures AI agents can pick up exactly where you left off!
 - [X] 3.1 - Post Components (✅ Complete - Jan 2025)
 - [X] 3.2 - Posts Feed (✅ Complete - Nov 7)
 - [X] 3.3 - Create Post (✅ Complete - Nov 7)
-- [ ] 3.4 - Vibes System (⏸️ Not started)
+- [ ] 3.4 - Community Moderation System (⏸️ Design complete, implementation pending)
 - [ ] 3.5 - Comments System (⏸️ Not started)
 
 ### Phase 4: Social (Week 7-9)
@@ -816,6 +816,53 @@ This ensures AI agents can pick up exactly where you left off!
 - **Status:** ✅ Phase 3.3 complete - Complete post creation system with S3 upload and geolocation
 - **Notes:** Image cropping, multiple images, and camera integration skipped as future enhancements
 - **Next:** Phase 3.4 - Vibes System (reaction improvements, scoring algorithm, recommendations)
+
+### Session 23 - November 7, 2025
+- **Completed:** Phase 3.4 Design Discussion & Documentation Update
+- **Time taken:** ~2 hours (no code changes)
+- **Context:** User requested conceptual overview of Phase 3.4 before implementation. Identified critical design conflict with app's transparent, no-algorithm philosophy. Complete redesign session.
+- **Design Changes:**
+  - **OLD DESIGN (Rejected):** Like/Dislike system with weighted vibe scoring, proximal_dislikes tracking, algorithmic recommendations, "Popular" sort based on vibe score
+  - **NEW DESIGN (Approved):** Heart/Report system with transparent community moderation
+  - **Core Philosophy:** "No hidden algorithms - only stated rules that everyone can see"
+- **Final Specifications (Locked In):**
+  - **Reactions:** Hearts only (removed dislikes entirely)
+  - **Moderation:** Report button with reasons (Pornographic, Spam, Hate Speech)
+  - **Auto-hide:** 3 reports from unique users within 50 miles = post hidden
+  - **Strike System:** Scenario A (all 24h, escalating restrictions)
+    - Strike 1: Can't post (24h cooldown)
+    - Strike 2: Can't post or comment (24h cooldown)
+    - Strike 3: Full read-only mode (24h cooldown)
+    - Strike 4: Permanent ban
+  - **Strike Decay:** 30-day sliding window (strikes older than 30 days don't count toward progression)
+  - **Geographic Radius:** 50 miles for community moderation
+  - **Report Flow:** 2-click (button → reason selection → submit)
+  - **Report Button:** Disappears after user reports (1 report per user per post)
+  - **Post Visibility:** Reported post hidden from reporter's feed immediately
+  - **Backend:** Separate reports array (not reusing reactions)
+  - **Post States:** Soft-delete (isDeleted: true) for hidden posts (admin can restore)
+  - **Sort Options:** Removed "Popular", kept only Recent and Nearby
+  - **Admin Queue:** Detailed view with post info, reporter details, author strikes, restore/ban actions
+- **Key Decisions From Q&A:**
+  1. All strikes reset to 24h (not cumulative)
+  2. Restrictions escalate with each strike
+  3. Strike 3 is read-only (can't interact), not full account suspension
+  4. Strike 4 is permanent ban (account deleted)
+  5. Strike decay is sliding window (automatic expiration after 30 days)
+  6. Reports from >50 miles queue for manual admin review (no auto-hide)
+  7. Report button is single-click to open modal (not 2-second hold)
+  8. Reported post disappears from reporter's feed immediately
+  9. Strike notifications show on next app open (modal with details)
+  10. Admin can restore posts and remove strikes
+- **Documentation Updated:**
+  - ✅ REBUILD-PROMPTS.md: Added complete Phase 3.4 prompt section with new design
+  - ⏳ PHASE-3.4-SUMMARY.md: Not yet created
+- **Issues:** None - purely design and documentation phase
+- **Status:** ✅ Phase 3.4 design locked in, documentation partially updated
+- **Next Steps:**
+  1. Create PHASE-3.4-SUMMARY.md with full technical specifications
+  2. Begin Phase 3.4 implementation (code changes)
+- **Next Phase:** Phase 3.4 - Community Moderation System implementation
 
 ### Session 21 - November 7, 2025
 - **Completed:** Prompt 3.2 - Posts Feed
@@ -2177,7 +2224,203 @@ Navigation Items:
 
 ## 📸 PHASE 3: Posts & Feed
 
-*[Continue with Phases 3-6 following same pattern...]*
+---
+
+### Prompt 3.4: Community Moderation System (Vibes System Redesign)
+
+**AI Recommendation:** 🎯 **Claude Sonnet** (Complex moderation logic with backend integration)
+
+**Status:** ⏸️ Not started  
+**Completed:** [ ] No  
+**Prerequisites:** Phase 3.1-3.3 completed  
+**Estimated Time:** 6-8 hours  
+**Reference:** REBUILD-ACTION-PLAN.md, Phase 3.4 design discussion (Nov 7, 2025)
+
+#### DESIGN CHANGE (Nov 7, 2025):
+**OLD:** Like/Dislike system with vibe score calculation (likes - dislikes)  
+**NEW:** Heart/Report system with community moderation
+
+#### PROMPT TO COPY:
+
+```
+Let's build Phase 3.4 - Community Moderation System
+
+Implement the heart/report reaction system with automated community moderation.
+
+Requirements:
+1. Replace like/dislike with heart/report buttons
+2. Report flow with reason selection (Pornographic, Spam, Hate Speech)
+3. Strike system with graduated punishments
+4. Auto-hide posts at 3 reports within 50 miles
+5. 30-day strike decay (sliding window)
+6. Admin review queue with detailed information
+7. Strike notifications with modal warnings
+
+Reference files:
+- /docs/REBUILD-PROMPTS.md (Phase 3.4 full specification)
+- apps/api/src/models/Post.js (existing Post model)
+- apps/api/src/models/User.js (existing User model)
+
+Key Technical Details:
+- Local community radius: 50 miles
+- Strike system: Strike 1-3 with escalating restrictions, Strike 4 = permanent ban
+- Each strike resets to 24h cooldown
+- Reports stored separately from reactions (new schema)
+- Soft-delete for hidden posts (isDeleted: true)
+```
+
+#### Expected Deliverables:
+
+**Frontend (apps/web-v2):**
+- [ ] Update PostActions component:
+  - [ ] Replace like button with heart button (❤️)
+  - [ ] Replace dislike button with report button (🚩)
+  - [ ] Remove vibe score display (just show heart count)
+- [ ] Create ReportModal component:
+  - [ ] Radio button selection: Pornographic, Spam, Hate Speech
+  - [ ] Submit button
+  - [ ] Cancel button
+  - [ ] 2-click flow (click report → select reason → submit)
+- [ ] Create StrikeNotificationModal component:
+  - [ ] Strike count display (X/3)
+  - [ ] Violation reason
+  - [ ] Cooldown duration message
+  - [ ] Community guidelines link
+  - [ ] Closes on acknowledge
+- [ ] Update FilterBar component:
+  - [ ] Remove "Popular" sort option
+  - [ ] Keep only: Recent, Nearby
+- [ ] Create useReportPost hook:
+  - [ ] React Query mutation for reporting
+  - [ ] Hide post from reporter's feed after report
+  - [ ] Update UI to disable report button
+- [ ] Create useUserStrikes hook:
+  - [ ] Fetch user's current strikes
+  - [ ] Check if user is in cooldown
+  - [ ] Block posting/commenting based on strike level
+- [ ] Update CreatePostModal:
+  - [ ] Check strike status before allowing post
+  - [ ] Show cooldown message if restricted
+- [ ] Add posting cooldown enforcement:
+  - [ ] Strike 1: Disable post creation only
+  - [ ] Strike 2: Disable post creation + commenting
+  - [ ] Strike 3: Full read-only mode (browse only)
+
+**Backend (apps/api):**
+- [ ] Update Post model:
+  - [ ] Add `reports` array: `[{ userId, reason, location, timestamp }]`
+  - [ ] Keep `reactions` for hearts only (remove dislikes)
+  - [ ] Add `isDeleted` field (soft-delete for hidden posts)
+  - [ ] Add `hiddenAt` timestamp
+  - [ ] Add `hiddenBy` (auto or admin)
+- [ ] Update User model:
+  - [ ] Add `strikes` array: `[{ reason, timestamp, expiresAt }]`
+  - [ ] Add method: `getActiveStrikes()` (strikes within 30 days)
+  - [ ] Add method: `getCurrentRestrictions()` (what user can/can't do)
+- [ ] Create report endpoint: POST /api/post/:postId/report
+  - [ ] Accept: { reason, location }
+  - [ ] Validate: 1 report per user per post
+  - [ ] Add report to post.reports array
+  - [ ] Check if 3 reports within 50 miles → auto-hide
+  - [ ] If auto-hide: add strike to user, soft-delete post
+  - [ ] Return: { success, reportCount, isHidden }
+- [ ] Create get strikes endpoint: GET /api/user/strikes
+  - [ ] Return user's current strikes (within 30 days)
+  - [ ] Return current restrictions
+  - [ ] Return cooldown end time
+- [ ] Update like endpoint: POST /api/post/:postId/like
+  - [ ] Remove dislike functionality
+  - [ ] Only handle "heart" reactions
+- [ ] Create admin review queue endpoint: GET /api/admin/reported-posts
+  - [ ] Return posts with 1+ reports
+  - [ ] Include: post data, reports (users + reasons), author strikes
+  - [ ] Sort by: report count, date
+  - [ ] Pagination support
+- [ ] Create admin restore endpoint: POST /api/admin/post/:postId/restore
+  - [ ] Restore soft-deleted post
+  - [ ] Remove strike from user
+  - [ ] Clear reports
+- [ ] Create admin ban endpoint: POST /api/admin/user/:userId/ban
+  - [ ] Permanently ban user
+  - [ ] Soft-delete all user's posts
+- [ ] Add posting enforcement middleware:
+  - [ ] Check user strikes before allowing post/comment creation
+  - [ ] Return 403 if user is in cooldown
+  - [ ] Return restriction details
+
+**Admin Panel (apps/web-v2/src/features/admin):**
+- [ ] Create ReportedPostsPage:
+  - [ ] List of reported posts with filters
+  - [ ] Filter by: All, Auto-hidden, Pending review
+  - [ ] Sort by: Most reports, Recent
+  - [ ] Pagination
+- [ ] Create ReportedPostCard:
+  - [ ] Post thumbnail + caption
+  - [ ] Report count + breakdown (Porn: 2, Spam: 1, etc.)
+  - [ ] Reporter usernames + locations
+  - [ ] Post author + strike history
+  - [ ] Actions: [Restore Post] [Keep Hidden] [Ban User]
+- [ ] Update AdminLayout navigation:
+  - [ ] Add "Reported Posts" link
+  - [ ] Badge showing count of pending reviews
+
+#### Validation Commands:
+
+```bash
+# Test user flow:
+1. Login as user
+2. View a post
+3. Click report button
+4. Select reason (e.g., Spam)
+5. Submit report
+6. Verify: post disappears from your feed
+7. Verify: report button is gone (can't report again)
+
+# Test auto-hide:
+1. Login as 3 different users within 50 miles
+2. All report the same post
+3. Verify: post is auto-hidden for everyone
+4. Verify: post author gets Strike 1 notification
+5. Verify: post author can't create posts for 24h
+
+# Test strike system:
+1. User gets Strike 1 → 24h posting cooldown
+2. User tries to create post → blocked with message
+3. Wait for 24h OR create another strike
+4. User gets Strike 2 → 24h posting + commenting cooldown
+5. User tries to comment → blocked
+6. User gets Strike 3 → 24h full read-only mode
+
+# Test strike decay:
+1. User has Strike 1 from 31 days ago
+2. Check strikes → should show 0 active strikes
+3. User can post normally
+
+# Test admin review:
+1. Login as admin
+2. Navigate to Reported Posts
+3. View post with reports
+4. See reporter details, reasons, author strikes
+5. Restore post → user's strike removed
+6. Or ban user → all posts hidden
+```
+
+#### Success Criteria:
+
+- Heart button shows count, no vibe score
+- Report button opens modal with 3 reasons
+- Can only report once per post
+- Reported post disappears from reporter's feed
+- 3 reports within 50 miles → auto-hide
+- Strike notification shows on next app open
+- Posting cooldown enforced based on strikes
+- Strike decay after 30 days (sliding window)
+- Admin can see all reported posts
+- Admin can restore or ban
+- All TypeScript errors resolved
+- Build successful
+
+**✋ STOP HERE - Confirm Phase 3.4 complete before Phase 3.5**
 
 ---
 

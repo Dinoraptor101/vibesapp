@@ -33,18 +33,26 @@
 
 ---
 
-## ✅ Finalized Feature Set (Updated Nov 5, 2025)
+## ✅ Finalized Feature Set (Updated Nov 7, 2025)
 
 ### Core Features (MVP - Week 1-6)
 1. **Authentication:** Pigeon ID system (password-only, non-regeneratable by users)
 2. **Posts:** Photo required + optional caption + location required
-3. **Vibes System:** Likes AND Dislikes
-   - Dislikes serve as community moderation (report functionality)
-   - User polarity is Yin/Yang balance (separate profile field for masculinity/femininity identity)
+3. **Community Moderation System (Vibes System Redesign):**
+   - **DESIGN CHANGE (Nov 7, 2025):** Replaced like/dislike with heart/report system
+   - Hearts for positive reactions (no vibe score calculation)
+   - Report button with reasons (Pornographic, Spam, Hate Speech)
+   - Geographic community moderation (50-mile radius)
+   - Auto-hide at 3 reports from unique users within 50 miles
+   - Strike system: 3 strikes (24h cooldowns each), 4th strike = permanent ban
+   - 30-day strike decay (sliding window)
+   - Transparent rules (no hidden algorithms)
+   - User polarity is Yin/Yang balance (separate profile field for masculinity/femininity identity, NOT related to moderation)
 4. **Feed Types:**
    - Nearby (location-based, **default 100km radius**, adjustable 50-150km in settings)
    - Following (posts from people you follow)
    - No algorithmic "For You" - anti-algorithm philosophy
+   - **Sort Options:** Recent, Nearby (Popular removed due to no vibe score)
 5. **Comments/Replies:** Threaded discussions on posts
 6. **Following System:** Users can follow each other, see follower/following counts
 7. **Direct Messaging:** Request-based DM (requires approval before messaging)
@@ -56,11 +64,13 @@
 13. **Online Presence:** Real-time online/offline indicators
 14. **User Profiles:** Username, avatar, bio, MBTI, polarity, age (calculated), posts grid
 15. **Settings Page:** Account tab (profile editing), Preferences tab (proximity range), Support tab (feedback, help)
-16. **Moderation:** Report system + Admin panel
-17. **Admin Panel:** Content moderation, user management, analytics
+16. **Moderation:** Report system + Admin panel with review queue
+17. **Admin Panel:** Content moderation, user management, analytics, strike management
 
 ### Removed/Replaced Features
-- ❌ Separate "dislike as report" - Now unified: dislike = report (community moderation)
+- ❌ Like/Dislike system with vibe score calculation → Heart/Report system
+- ❌ "Popular" sort option → No longer relevant without vibe scores
+- ❌ Algorithmic recommendations based on vibes
 - ❌ Complex recommendation algorithms
 - ❌ Email-based authentication
 - ❌ User-regeneratable passwords
@@ -71,7 +81,7 @@
 - 🔐 **Simple auth:** Pigeon ID system (password only)
 - 📸 **Photography-first:** Every post requires a photo
 - 🌍 **Location-aware:** Discover nearby content and people (default 100km, adjustable 50-150km)
-- 🛡️ **Community moderation:** Dislikes flag content for review
+- 🛡️ **Community moderation:** Transparent geographic-based moderation (50-mile radius)
 - 🔒 **Privacy-first:** DM requests require approval
 - 🧘 **ZEN Design:** Auto-save on blur, no "Save" buttons, silent error handling, one action per intent (Dieter Rams principles)
 - 📱 **Mobile-First:** 95% mobile usage, optimize for mobile experience
@@ -79,10 +89,12 @@
 
 ---
 
-### Admin Panel Features (Updated Nov 4, 2025)
+### Admin Panel Features (Updated Nov 7, 2025)
 - Password-protected route (`/admin`)
 - Single admin password (stored hashed in MongoDB)
-- Flagged posts management (auto-hide after 3 unique user dislikes)
+- **Reported posts review queue** (with filters, sort options)
+- **Post restore capability** (restore auto-hidden posts, remove strikes)
+- **User ban capability** (permanent Strike 4, hides all posts)
 - **Delete post capability** (single + bulk delete)
 - **Delete user capability** (soft delete - hides data, doesn't remove it)
 - **Delete orphaned S3 images** (images not attached to any post)
@@ -91,10 +103,13 @@
 - Email notifications (auto-hide alerts + weekly summary)
 - Analytics dashboard (posts/day, users/day, reports/day)
 
-### Key Technical Decisions (Confirmed Nov 5, 2025)
-- **Yin/Yang Polarity:** User profile field indicating masculinity/femininity identity (NOT a score, NOT related to likes/dislikes) - **binary toggle in Account settings (either Yin OR Yang, no middle state)**
-- **Vibes System:** Like + Dislike/Report (community moderation system, NOT related to user polarity)
-- **3-Dislike Threshold:** Post auto-hides after 3 unique user dislikes
+### Key Technical Decisions (Updated Nov 7, 2025)
+- **Yin/Yang Polarity:** User profile field indicating masculinity/femininity identity (NOT a score, NOT related to moderation) - **binary toggle in Account settings (either Yin OR Yang, no middle state)**
+- **Community Moderation:** Heart/Report system (geographic-based, transparent rules, NOT related to user polarity)
+- **3-Report Threshold:** Post auto-hides after 3 unique user reports within 50 miles
+- **Strike System:** Strike 1-3 (24h cooldowns, escalating restrictions), Strike 4 (permanent ban)
+- **Strike Decay:** 30-day sliding window (strikes older than 30 days don't count)
+- **Geographic Radius:** 50 miles for community moderation
 - **Proximity Range:** Default 100km, adjustable 50-150km in Settings → Preferences (hidden from posts grid display)
 - **Activity Cleanup:** Read notifications deleted after 7 days, unread persist forever (capped at 100k+)
 - **DM Request Cooldown:** 2 days if request declined
@@ -112,6 +127,8 @@
 - **Loading Rule:** < 1 second = no spinner, > 1 second = show spinner (global rule)
 - **Offline Indicator:** Small grey no-wifi icon in header (non-clickable)
 - **TODO (Post-MVP):** Age-based content filtering for child protection
+
+**Reference:** See PHASE-3.4-SUMMARY.md and REBUILD-PROMPTS.md (Prompt 3.4) for complete Phase 3.4 specification
 
 ---
 
@@ -528,14 +545,37 @@ export function Button({ className, variant, size, ...props }: ButtonProps) {
 - [ ] Loading states
 - [ ] Success/error handling
 
-#### Vibes System
-- [ ] Like button
-- [ ] Dislike button
-  - [ ] Counts as report (community moderation)
-  - [ ] Auto-hide post at 3 dislikes from unique users
+#### Community Moderation System (Vibes System Redesign)
+**DESIGN CHANGE (Nov 7, 2025):** Replaced like/dislike with heart/report system
+
+- [X] Heart button (replaces "like")
+- [ ] Report button (replaces "dislike")
+  - [ ] Report modal with reasons (Pornographic, Spam, Hate Speech)
+  - [ ] 1 report per user per post
+  - [ ] Auto-hide post at 3 reports from unique users within 50 miles
+  - [ ] Soft-delete (post recoverable by admin)
+- [ ] Strike system
+  - [ ] Strike 1: Can't post (24h)
+  - [ ] Strike 2: Can't post or comment (24h)
+  - [ ] Strike 3: Read-only mode (24h)
+  - [ ] Strike 4: Permanent ban
+  - [ ] 30-day strike decay (sliding window)
+- [ ] Strike notification modal (on app open after violation)
+- [ ] Admin review queue
+  - [ ] List reported posts with filters
+  - [ ] Detailed view (reports, reporters, author strikes)
+  - [ ] Restore/ban actions
 - [ ] Optimistic updates
-- [ ] Vibe count display (separate like/dislike counts)
-- [ ] User polarity display on profiles (Yin/Yang balance - separate identity field)
+- [ ] Heart count display (no vibe score calculation)
+- [ ] User polarity display on profiles (Yin/Yang balance - separate identity field, NOT related to moderation)
+
+**Key Changes:**
+- Removed "Popular" sort option (no longer has vibe score)
+- Hearts only for positive reactions
+- Reports for moderation (transparent rules, no hidden algorithms)
+- Geographic community moderation (50-mile radius)
+
+**Reference:** See PHASE-3.4-SUMMARY.md and REBUILD-PROMPTS.md (Prompt 3.4) for full specification
 
 #### Comments & Replies
 - [ ] Comment on post
