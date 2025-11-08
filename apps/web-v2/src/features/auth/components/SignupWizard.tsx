@@ -1,8 +1,11 @@
 import { Copy } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Input, Textarea } from '@/components/ui-next';
 import { useAuth } from '@/features/auth';
+import { uploadImage } from '@/features/posts/api/s3Service';
+import { compressImage } from '@/features/posts/utils/imageUtils';
+import { deleteCookie } from '@/lib';
 import { authApi } from '../services/authApi';
 import { generatePigeonId } from '../utils/pigeonIdGenerator';
 import { LocationStep } from './LocationStep';
@@ -33,11 +36,20 @@ const STEPS = [
 export function SignupWizard() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Clear any existing auth data when starting signup
+  useEffect(() => {
+    // Clear cookies without triggering navigation
+    deleteCookie('pigeonId');
+    deleteCookie('userId');
+  }, []);
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [copiedPigeonId, setCopiedPigeonId] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const [signupData, setSignupData] = useState<SignupData>({
     pigeonId: '',
@@ -100,6 +112,49 @@ export function SignupWizard() {
     }
   };
 
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError('Please select an image file');
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image must be less than 5MB');
+      return;
+    }
+
+    setIsUploadingImage(true);
+    setError('');
+
+    try {
+      // Compress image
+      const compressedBlob = await compressImage(file);
+
+      // Upload to S3
+      const imageKey = await uploadImage(compressedBlob);
+
+      // Construct CloudFront URL (using the CDN URL from backend)
+      const cloudFrontUrl = `https://d1pegm4swremw5.cloudfront.net/${imageKey}`;
+
+      // Update signup data with profile picture URL
+      setSignupData((prev) => ({ ...prev, profilePictureUrl: cloudFrontUrl }));
+    } catch (err) {
+      console.error('Error uploading image:', err);
+      setError('Failed to upload image. Please try again.');
+    } finally {
+      setIsUploadingImage(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   const handleSubmit = async () => {
     setError('');
     setIsSubmitting(true);
@@ -117,6 +172,7 @@ export function SignupWizard() {
 
       // Call backend API to create user
       const { pigeonId } = await authApi.signup({
+        pigeonId: signupData.pigeonId, // Send the frontend-generated Pigeon ID
         userName: signupData.userName,
         birthYear: signupData.birthYear,
         birthMonth: signupData.birthMonth,
@@ -299,7 +355,7 @@ export function SignupWizard() {
 
             <LocationStep
               location={signupData.location}
-              onLocationChange={(location: { lat: number; lon: number }) =>
+              onLocationChange={(location: { lat: number; lon: number } | null) =>
                 setSignupData((prev) => ({ ...prev, location }))
               }
             />
@@ -329,8 +385,21 @@ export function SignupWizard() {
                 )}
               </div>
 
-              <Button variant="outline" onClick={() => {}}>
-                Upload Photo
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+
+              <Button
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                loading={isUploadingImage}
+                disabled={isUploadingImage}
+              >
+                {isUploadingImage ? 'Uploading...' : 'Upload Photo'}
               </Button>
 
               <p className="text-sm text-text-secondary">JPG, PNG or WebP • Max 5MB</p>

@@ -6,11 +6,12 @@
  */
 
 import { AlertCircle } from 'lucide-react';
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, Card, CardContent, CardFooter, CardHeader, Input } from '@/components/ui-next';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui-next';
 import { useAuth } from '@/features/auth/context/useAuth';
+import { deleteCookie } from '@/lib';
 
 export function LoginForm() {
   const [pigeonId, setPigeonId] = useState('');
@@ -19,6 +20,12 @@ export function LoginForm() {
   const [showForgotModal, setShowForgotModal] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  // Clear any stale cookies when landing on login page
+  useEffect(() => {
+    deleteCookie('pigeonId');
+    deleteCookie('userId');
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

@@ -66,7 +66,7 @@ export async function fetchPosts(
  * Fetch a single post by ID
  */
 export async function getPostById(postId: string): Promise<Post> {
-  const response = await apiClient.get<PostResponse>(`/api/post/${postId}`);
+  const response = await apiClient.get<PostResponse>(`/api/posts/${postId}`);
   return response.post;
 }
 
@@ -74,7 +74,7 @@ export async function getPostById(postId: string): Promise<Post> {
  * Create a new post
  */
 export async function createPost(data: CreatePostPayload): Promise<Post> {
-  const response = await apiClient.post<PostResponse>('/api/post/create', data);
+  const response = await apiClient.post<PostResponse>('/api/posts/create', data);
   return response.post;
 }
 
@@ -88,12 +88,12 @@ export async function reactToPost(
   if (type === null) {
     // Remove reaction (unlike/undislike)
     // Note: Backend may need endpoint for this, assuming removing like/dislike
-    const response = await apiClient.delete<ReactionResponse>(`/api/post/${postId}/reaction`);
+    const response = await apiClient.delete<ReactionResponse>(`/api/posts/${postId}/reaction`);
     return response;
   }
 
   const endpoint = type === 'like' ? 'like' : 'dislike';
-  const response = await apiClient.post<ReactionResponse>(`/api/post/${postId}/${endpoint}`);
+  const response = await apiClient.post<ReactionResponse>(`/api/posts/${postId}/${endpoint}`);
 
   return response;
 }
@@ -102,7 +102,7 @@ export async function reactToPost(
  * Delete a post
  */
 export async function deletePost(postId: string): Promise<void> {
-  await apiClient.delete(`/api/post/${postId}`);
+  await apiClient.delete(`/api/posts/${postId}`);
 }
 
 /**
@@ -121,7 +121,7 @@ export async function getNearbyPosts(
     limit: limit.toString(),
   });
 
-  const response = await apiClient.get<ApiPostsResponse>(`/api/post/nearby?${params.toString()}`);
+  const response = await apiClient.get<ApiPostsResponse>(`/api/posts/nearby?${params.toString()}`);
 
   return response.posts;
 }

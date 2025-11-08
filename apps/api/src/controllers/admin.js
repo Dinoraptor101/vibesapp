@@ -717,6 +717,198 @@ const updateSettings = async (req, res) => {
   }
 };
 
+// Phase 3.4: Get reported posts (community reports)
+const getReportedPosts = async (req, res) => {
+  try {
+    const { filter = 'all', sort = 'most-reports', page = 1, limit = 20 } = req.query;
+    const skip = (page - 1) * limit;
+
+    // Build query based on filter
+    const query = { 'reports.0': { $exists: true } }; // Has at least 1 report
+
+    if (filter === 'auto-hidden') {
+      query.isHidden = true;
+      query.hiddenBy = 'auto';
+    } else if (filter === 'admin-hidden') {
+      query.isHidden = true;
+      query.hiddenBy = 'admin';
+    } else if (filter === 'under-review') {
+      query.isHidden = false; // Not hidden yet but has reports
+    }
+
+    // Build sort
+    const sortQuery = {};
+    if (sort === 'most-reports') {
+      // We'll add report count in the aggregation
+      sortQuery.reportCount = -1;
+    } else if (sort === 'recent') {
+      sortQuery.createdAt = -1;
+    } else if (sort === 'oldest') {
+      sortQuery.createdAt = 1;
+    }
+
+    // Use aggregation to add reportCount field
+    const posts = await Post.aggregate([
+      { $match: query },
+      {
+        $addFields: {
+          reportCount: { $size: '$reports' },
+        },
+      },
+      { $sort: sortQuery },
+      { $skip: skip },
+      { $limit: parseInt(limit) },
+    ]);
+
+    // Get reporters for each post
+    const postsWithReporters = await Promise.all(
+      posts.map(async (post) => {
+        const reporterIds = post.reports.map((r) => r.userId);
+        const reporters = await User.find({ userId: { $in: reporterIds } }).select(
+          'userId userName'
+        );
+
+        // Group reports by reason
+        const reportsByReason = post.reports.reduce((acc, report) => {
+          acc[report.reason] = (acc[report.reason] || 0) + 1;
+          return acc;
+        }, {});
+
+        return {
+          ...post,
+          reporters: reporters.map((u) => ({ userId: u.userId, userName: u.userName })),
+          reportsByReason,
+        };
+      })
+    );
+
+    const total = await Post.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      posts: postsWithReporters,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching reported posts:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching reported posts',
+      error: error.message,
+    });
+  }
+};
+
+// Phase 3.4: Restore a post (unhide and remove strike from author)
+const restorePost = async (req, res) => {
+  const { postId } = req.params;
+
+  try {
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ success: false, message: 'Post not found' });
+    }
+
+    // Restore post
+    post.isHidden = false;
+    post.hiddenAt = null;
+    post.hiddenBy = null;
+    await post.save();
+
+    // Remove most recent strike from author (if any)
+    const postAuthor = await User.findOne({ userId: post.user.userId });
+    if (postAuthor && postAuthor.strikes.length > 0) {
+      // Remove the most recent strike
+      postAuthor.strikes.sort((a, b) => b.timestamp - a.timestamp);
+      postAuthor.strikes.shift(); // Remove first (most recent)
+
+      // If user was banned (Strike 4), unban them
+      if (postAuthor.isBanned) {
+        postAuthor.isBanned = false;
+        postAuthor.bannedAt = null;
+      }
+
+      await postAuthor.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Post restored successfully',
+      post,
+    });
+  } catch (error) {
+    console.error('Error restoring post:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error restoring post',
+      error: error.message,
+    });
+  }
+};
+
+// Phase 3.4: Ban user (Strike 4) and hide all their posts
+const banUser = async (req, res) => {
+  const { userId } = req.params;
+  const { reason = 'Banned by admin' } = req.body;
+
+  try {
+    const user = await User.findOne({ userId });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Add Strike 4 (permanent ban strike)
+    const expiresAt = new Date();
+    expiresAt.setFullYear(expiresAt.getFullYear() + 100); // Effectively permanent
+
+    user.strikes.push({
+      reason,
+      timestamp: new Date(),
+      expiresAt,
+    });
+
+    user.isBanned = true;
+    user.bannedAt = new Date();
+    await user.save();
+
+    // Hide all user's posts
+    const updateResult = await Post.updateMany(
+      { 'user.userId': userId },
+      {
+        $set: {
+          isHidden: true,
+          hiddenAt: new Date(),
+          hiddenBy: 'admin',
+        },
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `User banned successfully. ${updateResult.modifiedCount} posts hidden.`,
+      user: {
+        userId: user.userId,
+        userName: user.userName,
+        isBanned: user.isBanned,
+        strikeCount: user.strikes.length,
+      },
+      postsHidden: updateResult.modifiedCount,
+    });
+  } catch (error) {
+    console.error('Error banning user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error banning user',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   adminLogin,
   updateBalance,
@@ -732,4 +924,7 @@ module.exports = {
   getDashboardMetrics,
   getActivityData,
   updateSettings,
+  getReportedPosts, // Phase 3.4
+  restorePost, // Phase 3.4
+  banUser, // Phase 3.4
 };

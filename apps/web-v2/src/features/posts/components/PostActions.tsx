@@ -1,25 +1,25 @@
 /**
  * PostActions Component
  *
- * Reusable action buttons for posts (like, dislike, comment, share).
- * Displays vibe score and handles optimistic UI updates.
+ * Reusable action buttons for posts (heart, report, comment, share).
+ * Handles reactions and moderation reports with optimistic UI updates.
+ *
+ * Design Change (Nov 7, 2025): Replaced like/dislike with heart/report system
  */
 
-import { Heart, MessageCircle, Share2, ThumbsDown } from 'lucide-react';
+import { Flag, Heart, MessageCircle, Share2 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui-next';
 import { cn } from '@/lib/cn';
 
-type ReactionType = 'like' | 'dislike' | null;
-
 interface PostActionsProps {
   postId: string;
-  initialLikes: number;
-  initialDislikes: number;
+  initialHearts: number;
   initialComments: number;
-  initialVibeScore: number;
-  userReaction?: ReactionType;
-  onReaction?: (postId: string, type: ReactionType) => void;
+  userHasHearted?: boolean;
+  userHasReported?: boolean;
+  onHeart?: (postId: string) => void;
+  onReport?: (postId: string) => void;
   onComment?: (postId: string) => void;
   onShare?: (postId: string) => void;
   className?: string;
@@ -27,47 +27,32 @@ interface PostActionsProps {
 
 export function PostActions({
   postId,
-  initialLikes,
-  initialDislikes,
+  initialHearts,
   initialComments,
-  initialVibeScore,
-  userReaction,
-  onReaction,
+  userHasHearted,
+  userHasReported,
+  onHeart,
+  onReport,
   onComment,
   onShare,
   className,
 }: PostActionsProps) {
-  const [reaction, setReaction] = useState<ReactionType>(userReaction ?? null);
-  const [likes, setLikes] = useState(initialLikes);
-  const [dislikes, setDislikes] = useState(initialDislikes);
-  const [vibeScore, setVibeScore] = useState(initialVibeScore);
+  const [hasHearted, setHasHearted] = useState(userHasHearted ?? false);
+  const [hasReported, setHasReported] = useState(userHasReported ?? false);
+  const [hearts, setHearts] = useState(initialHearts);
 
-  // Handle like action
-  const handleLike = () => {
-    const newReaction = reaction === 'like' ? null : 'like';
-    const likeDelta = reaction === 'like' ? -1 : reaction === 'dislike' ? 0 : 1;
-    const dislikeDelta = reaction === 'dislike' ? -1 : 0;
-
-    setReaction(newReaction);
-    setLikes((prev) => prev + likeDelta);
-    setDislikes((prev) => prev + dislikeDelta);
-    setVibeScore((prev) => prev + likeDelta - dislikeDelta);
-
-    onReaction?.(postId, newReaction);
+  // Handle heart action
+  const handleHeart = () => {
+    const newHasHearted = !hasHearted;
+    setHasHearted(newHasHearted);
+    setHearts((prev) => prev + (newHasHearted ? 1 : -1));
+    onHeart?.(postId);
   };
 
-  // Handle dislike action
-  const handleDislike = () => {
-    const newReaction = reaction === 'dislike' ? null : 'dislike';
-    const dislikeDelta = reaction === 'dislike' ? -1 : reaction === 'like' ? 0 : 1;
-    const likeDelta = reaction === 'like' ? -1 : 0;
-
-    setReaction(newReaction);
-    setDislikes((prev) => prev + dislikeDelta);
-    setLikes((prev) => prev + likeDelta);
-    setVibeScore((prev) => prev - dislikeDelta + likeDelta);
-
-    onReaction?.(postId, newReaction);
+  // Handle report action
+  const handleReport = () => {
+    setHasReported(true);
+    onReport?.(postId);
   };
 
   // Handle comment action
@@ -91,51 +76,21 @@ export function PostActions({
     return count.toString();
   };
 
-  // Get vibe score color
-  const getVibeColor = (score: number): string => {
-    if (score > 20) return 'text-green-600 dark:text-green-500';
-    if (score > 0) return 'text-blue-600 dark:text-blue-500';
-    if (score < -20) return 'text-red-600 dark:text-red-500';
-    if (score < 0) return 'text-orange-600 dark:text-orange-500';
-    return 'text-gray-600 dark:text-gray-400';
-  };
-
   return (
     <div className={cn('flex items-center gap-1', className)}>
-      {/* Like button */}
+      {/* Heart button */}
       <Button
         variant="ghost"
         size="sm"
-        onClick={handleLike}
+        onClick={handleHeart}
         className={cn(
           'gap-1.5 text-gray-600 dark:text-gray-400',
-          reaction === 'like' && 'text-pink-600 dark:text-pink-500'
+          hasHearted && 'text-pink-600 dark:text-pink-500'
         )}
-        aria-label={reaction === 'like' ? 'Unlike post' : 'Like post'}
+        aria-label={hasHearted ? 'Remove heart' : 'Heart post'}
       >
-        <Heart
-          className={cn('w-5 h-5', reaction === 'like' && 'fill-current')}
-          aria-hidden="true"
-        />
-        <span className="text-sm font-medium">{formatCount(likes)}</span>
-      </Button>
-
-      {/* Dislike button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={handleDislike}
-        className={cn(
-          'gap-1.5 text-gray-600 dark:text-gray-400',
-          reaction === 'dislike' && 'text-purple-600 dark:text-purple-500'
-        )}
-        aria-label={reaction === 'dislike' ? 'Remove dislike' : 'Dislike post'}
-      >
-        <ThumbsDown
-          className={cn('w-5 h-5', reaction === 'dislike' && 'fill-current')}
-          aria-hidden="true"
-        />
-        <span className="text-sm font-medium">{formatCount(dislikes)}</span>
+        <Heart className={cn('w-5 h-5', hasHearted && 'fill-current')} aria-hidden="true" />
+        <span className="text-sm font-medium">{formatCount(hearts)}</span>
       </Button>
 
       {/* Comment button */}
@@ -161,14 +116,18 @@ export function PostActions({
         <Share2 className="w-5 h-5" aria-hidden="true" />
       </Button>
 
-      {/* Vibe score */}
-      <div className="ml-auto flex items-center gap-1.5">
-        <span className="text-xs text-gray-500 dark:text-gray-400">Vibe</span>
-        <span className={cn('text-sm font-bold', getVibeColor(vibeScore))}>
-          {vibeScore > 0 ? '+' : ''}
-          {vibeScore}
-        </span>
-      </div>
+      {/* Report button - hidden after user reports */}
+      {!hasReported && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleReport}
+          className="ml-auto text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500"
+          aria-label="Report post"
+        >
+          <Flag className="w-5 h-5" aria-hidden="true" />
+        </Button>
+      )}
     </div>
   );
 }

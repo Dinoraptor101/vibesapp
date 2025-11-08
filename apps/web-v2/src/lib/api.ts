@@ -99,8 +99,8 @@ class ApiClient {
           apiError.message = (data?.message as string) || (data?.error as string) || 'Server error';
 
           // Handle authentication errors
-          if (error.response.status === 401) {
-            // Clear auth cookies
+          if (error.response.status === 401 || error.response.status === 403) {
+            // Clear auth cookies on unauthorized or forbidden (invalid credentials)
             deleteCookie('pigeonId');
             deleteCookie('userId');
             // Redirect to login (will be handled by auth context)

@@ -4,21 +4,13 @@ This monorepo uses different linting strategies for different applications:
 
 ## ⚠️ Important: Project-Specific Tools
 
-### Frontend V1 (`apps/web`) - Biome Only
-- **Location**: `apps/web/biome.json`
-- **Language**: TypeScript/JavaScript/CSS
-- **Tool**: **Biome** (both linting AND formatting)
-- **Run with**: `npm run lint` (from apps/web directory)
-- **Format with**: `npm run format` (from apps/web directory)
-- **⚠️ DO NOT**: Add ESLint config to this project - it uses Biome exclusively
-
-### Frontend V2 (`apps/web-v2`) - ESLint + Biome
+### Frontend (`apps/web-v2`) - ESLint + Biome
 - **Location**: `apps/web-v2/eslint.config.js` and `apps/web-v2/biome.json`
 - **Language**: TypeScript/JavaScript/CSS
 - **Linting Tool**: **ESLint** + TypeScript ESLint
 - **Formatting Tool**: **Biome** (formatting only)
 - **Run lint**: `npm run lint` (from apps/web-v2 directory)
-- **Note**: Uses ESLint for linting, Biome for formatting
+- **Run format**: `npm run format` (from apps/web-v2 directory)
 
 ### Backend (`apps/api`) - ESLint
 - **Location**: `apps/api/eslint.config.mjs`
@@ -32,12 +24,6 @@ This monorepo uses different linting strategies for different applications:
 - **Tool**: Biome (formatting)
 
 ## Why Different Tools?
-
-### Biome for apps/web
-- **Fast**: Rust-based, extremely fast performance
-- **All-in-one**: Handles both linting and formatting
-- **CSS Support**: Can lint and format CSS, including Tailwind directives
-- **No ESLint**: Completely replaces ESLint + Prettier for this project
 
 ### ESLint + Biome for apps/web-v2
 - **ESLint**: For comprehensive React-specific linting (react-refresh, react-hooks, etc.)
@@ -82,19 +68,19 @@ Biome configurations **must** include VCS settings to respect `.gitignore`:
 
 ## Common Pitfalls
 
-### ❌ DON'T: Add ESLint to apps/web
+### ❌ DON'T: Mix linting and formatting tools incorrectly
 ```bash
-# This is WRONG - apps/web uses Biome, not ESLint
-cd apps/web
-npm install eslint  # ❌ Don't do this!
+# Don't use Biome for linting in web-v2
+cd apps/web-v2
+biome lint src/  # ❌ Use ESLint instead
 ```
 
-### ✅ DO: Use Biome for apps/web
+### ✅ DO: Use the right tool for each job
 ```bash
 # Correct approach
-cd apps/web
-npm run lint        # Uses Biome
-npm run format      # Uses Biome
+cd apps/web-v2
+npm run lint        # Uses ESLint for linting
+npm run format      # Uses Biome for formatting
 ```
 
 ### ❌ DON'T: Forget VCS config in biome.json

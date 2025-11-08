@@ -61,7 +61,7 @@ export function FilterBar({
       {/* Divider */}
       <div className="w-px h-6 bg-border shrink-0" />
 
-      {/* Sort Options */}
+      {/* Sort Options - Popular removed (Nov 7, 2025: no vibe score) */}
       <div className="flex items-center gap-1 shrink-0">
         <Button
           variant="ghost"
@@ -70,14 +70,6 @@ export function FilterBar({
           className={cn(sortOption === 'recent' && 'bg-surface-alt')}
         >
           Recent
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onSortChange('popular')}
-          className={cn(sortOption === 'popular' && 'bg-surface-alt')}
-        >
-          Popular
         </Button>
         <Button
           variant="ghost"

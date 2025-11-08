@@ -25,6 +25,7 @@ export { PostActions } from './components/PostActions';
 export { PostCard } from './components/PostCard';
 export { PostSkeleton } from './components/PostSkeleton';
 export { PostsFeed } from './components/PostsFeed';
+export { ReportModal } from './components/ReportModal';
 export { UserBadge } from './components/UserBadge';
 
 // Hooks

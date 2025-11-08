@@ -9,7 +9,7 @@ import { Button, Input } from '@/components/ui-next';
 
 interface LocationStepProps {
   location: { lat: number; lon: number } | null;
-  onLocationChange: (location: { lat: number; lon: number }) => void;
+  onLocationChange: (location: { lat: number; lon: number } | null) => void;
 }
 
 export function LocationStep({ location, onLocationChange }: LocationStepProps) {
@@ -183,9 +183,10 @@ export function LocationStep({ location, onLocationChange }: LocationStepProps) 
           <Button
             variant="outline"
             onClick={() => {
-              onLocationChange({ lat: 0, lon: 0 });
+              onLocationChange(null); // Reset to null to show location picker again
               setManualEntry(false);
               setError('');
+              setCityName(''); // Clear city name input
             }}
             className="w-full"
           >

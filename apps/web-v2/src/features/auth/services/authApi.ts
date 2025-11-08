@@ -26,6 +26,7 @@ interface LoginResponse {
 }
 
 interface SignupData {
+  pigeonId: string; // Frontend generates this
   userName: string;
   birthYear: number;
   birthMonth: number;
@@ -75,7 +76,7 @@ export const authApi = {
    * Login with Pigeon ID (password)
    */
   async login(pigeonId: string): Promise<User> {
-    const response = await apiClient.get<LoginResponse>(`/api/user/login/${pigeonId}`);
+    const response = await apiClient.get<LoginResponse>(`/api/users/login/${pigeonId}`);
     return transformUserData(response);
   },
 
@@ -83,7 +84,7 @@ export const authApi = {
    * Create new user account
    */
   async signup(data: SignupData): Promise<{ user: User; pigeonId: string }> {
-    const response = await apiClient.post<SignupResponse>('/api/user/create', data);
+    const response = await apiClient.post<SignupResponse>('/api/users/create', data);
     return {
       user: transformUserData(response),
       pigeonId: response.pigeonId,
@@ -94,7 +95,7 @@ export const authApi = {
    * Get current user data by userId
    */
   async getCurrentUser(userId: string): Promise<User> {
-    const response = await apiClient.get<LoginResponse>(`/api/user/${userId}`);
+    const response = await apiClient.get<LoginResponse>(`/api/users/${userId}`);
     return transformUserData(response);
   },
 
@@ -114,7 +115,7 @@ export const authApi = {
       };
     }>
   ): Promise<User> {
-    const response = await apiClient.put<LoginResponse>(`/api/user/${userId}`, data);
+    const response = await apiClient.put<LoginResponse>(`/api/users/${userId}`, data);
     return transformUserData(response);
   },
 
