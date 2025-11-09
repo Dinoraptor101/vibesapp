@@ -4,12 +4,20 @@
  * Displays a single post with full details, comments, and interactions.
  */
 
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout';
 import { Button } from '@/components/ui-next';
-import { PostCard, usePost, reactToPost, ReportPostDialog } from '@/features/posts';
+import {
+  CommentInput,
+  CommentList,
+  PostCard,
+  ReportPostDialog,
+  reactToPost,
+  useCreateComment,
+  usePost,
+} from '@/features/posts';
 
 export function PostDetailPage() {
   const { postId } = useParams<{ postId: string }>();
@@ -17,6 +25,9 @@ export function PostDetailPage() {
   const { post, isLoading, isError, error, refetch } = usePost(postId || '');
   const [reportingPostId, setReportingPostId] = useState<string | null>(null);
   const [isLiking, setIsLiking] = useState(false);
+  const [replyTo, setReplyTo] = useState<{ id: string; username: string } | undefined>();
+
+  const createComment = useCreateComment(postId || '');
 
   const handleLike = async (postId: string) => {
     if (isLiking || !post) return;
@@ -40,9 +51,26 @@ export function PostDetailPage() {
     setReportingPostId(postId);
   };
 
-  const handleComment = (postId: string) => {
-    // TODO: Scroll to comments section or open comment modal
-    console.log('Comment on post:', postId);
+  const handleComment = () => {
+    // Scroll to comments section
+    const commentsSection = document.getElementById('comments-section');
+    commentsSection?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleSubmitComment = async (text: string) => {
+    try {
+      await createComment.mutateAsync(text);
+    } catch (error) {
+      console.error('Failed to create comment:', error);
+    }
+  };
+
+  const handleReply = (commentId: string, username: string) => {
+    setReplyTo({ id: commentId, username });
+  };
+
+  const handleCancelReply = () => {
+    setReplyTo(undefined);
   };
 
   if (isLoading) {
@@ -91,9 +119,24 @@ export function PostDetailPage() {
           onComment={handleComment}
         />
 
-        {/* TODO: Add comments section */}
-        <div className="mt-6 p-6 bg-surface-alt rounded-lg border border-border">
-          <p className="text-text-tertiary text-sm text-center">Comments section coming soon...</p>
+        {/* Comments Section */}
+        <div id="comments-section" className="mt-6 space-y-4">
+          {/* Section Header */}
+          <div className="flex items-center gap-2 px-1">
+            <MessageCircle className="w-5 h-5 text-text-tertiary" />
+            <h2 className="text-lg font-semibold text-text-primary">Comments</h2>
+          </div>
+
+          {/* Comment Input */}
+          <CommentInput
+            onSubmit={handleSubmitComment}
+            replyTo={replyTo}
+            onCancelReply={handleCancelReply}
+            disabled={createComment.isPending}
+          />
+
+          {/* Comment List */}
+          <CommentList postId={postId || ''} onReply={handleReply} />
         </div>
       </div>
 
