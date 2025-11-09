@@ -16,6 +16,10 @@ export type {
 } from './types';
 
 // Components
+export { CommentCard } from './components/CommentCard';
+export { CommentInput } from './components/CommentInput';
+export { CommentList } from './components/CommentList';
+export { CommentSkeleton } from './components/CommentSkeleton';
 export { CreatePostForm } from './components/CreatePostForm';
 export { CreatePostModal } from './components/CreatePostModal';
 export { FilterBar } from './components/FilterBar';
@@ -30,11 +34,16 @@ export { ReportPostDialog } from './components/ReportPostDialog';
 export { UserBadge } from './components/UserBadge';
 
 // Hooks
+export { useComments } from './hooks/useComments';
+export { useCreateComment } from './hooks/useCreateComment';
 export { useCreatePost } from './hooks/useCreatePost';
+export { useDeleteComment } from './hooks/useDeleteComment';
+export { useHeartComment } from './hooks/useHeartComment';
 export { useInfinitePosts } from './hooks/useInfinitePosts';
 export { usePost } from './hooks/usePost';
 export { usePostFilters } from './hooks/usePostFilters';
 export type { FeedFilters, SortOption } from './hooks/usePostFilters';
+export { useReportPost } from './hooks/useReportPost';
 
 // API Services
 export {

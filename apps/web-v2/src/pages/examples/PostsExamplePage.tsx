@@ -111,15 +111,15 @@ export default function PostsExamplePage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLike = (postId: string) => {
-    console.log(`Like post ${postId}`);
+    console.log('Like post:', postId);
   };
 
-  const handleDislike = (postId: string) => {
-    console.log(`Dislike post ${postId}`);
+  const handleReport = (postId: string) => {
+    console.log('Report post:', postId);
   };
 
   const handleComment = (postId: string) => {
-    console.log(`Comment on post ${postId}`);
+    console.log('Comment on post:', postId);
   };
 
   const toggleLoading = () => {
@@ -162,7 +162,7 @@ export default function PostsExamplePage() {
                 key={post._id}
                 post={post}
                 onLike={handleLike}
-                onDislike={handleDislike}
+                onReport={handleReport}
                 onComment={handleComment}
               />
             ))}
@@ -178,7 +178,7 @@ export default function PostsExamplePage() {
             <PostCard
               post={samplePosts[0]}
               onLike={handleLike}
-              onDislike={handleDislike}
+              onReport={handleReport}
               onComment={handleComment}
             />
           </div>
@@ -188,7 +188,7 @@ export default function PostsExamplePage() {
             <PostCard
               post={samplePosts[1]}
               onLike={handleLike}
-              onDislike={handleDislike}
+              onReport={handleReport}
               onComment={handleComment}
             />
           </div>
@@ -198,7 +198,7 @@ export default function PostsExamplePage() {
             <PostCard
               post={samplePosts[2]}
               onLike={handleLike}
-              onDislike={handleDislike}
+              onReport={handleReport}
               onComment={handleComment}
             />
           </div>
