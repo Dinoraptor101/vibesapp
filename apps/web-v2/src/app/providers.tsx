@@ -6,6 +6,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import type React from 'react';
+import { Toaster } from 'sonner';
 import { AdminAuthProvider } from '@/features/admin';
 import { ThemeProvider } from '@/lib/theme';
 
@@ -29,6 +30,7 @@ export function Providers({ children }: ProvidersProps): JSX.Element {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AdminAuthProvider>
+          <Toaster position="top-right" richColors />
           {children}
           {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
         </AdminAuthProvider>
