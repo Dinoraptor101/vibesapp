@@ -1,13 +1,14 @@
 /**
  * PostCard Component
  *
- * Displays a post in the feed with image, text, author info, and vibe actions.
+ * Displays a post in the feed with image, text, author info, and interaction actions.
  * Clickable to view full post details.
  */
 
-import { MessageSquare, ThumbsDown, ThumbsUp } from 'lucide-react';
+import { MessageSquare, Heart, Flag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui-next';
+import { useAuth } from '@/features/auth';
 import { formatRelativeTime } from '@/lib/utils';
 import type { Post } from '../types';
 import { UserBadge } from './UserBadge';
@@ -15,18 +16,27 @@ import { UserBadge } from './UserBadge';
 interface PostCardProps {
   post: Post;
   onLike?: (postId: string) => void;
-  onDislike?: (postId: string) => void;
+  onReport?: (postId: string) => void;
   onComment?: (postId: string) => void;
 }
 
-export function PostCard({ post, onLike, onDislike, onComment }: PostCardProps) {
+export function PostCard({ post, onLike, onReport, onComment }: PostCardProps) {
+  const { user: currentUser } = useAuth();
+
   // Calculate stats from reactions
   const likes = post.reactions.filter((r) => r.type === 'like').length;
-  const dislikes = post.reactions.filter((r) => r.type === 'dislike').length;
-  const vibesScore = likes - dislikes;
 
-  // Determine if current user has reacted (TODO: implement when auth is fully integrated)
-  // const userReaction = post.reactions.find(r => r.userId === currentUser?._id)?.type;
+  // Check if current user has liked this post
+  const userHasLiked = currentUser
+    ? post.reactions.some((r) => r.type === 'like' && r.userId === currentUser._id)
+    : false;
+
+  // Check if current user can report (not their own post)
+  const canReport = currentUser && post.user.userId !== currentUser._id;
+
+  // Construct full image URL from CloudFront CDN
+  const CDN_URL = import.meta.env.VITE_CDN_URL || 'https://d1pegm4swremw5.cloudfront.net';
+  const imageUrl = post.image.startsWith('http') ? post.image : `${CDN_URL}/${post.image}`;
 
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -34,10 +44,10 @@ export function PostCard({ post, onLike, onDislike, onComment }: PostCardProps) 
     onLike?.(post._id);
   };
 
-  const handleDislike = (e: React.MouseEvent) => {
+  const handleReport = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    onDislike?.(post._id);
+    onReport?.(post._id);
   };
 
   const handleComment = (e: React.MouseEvent) => {
@@ -60,36 +70,35 @@ export function PostCard({ post, onLike, onDislike, onComment }: PostCardProps) 
         {/* Post Image */}
         <div className="relative aspect-square bg-surface-alt overflow-hidden">
           <img
-            src={post.image}
+            src={imageUrl}
             alt={post.text || 'Post image'}
             className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
             loading="lazy"
+            onError={(e) => {
+              // Fallback for broken images
+              e.currentTarget.src = 'https://via.placeholder.com/400?text=Image+Not+Found';
+            }}
           />
         </div>
 
         {/* Post Actions */}
         <div className="p-4">
           <div className="flex items-center gap-4 mb-3">
-            {/* Like */}
+            {/* Like (Heart) */}
             <button
               type="button"
               onClick={handleLike}
-              className="flex items-center gap-1.5 text-text-secondary hover:text-vibe-positive transition-colors group"
-              aria-label={`Like post (${likes} likes)`}
+              className={`flex items-center gap-1.5 transition-colors group ${
+                userHasLiked ? 'text-vibe-positive' : 'text-text-secondary hover:text-vibe-positive'
+              }`}
+              aria-label={`${userHasLiked ? 'Unlike' : 'Like'} post (${likes} likes)`}
             >
-              <ThumbsUp className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              <Heart
+                className={`w-5 h-5 group-hover:scale-110 transition-transform ${
+                  userHasLiked ? 'fill-current' : ''
+                }`}
+              />
               <span className="text-sm font-medium">{likes}</span>
-            </button>
-
-            {/* Dislike */}
-            <button
-              type="button"
-              onClick={handleDislike}
-              className="flex items-center gap-1.5 text-text-secondary hover:text-vibe-negative transition-colors group"
-              aria-label={`Dislike post (${dislikes} dislikes)`}
-            >
-              <ThumbsDown className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium">{dislikes}</span>
             </button>
 
             {/* Comment */}
@@ -102,22 +111,17 @@ export function PostCard({ post, onLike, onDislike, onComment }: PostCardProps) 
               <MessageSquare className="w-5 h-5 group-hover:scale-110 transition-transform" />
             </button>
 
-            {/* Vibes Score */}
-            <div className="ml-auto flex items-center gap-1.5">
-              <span className="text-xs text-text-tertiary">Vibes:</span>
-              <span
-                className={`text-sm font-bold ${
-                  vibesScore > 0
-                    ? 'text-vibe-positive'
-                    : vibesScore < 0
-                      ? 'text-vibe-negative'
-                      : 'text-text-secondary'
-                }`}
+            {/* Report (only if not author) */}
+            {canReport && (
+              <button
+                type="button"
+                onClick={handleReport}
+                className="flex items-center gap-1.5 text-text-secondary hover:text-warning transition-colors group ml-auto"
+                aria-label="Report post"
               >
-                {vibesScore > 0 ? '+' : ''}
-                {vibesScore}
-              </span>
-            </div>
+                <Flag className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              </button>
+            )}
           </div>
 
           {/* Post Text/Caption */}

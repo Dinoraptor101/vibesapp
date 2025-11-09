@@ -69,9 +69,15 @@ export function useInfinitePosts({
   // Flatten all pages into single posts array
   const posts = data?.pages.flatMap((page) => page.posts) ?? [];
 
-  // Mutation for liking a post
+  // Mutation for liking/unliking a post (toggles)
   const likeMutation = useMutation({
-    mutationFn: (postId: string) => reactToPost(postId, 'like'),
+    mutationFn: (postId: string) => {
+      // Check current like state to determine action
+      const post = posts.find((p) => p._id === postId);
+      const hasLike = post?.reactions.some((r) => r.type === 'like');
+      // If already liked, unlike (null), otherwise like
+      return reactToPost(postId, hasLike ? null : 'like');
+    },
     onMutate: async (postId) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey });

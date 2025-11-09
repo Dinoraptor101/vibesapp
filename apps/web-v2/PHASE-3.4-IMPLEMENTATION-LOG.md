@@ -46,36 +46,51 @@ const handleReport = () => {
 )}
 ```
 
-### 2. ReportModal Component
-**File:** `src/features/posts/components/ReportModal.tsx` (NEW)
+### 2. ReportPostDialog Component
+**File:** `src/features/posts/components/ReportPostDialog.tsx` (NEW)
+
+**Design Philosophy (ZEN Approach - Updated Nov 8, 2025):**
+- ✅ **No Cancel Button:** X button in dialog header is sufficient
+- ✅ **No Submit Button:** Selecting a reason immediately submits the report
+- ✅ **Immediate Action:** Click reason = submit (no extra confirmation step)
 
 **Features:**
 - Radix UI Dialog for accessibility
 - 3 report reasons: Pornographic, Spam, Hate Speech
-- Radio-style selection with visual feedback
-- Info box: "The post author won't see your report"
-- Red submit button (disabled until reason selected)
-- Loading state for async submission
+- Info box: "Help us maintain a safe community"
+- Immediate submission on reason selection
+- Auto-closes dialog after submission
+- Optimistic UI update (post removed from feed)
 
 **Key Code:**
 ```typescript
-const reasons = [
-  { value: 'pornographic', label: 'Pornographic content' },
-  { value: 'spam', label: 'Spam or misleading' },
-  { value: 'hate_speech', label: 'Hate speech or harassment' }
-];
+const handleReasonSelect = (reason: 'spam' | 'pornographic' | 'hate_speech') => {
+  // ZEN approach: Selecting a reason immediately submits the report
+  reportPost(
+    {
+      postId,
+      reason,
+      location: {
+        type: 'Point',
+        coordinates: [0, 0], // Backend uses user's stored location
+      },
+    },
+    {
+      onSuccess: () => {
+        onClose(); // Auto-close dialog
+      },
+    }
+  );
+};
 
-// Visual selection indicator
-<div className={`
-  w-4 h-4 rounded-full border-2
-  ${selectedReason === reason.value 
-    ? 'border-red-500 bg-red-500' 
-    : 'border-gray-300'}
-`}>
-  {selectedReason === reason.value && (
-    <div className="w-2 h-2 bg-white rounded-full m-auto mt-0.5" />
-  )}
-</div>
+// Simple button for each reason - no selection state needed
+<button
+  onClick={() => handleReasonSelect(reason.value)}
+  disabled={isPending}
+  className="w-full text-left px-4 py-3 rounded-lg border hover:border-warning/50"
+>
+  {reason.label}
+</button>
 ```
 
 ### 3. FilterBar Component
@@ -943,6 +958,23 @@ All success criteria from PHASE-3.4-SUMMARY.md:
 ---
 
 ## Changelog
+
+### November 8, 2025
+- ✅ Fixed report functionality (API format mismatch)
+  - Updated useReportPost to send userId and location in correct format
+  - Backend expects: `{ userId, reason, location: { lat, lon } }`
+  - Hook now gets userId from auth context
+  - Maps location from `latitude/longitude` to `lat/lon` format
+  - Simplified ReportPostDialog - no location parameter needed
+- ✅ Fixed post detail page error (ZEN approach)
+  - Added userId parameter to getPostById API call
+  - Updated usePost hook to get current user from auth context
+  - Removed error message display in UI (console.log only)
+  - Added usePost to barrel exports
+- ✅ Fixed post detail page buttons (like and report)
+  - Added onLike, onReport, onComment handlers to PostDetailPage
+  - Integrated ReportPostDialog with state management
+  - Like button now toggles and refetches post data
 
 ### November 7, 2025
 - ✅ Frontend implementation complete (5 components/hooks)

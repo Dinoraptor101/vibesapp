@@ -329,31 +329,41 @@ const hasReported = post.reports?.some(r => r.userId === currentUser._id);
 
 #### New Components
 
-##### ReportModal.tsx
+##### ReportPostDialog.tsx
 **Props:**
 ```typescript
-interface ReportModalProps {
+interface ReportPostDialogProps {
   isOpen: boolean;
   onClose: () => void;
   postId: string;
-  onReportSuccess: () => void;
 }
 ```
+
+**Design Philosophy (ZEN Approach):**
+- **No Cancel Button:** X button in dialog header is sufficient
+- **No Submit Button:** Selecting a reason immediately submits the report
+- **Immediate Action:** Click reason = submit (no confirmation needed)
 
 **Layout:**
 ```
 ┌─────────────────────────────┐
-│   Report Post               │
+│   ⚠️ Report Post        [X] │
 │                             │
-│   Why are you reporting?    │
+│   Help us maintain a safe   │
+│   community. Select reason: │
 │                             │
-│   ( ) Pornographic content  │
-│   ( ) Spam                  │
-│   ( ) Hate speech           │
+│   [ Spam or misleading    ] │
+│   [ Inappropriate content ] │
+│   [ Harassment/hate speech] │
 │                             │
-│   [Cancel]  [Submit Report] │
 └─────────────────────────────┘
 ```
+
+**Implementation Notes:**
+- Reason options: `spam`, `pornographic`, `hate_speech` (backend enum)
+- Dialog closes automatically after report submission
+- No loading spinner needed (report is fast)
+- Post immediately removed from user's feed (optimistic update)
 
 ##### StrikeNotificationModal.tsx
 **Props:**

@@ -26,6 +26,8 @@ if (!isProduction) {
   corsOptions.origin.push('http://127.0.0.1:3000');
   corsOptions.origin.push('http://localhost:5173'); // Vite dev server (web-v2)
   corsOptions.origin.push('http://127.0.0.1:5173'); // Vite dev server (web-v2)
+  corsOptions.origin.push('http://localhost:5174'); // Vite dev server alternate port
+  corsOptions.origin.push('http://127.0.0.1:5174'); // Vite dev server alternate port
 }
 
 app.use(cors(corsOptions));

@@ -26,6 +26,7 @@ import LoadingExamplesPage from '@/pages/examples/LoadingExamplesPage';
 import PostsExamplePage from '@/pages/examples/PostsExamplePage';
 import { HomePage } from '@/pages/HomePage';
 import { MessagesPage } from '@/pages/MessagesPage';
+import { PostDetailPage } from '@/pages/PostDetailPage';
 import { ProfilePage } from '@/pages/ProfilePage';
 import { SettingsPage } from '@/pages/SettingsPage';
 
@@ -79,6 +80,14 @@ export function Router() {
             element={
               <ProtectedRoute>
                 <CreatePostPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/post/:postId"
+            element={
+              <ProtectedRoute>
+                <PostDetailPage />
               </ProtectedRoute>
             }
           />

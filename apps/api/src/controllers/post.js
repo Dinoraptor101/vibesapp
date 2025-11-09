@@ -23,7 +23,17 @@ const s3 = new S3({
 // Create a post or reply
 const createPost = async (req, res) => {
   console.time('createpost');
-  const { text, image, userId, lat, lon, replyTo } = req.body;
+  const { text, image, location, replyTo } = req.body;
+  const userId = req.validatedUserId; // Get userId from auth middleware
+
+  // Extract lat/lon from location object
+  const lat = location?.lat;
+  const lon = location?.lon;
+
+  if (!lat || !lon) {
+    return res.status(400).json({ error: 'Location (lat, lon) is required' });
+  }
+
   const session = await startSession();
 
   try {
@@ -143,36 +153,38 @@ const getPosts = async (req, res) => {
     await UserHandler.updateLastActiveAndGrantDailyReward(user);
   }
 
-  const missingParams = [];
-  if (!req.query.lat) missingParams.push('lat');
-  if (!req.query.lon) missingParams.push('lon');
-  if (!req.query.withReplies) missingParams.push('withReplies');
-  if (!req.query.range) missingParams.push('range');
-  if (!req.query.page) missingParams.push('page');
-  if (!req.query.limit) missingParams.push('limit');
-
-  if (missingParams.length > 0) {
-    return res.status(400).json({ message: `Missing parameters: ${missingParams.join(', ')}` });
-  }
-
-  const lat = parseFloat(req.query.lat);
-  const lon = parseFloat(req.query.lon);
-  const withReplies = req.query.withReplies === 'true';
-  const range = parseFloat(req.query.range);
+  // Parse query parameters with defaults
   const page = parseInt(req.query.page, 10);
   const limit = parseInt(req.query.limit, 10);
+  const pageNumber = Number.isNaN(page) ? 1 : page;
+  const limitNumber = Number.isNaN(limit) ? 20 : limit;
 
-  const pageNumber = isNaN(page) ? 1 : page;
-  const limitNumber = isNaN(limit) ? 20 : limit;
+  // Optional location-based filtering
+  const lat = req.query.lat ? parseFloat(req.query.lat) : null;
+  const lon = req.query.lon ? parseFloat(req.query.lon) : null;
+  const range = req.query.range ? parseFloat(req.query.range) : null;
+
+  // Optional filters
+  const withReplies = req.query.withReplies === 'true';
+  const userId = req.query.userId; // Filter by specific user
 
   try {
-    const allPosts = await Post.find({ isHidden: false });
+    // Build query filter
+    let query = { isHidden: false };
 
+    // Filter by user if provided
+    if (userId) {
+      query['user.userId'] = userId;
+    }
+
+    const allPosts = await Post.find(query);
+
+    // Sort by creation date (newest first)
     const sortedPosts = allPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    // Filter By Range Here using existing utility
-    let filteredPosts;
-    if (range !== 0) {
+    // Apply location filter if lat/lon/range provided
+    let filteredPosts = sortedPosts;
+    if (lat !== null && lon !== null && range !== null && range > 0) {
       filteredPosts = sortedPosts.filter((post) => {
         const distance = getDistanceFromLatLonInMiles(
           lat,
@@ -182,32 +194,28 @@ const getPosts = async (req, res) => {
         );
         return distance <= range;
       });
-    } else {
-      filteredPosts = sortedPosts;
     }
 
+    // Filter out replies unless explicitly requested
     if (!withReplies) {
       filteredPosts = filteredPosts.filter((post) => !post.replyTo);
     }
 
     const totalPosts = filteredPosts.length;
-
     const totalPages = Math.ceil(totalPosts / limitNumber);
-
     const start = (pageNumber - 1) * limitNumber;
-
     const paginatedPosts = filteredPosts.slice(start, start + limitNumber);
-
     const hasMorePosts = pageNumber < totalPages;
-    const nextPage = hasMorePosts ? pageNumber + 1 : null;
 
-    //console.info(`Pagination: hasMorePosts=${hasMorePosts}, nextPage=${nextPage}, page=${pageNumber}, totalPages=${totalPages}`);
+    //console.info(`Pagination: hasMorePosts=${hasMorePosts}, page=${pageNumber}, totalPages=${totalPages}`);
 
+    // Return standardized response format
     const responsePayload = {
-      results: paginatedPosts,
-      nextPage,
-      totalPosts,
-      totalPages,
+      posts: paginatedPosts,
+      page: pageNumber,
+      limit: limitNumber,
+      total: totalPosts,
+      hasMore: hasMorePosts,
     };
 
     res.json(responsePayload);
@@ -354,7 +362,7 @@ const deleteImageFromS3 = async (imageKey) => {
 
 // like a post
 const likePost = async (req, res) => {
-  const { userId, location } = req.body;
+  const userId = req.validatedUserId; // Get from auth middleware
   const { id: postHex } = req.params;
 
   try {
@@ -367,7 +375,7 @@ const likePost = async (req, res) => {
     // Prevent liking own post
     if (post.user.userId === userId) {
       return res.status(403).json({
-        message: `You cannot like your own post. Self-love is important, but this is too far!`,
+        message: 'You cannot like your own post. Self-love is important, but this is too far!',
       });
     }
 
@@ -386,6 +394,9 @@ const likePost = async (req, res) => {
       console.error('User already voted on this post');
       return res.status(409).json({ message: 'You already voted on this post' });
     }
+
+    // Use user's current location from their profile
+    const location = user.location || { lat: 0, lon: 0 };
 
     console.info('PROXIMAL CHECK: Calculating distance between user location and post location');
     const distance = getDistanceFromLatLonInMiles(
@@ -453,109 +464,7 @@ const likePost = async (req, res) => {
   }
 };
 
-// Dislike a post
-const dislikePost = async (req, res) => {
-  const { userId, location } = req.body;
-  const { id: postHex } = req.params;
-
-  try {
-    // Fetch the full post document from the database
-    const post = await Post.findById(postHex);
-    if (!post) {
-      console.error('Post not found');
-      return res.status(404).json({ message: 'Post not found' });
-    }
-
-    // Prevent disliking own post
-    if (post.user.userId === userId) {
-      console.error('User tried to dislike their own post');
-      return res.status(403).json({ message: 'You cannot dislike your own post' });
-    }
-
-    // Prevent disliking a post that is already reacted to
-    const existingReaction = post.reactions.find((reaction) => reaction.userId === userId);
-    if (existingReaction) {
-      console.error('User already voted on this post');
-      return res.status(409).json({ message: 'You already voted on this post' });
-    }
-
-    const user = await User.findOne({ userId });
-    if (!user) {
-      console.error('User not found');
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    if (!user.userName) {
-      console.error('Username is required for user:', userId);
-      return res.status(400).json({ message: 'Username is required' });
-    }
-
-    console.info('PROXIMAL CHECK: Calculating distance between user location and post location');
-    const distance = getDistanceFromLatLonInMiles(
-      location.lat,
-      location.lon,
-      post.user.location.lat,
-      post.user.location.lon
-    );
-    const isProximal = distance <= 100;
-    console.info('Distance:', distance, 'Proximal:', isProximal);
-
-    post.reactions.push({
-      userId,
-      type: 'dislike',
-      location,
-      post: post,
-      userName: user.userName,
-    });
-
-    const postUser = await User.findOne({ userId: post.user.userId }).select('-pigeonId');
-    if (!postUser) {
-      console.error('Post owner user not found');
-      return res.status(404).json({ message: 'Post owner user not found' });
-    }
-
-    try {
-      if (isProximal) {
-        post.proximal_dislikes = (post.proximal_dislikes || 0) + 1;
-
-        console.info('KARMA: Handling dislike given for user:', userId);
-        const userDislikeResult = await karma.handleDislikeGiven(user);
-        if (userDislikeResult !== true) {
-          console.error('KARMA: Error handling dislike given for user:', userDislikeResult);
-          return res.status(400).json({ message: userDislikeResult });
-        }
-
-        console.info('KARMA: Handling dislike received for post owner:', post.user.userId);
-        const postDislikeReceivedResult = await karma.handleDislikeReceived(postUser);
-        if (postDislikeReceivedResult !== true) {
-          console.error(
-            'KARMA: Error handling dislike received for post owner:',
-            postDislikeReceivedResult
-          );
-          return res.status(400).json({ error: postDislikeReceivedResult });
-        }
-      }
-
-      await post.save();
-
-      await createReactionActivity({
-        userId: userId,
-        type: 'dislike',
-        post: post,
-        originalPosterId: post.user.userId,
-      });
-
-      console.info('Reaction activity created successfully');
-      res.json(post);
-    } catch (activityError) {
-      console.error('Error during proximal check or activity creation:', activityError);
-      return res.status(500).json({ message: 'Error during proximal check or activity creation' });
-    }
-  } catch (err) {
-    console.error('Error disliking post:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
+// Delete a post// Delete a post
 
 // Utility function to calculate distance between two lat/lon vibes using the Haversine formula
 function getDistanceFromLatLonInMiles(lat1, lon1, lat2, lon2) {
@@ -689,13 +598,67 @@ const reportPost = async (req, res) => {
   }
 };
 
+// Unlike a post (DELETE reaction)
+const unlikePost = async (req, res) => {
+  const userId = req.validatedUserId; // Get from auth middleware
+  const { id: postHex } = req.params;
+
+  try {
+    const post = await Post.findById(postHex);
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    // Find the user's like reaction
+    const reactionIndex = post.reactions.findIndex(
+      (reaction) => reaction.userId === userId && reaction.type === 'like'
+    );
+
+    if (reactionIndex === -1) {
+      return res.status(404).json({ message: 'No like found to remove' });
+    }
+
+    const reaction = post.reactions[reactionIndex];
+
+    // Calculate if the like was proximal (within 100 miles)
+    const distance = getDistanceFromLatLonInMiles(
+      reaction.location.lat,
+      reaction.location.lon,
+      post.user.location.lat,
+      post.user.location.lon
+    );
+    const wasProximal = distance <= 100;
+
+    // Remove the reaction
+    post.reactions.splice(reactionIndex, 1);
+
+    // Adjust proximal_likes counter if it was a proximal like
+    if (wasProximal && post.proximal_likes > 0) {
+      post.proximal_likes -= 1;
+    }
+
+    await post.save();
+
+    // Note: We're NOT reversing karma here as per rebuild design
+    // The karma system may be removed entirely in future phases
+
+    return res.status(200).json({
+      message: 'Post unliked successfully',
+      proximal_likes: post.proximal_likes,
+    });
+  } catch (error) {
+    console.error('Error unliking post:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 module.exports = {
   createPost,
   getPosts,
   getPostById,
   deletePost,
   likePost,
-  dislikePost,
+  unlikePost,
   reportPost,
   getDistanceFromLatLonInMiles,
 };

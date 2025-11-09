@@ -170,14 +170,53 @@ After generating Pigeon ID, user must click "I've Saved It" AND then click "Next
 
 ---
 
+## Admin Panel Issues
+
+### 5. Admin Login API Endpoint Issue
+**Priority:** Medium  
+**Category:** Bug  
+**Status:** ⏳ Pending Investigation
+
+**Issue:**  
+Admin login fails with "Failed to execute json on response: unexpected end of json input" and 404 error.
+
+**Current Behavior:**
+- AdminAuthContext makes request to `/api/admin/login`
+- Request hits backend but returns 404
+- No response body to parse, causing JSON error
+
+**Suspected Causes:**
+1. Admin login endpoint might not be properly registered in backend routes
+2. Endpoint might be at different path (e.g., `/admin/login` vs `/api/admin/login`)
+3. Authentication middleware might be blocking request
+4. Backend admin routes might not be mounted
+
+**Investigation Needed:**
+- Verify admin routes are registered in `apps/api/src/index.js`
+- Check if endpoint is `/admin/login` or `/api/admin/login`
+- Test endpoint directly with curl/Postman
+- Review admin authentication implementation in backend
+
+**Location:**
+- Frontend: `apps/web-v2/src/features/admin/context/AdminAuthContext.tsx` (line ~99)
+- Backend: `apps/api/src/routes/admin.js` (needs verification)
+- Backend: `apps/api/src/index.js` (route mounting)
+
+**Workaround:**
+- None currently - admin panel is inaccessible
+
+**Effort Estimate:** 1-2 hours (includes investigation and fix)
+
+---
+
 ## Summary Statistics
 
-**Total Issues:** 4  
+**Total Issues:** 5  
 **High Priority:** 1  
-**Medium Priority:** 2  
+**Medium Priority:** 3  
 **Low Priority:** 1  
 
-**Estimated Total Effort:** 4-8 hours
+**Estimated Total Effort:** 5-10 hours
 
 ---
 
