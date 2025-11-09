@@ -96,7 +96,8 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (password: string): Promise<void> => {
     // Call backend API to verify password
-    const response = await fetch('/api/admin/login', {
+    const apiBaseURL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+    const response = await fetch(`${apiBaseURL}/api/admin/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -6,13 +6,14 @@
  */
 
 import { AlertCircle, Loader2 } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui-next';
 import { useInfinitePosts } from '../hooks/useInfinitePosts';
 import { usePostFilters } from '../hooks/usePostFilters';
 import { FilterBar } from './FilterBar';
 import { PostCard } from './PostCard';
 import { PostSkeleton } from './PostSkeleton';
+import { ReportPostDialog } from './ReportPostDialog';
 
 interface PostsFeedProps {
   className?: string;
@@ -20,6 +21,7 @@ interface PostsFeedProps {
 
 export function PostsFeed({ className }: PostsFeedProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const [reportingPostId, setReportingPostId] = useState<string | null>(null);
 
   // Filter state
   const { filters, setNearby, setFollowing, setSort, isFiltering } = usePostFilters();
@@ -35,7 +37,6 @@ export function PostsFeed({ className }: PostsFeedProps) {
     fetchNextPage,
     refetch,
     likePost,
-    dislikePost,
   } = useInfinitePosts({ filters: filters });
 
   // Infinite scroll observer
@@ -60,6 +61,11 @@ export function PostsFeed({ className }: PostsFeedProps) {
   const handleComment = (postId: string) => {
     // TODO: Navigate to post detail page or open comment modal
     console.log('Comment on post:', postId);
+  };
+
+  // Handle report
+  const handleReport = (postId: string) => {
+    setReportingPostId(postId);
   };
 
   // Error state
@@ -151,7 +157,7 @@ export function PostsFeed({ className }: PostsFeedProps) {
             key={post._id}
             post={post}
             onLike={likePost}
-            onDislike={dislikePost}
+            onReport={handleReport}
             onComment={handleComment}
           />
         ))}
@@ -168,6 +174,15 @@ export function PostsFeed({ className }: PostsFeedProps) {
           <p className="text-center text-text-tertiary text-sm">You've reached the end! 🎉</p>
         )}
       </div>
+
+      {/* Report Dialog */}
+      {reportingPostId && (
+        <ReportPostDialog
+          postId={reportingPostId}
+          isOpen={!!reportingPostId}
+          onClose={() => setReportingPostId(null)}
+        />
+      )}
     </div>
   );
 }

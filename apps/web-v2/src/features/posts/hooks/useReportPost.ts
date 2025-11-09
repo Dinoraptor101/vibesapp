@@ -6,6 +6,7 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/features/auth';
 import api from '@/lib/api';
 import type { Post } from '../types';
 
@@ -14,10 +15,6 @@ type ReportReason = 'pornographic' | 'spam' | 'hate_speech';
 interface ReportPostParams {
   postId: string;
   reason: ReportReason;
-  location: {
-    type: 'Point';
-    coordinates: [number, number]; // [longitude, latitude]
-  };
 }
 
 interface ReportPostResponse {
@@ -32,10 +29,20 @@ interface ReportPostResponse {
  */
 export function useReportPost() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ postId, reason, location }: ReportPostParams) => {
+    mutationFn: async ({ postId, reason }: ReportPostParams) => {
+      if (!user) throw new Error('User not authenticated');
+
+      // Map user location format to backend format
+      const location = user.location
+        ? { lat: user.location.latitude, lon: user.location.longitude }
+        : { lat: 0, lon: 0 };
+
+      // Backend expects: { userId, reason, location: { lat, lon } }
       const response = await api.post<ReportPostResponse>(`/api/posts/${postId}/report`, {
+        userId: user._id,
         reason,
         location,
       });

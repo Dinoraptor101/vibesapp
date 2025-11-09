@@ -48,7 +48,7 @@ export async function fetchPosts(
   params.append('page', page.toString());
   params.append('limit', limit.toString());
 
-  const response = await apiClient.get<ApiPostsResponse>(`/api/post?${params.toString()}`);
+  const response = await apiClient.get<ApiPostsResponse>(`/api/posts?${params.toString()}`);
 
   // Transform to match our PostsResponse interface
   return {
@@ -65,8 +65,9 @@ export async function fetchPosts(
 /**
  * Fetch a single post by ID
  */
-export async function getPostById(postId: string): Promise<Post> {
-  const response = await apiClient.get<PostResponse>(`/api/posts/${postId}`);
+export async function getPostById(postId: string, userId: string): Promise<Post> {
+  const params = new URLSearchParams({ userId });
+  const response = await apiClient.get<PostResponse>(`/api/posts/${postId}?${params.toString()}`);
   return response.post;
 }
 
@@ -87,13 +88,13 @@ export async function reactToPost(
 ): Promise<ReactionResponse> {
   if (type === null) {
     // Remove reaction (unlike/undislike)
-    // Note: Backend may need endpoint for this, assuming removing like/dislike
     const response = await apiClient.delete<ReactionResponse>(`/api/posts/${postId}/reaction`);
     return response;
   }
 
   const endpoint = type === 'like' ? 'like' : 'dislike';
-  const response = await apiClient.post<ReactionResponse>(`/api/posts/${postId}/${endpoint}`);
+  // No body needed - backend uses auth middleware for userId and user's stored location
+  const response = await apiClient.post<ReactionResponse>(`/api/posts/${postId}/${endpoint}`, {});
 
   return response;
 }
@@ -136,7 +137,7 @@ export async function getUserPosts(userId: string, page = 1, limit = 20): Promis
     limit: limit.toString(),
   });
 
-  const response = await apiClient.get<ApiPostsResponse>(`/api/post?${params.toString()}`);
+  const response = await apiClient.get<ApiPostsResponse>(`/api/posts?${params.toString()}`);
 
   // Transform to match our PostsResponse interface
   return {
@@ -164,7 +165,7 @@ export async function getPostsByMBTI(
     limit: limit.toString(),
   });
 
-  const response = await apiClient.get<ApiPostsResponse>(`/api/post?${params.toString()}`);
+  const response = await apiClient.get<ApiPostsResponse>(`/api/posts?${params.toString()}`);
 
   // Transform to match our PostsResponse interface
   return {
