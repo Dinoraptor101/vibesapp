@@ -1,0 +1,374 @@
+import { useRef, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Camera, Copy, Loader2, LogOut, MapPin } from 'lucide-react';
+import { toast } from 'sonner';
+import { Avatar } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/features/auth/context/AuthContext';
+import { useAccountUpdates } from '../hooks/useAccountUpdates';
+
+const MBTI_TYPES = [
+  'INTJ', 'INTP', 'ENTJ', 'ENTP',
+  'INFJ', 'INFP', 'ENFJ', 'ENFP',
+  'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ',
+  'ISTP', 'ISFP', 'ESTP', 'ESFP'
+];
+
+export function AccountTab() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const { queueUpdate } = useAccountUpdates();
+
+  // Form state
+  const [bio, setBio] = useState(user?.bio || '');
+  const [mbti, setMbti] = useState(user?.mbtiPersonality || 'INFJ');
+  const [zipCode, setZipCode] = useState('');
+  const [locationStr, setLocationStr] = useState(
+    user?.location ? `${user.location.city || ''}` : ''
+  );
+  const [polarity, setPolarity] = useState<'YIN' | 'YANG'>(
+    (user?.polarity?.toUpperCase() as 'YIN' | 'YANG') || 'YANG'
+  );
+  
+  // UI state
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [showGpsSpinner, setShowGpsSpinner] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const gpsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Update local state when user changes
+  useEffect(() => {
+    if (user) {
+      setBio(user.bio || '');
+      setMbti(user.mbtiPersonality || 'INFJ');
+      setLocationStr(user.location?.city || '');
+      setPolarity((user.polarity?.toUpperCase() as 'YIN' | 'YANG') || 'YANG');
+    }
+  }, [user]);
+
+  // Bio handler with auto-save on blur
+  const handleBioBlur = () => {
+    if (bio.length > 200) {
+      setBio(user?.bio || ''); // Silent revert
+      return;
+    }
+    if (bio !== user?.bio) {
+      queueUpdate({ bio });
+    }
+  };
+
+  // MBTI handler with auto-save
+  const handleMbtiChange = (newMbti: string) => {
+    setMbti(newMbti);
+    queueUpdate({ mbti: newMbti });
+  };
+
+  // Zip code handler with auto-save on blur
+  const handleZipCodeBlur = () => {
+    if (zipCode !== user?.zipCode) {
+      queueUpdate({ zipCode });
+    }
+  };
+
+  // GPS button handler
+  const handleGPSClick = () => {
+    if (!navigator.geolocation) {
+      toast.error('GPS not supported on this device');
+      return;
+    }
+
+    setGpsLoading(true);
+    
+    // Show spinner only if GPS takes > 1 second
+    gpsTimeoutRef.current = setTimeout(() => {
+      setShowGpsSpinner(true);
+    }, 1000);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        // Clear timeout and hide spinner
+        if (gpsTimeoutRef.current) {
+          clearTimeout(gpsTimeoutRef.current);
+        }
+        setGpsLoading(false);
+        setShowGpsSpinner(false);
+
+        const { latitude, longitude } = position.coords;
+        
+        // Geocode to get location string (simplified - would need geocoding API)
+        const locStr = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+        setLocationStr(locStr);
+        
+        // Queue update
+        queueUpdate({ 
+          location: { lat: latitude, lon: longitude }
+        });
+        
+        toast.success('Location updated');
+      },
+      (error) => {
+        // Clear timeout and hide spinner
+        if (gpsTimeoutRef.current) {
+          clearTimeout(gpsTimeoutRef.current);
+        }
+        setGpsLoading(false);
+        setShowGpsSpinner(false);
+        
+        // Silent fail - keep current value
+        console.error('GPS error:', error);
+      }
+    );
+  };
+
+  // Polarity toggle handler
+  const handlePolarityToggle = () => {
+    const newPolarity = polarity === 'YIN' ? 'YANG' : 'YIN';
+    setPolarity(newPolarity);
+    queueUpdate({ polarity: newPolarity });
+  };
+
+  // Avatar upload handler
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be less than 5MB');
+      return;
+    }
+
+    setUploadingAvatar(true);
+
+    try {
+      // TODO: Implement actual S3 upload with presigned URL
+      // For now, create local preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        queueUpdate({ avatar: result });
+        setUploadingAvatar(false);
+        toast.success('Avatar updated');
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+      setUploadingAvatar(false);
+      toast.error('Failed to upload avatar');
+    }
+  };
+
+  // Copy Pigeon ID
+  const handleCopyPigeonId = async () => {
+    if (user?.pigeonId) {
+      await navigator.clipboard.writeText(user.pigeonId);
+      toast.success('Copied!');
+    }
+  };
+
+  // Logout handler
+  const handleLogout = () => {
+    logout();
+    navigate('/welcome');
+  };
+
+  return (
+    <div className="p-4 pb-8 space-y-6">
+      {/* Profile Photo */}
+      <div>
+        <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Profile Photo
+        </div>
+        <div className="flex items-center gap-4">
+          <Avatar
+            src={user?.profilePictureUrl}
+            alt={user?.username || 'User'}
+            size="xl"
+            className="ring-2 ring-gray-200 dark:ring-gray-700"
+          />
+          <Button
+            onClick={handleAvatarClick}
+            disabled={uploadingAvatar}
+            variant="secondary"
+            size="sm"
+          >
+            {uploadingAvatar ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Camera className="w-4 h-4 mr-2" />
+                Change Photo
+              </>
+            )}
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarChange}
+            className="hidden"
+          />
+        </div>
+      </div>
+
+      {/* Bio */}
+      <div>
+        <label htmlFor="bio" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Bio
+        </label>
+        <textarea
+          id="bio"
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
+          onBlur={handleBioBlur}
+          maxLength={200}
+          rows={3}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"
+          placeholder="Tell others about yourself..."
+        />
+        {bio.length >= 180 && (
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {bio.length}/200 characters
+          </p>
+        )}
+      </div>
+
+      {/* MBTI Type */}
+      <div>
+        <label htmlFor="mbti" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          MBTI Type
+        </label>
+        <select
+          id="mbti"
+          value={mbti}
+          onChange={(e) => handleMbtiChange(e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+        >
+          {MBTI_TYPES.map((type) => (
+            <option key={type} value={type}>
+              {type}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Location (Zip Code) */}
+      <div>
+        <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Location (Zip Code)
+        </label>
+        <div className="flex gap-2">
+          <input
+            id="zipCode"
+            type="text"
+            value={zipCode}
+            onChange={(e) => setZipCode(e.target.value)}
+            onBlur={handleZipCodeBlur}
+            placeholder="60601"
+            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+          />
+          <Button
+            onClick={handleGPSClick}
+            disabled={gpsLoading}
+            variant="secondary"
+            size="sm"
+            aria-label="Use current location"
+          >
+            {showGpsSpinner ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <MapPin className="w-4 h-4" />
+            )}
+          </Button>
+        </div>
+        {locationStr && (
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+            <MapPin className="w-3 h-3" />
+            {locationStr}
+          </p>
+        )}
+      </div>
+
+      {/* Polarity */}
+      <div>
+        <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Polarity
+        </div>
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={handlePolarityToggle}
+            className="relative inline-flex h-12 w-24 items-center rounded-full bg-gray-200 dark:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+            aria-label={`Current polarity: ${polarity}`}
+          >
+            <span
+              className={`inline-block h-10 w-10 transform rounded-full bg-white dark:bg-gray-900 shadow-lg transition-transform ${
+                polarity === 'YANG' ? 'translate-x-12' : 'translate-x-1'
+              }`}
+            />
+            <span className="absolute left-2 text-xs font-medium text-gray-600 dark:text-gray-400">
+              YIN
+            </span>
+            <span className="absolute right-2 text-xs font-medium text-gray-600 dark:text-gray-400">
+              YANG
+            </span>
+          </button>
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            Currently: <span className="font-medium">{polarity}</span>
+          </span>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="border-t border-gray-200 dark:border-gray-700" />
+
+      {/* Security */}
+      <div>
+        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Security</h3>
+        <Button
+          onClick={handleCopyPigeonId}
+          variant="secondary"
+          className="mb-3"
+        >
+          <Copy className="w-4 h-4 mr-2" />
+          Copy Pigeon ID
+        </Button>
+        <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+          <p className="text-sm text-yellow-800 dark:text-yellow-200">
+            <span className="font-medium">[!] Never Share!</span> Anyone with your Pigeon ID can pretend to be you.
+          </p>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="border-t border-gray-200 dark:border-gray-700" />
+
+      {/* Logout */}
+      <div>
+        <Button
+          onClick={handleLogout}
+          variant="outline"
+          className="w-full text-red-600 dark:text-red-400 border-red-300 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20"
+        >
+          <LogOut className="w-4 h-4 mr-2" />
+          Logout
+        </Button>
+      </div>
+    </div>
+  );
+}

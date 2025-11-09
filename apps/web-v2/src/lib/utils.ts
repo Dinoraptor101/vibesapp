@@ -2,6 +2,16 @@
  * Utility functions for common operations across the application.
  */
 
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+/**
+ * Combines class names with Tailwind merge to avoid conflicts
+ */
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
 /**
  * Formats a date to a relative time string (e.g., "2 hours ago", "3 days ago")
  */

@@ -21,6 +21,7 @@ export type Theme = 'light' | 'dim' | 'dark';
 export interface User {
   _id: string;
   username: string;
+  pigeonId?: string; // For Pigeon ID auth
   polarity: string;
   mbtiPersonality: string;
   profilePictureUrl?: string;

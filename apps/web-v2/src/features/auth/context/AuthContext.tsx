@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import { createContext, useCallback, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { deleteCookie, getCookie, setCookie } from '@/lib/api';
 import type { AuthState, User } from '@/types';
@@ -139,4 +139,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+/**
+ * Custom hook to access Auth context
+ */
+export function useAuth(): AuthContextType {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
 }
