@@ -31,9 +31,7 @@ export function SupportTab() {
 
       {/* Legal */}
       <div>
-        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-          Legal
-        </h3>
+        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Legal</h3>
         <div className="space-y-2">
           <Button
             variant="ghost"
@@ -50,9 +48,7 @@ export function SupportTab() {
             Privacy Policy
           </Button>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-          Coming soon...
-        </p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Coming soon...</p>
       </div>
 
       {/* Divider */}

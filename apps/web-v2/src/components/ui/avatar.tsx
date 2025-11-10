@@ -60,7 +60,7 @@ export function Avatar({
           )}
         </div>
       )}
-      
+
       {online && (
         <span
           className={cn(
