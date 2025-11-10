@@ -7,7 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import type { User } from '@/types';
 
-interface ProfileData extends User {
+export interface ProfileData extends User {
   postsCount: number;
   followersCount: number;
   followingCount: number;
