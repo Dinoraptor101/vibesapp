@@ -1,6 +1,6 @@
+import { Camera, Copy, Loader2, LogOut, MapPin } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Copy, Loader2, LogOut, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -8,10 +8,22 @@ import { useAuth } from '@/features/auth/context/AuthContext';
 import { useAccountUpdates } from '../hooks/useAccountUpdates';
 
 const MBTI_TYPES = [
-  'INTJ', 'INTP', 'ENTJ', 'ENTP',
-  'INFJ', 'INFP', 'ENFJ', 'ENFP',
-  'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ',
-  'ISTP', 'ISFP', 'ESTP', 'ESFP'
+  'INTJ',
+  'INTP',
+  'ENTJ',
+  'ENTP',
+  'INFJ',
+  'INFP',
+  'ENFJ',
+  'ENFP',
+  'ISTJ',
+  'ISFJ',
+  'ESTJ',
+  'ESFJ',
+  'ISTP',
+  'ISFP',
+  'ESTP',
+  'ESFP',
 ];
 
 export function AccountTab() {
@@ -29,12 +41,12 @@ export function AccountTab() {
   const [polarity, setPolarity] = useState<'YIN' | 'YANG'>(
     (user?.polarity?.toUpperCase() as 'YIN' | 'YANG') || 'YANG'
   );
-  
+
   // UI state
   const [gpsLoading, setGpsLoading] = useState(false);
   const [showGpsSpinner, setShowGpsSpinner] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const gpsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -80,7 +92,7 @@ export function AccountTab() {
     }
 
     setGpsLoading(true);
-    
+
     // Show spinner only if GPS takes > 1 second
     gpsTimeoutRef.current = setTimeout(() => {
       setShowGpsSpinner(true);
@@ -96,16 +108,16 @@ export function AccountTab() {
         setShowGpsSpinner(false);
 
         const { latitude, longitude } = position.coords;
-        
+
         // Geocode to get location string (simplified - would need geocoding API)
         const locStr = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
         setLocationStr(locStr);
-        
+
         // Queue update
-        queueUpdate({ 
-          location: { lat: latitude, lon: longitude }
+        queueUpdate({
+          location: { lat: latitude, lon: longitude },
         });
-        
+
         toast.success('Location updated');
       },
       (error) => {
@@ -115,7 +127,7 @@ export function AccountTab() {
         }
         setGpsLoading(false);
         setShowGpsSpinner(false);
-        
+
         // Silent fail - keep current value
         console.error('GPS error:', error);
       }
@@ -228,7 +240,10 @@ export function AccountTab() {
 
       {/* Bio */}
       <div>
-        <label htmlFor="bio" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label
+          htmlFor="bio"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+        >
           Bio
         </label>
         <textarea
@@ -250,7 +265,10 @@ export function AccountTab() {
 
       {/* MBTI Type */}
       <div>
-        <label htmlFor="mbti" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label
+          htmlFor="mbti"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+        >
           MBTI Type
         </label>
         <select
@@ -269,7 +287,10 @@ export function AccountTab() {
 
       {/* Location (Zip Code) */}
       <div>
-        <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label
+          htmlFor="zipCode"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+        >
           Location (Zip Code)
         </label>
         <div className="flex gap-2">
@@ -340,17 +361,14 @@ export function AccountTab() {
       {/* Security */}
       <div>
         <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Security</h3>
-        <Button
-          onClick={handleCopyPigeonId}
-          variant="secondary"
-          className="mb-3"
-        >
+        <Button onClick={handleCopyPigeonId} variant="secondary" className="mb-3">
           <Copy className="w-4 h-4 mr-2" />
           Copy Pigeon ID
         </Button>
         <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
           <p className="text-sm text-yellow-800 dark:text-yellow-200">
-            <span className="font-medium">[!] Never Share!</span> Anyone with your Pigeon ID can pretend to be you.
+            <span className="font-medium">[!] Never Share!</span> Anyone with your Pigeon ID can
+            pretend to be you.
           </p>
         </div>
       </div>

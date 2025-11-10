@@ -20,7 +20,10 @@ export function PreferencesTab() {
     <div className="p-4 pb-8 space-y-6">
       {/* Proximity Range */}
       <div>
-        <label htmlFor="proximity" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label
+          htmlFor="proximity"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+        >
           Nearby Posts Radius
         </label>
         <select

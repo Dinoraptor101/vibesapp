@@ -1,6 +1,6 @@
 /**
  * useAccountUpdates Hook
- * 
+ *
  * Handles auto-save for account settings with:
  * - Debounced batch updates (300ms)
  * - Silent success/error handling
@@ -50,7 +50,7 @@ export function useAccountUpdates() {
         try {
           // Send batch update to API
           await api.patch(`/users/${user?._id}`, updates);
-          
+
           // Refresh user data silently
           await refreshUser();
         } catch (error) {

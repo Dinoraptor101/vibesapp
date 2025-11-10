@@ -109,9 +109,9 @@ This ensures AI agents can pick up exactly where you left off!
 
 ## 🎯 Progress Tracker
 
-**Last Updated:** November 4, 2025  
-**Current Phase:** 0 (Foundation)  
-**Status:** Ready to start
+**Last Updated:** November 9, 2025  
+**Current Phase:** 4 (Social Features)  
+**Status:** In Progress
 
 > ✅ = Complete | ⏸️ = Not started | 🚧 = In progress | ⚠️ = Blocked
 
@@ -147,8 +147,8 @@ This ensures AI agents can pick up exactly where you left off!
 - [X] 3.5 - Comments System (✅ Complete - Nov 8, 2025)
 
 ### Phase 4: Social (Week 7-9)
-- [ ] 4.1 - User Profiles (⏸️ Not started)
-- [ ] 4.2 - Following System (⏸️ Not started)
+- [X] 4.1 - Settings Page (✅ Complete - Nov 9, 2025)
+- [ ] 4.2 - User Profiles (🚧 In progress)
 - [ ] 4.3 - DM Request System (⏸️ Not started)
 - [ ] 4.4 - Messaging Interface (⏸️ Not started)
 - [ ] 4.5 - Group Chat (⏸️ Not started)
@@ -2737,7 +2737,177 @@ Key Technical Details:
 
 ---
 
-## 📝 Notes & Best Practices
+## � PHASE 4: Social Features
+
+---
+
+### Prompt 4.1: Settings Page
+
+**AI Recommendation:** ⚖️ **Either** (Straightforward forms with auto-save logic)
+
+**Status:** ✅ Complete  
+**Completed:** [X] Yes - November 9, 2025  
+**Prerequisites:** Phase 3 completed  
+**Estimated Time:** 3-4 hours  
+**Reference:** REBUILD-ACTION-PLAN.md lines 604-648, REBUILD-COMPONENT-DESIGNS.md lines 376-420
+
+#### Implementation Summary:
+
+Built complete Settings page with three tabs (Account, Preferences, Support) following ZEN design principles (auto-save on blur, no save buttons). Features include avatar upload placeholder, bio editing with character counter, MBTI selector, GPS location, polarity toggle, proximity range selector, feedback link, legal links, and app version display. All settings use debounced batch updates (300ms) for optimal UX.
+
+**✋ STOP HERE - Confirmed complete, moved to 4.2**
+
+---
+
+### Prompt 4.2: User Profiles (Public Read-Only View)
+
+**AI Recommendation:** 🎯 **Claude Sonnet** (Complex component composition with follow system)
+
+**Status:** 🚧 In Progress  
+**Completed:** [ ] No  
+**Prerequisites:** Settings Page (4.1) completed  
+**Estimated Time:** 4-5 hours  
+**Reference:** 
+- REBUILD-ACTION-PLAN.md lines 604-648 (Week 7: User Profiles & Following)
+- REBUILD-COMPONENT-DESIGNS.md lines 376-420 (User Profile Display)
+- REBUILD-UI-PATTERNS.md (ZEN Design Principles)
+
+#### PROMPT TO COPY:
+
+```
+Let's build Phase 4.2 - User Profiles (Public Read-Only View)
+
+Create the public profile page that users see when clicking on usernames throughout the app. This is DIFFERENT from the Settings/Account page - profiles are read-only views of other users.
+
+CRITICAL DISTINCTION:
+- Settings Page (4.1) = Editable account settings for YOUR OWN profile
+- Profile Page (4.2) = Read-only public view for OTHER USERS' profiles
+
+Requirements:
+1. ProfilePage component at /profile/:userId route
+2. ProfileHeader with avatar, username + age, bio, MBTI badge, polarity, location (as distance)
+3. ProfileStats showing post count, followers count, following count
+4. Follow/Unfollow button with real-time count updates
+5. DM Request button (just UI, not functional yet - placeholder for Phase 4.3)
+6. ProfilePosts grid displaying user's posts with infinite scroll
+7. useProfile hook to fetch profile data with React Query
+8. useFollow hook for follow/unfollow mutations with optimistic updates
+
+Reference files:
+- /docs/REBUILD-ACTION-PLAN.md (Week 7: User Profiles & Following section, lines 604-648)
+- /docs/REBUILD-COMPONENT-DESIGNS.md (User Profile Display, lines 376-420)
+- /docs/REBUILD-UI-PATTERNS.md (ZEN Design Principles)
+- /apps/web-v2/src/features/settings/ (for reference - but this is EDIT view, not READ view)
+
+Key Specifications from REBUILD-ACTION-PLAN.md:
+- Username + age display: "Age: 25" format (age calculated from birth date, NOT editable)
+- Location shown as DISTANCE from current user: "2.3 km away" (NOT full address)
+- Polarity displayed as text: "Polarity: YIN (Feminine)" or "Polarity: YANG (Masculine)"
+- Username is PERMANENT from signup (NOT editable anywhere in app)
+- Follow button: Toggle follow state with loading, update counts immediately (optimistic UI)
+- DM Request button: Just renders UI, onClick opens placeholder modal (actual DM flow is Phase 4.3)
+- Posts grid: User's posts in grid layout with infinite scroll (reuse PostCard component)
+
+Key Technical Details:
+- API Endpoint: GET /api/users/:userId/profile
+- Profile response includes: user data, postsCount, followersCount, followingCount, isFollowing, distance, age
+- Follow mutation: POST /api/users/:userId/follow (toggle endpoint)
+- Use React Query for data fetching and caching (5min stale time)
+- Optimistic updates for follow/unfollow (instant UI feedback)
+- Loading skeleton while fetching profile
+- Error state with retry button
+- Empty state for users with no posts
+```
+
+#### Expected Deliverables:
+
+- [ ] ProfilePage component (`/pages/ProfilePage.tsx`) with:
+  - [ ] Route `/profile/:userId`
+  - [ ] Back button in header
+  - [ ] Loading state (skeleton)
+  - [ ] Error state with retry
+  - [ ] Integration of all sub-components
+- [ ] ProfileHeader component (`/features/profile/components/ProfileHeader.tsx`):
+  - [ ] Avatar (xl size) with online indicator
+  - [ ] Username + age display ("Age: 25" format)
+  - [ ] Bio text
+  - [ ] MBTI badge
+  - [ ] Polarity text ("YIN (Feminine)" or "YANG (Masculine)")
+  - [ ] Location as distance ("2.3 km away")
+  - [ ] Follow button (if not own profile)
+  - [ ] DM Request button (if not own profile)
+- [ ] ProfileStats component (`/features/profile/components/ProfileStats.tsx`):
+  - [ ] Posts count
+  - [ ] Followers count (clickable → modal with follower list - future)
+  - [ ] Following count (clickable → modal with following list - future)
+- [ ] FollowButton component (`/features/profile/components/FollowButton.tsx`):
+  - [ ] Toggle follow/unfollow state
+  - [ ] Loading spinner during mutation
+  - [ ] Follower count updates immediately
+  - [ ] Disabled when loading
+  - [ ] "Follow" or "Following" text
+- [ ] ProfilePosts component (`/features/profile/components/ProfilePosts.tsx`):
+  - [ ] Grid layout (3 columns desktop, 2 mobile)
+  - [ ] Reuses PostCard component
+  - [ ] Infinite scroll with Intersection Observer
+  - [ ] Loading state (PostSkeleton)
+  - [ ] Empty state ("No posts yet 🕊️")
+- [ ] useProfile hook (`/features/profile/hooks/useProfile.ts`):
+  - [ ] React Query `useQuery` integration
+  - [ ] Fetches from GET `/api/users/:userId/profile`
+  - [ ] Returns: user, postsCount, followersCount, followingCount, isFollowing, distance, age
+  - [ ] 5-minute stale time
+  - [ ] Error handling
+- [ ] useFollow hook (`/features/profile/hooks/useFollow.ts`):
+  - [ ] React Query `useMutation` integration
+  - [ ] POST `/api/users/:userId/follow` (toggle endpoint)
+  - [ ] Optimistic UI updates (instant follower count change)
+  - [ ] Rollback on error
+  - [ ] Query invalidation after success
+- [ ] Router integration:
+  - [ ] Verify `/profile/:userId` route exists
+  - [ ] ProtectedRoute wrapper
+  - [ ] Link from username clicks throughout app
+- [ ] Barrel exports:
+  - [ ] Export all components from `/features/profile/index.ts`
+  - [ ] Export hooks from `/features/profile/index.ts`
+
+#### Validation Commands:
+
+```bash
+# Test flow:
+1. Click any username in app (post author, comment author)
+2. Should navigate to /profile/:userId
+3. Profile loads with all user info
+4. Click Follow button → should update to "Following" immediately
+5. Follower count should increment
+6. Click again → should update to "Follow" and decrement count
+7. Scroll down → posts should load infinitely
+8. Try DM Request button → should show placeholder modal
+```
+
+#### Success Criteria:
+
+- Profile page loads with all user info
+- Username is permanent (no edit option anywhere)
+- Age displayed as "Age: 25" format (calculated, not editable)
+- Location shown as distance ("2.3 km away")
+- Polarity shown as text ("YIN" or "YANG")
+- Follow/unfollow works with optimistic updates
+- Follower counts update immediately
+- Posts grid displays user's posts
+- Infinite scroll works
+- DM Request button shows placeholder modal
+- Loading and error states work
+- Mobile responsive
+- All TypeScript errors resolved
+- Build successful
+
+**✋ STOP HERE - Confirm Phase 4.2 complete before Phase 4.3**
+
+---
+
+## �📝 Notes & Best Practices
 
 ### For Each Prompt:
 1. **Read references first** - Check docs before coding
