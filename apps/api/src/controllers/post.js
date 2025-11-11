@@ -167,6 +167,7 @@ const getPosts = async (req, res) => {
   // Optional filters
   const withReplies = req.query.withReplies === 'true';
   const userId = req.query.userId; // Filter by specific user
+  const replyTo = req.query.replyTo; // Filter by parent post (for comments)
 
   try {
     // Build query filter
@@ -175,6 +176,11 @@ const getPosts = async (req, res) => {
     // Filter by user if provided
     if (userId) {
       query['user.userId'] = userId;
+    }
+
+    // Filter by parent post if provided (for fetching comments)
+    if (replyTo) {
+      query.replyTo = replyTo;
     }
 
     const allPosts = await Post.find(query);

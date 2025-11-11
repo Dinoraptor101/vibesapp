@@ -29,6 +29,12 @@ export function PostDetailPage() {
 
   const createComment = useCreateComment(postId || '');
 
+  // Redirect if no postId
+  if (!postId) {
+    navigate('/');
+    return null;
+  }
+
   const handleLike = async (postId: string) => {
     if (isLiking || !post) return;
 
@@ -58,6 +64,11 @@ export function PostDetailPage() {
   };
 
   const handleSubmitComment = async (text: string) => {
+    if (!postId) {
+      console.error('Cannot create comment: postId is missing');
+      return;
+    }
+
     try {
       await createComment.mutateAsync(text);
     } catch (error) {
