@@ -604,20 +604,20 @@ export function Button({ className, variant, size, ...props }: ButtonProps) {
 ### Week 7: User Profiles & Following
 
 #### Profile Pages (Read-Only Public View)
-- [ ] PublicProfile component (accessed by clicking usernames)
-- [ ] Profile header
-  - [ ] Avatar, username (with age next to it: "Age: 25")
-  - [ ] Bio
-  - [ ] MBTI badge
-  - [ ] Polarity display (Yin/Yang balance)
-  - [ ] Location (displayed as distance from current user, e.g., "2.3 km away")
-- [ ] Profile stats
-  - [ ] Post count
-  - [ ] Followers count
-  - [ ] Following count
-- [ ] Post grid on profile
-- [ ] Follow/Unfollow button
-- [ ] DM request button
+- [X] PublicProfile component (accessed by clicking usernames)
+- [X] Profile header
+  - [X] Avatar, username (with age next to it: "Age: 25")
+  - [X] Bio
+  - [X] MBTI badge
+  - [X] Polarity display (Yin/Yang balance)
+  - [X] Location (displayed as distance from current user, e.g., "2.3 km away")
+- [X] Profile stats
+  - [X] Post count
+  - [X] Followers count
+  - [X] Following count
+- [X] Post grid on profile
+- [X] Follow/Unfollow button
+- [ ] DM request button (backend ready, UI pending)
 
 **Important Distinction:**
 - **Profile** = Read-only public page (this section)
@@ -625,11 +625,15 @@ export function Button({ className, variant, size, ...props }: ButtonProps) {
 - Username NOT editable (set at signup, permanent)
 - Age NOT editable (calculated from birth date at signup)
 
-#### Following System
-### Week 8: Direct Messaging (Request-Based)n
-- [ ] Followers list
-- [ ] Following list
-- [ ] Follow notifications
+#### Following System (Backend Complete - Nov 10, 2025)
+- [X] Backend Follow model and endpoints
+- [X] Backend toggleFollow endpoint (POST /api/users/:userId/follow)
+- [X] Backend getFollowers/getFollowing endpoints
+- [X] Frontend useFollow hook with optimistic updates
+- [X] Frontend FollowButton component
+- [ ] Followers list page
+- [ ] Following list page
+- [ ] Follow notifications (Activity Feed - Phase 4.6)
 - [ ] Following feed implementation
 - [ ] User search
   - [ ] Search by username
@@ -637,22 +641,28 @@ export function Button({ className, variant, size, ...props }: ButtonProps) {
   - [ ] Recent searches
 
 #### Profile API
-- [ ] Profile API service
-- [ ] useProfile hook
-- [ ] useUpdateProfile hook
-- [ ] Profile caching
+- [X] Profile API service (getUserProfile endpoint)
+- [X] useProfile hook
+- [ ] useUpdateProfile hook (Settings → Account tab)
+- [X] Profile caching (React Query 5min stale time)
 
-**Week 6 Deliverable:** User can view and edit profiles
+**Week 7 Deliverable:** ✅ User can view profiles, follow/unfollow, see posts grid
 
 ---
 
-### Week 7: Messaging (MVP)
+### Week 8: Direct Messaging (Request-Based)
 
-#### DM Request System
-- [ ] Request DM button on profiles
+#### DM Request System (Backend Complete - Nov 10, 2025)
+- [X] Backend DMRequest model with cooldown tracking
+- [X] Backend sendDMRequest endpoint (POST /api/dm-requests)
+- [X] Backend getDMRequests endpoint (GET /api/dm-requests)
+- [X] Backend acceptDMRequest endpoint (creates Conversation)
+- [X] Backend declineDMRequest endpoint (sets 24h cooldown)
+- [X] Backend checkDMRequestStatus endpoint
+- [ ] Request DM button on profiles (frontend UI)
 - [ ] DM request modal (optional message)
-- [ ] Pending requests list
-- [ ] Accept/Decline request actions
+- [ ] Pending requests list UI
+- [ ] Accept/Decline request actions UI
 - [ ] Request notifications
 
 #### Messaging Components
