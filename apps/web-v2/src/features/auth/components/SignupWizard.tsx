@@ -139,7 +139,13 @@ export function SignupWizard() {
       const imageKey = await uploadImage(compressedBlob);
 
       // Construct CloudFront URL (using the CDN URL from backend)
-      const cloudFrontUrl = `https://d1pegm4swremw5.cloudfront.net/${imageKey}`;
+      const CDN_URL = import.meta.env.VITE_CDN_URL;
+
+      if (!CDN_URL) {
+        throw new Error('VITE_CDN_URL environment variable is required');
+      }
+
+      const cloudFrontUrl = `${CDN_URL}/${imageKey}`;
 
       // Update signup data with profile picture URL
       setSignupData((prev) => ({ ...prev, profilePictureUrl: cloudFrontUrl }));

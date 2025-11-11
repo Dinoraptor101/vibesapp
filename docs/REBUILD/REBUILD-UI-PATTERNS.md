@@ -20,6 +20,79 @@ VibesApp currently uses a **minimalist, content-first** design with:
 5. **Consistency** - Same patterns across all features
 6. **Delight** - Subtle animations and micro-interactions
 
+### ZEN Philosophy (Nov 11, 2025) 🧘
+
+**Core Tenets:**
+
+1. **Loading: 1-Second Delay Rule**
+   - Wait 1 second before showing loading indicators
+   - Avoid flashing spinners for fast responses
+   - If data loads in < 1s, user sees instant result (no spinner flash)
+   - Use `setTimeout` with cleanup to implement this behavior
+
+2. **Errors: Console Only, Never Show to Users**
+   - **CRITICAL:** In the UX, we NEVER EVER SHOW ERRORS
+   - All errors go to `console.error()` or `console.log()`
+   - No AlertCircle icons, no error messages, no "Try Again" buttons
+   - Network/API errors: Silent to user, logged to console
+   - Invalid input: Silent revert to previous value, logged to console
+
+3. **Empty Data: Show Nothing (Transparency)**
+   - If response is empty/null/404: Just show nothing
+   - No "No posts yet" messages
+   - No empty state illustrations
+   - Return `null` from component (complete transparency)
+   - "if there is nothing, then show nothing. Transparency :)"
+
+**Implementation Pattern:**
+
+```tsx
+export function ProfilePage() {
+  const [showLoading, setShowLoading] = useState(false);
+  const { data, isLoading, isError, error } = useProfile(userId);
+  
+  // ZEN: Wait 1 second before showing loading
+  useEffect(() => {
+    if (isLoading) {
+      const timer = setTimeout(() => setShowLoading(true), 1000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowLoading(false);
+    }
+  }, [isLoading]);
+  
+  // ZEN: Log errors to console only, never show to user
+  useEffect(() => {
+    if (isError && error) {
+      console.error('Profile fetch error:', error);
+    }
+  }, [isError, error]);
+  
+  // ZEN: Show loading only after 1 second
+  if (isLoading && showLoading) {
+    return <Spinner />;
+  }
+  
+  // ZEN: If no data, show nothing (Transparency)
+  if (!data) {
+    return null;
+  }
+  
+  // Render actual content
+  return <div>{data.content}</div>;
+}
+```
+
+**What This Means:**
+- ❌ No error boundaries showing error UI to users
+- ❌ No "Something went wrong" messages
+- ❌ No "Try Again" buttons
+- ❌ No empty state placeholders
+- ✅ `console.error()` for all errors
+- ✅ Return `null` for empty/error states
+- ✅ 1-second delay before showing spinners
+- ✅ Clean, transparent UX
+
 ## Color System
 
 ### Current Theme Structure

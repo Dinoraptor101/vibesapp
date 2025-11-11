@@ -79,7 +79,7 @@ export function AccountTab() {
 
   // Zip code handler with auto-save on blur
   const handleZipCodeBlur = () => {
-    if (zipCode !== user?.zipCode) {
+    if (zipCode?.trim()) {
       queueUpdate({ zipCode });
     }
   };
