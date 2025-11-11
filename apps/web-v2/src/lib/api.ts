@@ -46,7 +46,11 @@ class ApiClient {
 
   constructor(baseURL: string) {
     // Get base URL from environment or use provided
-    const apiBaseURL = baseURL || import.meta.env.VITE_API_URL || 'http://localhost:5001';
+    const apiBaseURL = baseURL || import.meta.env.VITE_API_URL;
+
+    if (!apiBaseURL) {
+      throw new Error('VITE_API_URL environment variable is required');
+    }
 
     this.client = axios.create({
       baseURL: apiBaseURL,
@@ -163,7 +167,12 @@ class ApiClient {
 }
 
 // Create and export a singleton instance
-const apiBaseURL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const apiBaseURL = import.meta.env.VITE_API_URL;
+
+if (!apiBaseURL) {
+  throw new Error('VITE_API_URL environment variable is required');
+}
+
 const apiClient = new ApiClient(apiBaseURL);
 
 export default apiClient;

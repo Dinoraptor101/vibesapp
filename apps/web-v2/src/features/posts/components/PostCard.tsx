@@ -35,7 +35,12 @@ export function PostCard({ post, onLike, onReport, onComment }: PostCardProps) {
   const canReport = currentUser && post.user.userId !== currentUser._id;
 
   // Construct full image URL from CloudFront CDN
-  const CDN_URL = import.meta.env.VITE_CDN_URL || 'https://d1pegm4swremw5.cloudfront.net';
+  const CDN_URL = import.meta.env.VITE_CDN_URL;
+
+  if (!CDN_URL) {
+    throw new Error('VITE_CDN_URL environment variable is required');
+  }
+
   const imageUrl = post.image.startsWith('http') ? post.image : `${CDN_URL}/${post.image}`;
 
   const handleLike = (e: React.MouseEvent) => {
@@ -76,7 +81,8 @@ export function PostCard({ post, onLike, onReport, onComment }: PostCardProps) {
             loading="lazy"
             onError={(e) => {
               // Fallback for broken images
-              e.currentTarget.src = 'https://via.placeholder.com/400?text=Image+Not+Found';
+              console.error('Image failed to load:', imageUrl);
+              e.currentTarget.src = import.meta.env.VITE_PLACEHOLDER_IMAGE_URL || '';
             }}
           />
         </div>

@@ -22,7 +22,7 @@ export function useProfile(userId: string | undefined) {
     queryFn: async () => {
       if (!userId) throw new Error('User ID is required');
 
-      const data = await api.get<ProfileData>(`/users/${userId}/profile`);
+      const data = await api.get<ProfileData>(`/api/users/${userId}/profile`);
       return data;
     },
     enabled: !!userId,

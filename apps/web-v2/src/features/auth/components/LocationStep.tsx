@@ -62,8 +62,14 @@ export function LocationStep({ location, onLocationChange }: LocationStepProps) 
     try {
       // Use a geocoding service to convert city name to coordinates
       // For now, using OpenStreetMap Nominatim (free, no API key required)
+      const GEOCODING_URL = import.meta.env.VITE_GEOCODING_URL;
+
+      if (!GEOCODING_URL) {
+        throw new Error('VITE_GEOCODING_URL environment variable is required');
+      }
+
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityName)}&format=json&limit=1`
+        `${GEOCODING_URL}?q=${encodeURIComponent(cityName)}&format=json&limit=1`
       );
 
       if (!response.ok) {

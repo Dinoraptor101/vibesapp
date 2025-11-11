@@ -96,32 +96,43 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (password: string): Promise<void> => {
     // Call backend API to verify password
-    const apiBaseURL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
-    const response = await fetch(`${apiBaseURL}/api/admin/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ password }),
-    });
+    try {
+      // Verify admin credentials with backend
+      const apiBaseURL = import.meta.env.VITE_API_URL;
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Invalid password');
+      if (!apiBaseURL) {
+        throw new Error('VITE_API_URL environment variable is required');
+      }
+
+      const response = await fetch(`${apiBaseURL}/api/admin/verify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Invalid password');
+      }
+
+      const data = await response.json();
+
+      // Set session cookies
+      const expiry = Date.now() + SESSION_DURATION;
+      setCookie('adminToken', data.token, 1 / 24); // 1 hour
+      setCookie('adminSessionExpiry', expiry.toString(), 1 / 24);
+
+      setState({
+        isAuthenticated: true,
+        isLoading: false,
+        sessionExpiry: expiry,
+      });
+    } catch (err) {
+      console.error('Admin login error:', err);
+      throw err;
     }
-
-    const data = await response.json();
-
-    // Set session cookies
-    const expiry = Date.now() + SESSION_DURATION;
-    setCookie('adminToken', data.token, 1 / 24); // 1 hour
-    setCookie('adminSessionExpiry', expiry.toString(), 1 / 24);
-
-    setState({
-      isAuthenticated: true,
-      isLoading: false,
-      sessionExpiry: expiry,
-    });
   };
 
   const checkSession = (): boolean => {

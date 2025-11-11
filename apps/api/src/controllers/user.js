@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Post = require('../models/Post'); // Add this line
+const Follow = require('../models/Follow');
 const karma = require('./karma');
 const UserHandler = require('../handlers/UserHandler');
 
@@ -98,7 +99,7 @@ const login = async (req, res) => {
   }
 
   try {
-    let user = await User.findOne({ pigeonId }).select('-pigeonId');
+    const user = await User.findOne({ pigeonId }).select('-pigeonId');
     if (!user) {
       console.error('User not found');
       return res.status(404).json({ message: 'User not found with PigeonId' });
@@ -159,7 +160,7 @@ const getUserById = async (req, res) => {
   console.log('Fetching user details...');
   const { userId } = req.params;
   try {
-    let user = await User.findOne({ userId }).select('-pigeonId');
+    const user = await User.findOne({ userId }).select('-pigeonId');
     if (!user) {
       console.error('User not found');
       return res.status(404).json({ message: 'User not found' });
@@ -278,6 +279,175 @@ const getUserStrikes = async (req, res) => {
   }
 };
 
+// Helper function to calculate distance between two points
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; // Earth's radius in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
+// Get user profile with stats
+const getUserProfile = async (req, res) => {
+  console.log('Fetching user profile with stats...');
+  const { userId } = req.params;
+  const requestingUserId = req.user?.userId;
+
+  try {
+    const user = await User.findOne({ userId }).select('-pigeonId');
+    if (!user) {
+      console.error('User not found');
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Get counts
+    const [postsCount, followersCount, followingCount] = await Promise.all([
+      Post.countDocuments({ userId }),
+      Follow.countDocuments({ following: userId }),
+      Follow.countDocuments({ follower: userId }),
+    ]);
+
+    // Check if requesting user follows this user
+    let isFollowing = false;
+    if (requestingUserId && requestingUserId !== userId) {
+      const followDoc = await Follow.findOne({
+        follower: requestingUserId,
+        following: userId,
+      });
+      isFollowing = !!followDoc;
+    }
+
+    // Calculate distance if both users have location
+    let distance = null;
+    if (requestingUserId && requestingUserId !== userId) {
+      const requestingUser = await User.findOne({ userId: requestingUserId });
+      if (requestingUser?.location && user.location) {
+        const distanceKm = calculateDistance(
+          requestingUser.location.lat,
+          requestingUser.location.lon,
+          user.location.lat,
+          user.location.lon
+        );
+        distance = distanceKm < 1 ? '<1 km away' : `${Math.round(distanceKm)} km away`;
+      }
+    }
+
+    // Calculate age
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1;
+    let age = currentYear - user.birthYear;
+    if (currentMonth < user.birthMonth) {
+      age -= 1;
+    }
+
+    const profileData = {
+      ...user.toObject(),
+      postsCount,
+      followersCount,
+      followingCount,
+      isFollowing,
+      distance,
+      age,
+    };
+
+    console.log('User profile retrieved successfully');
+    res.status(200).json(profileData);
+  } catch (error) {
+    console.error('Error retrieving user profile:', error);
+    res.status(500).json({ message: 'Error retrieving user profile', error });
+  }
+};
+
+// Toggle follow/unfollow
+const toggleFollow = async (req, res) => {
+  console.log('Toggling follow status...');
+  const { userId } = req.params;
+  const followerId = req.user?.userId;
+
+  if (!followerId) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  if (followerId === userId) {
+    return res.status(400).json({ message: 'Cannot follow yourself' });
+  }
+
+  try {
+    // Check if target user exists
+    const targetUser = await User.findOne({ userId });
+    if (!targetUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if already following
+    const existingFollow = await Follow.findOne({
+      follower: followerId,
+      following: userId,
+    });
+
+    if (existingFollow) {
+      // Unfollow
+      await Follow.deleteOne({ _id: existingFollow._id });
+      console.log('Unfollowed successfully');
+      return res.status(200).json({ isFollowing: false, message: 'Unfollowed' });
+    } else {
+      // Follow
+      await Follow.create({
+        follower: followerId,
+        following: userId,
+      });
+      console.log('Followed successfully');
+      return res.status(200).json({ isFollowing: true, message: 'Followed' });
+    }
+  } catch (error) {
+    console.error('Error toggling follow:', error);
+    res.status(500).json({ message: 'Error toggling follow', error });
+  }
+};
+
+// Get user's followers
+const getFollowers = async (req, res) => {
+  console.log('Fetching followers...');
+  const { userId } = req.params;
+
+  try {
+    const followers = await Follow.find({ following: userId })
+      .populate('follower', '-pigeonId')
+      .sort({ createdAt: -1 });
+
+    const followerUsers = followers.map((f) => f.follower);
+    res.status(200).json(followerUsers);
+  } catch (error) {
+    console.error('Error fetching followers:', error);
+    res.status(500).json({ message: 'Error fetching followers', error });
+  }
+};
+
+// Get users that this user follows
+const getFollowing = async (req, res) => {
+  console.log('Fetching following...');
+  const { userId } = req.params;
+
+  try {
+    const following = await Follow.find({ follower: userId })
+      .populate('following', '-pigeonId')
+      .sort({ createdAt: -1 });
+
+    const followingUsers = following.map((f) => f.following);
+    res.status(200).json(followingUsers);
+  } catch (error) {
+    console.error('Error fetching following:', error);
+    res.status(500).json({ message: 'Error fetching following', error });
+  }
+};
+
 module.exports = {
   createUser,
   login,
@@ -285,4 +455,8 @@ module.exports = {
   getUserById,
   getUserPosts,
   getUserStrikes,
+  getUserProfile,
+  toggleFollow,
+  getFollowers,
+  getFollowing,
 };

@@ -4,9 +4,8 @@
  */
 
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { AlertCircle } from 'lucide-react';
-import { useEffect, useRef } from 'react';
-import { Button, Spinner } from '@/components/ui-next';
+import { useEffect, useRef, useState } from 'react';
+import { Spinner } from '@/components/ui-next';
 import { PostCard, PostSkeleton, type Post } from '@/features/posts';
 import api from '@/lib/api';
 
@@ -23,6 +22,7 @@ interface PostsResponse {
 
 export function ProfilePosts({ userId }: ProfilePostsProps) {
   const observerTarget = useRef<HTMLDivElement>(null);
+  const [showLoading, setShowLoading] = useState(false);
 
   const {
     data,
@@ -33,11 +33,11 @@ export function ProfilePosts({ userId }: ProfilePostsProps) {
     isLoading,
     isError,
     error,
-    refetch,
   } = useInfiniteQuery({
     queryKey: ['profile-posts', userId],
     queryFn: async ({ pageParam = 1 }) => {
-      const response = await api.get<PostsResponse>(`/posts/user/${userId}`, {
+      const response = await api.get<PostsResponse>('/api/posts', {
+        userId,
         page: pageParam,
         limit: 12,
       });
@@ -50,6 +50,23 @@ export function ProfilePosts({ userId }: ProfilePostsProps) {
     enabled: !!userId,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  // ZEN: Wait 1 second before showing loading
+  useEffect(() => {
+    if (isLoading) {
+      const timer = setTimeout(() => setShowLoading(true), 1000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowLoading(false);
+    }
+  }, [isLoading]);
+
+  // ZEN: Log errors to console only, never show to user
+  useEffect(() => {
+    if (isError && error) {
+      console.error('Profile posts fetch error:', error);
+    }
+  }, [isError, error]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -76,8 +93,8 @@ export function ProfilePosts({ userId }: ProfilePostsProps) {
 
   const posts = data?.pages.flatMap((page) => page.posts) ?? [];
 
-  // Loading state
-  if (isLoading) {
+  // ZEN: Show loading only after 1 second
+  if (isLoading && showLoading) {
     return (
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
         <PostSkeleton />
@@ -90,34 +107,9 @@ export function ProfilePosts({ userId }: ProfilePostsProps) {
     );
   }
 
-  // Error state
-  if (isError) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
-        <AlertCircle className="h-12 w-12 text-red-500" />
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Failed to load posts
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {error instanceof Error ? error.message : 'Something went wrong'}
-          </p>
-        </div>
-        <Button variant="outline" onClick={() => refetch()}>
-          Try Again
-        </Button>
-      </div>
-    );
-  }
-
-  // Empty state
-  if (posts.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
-        <span className="text-6xl">🕊️</span>
-        <p className="text-gray-500 dark:text-gray-400">No posts yet</p>
-      </div>
-    );
+  // ZEN: If no posts, show nothing (Transparency)
+  if (!data || posts.length === 0) {
+    return null;
   }
 
   return (

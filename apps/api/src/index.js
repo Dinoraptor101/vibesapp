@@ -69,6 +69,7 @@ const messageRoutes = require('./routes/message');
 const healthCheckRouter = require('./routes/healthCheck');
 const recaptchaRoutes = require('./routes/recaptcha');
 const dmRoutes = require('./routes/dm');
+const dmRequestRoutes = require('./routes/dmRequest');
 
 // Helper function to wrap route registration with detailed error logging
 function useRoute(path, router) {
@@ -92,6 +93,7 @@ useRoute('/api/groupChats', groupChatRoutes);
 useRoute('/api/health', healthCheckRouter);
 useRoute('/api/recaptcha', recaptchaRoutes);
 useRoute('/api/dm', dmRoutes);
+useRoute('/api/dm-requests', dmRequestRoutes);
 
 // MongoDB Connection
 console.log('Connecting to MongoDB...');
@@ -126,12 +128,8 @@ mongoose.connection.on('disconnected', () => {
 });
 
 // Catch-all route to redirect non-API requests to frontend
-app.get('*', (req, res) => {
-  if (!req.originalUrl.startsWith('/api')) {
-    console.log('Redirecting to frontend...');
-    res.redirect(`${process.env.FRONTEND_BASE_URL}${req.originalUrl}`);
-  } else {
-    console.log(`API route not found: ${req.originalUrl}`);
-    res.status(404).send('API route not found');
-  }
+// Redirect all non-API routes to the frontend (for client-side routing)
+app.use((_req, res) => {
+  console.log('Redirecting to frontend...');
+  res.redirect(process.env.FRONTEND_URL);
 });

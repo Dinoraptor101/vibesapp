@@ -14,8 +14,11 @@
 - 🛡️ **Community Moderation:** Dislikes flag content + affect vibes score
 - ⚖️ **User Polarity:** YIN/YANG is a user profile field (masculinity/femininity identity)
 - 🔐 **Privacy-First:** DM requests require approval
+- ZEN Data Viewing Principles: 
+    - Loading: Wait 1 second before showing spinner (avoid flashing)
+    - Empty data: Show nothing (pure transparency)
+    - Errors: Console.log only, NEVER show to user
 
----
 
 ## 1. Activity Feed (Zen Mode - Unread First)
 
