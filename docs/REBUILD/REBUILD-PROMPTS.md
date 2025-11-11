@@ -149,7 +149,7 @@ This ensures AI agents can pick up exactly where you left off!
 ### Phase 4: Social (Week 7-9)
 - [X] 4.1 - Settings Page (✅ Complete - Nov 9, 2025)
 - [X] 4.2 - User Profiles (✅ Complete - Nov 10, 2025)
-- [ ] 4.3 - DM Request System (⏸️ Not started)
+- [X] 4.3 - DM Request System (✅ Complete - Nov 10, 2025) - Backend only
 - [ ] 4.4 - Messaging Interface (⏸️ Not started)
 - [ ] 4.5 - Group Chat (⏸️ Not started)
 - [ ] 4.6 - Activity Feed (⏸️ Not started)
@@ -1033,6 +1033,80 @@ This ensures AI agents can pick up exactly where you left off!
   - Need to verify: Distance calculation, age calculation, polarity display, MBTI badge
   - Backend endpoints may need implementation/verification
 - **Next:** Phase 4.3 - DM Request System
+
+### Session 27 - November 10, 2025
+- **Completed:** Phase 4.3 Backend + Comment System Bug Fixes
+- **Time taken:** ~3 hours
+- **Deliverables:**
+  - **Backend (Phase 4.3 - DM Request System):**
+    - Created Follow model (`apps/api/src/models/Follow.js`):
+      - follower/following relationship with unique compound index
+      - Timestamps for follow history
+    - Created DMRequest model (`apps/api/src/models/DMRequest.js`):
+      - sender/recipient/message/status fields
+      - 24-hour cooldown tracking (cooldownUntil)
+      - Unique compound index for sender-recipient pairs
+    - Created user controller (`apps/api/src/controllers/user.js`):
+      - getUserProfile: Returns profile with stats, distance, age calculation
+      - toggleFollow: Follow/unfollow with optimistic updates
+      - getFollowers: Paginated followers list
+      - getFollowing: Paginated following list
+    - Created DM request controller (`apps/api/src/controllers/dmRequest.js`):
+      - sendDMRequest: Create request with cooldown check
+      - getDMRequests: Fetch pending/accepted/declined requests
+      - acceptDMRequest: Create conversation on accept
+      - declineDMRequest: Set 24h cooldown
+      - checkDMRequestStatus: Check if can send request
+    - Created routes (`apps/api/src/routes/user.js`, `apps/api/src/routes/dmRequest.js`):
+      - /api/users/:userId/profile
+      - /api/users/:userId/follow (POST toggle)
+      - /api/users/:userId/followers
+      - /api/users/:userId/following
+      - /api/dm-requests (POST send)
+      - /api/dm-requests (GET list)
+      - /api/dm-requests/:requestId/accept
+      - /api/dm-requests/:requestId/decline
+      - /api/dm-requests/status/:recipientId
+    - Fixed authenticate middleware (`apps/api/src/middleware/authenticate.js`):
+      - Was missing entirely - created from scratch
+      - Validates Pigeon ID from cookies
+      - Attaches req.user with userId
+    - Fixed index.js:
+      - Mounted /api/dm-requests routes
+      - Fixed redirect to use process.env.FRONTEND_URL (removed hardcoded URL)
+  - **Bug Fixes:**
+    - Fixed ProfilePage 404 errors:
+      - useProfile hook missing /api prefix in URL
+      - Fixed: `/users/:userId/profile` → `/api/users/:userId/profile`
+    - Fixed ProfilePosts infinite loop:
+      - Wrong API path: `/posts/user/:userId` → `/api/posts?userId=:userId`
+      - Backend getPosts controller already supported userId query param
+    - Fixed AccountTab TypeScript error:
+      - user.zipCode doesn't exist on User type
+      - Changed: `zipCode !== user?.zipCode` → `zipCode?.trim()`
+    - Fixed CommentList duplicate keys bug:
+      - Backend getPosts missing replyTo query parameter handling
+      - Added: `if (replyTo) { query.replyTo = replyTo; }` to filter comments by parent post
+      - Comments now properly paginated without duplicates
+    - Fixed comment creation error:
+      - PostDetailPage allowing undefined postId in comment submission
+      - Added validation: Check postId exists before calling createComment mutation
+  - **Code Quality:**
+    - Removed ALL hardcoded URLs (localhost:5001, CloudFront, etc.)
+    - Environment-first architecture: All URLs from .env variables
+    - Added FRONTEND_URL, VITE_API_URL, VITE_CDN_URL, VITE_GEOCODING_URL, VITE_PLACEHOLDER_IMAGE_URL
+    - Fail-fast validation: App throws error if required env vars missing
+  - **Documentation:**
+    - Documented ZEN philosophy in REBUILD-UI-PATTERNS.md
+    - Applied ZEN to ProfilePage and ProfilePosts (1s delay, console errors, show nothing)
+- **Issues:** None - all TypeScript/linting errors resolved, backend running successfully
+- **Status:** ✅ Phase 4.3 Backend complete - DM request system fully operational (backend only, frontend UI pending)
+- **Testing Notes:**
+  - Backend endpoints tested and working
+  - Comment system fixed (no more duplicate keys)
+  - Profile navigation working
+  - Need to build frontend UI for DM requests (Phase 4.4)
+- **Next:** Phase 4.4 - Messaging Interface (frontend UI for DM requests + conversations)
 
 ### Session 21 - November 7, 2025
 - **Completed:** Prompt 3.2 - Posts Feed
