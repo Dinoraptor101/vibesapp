@@ -13,7 +13,7 @@ export function useDMRequestStatus(userId: string | undefined) {
     queryFn: async () => {
       if (!userId) throw new Error('User ID is required');
 
-      const data = await api.get<DMRequestStatusResponse>(`/dm-requests/status/${userId}`);
+      const data = await api.get<DMRequestStatusResponse>(`/api/dm-requests/status/${userId}`);
       return data;
     },
     enabled: !!userId,

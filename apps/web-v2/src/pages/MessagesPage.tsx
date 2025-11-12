@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { AppLayout } from '@/components/layout';
 import { Badge } from '@/components/ui-next';
-import { DMRequestsList } from '@/features/messaging/components/DMRequestsList';
+import { DMRequestsList, ConversationList } from '@/features/messaging';
 import { useDMRequests } from '@/features/messaging/hooks/useDMRequests';
 
 export function MessagesPage() {
@@ -51,21 +51,7 @@ export function MessagesPage() {
         </div>
 
         {/* Tab Content */}
-        <div>
-          {activeTab === 'conversations' ? (
-            <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
-              <span className="text-6xl">💬</span>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                No conversations yet
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Messaging interface coming in Phase 4.4
-              </p>
-            </div>
-          ) : (
-            <DMRequestsList />
-          )}
-        </div>
+        <div>{activeTab === 'conversations' ? <ConversationList /> : <DMRequestsList />}</div>
       </div>
     </AppLayout>
   );
