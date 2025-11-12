@@ -19,6 +19,7 @@ import {
 import { AuthProvider, LoginPage, ProtectedRoute, SignupPage } from '@/features/auth';
 import { ActivityPage } from '@/pages/ActivityPage';
 import { AuthTest } from '@/pages/AuthTest';
+import { ConversationPage } from '@/pages/ConversationPage';
 import { CreatePostPage } from '@/pages/CreatePostPage';
 import AvatarExamplesPage from '@/pages/examples/AvatarExamplesPage';
 import BadgeExamplesPage from '@/pages/examples/BadgeExamplesPage';
@@ -72,6 +73,14 @@ export function Router() {
             element={
               <ProtectedRoute>
                 <MessagesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/messages/:conversationId"
+            element={
+              <ProtectedRoute>
+                <ConversationPage />
               </ProtectedRoute>
             }
           />

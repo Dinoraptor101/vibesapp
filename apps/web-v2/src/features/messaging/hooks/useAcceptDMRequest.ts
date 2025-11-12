@@ -17,7 +17,7 @@ export function useAcceptDMRequest() {
 
   return useMutation({
     mutationFn: async (requestId: string) => {
-      const data = await api.post<AcceptDMRequestResponse>(`/dm-requests/${requestId}/accept`);
+      const data = await api.post<AcceptDMRequestResponse>(`/api/dm-requests/${requestId}/accept`);
       return data;
     },
     onSuccess: () => {

@@ -11,7 +11,7 @@ export function useDMRequests() {
   return useQuery({
     queryKey: ['dm-requests'],
     queryFn: async () => {
-      const data = await api.get<DMRequestsResponse>('/dm-requests');
+      const data = await api.get<DMRequestsResponse>('/api/dm-requests');
       return data;
     },
     staleTime: 1 * 60 * 1000, // 1 minute

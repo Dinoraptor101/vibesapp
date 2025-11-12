@@ -11,8 +11,16 @@ export { useDMRequests } from './hooks/useDMRequests';
 export { useDMRequestStatus } from './hooks/useDMRequestStatus';
 export { useAcceptDMRequest } from './hooks/useAcceptDMRequest';
 export { useDeclineDMRequest } from './hooks/useDeclineDMRequest';
+export { useConversations } from './hooks/useConversations';
+export { useConversation } from './hooks/useConversation';
+export { useSendMessage } from './hooks/useSendMessage';
+export { useMarkAsRead } from './hooks/useMarkAsRead';
 
 // Components
 export { DMRequestModal } from './components/DMRequestModal';
 export { DMRequestCard } from './components/DMRequestCard';
 export { DMRequestsList } from './components/DMRequestsList';
+export { ConversationList } from './components/ConversationList';
+export { ConversationView } from './components/ConversationView';
+export { MessageBubble } from './components/MessageBubble';
+export { MessageInput } from './components/MessageInput';
