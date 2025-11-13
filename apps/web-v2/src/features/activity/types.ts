@@ -81,8 +81,8 @@ export interface BackendActivity {
   _id: string;
   type: string;
   post?: string; // MongoDB ObjectId
-  authorUserName?: string;
-  userName?: string;
+  authorUsername?: string; // Normalized by backend
+  username?: string; // Normalized by backend
   userId?: string;
   isRead: boolean;
   createdAt: string | Date;
@@ -90,7 +90,7 @@ export interface BackendActivity {
   replyPost?: string;
   originalPosterId?: string;
   watcherUserId?: string;
-  watcherUserName?: string;
+  watcherUsername?: string; // Normalized by backend
   authorUserId?: string;
   messageId?: string;
   groupChatId?: string;

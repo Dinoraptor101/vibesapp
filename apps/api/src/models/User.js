@@ -98,17 +98,29 @@ const UserSchema = new mongoose.Schema({
 });
 
 // SECURITY: Ensure pigeonId is never exposed in JSON responses
+// NORMALIZATION: Transform field names to match frontend expectations
 UserSchema.set('toJSON', {
   transform: (_doc, ret) => {
     delete ret.pigeonId; // Remove pigeonId from JSON output
+
+    // Transform field names to match frontend (lowercase/consistent)
+    ret.username = ret.userName;
+    delete ret.userName;
+
     return ret;
   },
 });
 
 // SECURITY: Ensure pigeonId is never exposed in plain object conversion
+// NORMALIZATION: Transform field names to match frontend expectations
 UserSchema.set('toObject', {
   transform: (_doc, ret) => {
     delete ret.pigeonId; // Remove pigeonId from object output
+
+    // Transform field names to match frontend (lowercase/consistent)
+    ret.username = ret.userName;
+    delete ret.userName;
+
     return ret;
   },
 });

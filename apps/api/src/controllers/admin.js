@@ -104,7 +104,10 @@ const getFlaggedPosts = async (req, res) => {
 
         return {
           ...post,
-          reporters: reporters.map((u) => ({ userId: u.userId, userName: u.userName })),
+          reporters: reporters.map((u) => {
+            const userObj = u.toJSON(); // Use transformed object
+            return { userId: userObj._id || u.userId, username: userObj.username };
+          }),
           dislikeCount: post.proximal_dislikes,
         };
       })
