@@ -20,7 +20,7 @@ export function useFollow(userId: string | undefined) {
     mutationFn: async () => {
       if (!userId) throw new Error('User ID is required');
 
-      const data = await api.post<FollowResponse>(`/users/${userId}/follow`);
+      const data = await api.post<FollowResponse>(`/api/users/${userId}/follow`);
       return data;
     },
     // Optimistic update - immediately update UI before API responds

@@ -9,16 +9,22 @@ import { Bell, Home, MessageSquare, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Badge, Button } from '@/components/ui-next';
+import { useUnreadCounts } from '@/features/activity';
 import { CreatePostModal } from '@/features/posts';
 import { UserMenu } from './UserMenu';
-
-// Mock badge counts - will be replaced with real data later
-const MOCK_UNREAD_ACTIVITY = 3;
-const MOCK_UNREAD_MESSAGES = 5;
 
 export function TopNav() {
   const location = useLocation();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  // Fetch real unread counts from Activity API
+  // Note: This is safe to call even when not logged in because the query
+  // has `enabled: !!user?._id` which prevents execution until user is loaded
+  const { data: activityCounts } = useUnreadCounts();
+
+  // Messages count comes from activity feed (messages category)
+  const unreadActivity = activityCounts?.all || 0;
+  const unreadMessages = activityCounts?.messages || 0;
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -56,13 +62,13 @@ export function TopNav() {
               ? 'bg-brand-purple text-white'
               : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
           }`}
-          aria-label={`Activity${MOCK_UNREAD_ACTIVITY > 0 ? ` (${MOCK_UNREAD_ACTIVITY} unread)` : ''}`}
+          aria-label={`Activity${unreadActivity > 0 ? ` (${unreadActivity} unread)` : ''}`}
         >
           <div className="relative">
             <Bell className="w-5 h-5" />
-            {MOCK_UNREAD_ACTIVITY > 0 && (
+            {unreadActivity > 0 && (
               <div className="absolute -top-1 -right-1">
-                <Badge variant="error" size="sm" count={MOCK_UNREAD_ACTIVITY} />
+                <Badge variant="error" size="sm" count={unreadActivity} />
               </div>
             )}
           </div>
@@ -77,13 +83,13 @@ export function TopNav() {
               ? 'bg-brand-purple text-white'
               : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
           }`}
-          aria-label={`Messages${MOCK_UNREAD_MESSAGES > 0 ? ` (${MOCK_UNREAD_MESSAGES} unread)` : ''}`}
+          aria-label={`Messages${unreadMessages > 0 ? ` (${unreadMessages} unread)` : ''}`}
         >
           <div className="relative">
             <MessageSquare className="w-5 h-5" />
-            {MOCK_UNREAD_MESSAGES > 0 && (
+            {unreadMessages > 0 && (
               <div className="absolute -top-1 -right-1">
-                <Badge variant="error" size="sm" count={MOCK_UNREAD_MESSAGES} />
+                <Badge variant="error" size="sm" count={unreadMessages} />
               </div>
             )}
           </div>

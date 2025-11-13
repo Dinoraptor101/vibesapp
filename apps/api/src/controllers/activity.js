@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const ReplyActivity = require('../models/ReplyActivity');
 const ReactionActivity = require('../models/ReactionActivity');
 const WatchActivity = require('../models/WatchActivity');

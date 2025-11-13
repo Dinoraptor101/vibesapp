@@ -138,16 +138,7 @@ All Phase 3.4 fields present in `apps/api/src/models/User.js`:
 
 ---
 
-### 11. **Group Chat Auto-Creation**
-**Status**: Still active
-**Issue**: Every post automatically creates a group chat
-**Question**: Does rebuild need auto group chats?
-**Recommendation**: Review with product team
-**Priority**: Low - works but may be unnecessary
-
----
-
-### 12. **Reply Activity System**
+### 11. **Reply Activity System**
 **Status**: Still active  
 **Issue**: Complex activity tracking on every reply
 **Question**: Does rebuild need activity tracking?
@@ -553,25 +544,7 @@ if (karmaResult !== true) {
 
 ---
 
-### 15. **Group Chat Auto-Creation**
-**Issue**: Backend automatically creates group chat for every post
-
-**Code** (`post.js:84-97`):
-```javascript
-const groupChat = new GroupChat({
-  postId: newPost._id,
-  authorUserId: user.userId,
-  authorUserName: user.userName,
-});
-await groupChat.save({ session });
-```
-
-**Impact**: Extra database operations on every post creation  
-**Question**: Does rebuild need auto group chats?
-
----
-
-### 16. **Reply Activity System**
+### 15. **Reply Activity System**
 **Issue**: Complex reply activity tracking might be unnecessary
 
 **Code** (`post.js:110-123`):
@@ -640,8 +613,7 @@ router.get('/flagged-posts', getFlaggedPosts);
 10. Create dedicated `/nearby` endpoint with geospatial queries
 11. Standardize field naming (camelCase everywhere)
 12. Review karma system necessity
-13. Review group chat auto-creation necessity
-14. Remove legacy flagged posts endpoint
+13. Remove legacy flagged posts endpoint
 
 ### Low Priority
 15. Review activity tracking necessity

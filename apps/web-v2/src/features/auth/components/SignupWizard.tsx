@@ -5,9 +5,8 @@ import { Button, Input, Textarea } from '@/components/ui-next';
 import { useAuth } from '@/features/auth';
 import { uploadImage } from '@/features/posts/api/s3Service';
 import { compressImage } from '@/features/posts/utils/imageUtils';
-import { deleteCookie } from '@/lib';
+import { deleteCookie, setCookie } from '@/lib';
 import { authApi } from '../services/authApi';
-import { generatePigeonId } from '../utils/pigeonIdGenerator';
 import { LocationStep } from './LocationStep';
 import { MBTISelector } from './MBTISelector';
 
@@ -15,6 +14,7 @@ interface SignupData {
   pigeonId: string;
   userName: string;
   mbtiPersonality: string;
+  polarity: 'yin' | 'yang';
   location: { lat: number; lon: number } | null;
   profilePictureUrl?: string;
   bio?: string;
@@ -28,9 +28,10 @@ const STEPS = [
   { id: 2, title: 'Your Pigeon ID', required: true },
   { id: 3, title: 'Username', required: true },
   { id: 4, title: 'MBTI Type', required: true },
-  { id: 5, title: 'Location', required: true },
-  { id: 6, title: 'Avatar', required: false },
-  { id: 7, title: 'About You', required: false },
+  { id: 5, title: 'Polarity', required: true },
+  { id: 6, title: 'Location', required: true },
+  { id: 7, title: 'Avatar', required: false },
+  { id: 8, title: 'About You', required: false },
 ];
 
 export function SignupWizard() {
@@ -40,21 +41,35 @@ export function SignupWizard() {
 
   // Clear any existing auth data when starting signup
   useEffect(() => {
-    // Clear cookies without triggering navigation
+    // Clear ALL auth cookies without triggering navigation
+    console.log('Clearing all auth cookies for fresh signup...');
     deleteCookie('pigeonId');
     deleteCookie('userId');
+    deleteCookie('token');
+    deleteCookie('session');
+
+    // Clear any auth data from localStorage/sessionStorage
+    localStorage.removeItem('user');
+    sessionStorage.clear();
+
+    console.log('Auth cookies cleared');
   }, []);
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGeneratingPigeonId, setIsGeneratingPigeonId] = useState(false);
+  const [showGeneratingSpinner, setShowGeneratingSpinner] = useState(false);
   const [error, setError] = useState('');
   const [copiedPigeonId, setCopiedPigeonId] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+  const generatingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [signupData, setSignupData] = useState<SignupData>({
     pigeonId: '',
     userName: '',
     mbtiPersonality: '',
+    polarity: 'yang', // Default to yang
     location: null,
     bio: '',
     birthYear: new Date().getFullYear() - 20, // Default to 20 years old
@@ -62,10 +77,39 @@ export function SignupWizard() {
     sex: 'Other',
   });
 
-  const handleGeneratePigeonId = () => {
-    const newPigeonId = generatePigeonId();
-    setSignupData((prev) => ({ ...prev, pigeonId: newPigeonId }));
-    setCurrentStep(2); // Move to step 2 to show the generated ID
+  const handleGeneratePigeonId = async () => {
+    setIsGeneratingPigeonId(true);
+    setError('');
+
+    // ZEN: Only show spinner if generation takes > 1 second
+    generatingTimeoutRef.current = setTimeout(() => {
+      setShowGeneratingSpinner(true);
+    }, 1000);
+
+    try {
+      // Call backend to generate a unique Pigeon ID
+      const newPigeonId = await authApi.generatePigeonId();
+
+      // Clear timeout and hide spinner
+      if (generatingTimeoutRef.current) {
+        clearTimeout(generatingTimeoutRef.current);
+      }
+      setShowGeneratingSpinner(false);
+
+      setSignupData((prev) => ({ ...prev, pigeonId: newPigeonId }));
+      setCurrentStep(2); // Move to step 2 to show the generated ID
+    } catch (err) {
+      // Clear timeout and hide spinner
+      if (generatingTimeoutRef.current) {
+        clearTimeout(generatingTimeoutRef.current);
+      }
+      setShowGeneratingSpinner(false);
+
+      console.error('Error generating Pigeon ID:', err);
+      setError('Failed to generate Pigeon ID. Please try again.');
+    } finally {
+      setIsGeneratingPigeonId(false);
+    }
   };
 
   const handleCopyPigeonId = async () => {
@@ -88,7 +132,8 @@ export function SignupWizard() {
       setError('Please select your MBTI type');
       return;
     }
-    if (currentStep === 5 && !signupData.location) {
+    // Step 5 is polarity - no validation needed (has default)
+    if (currentStep === 6 && !signupData.location) {
       setError('Location is required');
       return;
     }
@@ -166,18 +211,49 @@ export function SignupWizard() {
     setIsSubmitting(true);
 
     try {
-      // Validate required fields
-      if (
-        !signupData.pigeonId ||
-        !signupData.userName ||
-        !signupData.mbtiPersonality ||
-        !signupData.location
-      ) {
-        throw new Error('Missing required fields');
+      // Clear all auth cookies one more time before signup
+      console.log('Clearing cookies before signup submission...');
+      deleteCookie('pigeonId');
+      deleteCookie('userId');
+      deleteCookie('token');
+      deleteCookie('session');
+
+      // Validate required fields before submission
+      if (!signupData.pigeonId) {
+        throw new Error('Pigeon ID is required');
+      }
+      if (!signupData.userName.trim()) {
+        throw new Error('Username is required');
+      }
+      if (!signupData.mbtiPersonality) {
+        throw new Error('MBTI type is required');
+      }
+      if (!signupData.polarity) {
+        throw new Error('Polarity is required');
+      }
+      if (!signupData.location) {
+        throw new Error('Location is required');
       }
 
       // Call backend API to create user
-      const { pigeonId } = await authApi.signup({
+      console.log('Signup data being sent:', {
+        pigeonId: signupData.pigeonId,
+        userName: signupData.userName,
+        birthYear: signupData.birthYear,
+        birthMonth: signupData.birthMonth,
+        sex: signupData.sex.toLowerCase(),
+        location: signupData.location,
+        polarity: signupData.polarity,
+        mbtiPersonality: signupData.mbtiPersonality,
+        profilePictureUrl: signupData.profilePictureUrl,
+        bio: signupData.bio,
+      });
+
+      // Store Pigeon ID in cookie before signup (for security - backend doesn't return it)
+      setCookie('pigeonId', signupData.pigeonId, 365); // Store for 1 year
+      console.log('Stored Pigeon ID in cookie:', signupData.pigeonId);
+
+      await authApi.signup({
         pigeonId: signupData.pigeonId, // Send the frontend-generated Pigeon ID
         userName: signupData.userName,
         birthYear: signupData.birthYear,
@@ -187,19 +263,29 @@ export function SignupWizard() {
           lat: signupData.location.lat,
           lon: signupData.location.lon,
         },
+        polarity: signupData.polarity,
         mbtiPersonality: signupData.mbtiPersonality,
         profilePictureUrl: signupData.profilePictureUrl,
         bio: signupData.bio || undefined,
       });
 
-      // Auto-login with the generated Pigeon ID
-      await login(pigeonId);
+      console.log('Signup successful, using Pigeon ID from cookie for login');
+
+      // Auto-login with the Pigeon ID (now stored in cookie)
+      await login(signupData.pigeonId);
 
       // Navigate to home
       navigate('/');
     } catch (err) {
       console.error('Signup error:', err);
-      setError(err instanceof Error ? err.message : 'Signup failed. Please try again.');
+
+      // Handle duplicate Pigeon ID error
+      if (err && typeof err === 'object' && 'status' in err && err.status === 409) {
+        setError('This Pigeon ID already exists. Please go back and generate a new one.');
+        setCurrentStep(2); // Go back to Pigeon ID step
+      } else {
+        setError(err instanceof Error ? err.message : 'Signup failed. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -237,8 +323,14 @@ export function SignupWizard() {
               </ul>
             </div>
 
-            <Button onClick={handleGeneratePigeonId} size="lg" className="w-full">
-              Get Started
+            <Button
+              onClick={handleGeneratePigeonId}
+              size="lg"
+              className="w-full"
+              loading={showGeneratingSpinner}
+              disabled={isGeneratingPigeonId}
+            >
+              {showGeneratingSpinner ? 'Generating...' : 'Get Started'}
             </Button>
 
             <p className="text-sm text-text-secondary">
@@ -355,6 +447,79 @@ export function SignupWizard() {
         return (
           <div className="space-y-6">
             <div className="space-y-2 text-center">
+              <h2 className="text-2xl font-bold text-text-primary">Choose Your Polarity</h2>
+              <p className="text-text-secondary">
+                Are you more Yin (receptive, calm) or Yang (active, dynamic)?
+              </p>
+            </div>
+
+            <div className="space-y-6 rounded-lg border border-border bg-surface-elevated p-6">
+              <div className="flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSignupData((prev) => ({
+                      ...prev,
+                      polarity: prev.polarity === 'yin' ? 'yang' : 'yin',
+                    }))
+                  }
+                  className="relative inline-flex h-16 w-32 items-center rounded-full bg-surface-elevated ring-2 ring-border transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+                  aria-label={`Current polarity: ${signupData.polarity.toUpperCase()}`}
+                >
+                  <span
+                    className={`inline-block h-12 w-12 transform rounded-full bg-gradient-to-br shadow-lg transition-all ${
+                      signupData.polarity === 'yang'
+                        ? 'translate-x-16 from-orange-400 to-red-500'
+                        : 'translate-x-2 from-blue-400 to-purple-500'
+                    }`}
+                  />
+                  <span className="absolute left-3 text-xs font-medium text-text-secondary">
+                    YIN
+                  </span>
+                  <span className="absolute right-3 text-xs font-medium text-text-secondary">
+                    YANG
+                  </span>
+                </button>
+              </div>
+
+              <div className="text-center">
+                <p className="text-lg font-semibold text-text-primary">
+                  Currently: {signupData.polarity.toUpperCase()}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="space-y-2 rounded-lg bg-surface p-4">
+                  <p className="font-semibold text-brand-purple">🌙 YIN</p>
+                  <ul className="list-inside list-disc space-y-1 text-text-secondary">
+                    <li>Receptive</li>
+                    <li>Reflective</li>
+                    <li>Calm energy</li>
+                    <li>Intuitive</li>
+                  </ul>
+                </div>
+                <div className="space-y-2 rounded-lg bg-surface p-4">
+                  <p className="font-semibold text-orange-500">☀️ YANG</p>
+                  <ul className="list-inside list-disc space-y-1 text-text-secondary">
+                    <li>Active</li>
+                    <li>Expressive</li>
+                    <li>Dynamic energy</li>
+                    <li>Assertive</li>
+                  </ul>
+                </div>
+              </div>
+
+              <p className="text-center text-xs text-text-secondary">
+                You can change this anytime in your settings
+              </p>
+            </div>
+          </div>
+        );
+
+      case 6:
+        return (
+          <div className="space-y-6">
+            <div className="space-y-2 text-center">
               <h2 className="text-2xl font-bold text-text-primary">Where Are You?</h2>
               <p className="text-text-secondary">Help us show you nearby vibes and local content</p>
             </div>
@@ -368,7 +533,7 @@ export function SignupWizard() {
           </div>
         );
 
-      case 6:
+      case 7:
         return (
           <div className="space-y-6">
             <div className="space-y-2 text-center">
@@ -413,7 +578,7 @@ export function SignupWizard() {
           </div>
         );
 
-      case 7:
+      case 8:
         return (
           <div className="space-y-6">
             <div className="space-y-2 text-center">

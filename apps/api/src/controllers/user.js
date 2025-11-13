@@ -4,6 +4,131 @@ const Follow = require('../models/Follow');
 const karma = require('./karma');
 const UserHandler = require('../handlers/UserHandler');
 
+// Pigeon ID generation utilities
+const adjectives = [
+  'brave',
+  'calm',
+  'clever',
+  'cosmic',
+  'daring',
+  'dreamy',
+  'eager',
+  'fancy',
+  'gentle',
+  'happy',
+  'jolly',
+  'kind',
+  'lively',
+  'lucky',
+  'merry',
+  'noble',
+  'proud',
+  'quick',
+  'royal',
+  'shiny',
+  'smart',
+  'swift',
+  'vivid',
+  'wise',
+  'witty',
+  'zesty',
+  'amber',
+  'azure',
+  'coral',
+  'crimson',
+  'emerald',
+  'golden',
+  'jade',
+  'ruby',
+  'silver',
+  'stellar',
+  'lunar',
+  'solar',
+  'mystic',
+];
+
+const nouns = [
+  'tiger',
+  'eagle',
+  'dolphin',
+  'phoenix',
+  'dragon',
+  'falcon',
+  'panther',
+  'wolf',
+  'lion',
+  'hawk',
+  'bear',
+  'fox',
+  'owl',
+  'raven',
+  'swan',
+  'deer',
+  'comet',
+  'star',
+  'moon',
+  'sun',
+  'cloud',
+  'storm',
+  'breeze',
+  'wave',
+  'mountain',
+  'river',
+  'ocean',
+  'forest',
+  'meadow',
+  'canyon',
+  'glacier',
+  'valley',
+  'sage',
+  'knight',
+  'mage',
+  'warrior',
+  'ranger',
+  'scout',
+  'voyager',
+  'seeker',
+];
+
+function generatePigeonId() {
+  const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const noun = nouns[Math.floor(Math.random() * nouns.length)];
+  const numbers = Math.floor(1000 + Math.random() * 9000);
+  return `${adjective}-${noun}-${numbers}`;
+}
+
+// Controller function to generate a unique Pigeon ID
+const generateUniquePigeonId = async (req, res) => {
+  console.log('Generating unique Pigeon ID...');
+
+  try {
+    let pigeonId;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    // Keep generating until we find a unique one
+    do {
+      pigeonId = generatePigeonId();
+      const existingUser = await User.findOne({ pigeonId });
+
+      if (!existingUser) {
+        console.log('Generated unique Pigeon ID:', pigeonId);
+        return res.status(200).json({ pigeonId });
+      }
+
+      attempts++;
+      console.log(`Attempt ${attempts}: ${pigeonId} already exists, trying again...`);
+    } while (attempts < maxAttempts);
+
+    // If we couldn't find a unique one after maxAttempts, return error
+    console.error('Failed to generate unique Pigeon ID after', maxAttempts, 'attempts');
+    res.status(500).json({ message: 'Failed to generate unique Pigeon ID. Please try again.' });
+  } catch (error) {
+    console.error('Error generating Pigeon ID:', error);
+    res.status(500).json({ message: 'Error generating Pigeon ID', error: error.message });
+  }
+};
+
 // Controller function to create a new user
 const createUser = async (req, res) => {
   console.log('Creating a new user...');
@@ -52,21 +177,25 @@ const createUser = async (req, res) => {
   try {
     const userId = UserHandler.generateUUID();
 
-    // Create new user with pigeonId from frontend
-    const user = new User({
+    // Create new user with pigeonId from frontend (guaranteed unique by generate endpoint)
+    const userData = {
       userId,
-      pigeonId, // Use pigeonId from request body (frontend generates it)
+      pigeonId, // Use pigeonId from request body (frontend generates it via backend)
       userName,
       birthYear,
       birthMonth,
       sex,
       location,
-      polarity,
       mbtiPersonality,
-      profilePictureUrl,
-      bio,
       lastActiveAt: new Date(),
-    });
+    };
+
+    // Only include optional fields if they are defined
+    if (polarity) userData.polarity = polarity;
+    if (profilePictureUrl) userData.profilePictureUrl = profilePictureUrl;
+    if (bio) userData.bio = bio;
+
+    const user = new User(userData);
 
     await user.save();
     console.log('User created successfully:', user.userId);
@@ -79,13 +208,18 @@ const createUser = async (req, res) => {
     }
 
     // Retrieve updated user JSON with initialized vibes from MongoDB
-    const updatedUserWithPigeon = await User.findOne({ userId }); //Include Pigeon ID Just this once for the user to save it.
+    // IMPORTANT: Include pigeonId this one time for the user to save it
+    const updatedUserWithPigeon = await User.findOne({ userId }).select('+pigeonId');
 
-    console.log('User created and initialized successfully:');
+    console.log(
+      'User created and initialized successfully with pigeonId:',
+      updatedUserWithPigeon.pigeonId
+    );
     res.status(201).json(updatedUserWithPigeon);
   } catch (error) {
     console.error('Error creating user:', error);
-    res.status(500).json({ message: 'Error creating user', error });
+    console.error('Error details:', error.message);
+    res.status(500).json({ message: 'Error creating user', error: error.message });
   }
 };
 
@@ -116,7 +250,18 @@ const login = async (req, res) => {
 // Controller function to update existing user details
 const updateUser = async (req, res) => {
   console.log('Updating user details...');
-  const { userName, birthYear, birthMonth, sex, location, polarity, mbtiPersonality } = req.body;
+  const {
+    userName,
+    birthYear,
+    birthMonth,
+    sex,
+    location,
+    polarity,
+    mbtiPersonality,
+    bio,
+    profilePictureUrl,
+    avatar, // Alias for profilePictureUrl
+  } = req.body;
   const { userId } = req.params;
 
   try {
@@ -141,6 +286,9 @@ const updateUser = async (req, res) => {
     if (location !== undefined) user.location = location;
     if (polarity !== undefined) user.polarity = polarity;
     if (mbtiPersonality !== undefined) user.mbtiPersonality = mbtiPersonality;
+    if (bio !== undefined) user.bio = bio;
+    if (profilePictureUrl !== undefined) user.profilePictureUrl = profilePictureUrl;
+    if (avatar !== undefined) user.profilePictureUrl = avatar; // Handle avatar alias
 
     console.log('Updated user details:', user);
 
@@ -449,6 +597,7 @@ const getFollowing = async (req, res) => {
 };
 
 module.exports = {
+  generateUniquePigeonId,
   createUser,
   login,
   updateUser,

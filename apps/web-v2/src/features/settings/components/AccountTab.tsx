@@ -1,10 +1,10 @@
 import { Camera, Copy, Loader2, LogOut, MapPin } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/features/auth/context/AuthContext';
+import { getCookie } from '@/lib/api';
 import { useAccountUpdates } from '../hooks/useAccountUpdates';
 
 const MBTI_TYPES = [
@@ -64,17 +64,38 @@ export function AccountTab() {
   const handleBioBlur = () => {
     if (bio.length > 200) {
       setBio(user?.bio || ''); // Silent revert
+      console.log('Bio exceeds 200 characters, reverted');
       return;
     }
     if (bio !== user?.bio) {
-      queueUpdate({ bio });
+      const previousBio = user?.bio || '';
+      queueUpdate(
+        { bio },
+        {
+          onError: (error) => {
+            // ZEN: Silent revert on error, log to console only
+            console.error('Failed to update bio:', error);
+            setBio(previousBio);
+          },
+        }
+      );
     }
   };
 
   // MBTI handler with auto-save
   const handleMbtiChange = (newMbti: string) => {
+    const previousMbti = mbti;
     setMbti(newMbti);
-    queueUpdate({ mbti: newMbti });
+    queueUpdate(
+      { mbtiPersonality: newMbti },
+      {
+        onError: (error) => {
+          // ZEN: Silent revert on error, log to console only
+          console.error('Failed to update MBTI:', error);
+          setMbti(previousMbti);
+        },
+      }
+    );
   };
 
   // Zip code handler with auto-save on blur
@@ -87,7 +108,7 @@ export function AccountTab() {
   // GPS button handler
   const handleGPSClick = () => {
     if (!navigator.geolocation) {
-      toast.error('GPS not supported on this device');
+      console.error('GPS not supported on this device');
       return;
     }
 
@@ -118,7 +139,8 @@ export function AccountTab() {
           location: { lat: latitude, lon: longitude },
         });
 
-        toast.success('Location updated');
+        // ZEN: Silent success, no toast
+        console.log('Location updated:', locStr);
       },
       (error) => {
         // Clear timeout and hide spinner
@@ -136,9 +158,19 @@ export function AccountTab() {
 
   // Polarity toggle handler
   const handlePolarityToggle = () => {
+    const previousPolarity = polarity;
     const newPolarity = polarity === 'YIN' ? 'YANG' : 'YIN';
     setPolarity(newPolarity);
-    queueUpdate({ polarity: newPolarity });
+    queueUpdate(
+      { polarity: newPolarity.toLowerCase() as 'yin' | 'yang' },
+      {
+        onError: (error) => {
+          // ZEN: Silent revert on error, log to console only
+          console.error('Failed to update polarity:', error);
+          setPolarity(previousPolarity);
+        },
+      }
+    );
   };
 
   // Avatar upload handler
@@ -152,13 +184,13 @@ export function AccountTab() {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file');
+      console.error('Invalid file type - must be an image');
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be less than 5MB');
+      console.error('Image file too large - must be less than 5MB');
       return;
     }
 
@@ -166,27 +198,32 @@ export function AccountTab() {
 
     try {
       // TODO: Implement actual S3 upload with presigned URL
-      // For now, create local preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        queueUpdate({ avatar: result });
-        setUploadingAvatar(false);
-        toast.success('Avatar updated');
-      };
-      reader.readAsDataURL(file);
+      // For now, skip avatar updates to avoid 413 Payload Too Large
+      // Base64 encoding makes images too large for PATCH requests
+      console.warn('Avatar upload disabled - implement S3 presigned URL upload');
+      setUploadingAvatar(false);
     } catch (error) {
       console.error('Avatar upload error:', error);
       setUploadingAvatar(false);
-      toast.error('Failed to upload avatar');
     }
   };
 
   // Copy Pigeon ID
   const handleCopyPigeonId = async () => {
-    if (user?.pigeonId) {
-      await navigator.clipboard.writeText(user.pigeonId);
-      toast.success('Copied!');
+    // SECURITY: Always get pigeonId from cookie, NEVER from API response
+    // This prevents exposing Pigeon IDs through the backend API
+    const pigeonId = getCookie('pigeonId');
+
+    if (pigeonId) {
+      try {
+        await navigator.clipboard.writeText(pigeonId);
+        // ZEN: Silent success, no toast (user sees it was copied)
+        console.log('Pigeon ID copied to clipboard');
+      } catch (error) {
+        console.error('Failed to copy Pigeon ID:', error);
+      }
+    } else {
+      console.error('Pigeon ID not found. Please log in again.');
     }
   };
 

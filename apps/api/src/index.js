@@ -16,7 +16,7 @@ const corsOptions = {
     'https://api-qa.vibesapp.net', // QA backend
     'https://dinoraptor101.github.io', // Failover production
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'x-pigeon-id'],
   optionsSuccessStatus: 200,
 };

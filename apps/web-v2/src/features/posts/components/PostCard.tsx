@@ -63,15 +63,15 @@ export function PostCard({ post, onLike, onReport, onComment }: PostCardProps) {
 
   return (
     <Card hoverable>
-      <Link to={`/post/${post._id}`} className="block">
-        {/* Author Info */}
-        <div className="p-4 pb-0">
-          <UserBadge user={post.user} size="md" clickable={false} />
-          <div className="text-xs text-text-tertiary mt-2">
-            {formatRelativeTime(new Date(post.createdAt))}
-          </div>
+      {/* Author Info - NOT wrapped in Link so UserBadge can be clickable */}
+      <div className="p-4 pb-0">
+        <UserBadge user={post.user} size="md" clickable={true} />
+        <div className="text-xs text-text-tertiary mt-2">
+          {formatRelativeTime(new Date(post.createdAt))}
         </div>
+      </div>
 
+      <Link to={`/post/${post._id}`} className="block">
         {/* Post Image */}
         <div className="relative aspect-square bg-surface-alt overflow-hidden">
           <img

@@ -3,6 +3,9 @@ const router = express.Router();
 const userController = require('../controllers/user');
 const { authenticate } = require('../middleware/authenticate');
 
+// GET endpoint to generate a unique Pigeon ID
+router.get('/generate-pigeon-id', userController.generateUniquePigeonId);
+
 // POST endpoint to create a new user
 router.post('/create', userController.createUser);
 
@@ -32,5 +35,8 @@ router.get('/:userId/strikes', userController.getUserStrikes);
 
 // PUT endpoint to update existing user details
 router.put('/:userId', userController.updateUser);
+
+// PATCH endpoint to update existing user details (same handler as PUT)
+router.patch('/:userId', userController.updateUser);
 
 module.exports = router;

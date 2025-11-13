@@ -150,8 +150,6 @@
 #### High Priority (🔴 Messages Tab - Unread Only)
 1. **DM Requests** - Requires user action (always stays until acted upon)
 2. **New DM Messages** - Unread messages
-3. **Group Chat Mentions** - @username in group
-4. **Group Chat Messages** - Unread in groups
 
 #### Medium Priority (🟡 Social Tab - Unread Only)
 5. **New Followers** - Someone started following you
@@ -186,8 +184,6 @@
 #### High Priority (🔴 Messages Tab)
 1. **DM Requests** - Requires user action
 2. **New DM Messages** - Unread messages
-3. **Group Chat Mentions** - @username in group
-4. **Group Chat Messages** - Unread in groups
 
 #### Medium Priority (🟡 Social Tab)
 5. **New Followers** - Someone started following you
@@ -547,87 +543,9 @@ interface Conversation {
 
 ---
 
-## 4. Group Chat with Mentions
+## 4. @Mention Autocomplete (CONFIRMED Nov 4, 2025)
 
-### Create Group Flow
-
-```
-┌─────────────────────────────────┐
-│  Create Group Chat         [×]  │
-├─────────────────────────────────┤
-│                                 │
-│  Group Name                     │
-│  ┌─────────────────────────┐   │
-│  │ Chicago Coffee Lovers   │   │
-│  └─────────────────────────┘   │
-│                                 │
-│  Add Members (2-50)             │
-│  ┌─────────────────────────┐   │
-│  │ 🔍 Search users...      │   │
-│  └─────────────────────────┘   │
-│                                 │
-│  Selected (3):                  │
-│  ┌─────────────────────────┐   │
-│  │ [@] @sarah          [×] │   │
-│  │ [@] @mike           [×] │   │
-│  │ [@] @alex           [×] │   │
-│  └─────────────────────────┘   │
-│                                 │
-├─────────────────────────────────┤
-│      [Cancel]  [Create Group]   │
-└─────────────────────────────────┘
-```
-
-### Group Chat with Mentions
-
-```
-┌─────────────────────────────────┐
-│  ← Chicago Coffee Lovers  [⋮]  │
-│     @you, @sarah, @mike +2     │
-├─────────────────────────────────┤
-│                                 │
-│         Yesterday               │
-│                                 │
-│  @sarah                   3:45 │
-│  ┌───────────────────────────┐ │
-│  │ Hey everyone! Who's up    │ │
-│  │ for coffee tomorrow?      │ │
-│  └───────────────────────────┘ │
-│                                 │
-│  @mike                    3:47 │
-│  ┌───────────────────────────┐ │
-│  │ @sarah I'm in! Where?     │ │
-│  └───────────────────────────┘ │
-│                                 │
-│  @you                     3:50 │
-│               ┌───────────────┐│
-│               │ @sarah @mike  ││ ← Mentions
-│               │ How about The ││
-│               │ Brew Lab at 2?││
-│               └───────────────┘│
-│                                 │
-│         Today                   │
-│                                 │
-│  @alex                    Just │
-│  ┌───────────────────────────┐ │
-│  │ @you Sounds perfect!      │ │
-│  │ See you there 👍          │ │
-│  └───────────────────────────┘ │
-│                                 │
-│  @mike is typing...             │
-│                                 │
-├─────────────────────────────────┤
-│  [@] ┌───────────────────┐ [📤]│
-│      │ Type a message... │     │
-│      └───────────────────┘     │
-│                                 │
-│  💡 Type @ to mention someone   │
-└─────────────────────────────────┘
-```
-
-### @Mention Autocomplete (CONFIRMED Nov 4, 2025)
-
-> **Mention Scope:** @username mentions work in **Comments, Group chat, AND Captions**
+> **Mention Scope:** @username mentions work in **Comments AND Captions**
 
 ```
 ┌─────────────────────────────────┐
@@ -645,7 +563,6 @@ interface Conversation {
 **Usage contexts:**
 - Post captions: "@sarah check this out!"
 - Comments: "@john great shot!"
-- Group chat: "@everyone meeting at 3pm"
 
 ---
 
