@@ -9,7 +9,7 @@ import type { User } from '@/types';
 
 interface LoginResponse {
   userId: string;
-  userName: string;
+  username: string; // Backend now returns 'username' (transformed in Mongoose)
   mbtiPersonality: string;
   polarity: string;
   profilePictureUrl?: string;
@@ -48,11 +48,12 @@ interface SignupResponse extends LoginResponse {
 
 /**
  * Transform backend user response to frontend User type
+ * Backend now returns normalized field names, so minimal transformation needed
  */
 function transformUserData(data: LoginResponse): User {
   return {
     _id: data.userId,
-    username: data.userName,
+    username: data.username, // Already normalized by backend
     polarity: data.polarity || 'neutral',
     mbtiPersonality: data.mbtiPersonality,
     profilePictureUrl: data.profilePictureUrl,

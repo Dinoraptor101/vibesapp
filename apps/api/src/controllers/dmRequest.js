@@ -57,7 +57,12 @@ const sendDMRequest = async (req, res) => {
       message: message || '',
     });
 
-    console.log('DM request sent successfully');
+    console.log('DM request sent successfully:', {
+      sender: senderId,
+      recipient: recipientId,
+      status: dmRequest.status,
+      _id: dmRequest._id,
+    });
     res.status(201).json(dmRequest);
   } catch (error) {
     console.error('Error sending DM request:', error);
@@ -75,14 +80,29 @@ const getDMRequests = async (req, res) => {
   }
 
   try {
+    console.log('Looking for DM requests for recipient:', userId);
     const requests = await DMRequest.find({
       recipient: userId,
       status: 'pending',
-    })
-      .populate('sender', '-pigeonId')
-      .sort({ createdAt: -1 });
+    }).sort({ createdAt: -1 });
 
-    res.status(200).json(requests);
+    console.log('Found DM requests:', requests.length);
+
+    // Manually populate sender info (UUID-based, not ObjectId)
+    const populatedRequests = await Promise.all(
+      requests.map(async (request) => {
+        console.log('Populating sender for request:', request.sender);
+        const sender = await User.findOne({ userId: request.sender }).select('-pigeonId');
+        console.log('Sender found:', sender?.userName || 'NOT FOUND');
+        return {
+          ...request.toObject(),
+          sender,
+        };
+      })
+    );
+
+    console.log('Returning', populatedRequests.length, 'populated requests');
+    res.status(200).json(populatedRequests);
   } catch (error) {
     console.error('Error fetching DM requests:', error);
     res.status(500).json({ message: 'Error fetching DM requests', error });

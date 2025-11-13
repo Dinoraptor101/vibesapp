@@ -31,7 +31,7 @@ function transformActivity(backendActivity: BackendActivity): Activity {
   // Build actor object
   const actor = {
     userId: backendActivity.userId || backendActivity.authorUserId || '',
-    username: backendActivity.userName || backendActivity.authorUserName || 'Unknown',
+    username: backendActivity.username || backendActivity.authorUsername || 'Unknown',
     avatar: undefined, // Backend doesn't provide avatar in activity response
     mbti: undefined,
   };

@@ -26,6 +26,8 @@ export function useProfile(userId: string | undefined) {
       return data;
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes - cache profile data
+    refetchOnMount: 'always', // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
   });
 }

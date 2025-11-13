@@ -28,17 +28,30 @@ export function ProfileHeader({ profile, isOwnProfile, onDMRequest }: ProfileHea
 
         <div className="flex-1 space-y-2">
           {/* Username and Age */}
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{profile.username}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              @{profile.username}
+            </h1>
             {profile.age && (
               <span className="text-sm text-gray-500 dark:text-gray-400">Age: {profile.age}</span>
             )}
           </div>
 
-          {/* MBTI Badge */}
-          {profile.mbtiPersonality && (
-            <div>
-              <Badge variant="brand">{profile.mbtiPersonality}</Badge>
+          {/* MBTI + Polarity (on same line per spec) */}
+          <div className="flex items-center gap-2">
+            {profile.mbtiPersonality && <Badge variant="brand">{profile.mbtiPersonality}</Badge>}
+            {profile.polarity && (
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                • {profile.polarity.toUpperCase()}
+              </span>
+            )}
+          </div>
+
+          {/* Distance */}
+          {profile.distance && (
+            <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+              <MapPin size={16} />
+              <span>{profile.distance}</span>
             </div>
           )}
 
@@ -65,25 +78,6 @@ export function ProfileHeader({ profile, isOwnProfile, onDMRequest }: ProfileHea
           <p className="whitespace-pre-wrap text-gray-700 dark:text-gray-300">{profile.bio}</p>
         </div>
       )}
-
-      {/* Additional Info */}
-      <div className="space-y-2 text-sm">
-        {/* Polarity */}
-        {profile.polarity && (
-          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-            <span className="font-medium">Polarity:</span>
-            <span>{profile.polarity === 'yin' ? 'YIN (Feminine)' : 'YANG (Masculine)'}</span>
-          </div>
-        )}
-
-        {/* Location (as distance) */}
-        {profile.distance && (
-          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-            <MapPin size={16} />
-            <span>{profile.distance}</span>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

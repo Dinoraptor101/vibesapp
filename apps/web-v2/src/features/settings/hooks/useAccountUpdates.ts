@@ -7,6 +7,7 @@
  * - Optimistic UI updates with revert on failure
  */
 
+import { useQueryClient } from '@tanstack/react-query';
 import { useRef, useCallback } from 'react';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import api from '@/lib/api';
@@ -28,6 +29,7 @@ interface QueueOptions {
 
 export function useAccountUpdates() {
   const { user, refreshUser } = useAuth();
+  const queryClient = useQueryClient();
   const updateQueue = useRef<AccountUpdate>({});
   const callbacksRef = useRef<QueueOptions>({});
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -70,6 +72,11 @@ export function useAccountUpdates() {
           // Refresh user data silently
           await refreshUser();
 
+          // Invalidate profile cache so other pages show updated data
+          if (user?._id) {
+            queryClient.invalidateQueries({ queryKey: ['profile', user._id] });
+          }
+
           // Call success callback if provided
           callbacks.onSuccess?.();
         } catch (error) {
@@ -83,7 +90,7 @@ export function useAccountUpdates() {
         }
       }, 300);
     },
-    [user, refreshUser]
+    [user, refreshUser, queryClient]
   );
 
   return { queueUpdate };
