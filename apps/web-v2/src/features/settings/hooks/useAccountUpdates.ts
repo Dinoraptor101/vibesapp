@@ -3,8 +3,8 @@
  *
  * Handles auto-save for account settings with:
  * - Debounced batch updates (300ms)
- * - Silent success/error handling
- * - Optimistic UI updates
+ * - Error callbacks for rollback
+ * - Optimistic UI updates with revert on failure
  */
 
 import { useRef, useCallback } from 'react';
@@ -14,28 +14,42 @@ import api from '@/lib/api';
 interface AccountUpdate {
   avatar?: string;
   bio?: string;
-  mbti?: string;
+  mbtiPersonality?: string;
   zipCode?: string;
   location?: { lat: number; lon: number };
-  polarity?: 'YIN' | 'YANG';
+  polarity?: 'yin' | 'yang';
   proximityRange?: number;
+}
+
+interface QueueOptions {
+  onSuccess?: () => void;
+  onError?: (error: unknown, updates: AccountUpdate) => void;
 }
 
 export function useAccountUpdates() {
   const { user, refreshUser } = useAuth();
   const updateQueue = useRef<AccountUpdate>({});
+  const callbacksRef = useRef<QueueOptions>({});
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /**
    * Queue an account update with debounced batch sending
    */
   const queueUpdate = useCallback(
-    (changes: AccountUpdate) => {
+    (changes: AccountUpdate, options?: QueueOptions) => {
       // Add changes to queue
       updateQueue.current = {
         ...updateQueue.current,
         ...changes,
       };
+
+      // Store callbacks (later callbacks override earlier ones)
+      if (options) {
+        callbacksRef.current = {
+          ...callbacksRef.current,
+          ...options,
+        };
+      }
 
       // Clear existing timeout
       if (timeoutRef.current) {
@@ -45,18 +59,27 @@ export function useAccountUpdates() {
       // Schedule batch update after 300ms
       timeoutRef.current = setTimeout(async () => {
         const updates = { ...updateQueue.current };
+        const callbacks = { ...callbacksRef.current };
         updateQueue.current = {}; // Clear queue
+        callbacksRef.current = {}; // Clear callbacks
 
         try {
           // Send batch update to API
-          await api.patch(`/users/${user?._id}`, updates);
+          await api.patch(`/api/users/${user?._id}`, updates);
 
           // Refresh user data silently
           await refreshUser();
+
+          // Call success callback if provided
+          callbacks.onSuccess?.();
         } catch (error) {
           console.error('Failed to update account:', error);
-          // Silent fail - UI already shows optimistic update
-          // Could revert optimistic update here if needed
+
+          // Call error callback to allow rollback
+          callbacks.onError?.(error, updates);
+
+          // Refresh to get server state
+          await refreshUser();
         }
       }, 300);
     },

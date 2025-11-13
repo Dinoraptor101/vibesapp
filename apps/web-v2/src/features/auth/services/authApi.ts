@@ -36,7 +36,7 @@ interface SignupData {
     lon: number;
     city?: string;
   };
-  polarity?: string;
+  polarity: 'yin' | 'yang';
   mbtiPersonality: string;
   profilePictureUrl?: string;
   bio?: string;
@@ -72,6 +72,14 @@ function transformUserData(data: LoginResponse): User {
 }
 
 export const authApi = {
+  /**
+   * Generate a unique Pigeon ID from the backend
+   */
+  async generatePigeonId(): Promise<string> {
+    const response = await apiClient.get<{ pigeonId: string }>('/api/users/generate-pigeon-id');
+    return response.pigeonId;
+  },
+
   /**
    * Login with Pigeon ID (password)
    */

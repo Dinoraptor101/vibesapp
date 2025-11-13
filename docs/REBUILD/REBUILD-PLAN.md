@@ -401,7 +401,7 @@ const buttonVariants = cva(
 4. **Activity Cleanup:** Read notifications deleted after 7 days, unread persist forever (capped at 100k+)
 5. **DM Request Cooldown:** 2 days if request declined
 6. **Search Scope:** Global search (all posts and users, not location-filtered)
-7. **@Mentions Scope:** Comments, Group chat, AND captions
+7. **@Mentions Scope:** Comments and captions
 8. **Ban User:** Easy and quick (no confirmation required), reversible, doesn't delete data (soft delete)
 
 ### Admin Panel Additions

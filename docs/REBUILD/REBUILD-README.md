@@ -56,7 +56,7 @@
 - **Activity Cleanup:** Read after 7 days, unread capped at 100k+
 - **DM Cooldown:** 2 days if declined
 - **Search Scope:** Global (not location-filtered)
-- **@Mentions:** Comments, Group chat, AND captions
+- **@Mentions:** Comments and captions
 - **Ban User:** Easy toggle, no confirmation, reversible, soft delete
 - **Age Display:** Calculated from birth date, shown on profile (NOT editable), format: "Age: 28"
 - **Username:** Set at signup, permanent (NOT editable, NOT shown in Account settings)

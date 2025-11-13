@@ -14,6 +14,7 @@ const UserSchema = new mongoose.Schema({
     required: [true, 'Pigeon ID is required'],
     unique: true,
     index: true,
+    select: false, // SECURITY: Never include pigeonId in query results by default
   },
   userName: {
     type: String,
@@ -93,6 +94,22 @@ const UserSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+});
+
+// SECURITY: Ensure pigeonId is never exposed in JSON responses
+UserSchema.set('toJSON', {
+  transform: (_doc, ret) => {
+    delete ret.pigeonId; // Remove pigeonId from JSON output
+    return ret;
+  },
+});
+
+// SECURITY: Ensure pigeonId is never exposed in plain object conversion
+UserSchema.set('toObject', {
+  transform: (_doc, ret) => {
+    delete ret.pigeonId; // Remove pigeonId from object output
+    return ret;
   },
 });
 

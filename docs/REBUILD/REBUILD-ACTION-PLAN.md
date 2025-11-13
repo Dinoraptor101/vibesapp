@@ -56,9 +56,8 @@
 5. **Comments/Replies:** Threaded discussions on posts
 6. **Following System:** Users can follow each other, see follower/following counts
 7. **Direct Messaging:** Request-based DM (requires approval before messaging)
-8. **Group Chat:** Multi-user conversations with mentions
-9. **User Mentions:** @username in comments and group chats
-10. **Search:** Search posts by caption content and username
+8. **User Mentions:** @username in comments and captions
+9. **Search:** Search posts by caption content and username
 11. **MBTI:** Personality type selection (required during signup, changeable in settings)
 12. **Activity Feed:** Categorized notifications (Messages, Social, Your Posts)
 13. **Online Presence:** Real-time online/offline indicators
@@ -114,7 +113,7 @@
 - **Activity Cleanup:** Read notifications deleted after 7 days, unread persist forever (capped at 100k+)
 - **DM Request Cooldown:** 2 days if request declined
 - **Search Scope:** Global search (all posts and users)
-- **@Mentions Scope:** Comments, Group chat, AND captions
+- **@Mentions Scope:** Comments and captions
 - **Ban User:** Easy and quick (no confirmation), reversible, doesn't delete data (just hides it)
 - **Request-Based DM:** Users must approve DM requests before conversations start
 - **Photo Required:** No text-only posts allowed
@@ -686,23 +685,7 @@ export function Button({ className, variant, size, ...props }: ButtonProps) {
 
 ---
 
-### Week 9: Group Chat & Activity Feed
-
-#### Group Chat
-- [ ] Create group modal
-  - [ ] Group name input
-  - [ ] Member selection (multi-select)
-  - [ ] Group avatar (optional)
-- [ ] Group chat list
-- [ ] Group chat view (similar to DM)
-- [ ] @mentions in group chat
-  - [ ] Autocomplete usernames
-  - [ ] Mention notifications
-- [ ] Group settings
-  - [ ] Add/remove members
-  - [ ] Change group name
-  - [ ] Leave group
-- [ ] Group chat notifications
+### Week 9: Activity Feed
 
 #### Activity Feed (Categorized)
 - [ ] Activity feed layout with tabs
@@ -944,7 +927,7 @@ export function Button({ className, variant, size, ...props }: ButtonProps) {
 - **Week 6:** Post creation & vibes system
 - **Week 7:** Profiles & following system
 - **Week 8:** Request-based DM system
-- **Week 9:** Group chat & activity feed
+- **Week 9:** Activity feed
 - **Week 10:** Search & discovery
 - **Week 11:** Performance & offline support
 - **Week 12:** Testing & polish
