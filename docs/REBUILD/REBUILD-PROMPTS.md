@@ -155,6 +155,8 @@ This ensures AI agents can pick up exactly where you left off!
 - [X] 4.6 - Read/Unread System Optimization (✅ Complete - Nov 13, 2025)
 - [X] 4.7 - Post Feed Grid Redesign (✅ Complete - Nov 14, 2025)
 - [X] 4.8 - Comment System Overhaul (✅ Complete - Nov 14, 2025)
+- [ ] 4.9 - Post Feed Tabs Cleanup (⚠️ Blocked - Nov 14, 2025)
+- [ ] 4.10 - Activity Feed Overhaul (⚠️ Blocked - Nov 14, 2025)
 
 ### Phase 5: Discovery (Week 10-11)
 - [ ] 5.1 - Search Interface (⏸️ Not started)
@@ -3382,6 +3384,103 @@ Please implement this cursor-based system with lazy migration. Focus on eliminat
 - Missing API endpoint information
 - Design ambiguity
 - Technical blocker
+
+---
+
+## Prompt 4.9: Post Feed Tabs Cleanup
+
+**Complexity:** 💰 GPT-5 mini (Simple refactor)  
+**Time Estimate:** 30 minutes  
+**Priority:** Medium  
+**Completed:** [ ] No
+
+### Context
+
+**Problem:** Post feed displays redundant and confusing tabs
+- Currently showing: "Nearby | Following | Recent | Nearby" (duplicate "Nearby")
+- Expected: Only "Nearby | Following" tabs
+- Tabs should be mutually exclusive (only one active at a time)
+
+**User Experience:**
+- **Nearby tab (default):** Shows posts within proximity radius set in Settings → Preferences (50km, 100km, or 150km)
+- **Following tab:** Shows posts from people you follow
+- Both tabs display posts chronologically (newest first)
+- No "Recent" or other tabs needed
+
+### Acceptance Criteria
+
+- [ ] Only 2 tabs displayed: "Nearby" and "Following"
+- [ ] Nearby tab is default on page load
+- [ ] Tabs are mutually exclusive (only one active)
+- [ ] Nearby tab respects proximity setting from Settings → Preferences
+- [ ] Following tab shows posts from followed users
+- [ ] Both tabs sort by newest first
+- [ ] No TypeScript errors
+- [ ] Build successful
+
+---
+
+## Prompt 4.10: Activity Feed Overhaul (Comment System Integration)
+
+**Complexity:** 🎯 Claude Sonnet (Complex business logic)  
+**Time Estimate:** 2-3 hours  
+**Priority:** High  
+**Completed:** [ ] No
+
+### Context
+
+**Problem:** Activity Feed not working with new comment/heart system
+- Comment hearts don't generate notifications
+- Comment replies don't generate notifications
+- Messages tab in Activity Feed is redundant (Messages has its own navigation tab)
+- Activity system needs to understand new comment structure (`commentOn`, `replyToCommentId`)
+
+### Required Changes
+
+#### 1. Remove Messages from Activity Feed
+- Remove "Messages" tab from Activity Feed
+- Remove message-related activity items
+- Keep only: "All | Social | Me" tabs
+- Message notifications appear on Messages nav button badge only
+
+#### 2. New Activity Types Needed
+
+1. **Heart on Comment**
+   - Trigger: User hearts your comment
+   - Notification: "@username hearted your comment"
+   - Icon: ❤️
+
+2. **Reply to Comment**
+   - Trigger: User replies to your comment
+   - Notification: "@username replied to your comment"
+   - Icon: 💬
+
+3. **Comment on Post** (verify existing works)
+   - Trigger: User comments on your post
+   - Notification: "@username commented on your post"
+   - Icon: 💬
+
+### Acceptance Criteria
+
+**Activity Feed:**
+- [ ] No "Messages" tab in Activity Feed
+- [ ] Only "All | Social | Me" tabs remain
+- [ ] No message-related activities displayed
+
+**Comment Notifications:**
+- [ ] Heart on comment generates activity
+- [ ] Reply to comment generates activity
+- [ ] Comment on post generates activity
+- [ ] Activities link to correct post with comment anchor
+
+**Backend:**
+- [ ] Activity created when hearting comment
+- [ ] Activity created when replying to comment
+- [ ] Activities reference correct comment/post IDs
+
+**Technical:**
+- [ ] No TypeScript errors
+- [ ] Build successful
 
 ---
 
