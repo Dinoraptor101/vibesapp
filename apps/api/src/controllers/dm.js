@@ -220,20 +220,25 @@ exports.getConversations = async (req, res) => {
         const user1 = await User.findOne({ userId: conversation.user1Id });
         const user2 = await User.findOne({ userId: conversation.user2Id });
 
+        // Determine which user is the "other" user
+        const otherUserData = conversation.user1Id === user.userId ? user2 : user1;
+
         return {
-          conversationId: conversation._id,
+          _id: conversation._id.toString(),
           user1Id: conversation.user1Id,
-          user1Username: user1.userName,
           user2Id: conversation.user2Id,
-          user2Username: user2.userName,
           lastRequesterId: conversation.lastRequesterId,
           status: conversation.status,
-          hasUnreadMessages: unreadMessages,
+          // Computed fields for frontend
+          otherUser: otherUserData ? otherUserData.toJSON() : null,
+          unreadCount: unreadMessages ? 1 : 0, // Simplified - count all unread as 1
           lastMessage: lastMessage
             ? {
+                _id: lastMessage._id,
                 senderId: lastMessage.senderId,
                 body: lastMessage.body,
                 timestamp: lastMessage.timestamp,
+                readBy: lastMessage.readBy,
               }
             : null,
         };
@@ -251,7 +256,14 @@ exports.getConversations = async (req, res) => {
 
 exports.getConversation = async (req, res) => {
   const { conversationId } = req.params;
+  const currentUserId = req.user?.userId;
+
   console.log('Fetching conversation details for conversationId:', conversationId);
+  console.log('Current user:', currentUserId);
+
+  if (!currentUserId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
 
   try {
     const conversation = await Conversation.findById(conversationId);
@@ -260,24 +272,32 @@ exports.getConversation = async (req, res) => {
       return res.status(404).json({ error: 'Conversation not found' });
     }
 
+    // Verify user is part of this conversation
+    if (conversation.user1Id !== currentUserId && conversation.user2Id !== currentUserId) {
+      return res.status(403).json({ error: 'Not authorized to view this conversation' });
+    }
+
     const user1 = await User.findOne({ userId: conversation.user1Id });
     const user2 = await User.findOne({ userId: conversation.user2Id });
 
+    // Determine which user is the "other" user based on who's requesting
+    const otherUser = conversation.user1Id === currentUserId ? user2 : user1;
+
     const conversationDetails = {
-      conversationId: conversation._id,
+      _id: conversation._id.toString(),
       user1Id: conversation.user1Id,
-      user1Username: user1 ? user1.userName : null,
       user2Id: conversation.user2Id,
-      user2Username: user2 ? user2.userName : null,
       lastRequesterId: conversation.lastRequesterId,
       status: conversation.status,
       messages: conversation.messages.map((message) => ({
-        id: message._id,
+        _id: message._id,
         senderId: message.senderId,
         body: message.body,
         timestamp: message.timestamp,
         readBy: message.readBy,
       })),
+      // Provide the other user (from current user's perspective)
+      otherUser: otherUser ? otherUser.toJSON() : null,
     };
 
     res.status(200).json(conversationDetails);
@@ -288,46 +308,63 @@ exports.getConversation = async (req, res) => {
 };
 
 exports.sendDMMessage = async (req, res) => {
-  const { senderId, recipientId, body } = req.body;
+  const { conversationId, body } = req.body;
+  const currentUserId = req.user?.userId;
+
+  console.log('Sending message to conversationId:', conversationId, 'from user:', currentUserId);
+
+  if (!currentUserId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
 
   if (!body || body.trim() === '') {
     return res.status(400).json({ error: 'Message body cannot be blank' });
   }
 
+  if (!conversationId) {
+    return res.status(400).json({ error: 'Conversation ID is required' });
+  }
+
   try {
-    const sender = await User.findOne({ userId: senderId });
-    const recipient = await User.findOne({ userId: recipientId });
-
-    if (!sender || !recipient) {
-      return res.status(404).json({ error: 'Sender or recipient not found' });
-    }
-
-    let conversation = await Conversation.findOne({
-      $or: [
-        { user1Id: sender.userId, user2Id: recipient.userId },
-        { user1Id: recipient.userId, user2Id: sender.userId },
-      ],
-    });
+    const conversation = await Conversation.findById(conversationId);
 
     if (!conversation) {
       return res.status(404).json({ error: 'Conversation not found' });
+    }
+
+    // Verify user is part of this conversation
+    if (conversation.user1Id !== currentUserId && conversation.user2Id !== currentUserId) {
+      return res
+        .status(403)
+        .json({ error: 'Not authorized to send messages in this conversation' });
     }
 
     if (conversation.status !== 'approved') {
       return res.status(400).json({ error: 'Conversation is not approved for messaging' });
     }
 
-    conversation.messages.push({
-      senderId: sender.userId,
-      body,
+    const newMessage = {
+      senderId: currentUserId,
+      body: body.trim(),
       timestamp: new Date(),
-      readBy: [sender.userId], // Mark the message as read by the sender
-    });
+      readBy: [currentUserId], // Mark as read by sender
+    };
 
+    conversation.messages.push(newMessage);
     conversation.updatedAt = new Date();
     await conversation.save();
 
-    res.status(201).json(conversation);
+    console.log('Message sent successfully');
+
+    // Return the new message with its generated ID
+    const savedMessage = conversation.messages[conversation.messages.length - 1];
+    res.status(201).json({
+      _id: savedMessage._id,
+      senderId: savedMessage.senderId,
+      body: savedMessage.body,
+      timestamp: savedMessage.timestamp,
+      readBy: savedMessage.readBy,
+    });
   } catch (error) {
     console.error('Error sending DM message:', error.message);
     res.status(500).json({ error: 'Server error while sending DM message' });
@@ -335,9 +372,19 @@ exports.sendDMMessage = async (req, res) => {
 };
 
 exports.markMessagesAsRead = async (req, res) => {
-  const { userId } = req.body;
   const { conversationId } = req.params;
-  console.log('Marking messages as read for userId:', userId, 'in conversationId:', conversationId);
+  const currentUserId = req.user?.userId;
+
+  console.log(
+    'Marking messages as read for userId:',
+    currentUserId,
+    'in conversationId:',
+    conversationId
+  );
+
+  if (!currentUserId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
 
   try {
     const conversation = await Conversation.findById(conversationId);
@@ -346,20 +393,19 @@ exports.markMessagesAsRead = async (req, res) => {
       return res.status(404).json({ error: 'Conversation not found' });
     }
 
-    const user = await User.findOne({ userId });
-    if (!user) {
-      console.log('User not found:', userId);
-      return res.status(404).json({ error: 'User not found' });
+    // Verify user is part of this conversation
+    if (conversation.user1Id !== currentUserId && conversation.user2Id !== currentUserId) {
+      return res.status(403).json({ error: 'Not authorized to access this conversation' });
     }
 
     conversation.messages.forEach((message) => {
-      if (!message.readBy.includes(user.userId)) {
-        message.readBy.push(user.userId);
+      if (!message.readBy.includes(currentUserId)) {
+        message.readBy.push(currentUserId);
       }
     });
 
     await conversation.save();
-    console.log('Messages marked as read for userId:', userId);
+    console.log('Messages marked as read for userId:', currentUserId);
 
     res.status(200).json({ message: 'Messages marked as read successfully' });
   } catch (error) {

@@ -514,30 +514,47 @@ const handleDislike = async (postId: string) => {
 └─────────────────────────────────┘
 ```
 
-> **Cooldown Rule:** If DM request is declined, requester cannot send another request to the same user for **2 days**.
+> **Updated Request Flow (Nov 13, 2025):**
+> - **One Request at a Time:** Only one pending request can exist between any two users (either direction)
+> - **No Cooldown on Decline:** When a request is declined, it's simply deleted. The sender can request again immediately
+> - **Bi-directional Check:** Before sending, system checks if either user has already sent a request to the other
+> - **Auto-Connect on Accept:** When accepted, conversation is immediately created with 'approved' status
+> - **Message Button Intelligence:** 
+>   - If conversation exists → Navigate to conversation
+>   - If they sent you a request → Navigate to DM Requests tab
+>   - If you sent a request → Show "Request Pending" message
+>   - Otherwise → Show DM Request modal
 
 ### Component Structure
 
 ```typescript
 interface DMRequest {
-  id: string;
-  from: User;
-  to: User;
-  message: string; // Initial message (max 200 chars)
+  _id: string;
+  sender: User; // Populated sender user object
+  recipient: string; // Recipient userId
+  message?: string; // Initial message (max 200 chars)
   status: 'pending' | 'accepted' | 'declined';
-  createdAt: Date;
-  respondedAt?: Date;
-  cooldownUntil?: Date; // Set to +2 days if declined (CONFIRMED Nov 4, 2025)
+  createdAt: string; // ISO timestamp
+  updatedAt: string; // ISO timestamp
 }
 
 interface Conversation {
-  id: string;
-  participants: User[];
-  type: 'dm' | 'group';
-  lastMessage?: Message;
-  unreadCount: number;
+  _id: string;
+  user1Id: string;
+  user2Id: string;
+  lastRequesterId?: string;
+  messages: Message[];
+  status: 'pending' | 'approved' | 'closed';
   createdAt: Date;
-  isArchived: boolean;
+  updatedAt: Date;
+}
+
+interface DMRequestStatus {
+  canSend: boolean;
+  reason?: 'pending' | 'received' | 'connected';
+  requestId?: string; // ID of pending request
+  conversationId?: string; // ID of existing conversation
+  message?: string; // Additional message to display
 }
 ```
 

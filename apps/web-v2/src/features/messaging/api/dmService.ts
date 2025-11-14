@@ -1,4 +1,5 @@
 import apiClient from '@/lib/api';
+import type { User } from '@/types';
 
 /**
  * DM Request and Messaging API Service
@@ -6,23 +7,13 @@ import apiClient from '@/lib/api';
 
 export interface DMRequest {
   _id: string;
-  sender: {
-    userId: string;
-    username: string;
-    profilePictureUrl?: string;
-    mbtiPersonality?: string;
-  };
-  recipient: {
-    userId: string;
-    username: string;
-    profilePictureUrl?: string;
-    mbtiPersonality?: string;
-  };
+  sender: User; // Populated sender user object from backend
+  recipient: string; // Recipient userId (not populated in list responses)
   message?: string;
   status: 'pending' | 'accepted' | 'declined';
-  cooldownUntil?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string; // ISO timestamp
+  updatedAt: string; // ISO timestamp
+  __v?: number; // Mongoose version key
 }
 
 export interface DMRequestStatus {
@@ -39,15 +30,10 @@ export interface Conversation {
   lastRequesterId?: string;
   messages: Message[];
   status: 'pending' | 'approved' | 'closed';
-  createdAt: Date;
-  updatedAt: Date;
-  // Computed fields
-  otherUser?: {
-    userId: string;
-    username: string;
-    profilePictureUrl?: string;
-    mbtiPersonality?: string;
-  };
+  createdAt?: Date;
+  updatedAt?: Date;
+  // Backend determines and provides the "other" user based on auth
+  otherUser: User; // Always populated by backend
   unreadCount?: number;
   lastMessage?: Message;
 }

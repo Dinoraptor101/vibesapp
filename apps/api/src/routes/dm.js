@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { authenticate } = require('../middleware/authenticate');
 const {
   sendDMRequest,
   approveDMRequest,
@@ -13,85 +14,30 @@ const {
 } = require('../controllers/dm');
 
 // Send a DM request
-router.post(
-  '/request',
-  (req, res, next) => {
-    next();
-  },
-  sendDMRequest
-);
+router.post('/request', authenticate, sendDMRequest);
 
 // Approve a DM request
-router.post(
-  '/approve',
-  (req, res, next) => {
-    next();
-  },
-  approveDMRequest
-);
+router.post('/approve', authenticate, approveDMRequest);
 
 // Decline a DM request
-router.post(
-  '/decline',
-  (req, res, next) => {
-    next();
-  },
-  declineDMRequest
-);
+router.post('/decline', authenticate, declineDMRequest);
 
 // Send a new DM message
-router.post(
-  '/message',
-  (req, res, next) => {
-    console.log('POST /message - sendDMMessage');
-    next();
-  },
-  sendDMMessage
-);
+router.post('/message', authenticate, sendDMMessage);
 
 // Get all conversations for the current user
-router.get(
-  '/conversations/:userId',
-  (req, res, next) => {
-    next();
-  },
-  getConversations
-);
+router.get('/conversations/:userId', authenticate, getConversations);
 
 // Get a specific conversation by ID
-router.get(
-  '/conversation/:conversationId',
-  (req, res, next) => {
-    next();
-  },
-  getConversation
-);
+router.get('/conversation/:conversationId', authenticate, getConversation);
 
 // Mark messages as read
-router.post(
-  '/conversation/:conversationId/markAsRead',
-  (req, res, next) => {
-    next();
-  },
-  markMessagesAsRead
-);
+router.post('/conversation/:conversationId/markAsRead', authenticate, markMessagesAsRead);
 
 // Close a conversation
-router.post(
-  '/conversation/:conversationId/close',
-  (req, res, next) => {
-    next();
-  },
-  closeConversation
-);
+router.post('/conversation/:conversationId/close', authenticate, closeConversation);
 
 // Check conversation status between two users
-router.get(
-  '/status',
-  (req, res, next) => {
-    next();
-  },
-  getConversationStatus
-);
+router.get('/status', authenticate, getConversationStatus);
 
 module.exports = router;
