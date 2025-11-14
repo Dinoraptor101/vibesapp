@@ -1,15 +1,18 @@
 /**
  * PostCard Component
  *
- * Displays a post in the feed with image, text, author info, and interaction actions.
- * Clickable to view full post details.
+ * Displays a post in the feed with Polaroid-style design:
+ * - Image with rounded corners fills the card
+ * - Username + timestamp overlay at top-right
+ * - Caption and actions in compact footer
+ * - Image is not clickable; only comment button navigates to detail
  */
 
 import { MessageSquare, Heart, Flag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui-next';
 import { useAuth } from '@/features/auth';
-import { formatRelativeTime } from '@/lib/utils';
+import { formatRelativeTime, stripHtml } from '@/lib/utils';
 import type { Post } from '../types';
 import { UserBadge } from './UserBadge';
 
@@ -17,10 +20,10 @@ interface PostCardProps {
   post: Post;
   onLike?: (postId: string) => void;
   onReport?: (postId: string) => void;
-  onComment?: (postId: string) => void;
+  onComment?: (postId: string) => void; // Legacy prop - not used in new design
 }
 
-export function PostCard({ post, onLike, onReport, onComment }: PostCardProps) {
+export function PostCard({ post, onLike, onReport }: PostCardProps) {
   const { user: currentUser } = useAuth();
 
   // Calculate stats from reactions
@@ -55,98 +58,91 @@ export function PostCard({ post, onLike, onReport, onComment }: PostCardProps) {
     onReport?.(post._id);
   };
 
-  const handleComment = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onComment?.(post._id);
-  };
-
   return (
-    <Card hoverable>
-      {/* Author Info - NOT wrapped in Link so UserBadge can be clickable */}
-      <div className="p-4 pb-0">
-        <UserBadge user={post.user} size="md" clickable={true} />
-        <div className="text-xs text-text-tertiary mt-2">
-          {formatRelativeTime(new Date(post.createdAt))}
-        </div>
-      </div>
-
+    <Card noPadding>
+      {/* Image - Full width, edge-to-edge, clickable to post detail */}
       <Link to={`/post/${post._id}`} className="block">
-        {/* Post Image */}
         <div className="relative aspect-square bg-surface-alt overflow-hidden">
           <img
             src={imageUrl}
             alt={post.text || 'Post image'}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover"
             loading="lazy"
             onError={(e) => {
-              // Fallback for broken images
               console.error('Image failed to load:', imageUrl);
               e.currentTarget.src = import.meta.env.VITE_PLACEHOLDER_IMAGE_URL || '';
             }}
           />
         </div>
+      </Link>
 
-        {/* Post Actions */}
-        <div className="p-4">
-          <div className="flex items-center gap-4 mb-3">
-            {/* Like (Heart) */}
-            <button
-              type="button"
-              onClick={handleLike}
-              className={`flex items-center gap-1.5 transition-colors group ${
-                userHasLiked ? 'text-vibe-positive' : 'text-text-secondary hover:text-vibe-positive'
-              }`}
-              aria-label={`${userHasLiked ? 'Unlike' : 'Like'} post (${likes} likes)`}
-            >
-              <Heart
-                className={`w-5 h-5 group-hover:scale-110 transition-transform ${
-                  userHasLiked ? 'fill-current' : ''
-                }`}
-              />
-              <span className="text-sm font-medium">{likes}</span>
-            </button>
+      {/* Footer with user info, caption, and actions */}
+      <div className="p-3">
+        {/* Username (left) + Timestamp (right) */}
+        <div className="flex items-center justify-between mb-2">
+          <UserBadge user={post.user} size="sm" clickable={true} />
+          <span className="text-xs text-text-tertiary">
+            {formatRelativeTime(new Date(post.createdAt))}
+          </span>
+        </div>
 
-            {/* Comment */}
-            <button
-              type="button"
-              onClick={handleComment}
-              className="flex items-center gap-1.5 text-text-secondary hover:text-brand-purple transition-colors group"
-              aria-label="Comment on post"
-            >
-              <MessageSquare className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            </button>
-
-            {/* Report (only if not author) */}
-            {canReport && (
-              <button
-                type="button"
-                onClick={handleReport}
-                className="flex items-center gap-1.5 text-text-secondary hover:text-warning transition-colors group ml-auto"
-                aria-label="Report post"
-              >
-                <Flag className="w-4 h-4 group-hover:scale-110 transition-transform" />
-              </button>
-            )}
+        {/* Caption */}
+        {post.text && (
+          <div className="text-text-primary text-sm leading-relaxed line-clamp-2 mb-3">
+            {stripHtml(post.text)}
           </div>
+        )}
 
-          {/* Post Text/Caption */}
-          {post.text && (
-            <div className="text-text-primary text-sm leading-relaxed line-clamp-3">
-              {post.text}
-            </div>
-          )}
+        {/* Actions */}
+        <div className="flex items-center gap-4">
+          {/* Like (Heart) */}
+          <button
+            type="button"
+            onClick={handleLike}
+            className={`flex items-center gap-1.5 transition-colors duration-200 group ${
+              userHasLiked ? 'text-vibe-positive' : 'text-text-secondary hover:text-vibe-positive'
+            }`}
+            aria-label={`${userHasLiked ? 'Unlike' : 'Like'} post (${likes} likes)`}
+          >
+            <Heart
+              className={`w-5 h-5 transition-transform duration-200 ${
+                userHasLiked ? 'fill-current' : ''
+              }`}
+            />
+            <span className="text-sm font-medium">{likes}</span>
+          </button>
 
-          {/* Hidden indicator */}
-          {post.isHidden && (
-            <div className="mt-3 px-3 py-2 bg-vibe-negative-bg border border-vibe-negative rounded-md">
-              <p className="text-xs text-vibe-negative">
-                This post has been auto-hidden due to community reports
-              </p>
-            </div>
+          {/* Comment - navigates to post detail */}
+          <Link
+            to={`/post/${post._id}`}
+            className="flex items-center gap-1.5 text-text-secondary hover:text-brand-purple transition-colors duration-200 group"
+            aria-label="View comments"
+          >
+            <MessageSquare className="w-5 h-5 transition-transform duration-200" />
+          </Link>
+
+          {/* Report (only if not author) */}
+          {canReport && (
+            <button
+              type="button"
+              onClick={handleReport}
+              className="flex items-center gap-1.5 text-text-secondary hover:text-warning transition-colors duration-200 group ml-auto"
+              aria-label="Report post"
+            >
+              <Flag className="w-4 h-4 transition-transform duration-200" />
+            </button>
           )}
         </div>
-      </Link>
+
+        {/* Hidden indicator */}
+        {post.isHidden && (
+          <div className="mt-3 px-3 py-2 bg-vibe-negative-bg border border-vibe-negative rounded-md">
+            <p className="text-xs text-vibe-negative">
+              This post has been auto-hidden due to community reports
+            </p>
+          </div>
+        )}
+      </div>
     </Card>
   );
 }

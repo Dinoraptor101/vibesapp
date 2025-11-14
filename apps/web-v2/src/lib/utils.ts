@@ -78,3 +78,13 @@ export function debounce<T extends (...args: any[]) => any>(
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+/**
+ * Strips HTML tags from a string and returns plain text
+ */
+export function stripHtml(html: string): string {
+  if (!html) return '';
+  const tmp = document.createElement('DIV');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
+}
