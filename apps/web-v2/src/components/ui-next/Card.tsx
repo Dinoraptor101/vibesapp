@@ -83,7 +83,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ children, className = '', hoverable = false, noPadding = false, onClick, ...props }, ref) => {
     // Base styles
     const base =
-      'bg-light-bg-elevated dark:bg-dark-bg-elevated rounded-lg border border-light-border dark:border-dark-border overflow-hidden transition-all';
+      'bg-surface-elevated rounded-lg border border-border overflow-hidden transition-all';
 
     // Hover effect styles
     const hoverStyles = hoverable
@@ -152,7 +152,7 @@ export interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
   ({ children, className = '', ...props }, ref) => {
-    const headerClasses = `px-6 py-4 border-b border-light-border dark:border-dark-border ${className}`;
+    const headerClasses = `px-6 py-4 border-b border-border ${className}`;
 
     return (
       <div ref={ref} className={headerClasses} {...props}>
@@ -218,7 +218,7 @@ export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(
   ({ children, className = '', ...props }, ref) => {
-    const footerClasses = `px-6 py-4 border-t border-light-border dark:border-dark-border flex items-center gap-2 ${className}`;
+    const footerClasses = `px-6 py-4 border-t border-border flex items-center gap-2 ${className}`;
 
     return (
       <div ref={ref} className={footerClasses} {...props}>
