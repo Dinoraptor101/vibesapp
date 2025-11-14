@@ -658,6 +658,106 @@ const unlikePost = async (req, res) => {
   }
 };
 
+/**
+ * React to a post (like/unlike toggle)
+ * POST /api/posts/:id/react
+ * Body: { type: 'like' | null }
+ */
+const reactToPost = async (req, res) => {
+  const userId = req.validatedUserId;
+  const { id: postHex } = req.params;
+  const { type } = req.body; // 'like' or null (to unlike)
+
+  try {
+    const post = await Post.findById(postHex);
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    const existingReaction = post.reactions.find((reaction) => reaction.userId === userId);
+
+    // If type is null, unlike
+    if (type === null) {
+      if (!existingReaction) {
+        return res.status(400).json({ message: 'No reaction to remove' });
+      }
+
+      // Remove reaction
+      post.reactions = post.reactions.filter((reaction) => reaction.userId !== userId);
+
+      // Update proximal counts if it was proximal
+      const user = await User.findOne({ userId });
+      if (user && user.location) {
+        const distance = getDistanceFromLatLonInMiles(
+          user.location.lat,
+          user.location.lon,
+          post.user.location.lat,
+          post.user.location.lon
+        );
+        if (distance <= 100) {
+          post.proximal_likes = Math.max(0, (post.proximal_likes || 0) - 1);
+        }
+      }
+
+      await post.save();
+
+      return res.status(200).json({
+        success: true,
+        post,
+      });
+    }
+
+    // If type is 'like', add reaction
+    if (type === 'like') {
+      if (existingReaction) {
+        return res.status(409).json({ message: 'You already reacted to this post' });
+      }
+
+      // Prevent liking own post
+      if (post.user.userId === userId) {
+        return res.status(403).json({ message: 'You cannot like your own post' });
+      }
+
+      const user = await User.findOne({ userId });
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      const location = user.location || { lat: 0, lon: 0 };
+
+      // Add reaction
+      post.reactions.push({
+        userId,
+        type: 'like',
+        location,
+      });
+
+      // Update proximal counts
+      const distance = getDistanceFromLatLonInMiles(
+        location.lat,
+        location.lon,
+        post.user.location.lat,
+        post.user.location.lon
+      );
+      if (distance <= 100) {
+        post.proximal_likes = (post.proximal_likes || 0) + 1;
+      }
+
+      await post.save();
+
+      return res.status(200).json({
+        success: true,
+        post,
+      });
+    }
+
+    return res.status(400).json({ message: 'Invalid reaction type' });
+  } catch (error) {
+    console.error('Error reacting to post:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 module.exports = {
   createPost,
   getPosts,
@@ -665,6 +765,7 @@ module.exports = {
   deletePost,
   likePost,
   unlikePost,
+  reactToPost,
   reportPost,
   getDistanceFromLatLonInMiles,
 };

@@ -60,6 +60,56 @@ export function CommentList({ postId, onReply, className }: CommentListProps) {
   // Flatten comments from all pages
   const comments = data?.pages.flatMap((page) => page.posts) ?? [];
 
+  // Thread comments: group top-level comments with their replies
+  const threadedComments = (() => {
+    // Separate top-level comments and replies
+    const topLevel: Post[] = [];
+    const replies: Post[] = [];
+
+    for (const comment of comments) {
+      if (comment.replyToCommentId) {
+        replies.push(comment);
+      } else {
+        topLevel.push(comment);
+      }
+    }
+
+    // Sort top-level comments by creation time (newest first)
+    topLevel.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    // Helper to find the root comment (top-level) for any reply
+    const findRootComment = (replyId: string): string => {
+      const reply = replies.find((r) => r._id === replyId);
+      if (!reply) return replyId; // It's already a top-level comment
+      if (reply.replyToCommentId) {
+        // This reply is itself replying to something - recurse
+        return findRootComment(reply.replyToCommentId);
+      }
+      return replyId;
+    };
+
+    // Build threaded list: top-level comment followed by ALL its replies (including nested)
+    const result: Post[] = [];
+    for (const comment of topLevel) {
+      result.push(comment);
+
+      // Find all replies that belong to this thread (directly or indirectly)
+      const threadReplies = replies.filter((r) => {
+        // Check if this reply's root is the current top-level comment
+        const rootId = findRootComment(r.replyToCommentId || '');
+        return rootId === comment._id;
+      });
+
+      // Sort replies by creation time (oldest first for natural flow)
+      threadReplies.sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+      result.push(...threadReplies);
+    }
+
+    return result;
+  })();
+
   const handleHeart = async (commentId: string, isHearted: boolean) => {
     await heartComment.mutateAsync({ commentId, isHearted });
   };
@@ -105,7 +155,7 @@ export function CommentList({ postId, onReply, className }: CommentListProps) {
   }
 
   // Empty state
-  if (comments.length === 0) {
+  if (threadedComments.length === 0) {
     return (
       <div className={cn('text-center py-8', className)}>
         <p className="text-text-secondary text-lg mb-1">💬</p>
@@ -116,8 +166,8 @@ export function CommentList({ postId, onReply, className }: CommentListProps) {
 
   // Comments list
   return (
-    <div className={cn('divide-y divide-surface-tertiary', className)}>
-      {comments.map((comment) => (
+    <div className={cn('space-y-1', className)}>
+      {threadedComments.map((comment) => (
         <CommentCard
           key={comment._id}
           comment={comment}
@@ -142,7 +192,7 @@ export function CommentList({ postId, onReply, className }: CommentListProps) {
       )}
 
       {/* End message */}
-      {!hasNextPage && comments.length > 5 && (
+      {!hasNextPage && threadedComments.length > 5 && (
         <p className="text-center text-text-tertiary text-sm py-4">You've reached the end!</p>
       )}
     </div>

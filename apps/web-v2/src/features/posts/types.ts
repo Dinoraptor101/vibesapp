@@ -39,7 +39,9 @@ export interface Post {
   text?: string; // Optional caption
   image: string; // Required - S3 URL
   user: PostUser;
-  replyTo?: string; // Post ID if this is a reply/comment
+  replyTo?: string; // Post ID if this is a reply/comment (legacy - for post-to-post replies)
+  commentOn?: string; // Post ID if this is a comment on a post
+  replyToCommentId?: string; // Comment ID if this is a reply to another comment
   reactions: Reaction[];
   proximal_likes: number; // Likes from nearby users
   proximal_dislikes: number; // Dislikes from nearby users

@@ -10,7 +10,8 @@ import type { Post, PostsResponse } from '../types';
 
 export interface CreateCommentPayload {
   text: string;
-  replyTo: string; // Parent post or comment ID
+  postId: string; // Parent post ID
+  replyToCommentId?: string; // Optional: Comment being replied to
   location: {
     lat: number;
     lon: number;
@@ -26,20 +27,13 @@ export async function getComments(
   page: number = 1,
   limit: number = 20
 ): Promise<PostsResponse> {
-  const params = new URLSearchParams({
-    replyTo: postId,
-    page: page.toString(),
-    limit: limit.toString(),
-    sort: 'recent', // Most recent first
-  });
-
   const response = await apiClient.get<{
     posts: Post[];
     currentPage: number;
     totalPages: number;
     totalPosts: number;
     hasMore: boolean;
-  }>(`/api/posts?${params.toString()}`);
+  }>(`/api/comments/${postId}?page=${page}&limit=${limit}`);
 
   // Transform to PostsResponse format
   return {
@@ -55,10 +49,10 @@ export async function getComments(
 
 /**
  * Create a comment on a post
- * Creates a post with replyTo field
+ * Creates a comment using the dedicated comment endpoint
  */
 export async function createComment(payload: CreateCommentPayload): Promise<Post> {
-  const response = await apiClient.post<{ post: Post }>('/api/posts', payload);
+  const response = await apiClient.post<{ post: Post }>('/api/comments', payload);
   return response.post;
 }
 

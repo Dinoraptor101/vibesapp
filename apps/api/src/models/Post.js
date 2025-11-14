@@ -96,13 +96,23 @@ const postSchema = new mongoose.Schema({
   },
   image: {
     type: String,
-    required: true,
+    required: false, // Optional - comments don't need images
   },
   user: {
     type: UserSubSchema, // Use the sub-schema here
     required: true,
   },
   replyTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Post',
+    default: null,
+  },
+  commentOn: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Post',
+    default: null,
+  },
+  replyToCommentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Post',
     default: null,
