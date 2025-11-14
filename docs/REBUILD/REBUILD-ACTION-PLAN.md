@@ -40,6 +40,63 @@
 
 ---
 
+## 🚨 Known Issues & Next Priorities (November 14, 2025)
+
+### Priority 1: Post Feed Tabs Cleanup ⚠️
+**Issue:** Feed displays redundant/confusing tabs
+- Current: Shows "Nearby | Following | Recent | Nearby" (redundant)
+- Expected: Only "Nearby | Following" tabs
+- **Nearby tab:** Shows posts within proximity radius (configured in Settings → Preferences)
+- **Following tab:** Shows posts from people you follow
+- Both tabs should show posts sorted chronologically (newest first)
+- Tabs are **mutually exclusive** (only one active at a time)
+
+**Impact:** Medium - Confusing UX, duplicate content
+**Files to modify:**
+- `apps/web-v2/src/features/posts/components/PostsFeed.tsx` - Remove redundant tabs
+- Verify API calls use correct filters (`nearby` vs `following`)
+
+### Priority 2: Activity Feed Overhaul ⚠️
+**Issue:** Activity notifications not working with new comment/heart system
+- Comment likes not generating notifications
+- Comment replies not generating notifications
+- New heart system (replaced like/dislike) needs notification integration
+- Messages section shouldn't be in Activity Feed (redundant with Messages tab)
+
+**Required changes:**
+1. **Remove Messages from Activity Feed:**
+   - Messages have dedicated tab in navigation
+   - New message alerts show on Messages button badge (not Activities)
+   - Remove entire Messages category from Activity Feed
+
+2. **Update activity types for new comment system:**
+   - ✅ Heart on your post (already works)
+   - ⚠️ Heart on your comment (needs implementation)
+   - ⚠️ Reply to your comment (needs implementation)
+   - ⚠️ Comment on your post (verify still works)
+
+3. **Backend activity generation:**
+   - Update activity creation for comment hearts
+   - Update activity creation for comment replies
+   - Verify `commentOn` and `replyToCommentId` fields used correctly
+
+**Impact:** High - Core social feature broken
+**Files to modify:**
+- `apps/web-v2/src/features/activity/components/ActivityFeed.tsx` - Remove Messages tab
+- `apps/web-v2/src/features/activity/components/ActivityList.tsx` - Remove message activities
+- `apps/api/src/controllers/activity.js` - Add comment/reply activity generation
+- `apps/api/src/controllers/comment.js` - Trigger activity creation on heart/reply
+- Backend activity model - Verify supports new comment structure
+
+**Acceptance Criteria:**
+- [ ] No Messages tab in Activity Feed
+- [ ] Heart on comment generates notification
+- [ ] Reply to comment generates notification
+- [ ] All notifications link to correct post/comment
+- [ ] Activity badges count correctly
+
+---
+
 ## Quick Start Guide
 
 ### Immediate Next Steps (This Week)
