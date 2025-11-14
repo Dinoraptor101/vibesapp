@@ -202,9 +202,10 @@ const getPosts = async (req, res) => {
       });
     }
 
-    // Filter out replies unless explicitly requested
+    // Filter out comments (commentOn field) - only show top-level posts
+    // Note: replyTo field is for post-to-post replies (V1 feature, not used in V2)
     if (!withReplies) {
-      filteredPosts = filteredPosts.filter((post) => !post.replyTo);
+      filteredPosts = filteredPosts.filter((post) => !post.commentOn);
     }
 
     const totalPosts = filteredPosts.length;

@@ -44,7 +44,12 @@ export function PostCard({ post, onLike, onReport }: PostCardProps) {
     throw new Error('VITE_CDN_URL environment variable is required');
   }
 
-  const imageUrl = post.image.startsWith('http') ? post.image : `${CDN_URL}/${post.image}`;
+  // Handle optional image field (comments don't have images)
+  const imageUrl = post.image
+    ? post.image.startsWith('http')
+      ? post.image
+      : `${CDN_URL}/${post.image}`
+    : null;
 
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -57,6 +62,11 @@ export function PostCard({ post, onLike, onReport }: PostCardProps) {
     e.stopPropagation();
     onReport?.(post._id);
   };
+
+  // Don't render if no image (e.g., comments)
+  if (!imageUrl) {
+    return null;
+  }
 
   return (
     <Card noPadding>

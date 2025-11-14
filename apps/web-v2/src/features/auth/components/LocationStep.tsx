@@ -155,7 +155,7 @@ export function LocationStep({ location, onLocationChange, onAutoSuccess }: Loca
       } else {
         setDisplayLocation(city || result.display_name.split(',').slice(0, 2).join(','));
       }
-    } catch (err) {
+    } catch {
       // Error - shake and clear
       setShowError(true);
       setCityName('');
