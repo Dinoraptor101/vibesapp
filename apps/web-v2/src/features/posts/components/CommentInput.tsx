@@ -1,12 +1,12 @@
 /**
  * CommentInput Component
  *
- * Text input for comments with ZEN auto-save on blur.
- * No submit button - blurring the input automatically saves.
+ * Text input for comments with explicit submit actions.
+ * Submit via Enter key or Send button (modern UX pattern).
  */
 
-import { X } from 'lucide-react';
-import { type ChangeEvent, useEffect, useRef, useState } from 'react';
+import { X, Send } from 'lucide-react';
+import { type ChangeEvent, type KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/cn';
 
 interface CommentInputProps {
@@ -42,7 +42,8 @@ export function CommentInput({
     }
   }, [replyTo]);
 
-  // Auto-resize textarea (intentionally depends on value for dynamic height)
+  // Auto-resize textarea based on content
+  // biome-ignore lint/correctness/useExhaustiveDependencies: value dependency is intentional for dynamic height
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
@@ -58,15 +59,30 @@ export function CommentInput({
     }
   };
 
+  const handleSubmit = () => {
+    const trimmedValue = value.trim();
+    if (!trimmedValue || disabled) return;
+
+    onSubmit(trimmedValue);
+    setValue(''); // Clear input after submit
+
+    // Reset reply mode
+    if (replyTo && onCancelReply) {
+      onCancelReply();
+    }
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    // Enter without Shift = Submit
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+    // Shift+Enter = New line (default behavior)
+  };
+
   const handleBlur = () => {
     setIsFocused(false);
-
-    // ZEN auto-save: Submit on blur if there's content
-    const trimmedValue = value.trim();
-    if (trimmedValue) {
-      onSubmit(trimmedValue);
-      setValue(''); // Clear input after submit
-    }
   };
 
   const handleFocus = () => {
@@ -107,27 +123,43 @@ export function CommentInput({
           ref={textareaRef}
           value={value}
           onChange={handleChange}
+          onKeyDown={handleKeyDown}
           onBlur={handleBlur}
           onFocus={handleFocus}
           placeholder={placeholder}
           disabled={disabled}
           rows={1}
           className={cn(
-            'w-full px-4 py-3 rounded-lg resize-none',
-            'bg-surface-secondary text-text-primary placeholder:text-text-tertiary',
+            'w-full px-4 py-3 pr-12 rounded-lg resize-none',
+            'bg-surface text-text-primary placeholder:text-text-tertiary',
             'border-2 transition-colors',
-            'focus:outline-none focus:bg-surface-primary',
-            isFocused ? 'border-brand' : 'border-transparent hover:border-surface-tertiary',
+            'focus:outline-none focus:border-brand focus:bg-surface-elevated',
+            isFocused ? 'border-brand' : 'border-border hover:border-brand/50',
             disabled && 'opacity-50 cursor-not-allowed'
           )}
           style={{ minHeight: '44px', maxHeight: '200px' }}
         />
 
+        {/* Send Button */}
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={disabled || !value.trim()}
+          className={cn(
+            'absolute bottom-2 right-2 p-2 rounded-lg transition-all',
+            'hover:bg-surface-tertiary',
+            value.trim() ? 'text-brand hover:scale-110' : 'text-text-tertiary cursor-not-allowed'
+          )}
+          aria-label="Send comment"
+        >
+          <Send className="w-5 h-5" />
+        </button>
+
         {/* Character count (only show when approaching limit) */}
         {showCharCount && (
           <div
             className={cn(
-              'absolute bottom-2 right-3 text-xs',
+              'absolute bottom-2 left-3 text-xs',
               charsRemaining < 20 ? 'text-error' : 'text-text-tertiary'
             )}
           >
@@ -136,10 +168,10 @@ export function CommentInput({
         )}
       </div>
 
-      {/* ZEN hint */}
+      {/* Hint text */}
       {isFocused && !replyTo && (
         <p className="text-xs text-text-tertiary px-1">
-          Comment will be posted when you click away
+          Press Enter to send • Shift+Enter for new line
         </p>
       )}
     </div>
