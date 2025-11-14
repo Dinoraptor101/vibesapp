@@ -70,7 +70,15 @@ export function PostDetailPage() {
     }
 
     try {
-      await createComment.mutateAsync(text);
+      await createComment.mutateAsync({
+        text,
+        replyToCommentId: replyTo?.id,
+      });
+
+      // Clear reply state after successful comment
+      if (replyTo) {
+        setReplyTo(undefined);
+      }
     } catch (error) {
       console.error('Failed to create comment:', error);
     }

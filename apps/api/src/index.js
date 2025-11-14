@@ -60,6 +60,7 @@ app.use(pigeonAuthMiddleware);
 // Import Routes
 const userRoutes = require('./routes/user');
 const postRoutes = require('./routes/post');
+const commentRoutes = require('./routes/comment');
 const s3Routes = require('./routes/s3');
 const issueRoutes = require('./routes/issue');
 const activityRouter = require('./routes/activity');
@@ -84,6 +85,7 @@ function useRoute(path, router) {
 // Use Routes
 useRoute('/api/users', userRoutes);
 useRoute('/api/posts', postRoutes);
+useRoute('/api/comments', commentRoutes);
 useRoute('/api/messages', messageRoutes);
 useRoute('/api/s3', s3Routes);
 useRoute('/api/issues', issueRoutes);

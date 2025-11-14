@@ -65,13 +65,7 @@ export function CommentInput({
 
     onSubmit(trimmedValue);
     setValue(''); // Clear input after submit
-
-    // Reset reply mode
-    if (replyTo && onCancelReply) {
-      onCancelReply();
-    }
   };
-
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     // Enter without Shift = Submit
     if (e.key === 'Enter' && !e.shiftKey) {

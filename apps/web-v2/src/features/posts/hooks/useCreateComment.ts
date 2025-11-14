@@ -14,18 +14,20 @@ export function useCreateComment(postId: string) {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: (text: string) => {
-      if (!user?.location) {
-        throw new Error('User location is required');
-      }
-
+    mutationFn: ({ text, replyToCommentId }: { text: string; replyToCommentId?: string }) => {
       const payload: CreateCommentPayload = {
         text,
-        replyTo: postId,
-        location: {
-          lat: user.location.latitude,
-          lon: user.location.longitude,
-        },
+        postId: postId,
+        replyToCommentId,
+        location: user?.location
+          ? {
+              lat: user.location.latitude,
+              lon: user.location.longitude,
+            }
+          : {
+              lat: 0,
+              lon: 0,
+            },
       };
 
       return createComment(payload);
