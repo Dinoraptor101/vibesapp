@@ -26,28 +26,30 @@ const sendDMRequest = async (req, res) => {
 
     // Check if already connected (existing conversation)
     const existingConversation = await Conversation.findOne({
-      participants: { $all: [senderId, recipientId] },
+      $or: [
+        { user1Id: senderId, user2Id: recipientId },
+        { user1Id: recipientId, user2Id: senderId },
+      ],
     });
     if (existingConversation) {
       return res.status(400).json({ message: 'Already connected with this user' });
     }
 
-    // Check if pending request already exists
+    // Check if ANY pending request exists between these users (either direction)
     const pendingRequest = await DMRequest.findOne({
-      sender: senderId,
-      recipient: recipientId,
-      status: 'pending',
+      $or: [
+        { sender: senderId, recipient: recipientId, status: 'pending' },
+        { sender: recipientId, recipient: senderId, status: 'pending' },
+      ],
     });
     if (pendingRequest) {
+      // If the other user sent you a request, show different message
+      if (pendingRequest.sender === recipientId) {
+        return res.status(400).json({
+          message: 'This user has already sent you a request. Check your DM Requests tab.',
+        });
+      }
       return res.status(400).json({ message: 'Request already pending' });
-    }
-
-    // Check 24h cooldown
-    const canSend = await DMRequest.canSendRequest(senderId, recipientId);
-    if (!canSend) {
-      return res.status(429).json({
-        message: 'You must wait 24 hours after a declined request before sending another',
-      });
     }
 
     // Create new request
@@ -138,10 +140,13 @@ const acceptDMRequest = async (req, res) => {
     dmRequest.respondedAt = new Date();
     await dmRequest.save();
 
-    // Create conversation
+    // Create conversation with proper field names
     const conversation = await Conversation.create({
-      participants: [dmRequest.sender, dmRequest.recipient],
-      lastMessageAt: new Date(),
+      user1Id: dmRequest.sender,
+      user2Id: dmRequest.recipient,
+      lastRequesterId: dmRequest.sender,
+      status: 'approved', // Immediately approved since request was accepted
+      messages: [],
     });
 
     console.log('DM request accepted and conversation created');
@@ -176,13 +181,11 @@ const declineDMRequest = async (req, res) => {
       return res.status(400).json({ message: 'Request already processed' });
     }
 
-    // Update request status
-    dmRequest.status = 'declined';
-    dmRequest.respondedAt = new Date();
-    await dmRequest.save();
+    // Simply delete the request (no cooldown, sender can try again)
+    await DMRequest.findByIdAndDelete(requestId);
 
-    console.log('DM request declined');
-    res.status(200).json(dmRequest);
+    console.log('DM request declined and deleted');
+    res.status(200).json({ message: 'Request declined' });
   } catch (error) {
     console.error('Error declining DM request:', error);
     res.status(500).json({ message: 'Error declining DM request', error });
@@ -200,44 +203,12 @@ const checkDMRequestStatus = async (req, res) => {
   }
 
   try {
-    // Check for pending request
-    const pendingRequest = await DMRequest.findOne({
-      sender: currentUserId,
-      recipient: targetUserId,
-      status: 'pending',
-    });
-
-    if (pendingRequest) {
-      return res.status(200).json({
-        canSend: false,
-        reason: 'pending',
-        requestId: pendingRequest._id,
-      });
-    }
-
-    // Check for recent declined request (24h cooldown)
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const recentDeclinedRequest = await DMRequest.findOne({
-      sender: currentUserId,
-      recipient: targetUserId,
-      status: 'declined',
-      respondedAt: { $gte: oneDayAgo },
-    });
-
-    if (recentDeclinedRequest) {
-      const cooldownEnd = new Date(
-        recentDeclinedRequest.respondedAt.getTime() + 24 * 60 * 60 * 1000
-      );
-      return res.status(200).json({
-        canSend: false,
-        reason: 'cooldown',
-        cooldownEndsAt: cooldownEnd,
-      });
-    }
-
-    // Check if already connected
+    // Check if already connected (conversation exists)
     const existingConversation = await Conversation.findOne({
-      participants: { $all: [currentUserId, targetUserId] },
+      $or: [
+        { user1Id: currentUserId, user2Id: targetUserId },
+        { user1Id: targetUserId, user2Id: currentUserId },
+      ],
     });
 
     if (existingConversation) {
@@ -245,6 +216,32 @@ const checkDMRequestStatus = async (req, res) => {
         canSend: false,
         reason: 'connected',
         conversationId: existingConversation._id,
+      });
+    }
+
+    // Check for any pending request between these users (either direction)
+    const pendingRequest = await DMRequest.findOne({
+      $or: [
+        { sender: currentUserId, recipient: targetUserId, status: 'pending' },
+        { sender: targetUserId, recipient: currentUserId, status: 'pending' },
+      ],
+    });
+
+    if (pendingRequest) {
+      // If you sent the request
+      if (pendingRequest.sender === currentUserId) {
+        return res.status(200).json({
+          canSend: false,
+          reason: 'pending',
+          requestId: pendingRequest._id,
+        });
+      }
+      // If they sent you the request
+      return res.status(200).json({
+        canSend: false,
+        reason: 'received',
+        requestId: pendingRequest._id,
+        message: 'This user has sent you a request. Check your DM Requests tab.',
       });
     }
 

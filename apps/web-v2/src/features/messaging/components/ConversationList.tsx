@@ -70,7 +70,7 @@ export function ConversationList() {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                if (otherUser?.userId) navigate(`/profile/${otherUser.userId}`);
+                if (otherUser?._id) navigate(`/profile/${otherUser._id}`);
               }}
               className="hover:opacity-80 transition-opacity"
             >

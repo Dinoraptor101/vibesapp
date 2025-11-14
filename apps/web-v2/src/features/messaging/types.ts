@@ -11,24 +11,22 @@ export type DMRequestStatus = 'pending' | 'accepted' | 'declined';
 // DM Request Interface
 export interface DMRequest {
   _id: string;
-  senderId: string;
-  receiverId: string;
+  sender: User; // Populated sender user object
+  recipient: string; // Recipient userId (not populated in list view)
   message?: string; // Optional message with request (200 char max)
   status: DMRequestStatus;
-  declinedAt?: string; // ISO timestamp when declined (for cooldown)
   createdAt: string; // ISO timestamp
   updatedAt: string; // ISO timestamp
-  // Populated sender info
-  sender?: User;
-  receiver?: User;
+  __v?: number; // Mongoose version key
 }
 
 // DM Request Status Check (for button state)
 export interface DMRequestStatusCheck {
-  hasPendingRequest: boolean;
-  wasDeclined: boolean;
-  canRequest: boolean; // false if declined within 2 days
-  cooldownEndsAt?: string; // ISO timestamp when can request again
+  canSend: boolean;
+  reason?: 'pending' | 'received' | 'connected'; // pending=you sent, received=they sent you, connected=already messaging
+  requestId?: string; // ID of the pending request
+  conversationId?: string; // ID of existing conversation
+  message?: string; // Additional message to display to user
 }
 
 // API Response Types

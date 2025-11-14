@@ -19,6 +19,7 @@ export function ConversationView() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const hasMarkedAsRead = useRef(false);
 
   const { data: conversation, isLoading } = useConversation(conversationId);
   const markAsReadMutation = useMarkAsRead();
@@ -33,13 +34,20 @@ export function ConversationView() {
     }
   }, [conversation?.messages.length]);
 
-  // Mark messages as read when opening conversation
+  // Mark messages as read when opening conversation (only once per conversation)
   useEffect(() => {
-    if (conversationId && conversation?.messages.length) {
+    if (conversationId && conversation && !hasMarkedAsRead.current) {
       markAsReadMutation.mutate(conversationId);
+      hasMarkedAsRead.current = true;
     }
-    // Only run when conversation ID changes or when new messages arrive
-  }, [conversationId, conversation?.messages.length, markAsReadMutation]);
+  }, [conversationId, conversation, markAsReadMutation]);
+
+  // Reset hasMarkedAsRead when conversationId changes
+  useEffect(() => {
+    return () => {
+      hasMarkedAsRead.current = false;
+    };
+  }, [conversationId]);
 
   const handleSendMessage = (body: string) => {
     if (!conversationId) return;
@@ -87,7 +95,7 @@ export function ConversationView() {
 
         <button
           type="button"
-          onClick={() => otherUser?.userId && navigate(`/profile/${otherUser.userId}`)}
+          onClick={() => otherUser?._id && navigate(`/profile/${otherUser._id}`)}
           className="flex flex-1 items-center gap-3 hover:opacity-80 transition-opacity"
         >
           <Avatar

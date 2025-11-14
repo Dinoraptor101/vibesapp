@@ -4,11 +4,12 @@
 
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout';
 import { Button, Spinner } from '@/components/ui-next';
 import { useAuth } from '@/features/auth';
 import { DMRequestModal } from '@/features/messaging/components/DMRequestModal';
+import { useDMRequestStatus } from '@/features/messaging/hooks/useDMRequestStatus';
 import { ProfileHeader } from '@/features/profile/components/ProfileHeader';
 import { ProfilePosts } from '@/features/profile/components/ProfilePosts';
 import { ProfileStats } from '@/features/profile/components/ProfileStats';
@@ -17,10 +18,12 @@ import { useProfile } from '@/features/profile/hooks/useProfile';
 export function ProfilePage() {
   const { userId } = useParams<{ userId: string }>();
   const { user: currentUser } = useAuth();
+  const navigate = useNavigate();
   const [showDMModal, setShowDMModal] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
 
   const { data: profile, isLoading, isError, error } = useProfile(userId);
+  const { data: dmStatus } = useDMRequestStatus(userId);
 
   // ZEN: Wait 1 second before showing loading spinner (avoid flash)
   useEffect(() => {
@@ -40,6 +43,33 @@ export function ProfilePage() {
   }, [isError, error]);
 
   const isOwnProfile = currentUser?._id === userId;
+
+  // Handle Message button click
+  const handleMessageClick = () => {
+    // If already connected, navigate to conversation
+    if (dmStatus?.reason === 'connected' && dmStatus.conversationId) {
+      navigate(`/messages/${dmStatus.conversationId}`);
+      return;
+    }
+
+    // If they sent you a request, show message to check DM Requests tab
+    if (dmStatus?.reason === 'received') {
+      // TODO: Show toast or alert
+      console.log('This user has sent you a request. Check your DM Requests tab.');
+      navigate('/messages?tab=requests');
+      return;
+    }
+
+    // If you sent a request, show it's pending
+    if (dmStatus?.reason === 'pending') {
+      // TODO: Show toast
+      console.log('Your request is pending');
+      return;
+    }
+
+    // Otherwise, show DM request modal
+    setShowDMModal(true);
+  };
 
   // ZEN: Show loading only after 1 second delay (avoid flash for fast loads)
   if (isLoading && showLoading) {
@@ -79,7 +109,7 @@ export function ProfilePage() {
           <ProfileHeader
             profile={profile}
             isOwnProfile={isOwnProfile}
-            onDMRequest={() => setShowDMModal(true)}
+            onDMRequest={handleMessageClick}
           />
 
           {/* Stats */}

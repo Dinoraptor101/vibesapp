@@ -3,6 +3,7 @@ import { getConversation } from '../api/dmService';
 
 /**
  * Hook to fetch a specific conversation by ID
+ * Backend automatically determines which user is the "other" user based on auth
  */
 export const useConversation = (conversationId: string | undefined) => {
   return useQuery({

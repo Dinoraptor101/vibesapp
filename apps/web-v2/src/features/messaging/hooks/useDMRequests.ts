@@ -5,14 +5,19 @@
 
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
-import type { DMRequestsResponse } from '../types';
+import type { DMRequest } from '../types';
 
 export function useDMRequests() {
   return useQuery({
     queryKey: ['dm-requests'],
     queryFn: async () => {
-      const data = await api.get<DMRequestsResponse>('/api/dm-requests');
-      return data;
+      // Backend returns plain array of requests
+      const requests = await api.get<DMRequest[]>('/api/dm-requests');
+      // Transform to match component expectations
+      return {
+        requests,
+        count: requests.length,
+      };
     },
     staleTime: 1 * 60 * 1000, // 1 minute
     refetchInterval: 30 * 1000, // Refetch every 30 seconds for real-time updates
