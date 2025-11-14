@@ -48,8 +48,7 @@ export interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> 
  */
 export const Label = forwardRef<HTMLLabelElement, LabelProps>(
   ({ required = false, className = '', children, ...props }, ref) => {
-    const baseClasses =
-      'block text-sm font-medium text-light-text-primary dark:text-dark-text-primary';
+    const baseClasses = 'block text-sm font-medium text-text-primary';
 
     return (
       // biome-ignore lint/a11y/noLabelWithoutControl: This is a standalone label component that will be associated with inputs by the consumer

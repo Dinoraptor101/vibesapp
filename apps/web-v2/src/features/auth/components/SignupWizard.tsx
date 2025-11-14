@@ -465,7 +465,7 @@ export function SignupWizard() {
         return (
           <div className="space-y-6">
             <div className="space-y-2 text-center">
-              <h2 className="text-2xl font-bold text-text-primary">Choose Your Polarity</h2>
+              <h2 className="text-2xl font-bold text-text-primary">Your Polarity</h2>
               <p className="text-text-secondary">
                 Are you more Yin (receptive, calm) or Yang (active, dynamic)?
               </p>

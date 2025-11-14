@@ -14,29 +14,25 @@ const MBTI_TYPES = [
     type: 'INTJ',
     name: 'Architect',
     category: 'Analyst',
-    color:
-      'bg-purple-100 border-purple-300 hover:bg-purple-200 dark:bg-purple-900/20 dark:border-purple-700 dark:hover:bg-purple-800/30',
+    color: 'bg-mbti-analyst-bg border-mbti-analyst-border hover:bg-mbti-analyst-hover',
   },
   {
     type: 'INTP',
     name: 'Logician',
     category: 'Analyst',
-    color:
-      'bg-purple-100 border-purple-300 hover:bg-purple-200 dark:bg-purple-900/20 dark:border-purple-700 dark:hover:bg-purple-800/30',
+    color: 'bg-mbti-analyst-bg border-mbti-analyst-border hover:bg-mbti-analyst-hover',
   },
   {
     type: 'ENTJ',
     name: 'Commander',
     category: 'Analyst',
-    color:
-      'bg-purple-100 border-purple-300 hover:bg-purple-200 dark:bg-purple-900/20 dark:border-purple-700 dark:hover:bg-purple-800/30',
+    color: 'bg-mbti-analyst-bg border-mbti-analyst-border hover:bg-mbti-analyst-hover',
   },
   {
     type: 'ENTP',
     name: 'Debater',
     category: 'Analyst',
-    color:
-      'bg-purple-100 border-purple-300 hover:bg-purple-200 dark:bg-purple-900/20 dark:border-purple-700 dark:hover:bg-purple-800/30',
+    color: 'bg-mbti-analyst-bg border-mbti-analyst-border hover:bg-mbti-analyst-hover',
   },
 
   // Diplomats
@@ -44,29 +40,25 @@ const MBTI_TYPES = [
     type: 'INFJ',
     name: 'Advocate',
     category: 'Diplomat',
-    color:
-      'bg-green-100 border-green-300 hover:bg-green-200 dark:bg-green-900/20 dark:border-green-700 dark:hover:bg-green-800/30',
+    color: 'bg-mbti-diplomat-bg border-mbti-diplomat-border hover:bg-mbti-diplomat-hover',
   },
   {
     type: 'INFP',
     name: 'Mediator',
     category: 'Diplomat',
-    color:
-      'bg-green-100 border-green-300 hover:bg-green-200 dark:bg-green-900/20 dark:border-green-700 dark:hover:bg-green-800/30',
+    color: 'bg-mbti-diplomat-bg border-mbti-diplomat-border hover:bg-mbti-diplomat-hover',
   },
   {
     type: 'ENFJ',
     name: 'Protagonist',
     category: 'Diplomat',
-    color:
-      'bg-green-100 border-green-300 hover:bg-green-200 dark:bg-green-900/20 dark:border-green-700 dark:hover:bg-green-800/30',
+    color: 'bg-mbti-diplomat-bg border-mbti-diplomat-border hover:bg-mbti-diplomat-hover',
   },
   {
     type: 'ENFP',
     name: 'Campaigner',
     category: 'Diplomat',
-    color:
-      'bg-green-100 border-green-300 hover:bg-green-200 dark:bg-green-900/20 dark:border-green-700 dark:hover:bg-green-800/30',
+    color: 'bg-mbti-diplomat-bg border-mbti-diplomat-border hover:bg-mbti-diplomat-hover',
   },
 
   // Sentinels
@@ -74,29 +66,25 @@ const MBTI_TYPES = [
     type: 'ISTJ',
     name: 'Logistician',
     category: 'Sentinel',
-    color:
-      'bg-blue-100 border-blue-300 hover:bg-blue-200 dark:bg-blue-900/20 dark:border-blue-700 dark:hover:bg-blue-800/30',
+    color: 'bg-mbti-sentinel-bg border-mbti-sentinel-border hover:bg-mbti-sentinel-hover',
   },
   {
     type: 'ISFJ',
     name: 'Defender',
     category: 'Sentinel',
-    color:
-      'bg-blue-100 border-blue-300 hover:bg-blue-200 dark:bg-blue-900/20 dark:border-blue-700 dark:hover:bg-blue-800/30',
+    color: 'bg-mbti-sentinel-bg border-mbti-sentinel-border hover:bg-mbti-sentinel-hover',
   },
   {
     type: 'ESTJ',
     name: 'Executive',
     category: 'Sentinel',
-    color:
-      'bg-blue-100 border-blue-300 hover:bg-blue-200 dark:bg-blue-900/20 dark:border-blue-700 dark:hover:bg-blue-800/30',
+    color: 'bg-mbti-sentinel-bg border-mbti-sentinel-border hover:bg-mbti-sentinel-hover',
   },
   {
     type: 'ESFJ',
     name: 'Consul',
     category: 'Sentinel',
-    color:
-      'bg-blue-100 border-blue-300 hover:bg-blue-200 dark:bg-blue-900/20 dark:border-blue-700 dark:hover:bg-blue-800/30',
+    color: 'bg-mbti-sentinel-bg border-mbti-sentinel-border hover:bg-mbti-sentinel-hover',
   },
 
   // Explorers
@@ -104,29 +92,25 @@ const MBTI_TYPES = [
     type: 'ISTP',
     name: 'Virtuoso',
     category: 'Explorer',
-    color:
-      'bg-amber-100 border-amber-300 hover:bg-amber-200 dark:bg-amber-900/20 dark:border-amber-700 dark:hover:bg-amber-800/30',
+    color: 'bg-mbti-explorer-bg border-mbti-explorer-border hover:bg-mbti-explorer-hover',
   },
   {
     type: 'ISFP',
     name: 'Adventurer',
     category: 'Explorer',
-    color:
-      'bg-amber-100 border-amber-300 hover:bg-amber-200 dark:bg-amber-900/20 dark:border-amber-700 dark:hover:bg-amber-800/30',
+    color: 'bg-mbti-explorer-bg border-mbti-explorer-border hover:bg-mbti-explorer-hover',
   },
   {
     type: 'ESTP',
     name: 'Entrepreneur',
     category: 'Explorer',
-    color:
-      'bg-amber-100 border-amber-300 hover:bg-amber-200 dark:bg-amber-900/20 dark:border-amber-700 dark:hover:bg-amber-800/30',
+    color: 'bg-mbti-explorer-bg border-mbti-explorer-border hover:bg-mbti-explorer-hover',
   },
   {
     type: 'ESFP',
     name: 'Entertainer',
     category: 'Explorer',
-    color:
-      'bg-amber-100 border-amber-300 hover:bg-amber-200 dark:bg-amber-900/20 dark:border-amber-700 dark:hover:bg-amber-800/30',
+    color: 'bg-mbti-explorer-bg border-mbti-explorer-border hover:bg-mbti-explorer-hover',
   },
 ];
 
@@ -162,19 +146,19 @@ export function MBTISelector({ value, onChange }: MBTISelectorProps) {
       {/* Legend */}
       <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
         <div className="flex items-center gap-2">
-          <div className="h-4 w-4 rounded border-2 border-purple-300 bg-purple-100 dark:border-purple-700 dark:bg-purple-900/20" />
+          <div className="h-4 w-4 rounded border-2 border-mbti-analyst-border bg-mbti-analyst-bg" />
           <span className="text-text-secondary">Analyst</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-4 w-4 rounded border-2 border-green-300 bg-green-100 dark:border-green-700 dark:bg-green-900/20" />
+          <div className="h-4 w-4 rounded border-2 border-mbti-diplomat-border bg-mbti-diplomat-bg" />
           <span className="text-text-secondary">Diplomat</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-4 w-4 rounded border-2 border-blue-300 bg-blue-100 dark:border-blue-700 dark:bg-blue-900/20" />
+          <div className="h-4 w-4 rounded border-2 border-mbti-sentinel-border bg-mbti-sentinel-bg" />
           <span className="text-text-secondary">Sentinel</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-4 w-4 rounded border-2 border-amber-300 bg-amber-100 dark:border-amber-700 dark:bg-amber-900/20" />
+          <div className="h-4 w-4 rounded border-2 border-mbti-explorer-border bg-mbti-explorer-bg" />
           <span className="text-text-secondary">Explorer</span>
         </div>
       </div>
