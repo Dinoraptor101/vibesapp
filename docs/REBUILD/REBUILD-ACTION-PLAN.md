@@ -710,6 +710,36 @@ export function Button({ className, variant, size, ...props }: ButtonProps) {
 - [ ] Optimistic message sending
 - [ ] Message queueing for offline
 
+#### Phase 2.6: Read/Unread System Optimization 
+**PRIORITY:** Fix infinite polling loops and performance issues in messaging system
+
+##### Backend Database Changes
+- [ ] Add `readCursors` field to Conversation model
+- [ ] Create lazy migration utility `ensureConversationHasCursors()`
+- [ ] Update `getConversations()` to use cursor-based unread calculation
+- [ ] Update `getConversation()` to include unread count + lazy migration  
+- [ ] Update `markMessagesAsRead()` to use O(1) cursor updates (no more array iteration)
+
+##### Frontend Architecture Changes
+- [ ] Create `useMessagingPolling()` unified hook
+  - [ ] Auto-detect active conversation from URL
+  - [ ] 5s polling for active conversation, 30s for list
+  - [ ] Tab visibility detection for adaptive polling
+- [ ] Create `useAutoMarkAsRead()` with Intersection Observer
+  - [ ] Mark as read when messages container 50%+ visible
+  - [ ] Handle new messages from polling automatically
+  - [ ] Remove all useRef flags and complex effect dependencies
+- [ ] Update `ConversationView` to use new visibility-based system
+- [ ] Remove infinite loop sources from mark-as-read logic
+
+##### Performance Optimizations
+- [ ] Cursor-based read tracking: O(1) vs O(n) operations
+- [ ] Adaptive polling: 6x slower when tab hidden
+- [ ] Zero downtime lazy migration strategy
+- [ ] Preserve all existing conversation history
+
+**Week 9.5 Deliverable:** Messaging system with no infinite loops, 90% faster read tracking, preserved conversation history
+
 #### Messaging API
 - [ ] Message API service
 - [ ] useConversations hook
