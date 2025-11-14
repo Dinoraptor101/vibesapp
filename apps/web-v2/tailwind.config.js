@@ -28,10 +28,54 @@ export default {
           border: 'var(--dark-border)',
         },
 
+        // Semantic design tokens (theme-aware)
+        surface: {
+          DEFAULT: 'var(--surface)',
+          elevated: 'var(--surface-elevated)',
+          hover: 'var(--surface-hover)',
+        },
+        text: {
+          primary: 'var(--text-primary)',
+          secondary: 'var(--text-secondary)',
+          tertiary: 'var(--text-tertiary)',
+        },
+        'text-text': {
+          // Support for text-text-primary pattern
+          primary: 'var(--text-primary)',
+          secondary: 'var(--text-secondary)',
+          tertiary: 'var(--text-tertiary)',
+        },
+        border: {
+          DEFAULT: 'var(--border)',
+        },
+        background: {
+          DEFAULT: 'var(--background)',
+        },
+        foreground: {
+          DEFAULT: 'var(--foreground)',
+        },
+        primary: {
+          DEFAULT: '#21a1f1',
+          foreground: '#ffffff',
+        },
+        secondary: {
+          DEFAULT: '#f3f4f6',
+          foreground: '#1f2937',
+        },
+        'vibe-negative': {
+          DEFAULT: '#ab1c1c',
+          bg: 'rgba(171, 28, 28, 0.1)',
+        },
+        'vibe-positive': {
+          DEFAULT: '#4caf50',
+          bg: 'rgba(76, 175, 80, 0.1)',
+        },
+
         // Semantic brand colors
         brand: {
           DEFAULT: '#21a1f1',
           primary: '#21a1f1', // Add explicit 'primary' for bg-brand-primary class
+          purple: '#8b5cf6', // For active states
           50: '#e6f7ff',
           100: '#bae7ff',
           200: '#91d5ff',

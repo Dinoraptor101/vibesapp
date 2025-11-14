@@ -8,7 +8,7 @@
 import { Bell, Home, MessageSquare, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Badge, Button } from '@/components/ui-next';
+import { Button } from '@/components/ui-next';
 import { useUnreadCounts } from '@/features/activity';
 import { CreatePostModal } from '@/features/posts';
 import { UserMenu } from './UserMenu';
@@ -29,7 +29,7 @@ export function TopNav() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="hidden md:flex items-center justify-between px-6 py-3 bg-surface-elevated border-b border-border sticky top-0 z-40">
+    <nav className="hidden md:flex items-center justify-between px-6 py-3 bg-surface-elevated/95 backdrop-blur-md border-b border-border sticky top-0 z-40">
       {/* Left: Logo */}
       <Link to="/" className="flex items-center gap-2 group">
         <div className="text-2xl font-bold text-brand-purple group-hover:scale-110 transition-transform">
@@ -60,16 +60,18 @@ export function TopNav() {
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors relative ${
             isActive('/activity')
               ? 'bg-brand-purple text-white'
-              : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
+              : unreadActivity > 0
+                ? 'text-vibe-negative hover:bg-surface-hover'
+                : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
           }`}
           aria-label={`Activity${unreadActivity > 0 ? ` (${unreadActivity} unread)` : ''}`}
         >
           <div className="relative">
             <Bell className="w-5 h-5" />
             {unreadActivity > 0 && (
-              <div className="absolute -top-1 -right-1">
-                <Badge variant="error" size="sm" count={unreadActivity} />
-              </div>
+              <span className="absolute -top-1.5 -right-1.5 text-[10px] font-bold tabular-nums">
+                {unreadActivity > 99 ? '99+' : unreadActivity}
+              </span>
             )}
           </div>
           <span className="hidden lg:inline font-medium">Activity</span>
@@ -81,16 +83,18 @@ export function TopNav() {
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors relative ${
             isActive('/messages')
               ? 'bg-brand-purple text-white'
-              : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
+              : unreadMessages > 0
+                ? 'text-vibe-negative hover:bg-surface-hover'
+                : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
           }`}
           aria-label={`Messages${unreadMessages > 0 ? ` (${unreadMessages} unread)` : ''}`}
         >
           <div className="relative">
             <MessageSquare className="w-5 h-5" />
             {unreadMessages > 0 && (
-              <div className="absolute -top-1 -right-1">
-                <Badge variant="error" size="sm" count={unreadMessages} />
-              </div>
+              <span className="absolute -top-1.5 -right-1.5 text-[10px] font-bold tabular-nums">
+                {unreadMessages > 99 ? '99+' : unreadMessages}
+              </span>
             )}
           </div>
           <span className="hidden lg:inline font-medium">Messages</span>
