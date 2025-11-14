@@ -1,6 +1,11 @@
 /**
  * ConversationView Component
  * Full chat interface for a conversation
+ *
+ * Phase 4.6 Update:
+ * - Uses unified polling (useMessagingPolling)
+ * - Automatic visibility-based read detection (useAutoMarkAsRead)
+ * - No more infinite loops or manual useRef flags
  */
 
 import { ArrowLeft } from 'lucide-react';
@@ -8,8 +13,8 @@ import { useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Avatar, Badge, Spinner } from '@/components/ui-next';
 import { useAuth } from '@/features/auth';
-import { useConversation } from '../hooks/useConversation';
-import { useMarkAsRead } from '../hooks/useMarkAsRead';
+import { useAutoMarkAsRead } from '../hooks/useAutoMarkAsRead';
+import { useMessagingPolling } from '../hooks/useMessagingPolling';
 import { useSendMessage } from '../hooks/useSendMessage';
 import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
@@ -19,35 +24,23 @@ export function ConversationView() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const hasMarkedAsRead = useRef(false);
 
-  const { data: conversation, isLoading } = useConversation(conversationId);
-  const markAsReadMutation = useMarkAsRead();
+  // Unified polling - automatically manages queries based on URL
+  const { activeConversation, isLoading } = useMessagingPolling();
+
+  // Automatic read detection - marks as read when user is viewing
+  useAutoMarkAsRead(conversationId);
+
   const sendMessageMutation = useSendMessage();
 
-  const otherUser = conversation?.otherUser;
+  const otherUser = activeConversation?.otherUser;
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    if (conversation?.messages.length) {
+    if (activeConversation?.messages.length) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [conversation?.messages.length]);
-
-  // Mark messages as read when opening conversation (only once per conversation)
-  useEffect(() => {
-    if (conversationId && conversation && !hasMarkedAsRead.current) {
-      markAsReadMutation.mutate(conversationId);
-      hasMarkedAsRead.current = true;
-    }
-  }, [conversationId, conversation, markAsReadMutation]);
-
-  // Reset hasMarkedAsRead when conversationId changes
-  useEffect(() => {
-    return () => {
-      hasMarkedAsRead.current = false;
-    };
-  }, [conversationId]);
+  }, [activeConversation?.messages.length]);
 
   const handleSendMessage = (body: string) => {
     if (!conversationId) return;
@@ -66,7 +59,7 @@ export function ConversationView() {
     );
   }
 
-  if (!conversation) {
+  if (!activeConversation) {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-2">
         <p className="text-gray-600 dark:text-gray-400">Conversation not found</p>
@@ -119,9 +112,9 @@ export function ConversationView() {
         </button>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 space-y-4 overflow-y-auto p-4">
-        {!conversation?.messages || conversation.messages.length === 0 ? (
+      {/* Messages - IMPORTANT: id="messages-container" for Intersection Observer */}
+      <div id="messages-container" className="flex-1 space-y-4 overflow-y-auto p-4">
+        {!activeConversation?.messages || activeConversation.messages.length === 0 ? (
           <div className="flex h-full items-center justify-center text-center">
             <p className="text-sm text-gray-500 dark:text-gray-400">
               No messages yet. Start the conversation!
@@ -129,7 +122,7 @@ export function ConversationView() {
           </div>
         ) : (
           <>
-            {conversation.messages.map((message, index) => (
+            {activeConversation.messages.map((message, index) => (
               <MessageBubble
                 key={message._id || index}
                 message={message}

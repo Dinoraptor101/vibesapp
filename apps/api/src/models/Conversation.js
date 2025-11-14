@@ -38,6 +38,24 @@ const ConversationSchema = new mongoose.Schema({
       ],
     },
   ],
+  // New cursor-based read tracking system (Phase 4.6)
+  readCursors: {
+    type: Map,
+    of: new mongoose.Schema(
+      {
+        lastReadMessageId: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: true,
+        },
+        lastReadAt: {
+          type: Date,
+          required: true,
+        },
+      },
+      { _id: false }
+    ),
+    default: {},
+  },
   status: {
     type: String,
     enum: ['pending', 'approved', 'closed'],

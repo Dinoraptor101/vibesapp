@@ -1,7 +1,43 @@
-const mongoose = require('mongoose');
 const User = require('../models/User');
 const Conversation = require('../models/Conversation');
 const karma = require('./karma');
+
+/**
+ * Lazy migration utility - ensures conversation has cursor-based read tracking
+ * Runs on-demand when conversations are accessed (zero downtime migration)
+ * @param {Object} conversation - Mongoose conversation document
+ * @returns {Object} Updated conversation with readCursors
+ */
+const ensureConversationHasCursors = async (conversation) => {
+  // Check if already migrated
+  if (conversation.readCursors && conversation.readCursors.size > 0) {
+    return conversation;
+  }
+
+  console.log(`[Migration] Upgrading conversation ${conversation._id} to cursor-based tracking`);
+
+  // Initialize cursor structure
+  if (!conversation.readCursors) {
+    conversation.readCursors = new Map();
+  }
+
+  // For each participant, mark all existing messages as read (conservative approach)
+  // This prevents overwhelming users with old "unread" messages after migration
+  [conversation.user1Id, conversation.user2Id].forEach((userId) => {
+    const lastMessage = conversation.messages[conversation.messages.length - 1];
+    if (lastMessage) {
+      conversation.readCursors.set(userId, {
+        lastReadMessageId: lastMessage._id,
+        lastReadAt: new Date(),
+      });
+    }
+  });
+
+  await conversation.save();
+  console.log(`[Migration] Conversation ${conversation._id} migrated successfully`);
+
+  return conversation;
+};
 
 exports.sendDMRequest = async (req, res) => {
   const { senderId, recipientId } = req.body;
@@ -97,7 +133,7 @@ exports.approveDMRequest = async (req, res) => {
       return res.status(404).json({ error: 'Sender or recipient not found' });
     }
 
-    let conversation = await Conversation.findOne({
+    const conversation = await Conversation.findOne({
       $or: [
         { user1Id: sender.userId, user2Id: recipient.userId, status: 'pending' },
         { user1Id: recipient.userId, user2Id: sender.userId, status: 'pending' },
@@ -211,27 +247,49 @@ exports.getConversations = async (req, res) => {
 
     const dmRequests = await Promise.all(
       validConversations.map(async (conversation) => {
-        const unreadMessages = conversation.messages.some(
-          (message) => !message.readBy.includes(user.userId)
-        );
+        // Lazy migration: Ensure conversation has cursor-based tracking
+        const migratedConversation = await ensureConversationHasCursors(conversation);
 
-        const lastMessage = conversation.messages[conversation.messages.length - 1];
+        // Calculate unread count using cursor system
+        let unreadCount = 0;
+        const cursor = migratedConversation.readCursors.get(user.userId);
 
-        const user1 = await User.findOne({ userId: conversation.user1Id });
-        const user2 = await User.findOne({ userId: conversation.user2Id });
+        if (cursor?.lastReadMessageId) {
+          // Find index of last read message
+          const lastReadIndex = migratedConversation.messages.findIndex(
+            (m) => m._id.toString() === cursor.lastReadMessageId.toString()
+          );
+
+          if (lastReadIndex !== -1) {
+            // Count messages after cursor that aren't from current user
+            unreadCount = migratedConversation.messages
+              .slice(lastReadIndex + 1)
+              .filter((m) => m.senderId !== user.userId).length;
+          }
+        } else {
+          // No cursor exists - all messages from other user are unread
+          unreadCount = migratedConversation.messages.filter(
+            (m) => m.senderId !== user.userId
+          ).length;
+        }
+
+        const lastMessage = migratedConversation.messages[migratedConversation.messages.length - 1];
+
+        const user1 = await User.findOne({ userId: migratedConversation.user1Id });
+        const user2 = await User.findOne({ userId: migratedConversation.user2Id });
 
         // Determine which user is the "other" user
-        const otherUserData = conversation.user1Id === user.userId ? user2 : user1;
+        const otherUserData = migratedConversation.user1Id === user.userId ? user2 : user1;
 
         return {
-          _id: conversation._id.toString(),
-          user1Id: conversation.user1Id,
-          user2Id: conversation.user2Id,
-          lastRequesterId: conversation.lastRequesterId,
-          status: conversation.status,
+          _id: migratedConversation._id.toString(),
+          user1Id: migratedConversation.user1Id,
+          user2Id: migratedConversation.user2Id,
+          lastRequesterId: migratedConversation.lastRequesterId,
+          status: migratedConversation.status,
           // Computed fields for frontend
           otherUser: otherUserData ? otherUserData.toJSON() : null,
-          unreadCount: unreadMessages ? 1 : 0, // Simplified - count all unread as 1
+          unreadCount,
           lastMessage: lastMessage
             ? {
                 _id: lastMessage._id,
@@ -266,7 +324,7 @@ exports.getConversation = async (req, res) => {
   }
 
   try {
-    const conversation = await Conversation.findById(conversationId);
+    let conversation = await Conversation.findById(conversationId);
     if (!conversation) {
       console.log('Conversation not found:', conversationId);
       return res.status(404).json({ error: 'Conversation not found' });
@@ -277,11 +335,35 @@ exports.getConversation = async (req, res) => {
       return res.status(403).json({ error: 'Not authorized to view this conversation' });
     }
 
+    // Lazy migration: Ensure conversation has cursor-based tracking
+    conversation = await ensureConversationHasCursors(conversation);
+
     const user1 = await User.findOne({ userId: conversation.user1Id });
     const user2 = await User.findOne({ userId: conversation.user2Id });
 
     // Determine which user is the "other" user based on who's requesting
     const otherUser = conversation.user1Id === currentUserId ? user2 : user1;
+
+    // Calculate unread count using cursor system
+    let unreadCount = 0;
+    const cursor = conversation.readCursors.get(currentUserId);
+
+    if (cursor?.lastReadMessageId) {
+      // Find index of last read message
+      const lastReadIndex = conversation.messages.findIndex(
+        (m) => m._id.toString() === cursor.lastReadMessageId.toString()
+      );
+
+      if (lastReadIndex !== -1) {
+        // Count messages after cursor that aren't from current user
+        unreadCount = conversation.messages
+          .slice(lastReadIndex + 1)
+          .filter((m) => m.senderId !== currentUserId).length;
+      }
+    } else {
+      // No cursor exists - all messages from other user are unread
+      unreadCount = conversation.messages.filter((m) => m.senderId !== currentUserId).length;
+    }
 
     const conversationDetails = {
       _id: conversation._id.toString(),
@@ -298,6 +380,7 @@ exports.getConversation = async (req, res) => {
       })),
       // Provide the other user (from current user's perspective)
       otherUser: otherUser ? otherUser.toJSON() : null,
+      unreadCount,
     };
 
     res.status(200).json(conversationDetails);
@@ -387,7 +470,7 @@ exports.markMessagesAsRead = async (req, res) => {
   }
 
   try {
-    const conversation = await Conversation.findById(conversationId);
+    let conversation = await Conversation.findById(conversationId);
     if (!conversation) {
       console.log('Conversation not found:', conversationId);
       return res.status(404).json({ error: 'Conversation not found' });
@@ -398,16 +481,32 @@ exports.markMessagesAsRead = async (req, res) => {
       return res.status(403).json({ error: 'Not authorized to access this conversation' });
     }
 
-    conversation.messages.forEach((message) => {
-      if (!message.readBy.includes(currentUserId)) {
-        message.readBy.push(currentUserId);
-      }
-    });
+    // Ensure conversation has cursor-based tracking
+    conversation = await ensureConversationHasCursors(conversation);
 
-    await conversation.save();
-    console.log('Messages marked as read for userId:', currentUserId);
+    // Get last message in conversation
+    const lastMessage = conversation.messages[conversation.messages.length - 1];
 
-    res.status(200).json({ message: 'Messages marked as read successfully' });
+    if (lastMessage) {
+      // O(1) cursor update - no message iteration needed!
+      conversation.readCursors.set(currentUserId, {
+        lastReadMessageId: lastMessage._id,
+        lastReadAt: new Date(),
+      });
+
+      await conversation.save();
+      console.log(
+        `[Cursor Update] User ${currentUserId} read up to message ${lastMessage._id} in conversation ${conversationId}`
+      );
+
+      return res.json({
+        success: true,
+        lastReadMessageId: lastMessage._id,
+      });
+    }
+
+    // No messages to mark as read
+    res.json({ success: true, lastReadMessageId: null });
   } catch (error) {
     console.error('Error marking messages as read:', error.message);
     res.status(500).json({ error: 'Server error while marking messages as read' });
