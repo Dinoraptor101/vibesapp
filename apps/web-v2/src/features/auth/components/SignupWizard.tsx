@@ -1,4 +1,4 @@
-import { Copy } from 'lucide-react';
+import { Check, Copy, RotateCcw } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Input, Textarea } from '@/components/ui-next';
@@ -9,6 +9,7 @@ import { deleteCookie, setCookie } from '@/lib';
 import { authApi } from '../services/authApi';
 import { LocationStep } from './LocationStep';
 import { MBTISelector } from './MBTISelector';
+import './LoginForm.css'; // Import shake animation
 
 interface SignupData {
   pigeonId: string;
@@ -62,6 +63,7 @@ export function SignupWizard() {
   const [error, setError] = useState('');
   const [copiedPigeonId, setCopiedPigeonId] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [showUsernameError, setShowUsernameError] = useState(false);
 
   const generatingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -124,10 +126,33 @@ export function SignupWizard() {
     setError('');
 
     // Validation for required steps
-    if (currentStep === 3 && !signupData.userName.trim()) {
-      setError('Username is required');
-      return;
+    if (currentStep === 3) {
+      const username = signupData.userName.trim();
+
+      // Check if username is empty
+      if (!username) {
+        setShowUsernameError(true);
+        setSignupData((prev) => ({ ...prev, userName: '' }));
+        setTimeout(() => setShowUsernameError(false), 500);
+        return;
+      }
+
+      // Check length (3-20 characters)
+      if (username.length < 3 || username.length > 20) {
+        setShowUsernameError(true);
+        setTimeout(() => setShowUsernameError(false), 500);
+        return;
+      }
+
+      // Check if only letters and numbers (alphanumeric)
+      const alphanumericRegex = /^[a-zA-Z0-9]+$/;
+      if (!alphanumericRegex.test(username)) {
+        setShowUsernameError(true);
+        setTimeout(() => setShowUsernameError(false), 500);
+        return;
+      }
     }
+
     if (currentStep === 4 && !signupData.mbtiPersonality) {
       setError('Please select your MBTI type');
       return;
@@ -296,29 +321,37 @@ export function SignupWizard() {
       case 1:
         return (
           <div className="space-y-6 text-center">
+            {/* Logo */}
+            <button
+              type="button"
+              onClick={() => navigate('/login')}
+              className="text-6xl mb-2 hover:opacity-80 transition-opacity cursor-pointer"
+              aria-label="Return to login"
+            >
+              🕊️
+            </button>
+
             <div className="space-y-2">
-              <h2 className="text-3xl font-bold text-text-primary">Welcome to VibesApp</h2>
               <p className="text-lg text-text-secondary">
                 A picture-based social network where you connect through vibes, not followers
               </p>
             </div>
 
             <div className="space-y-4 rounded-lg border border-border bg-surface-elevated p-6 text-left">
-              <h3 className="font-semibold text-text-primary">What makes VibesApp unique?</h3>
+              <h3 className="font-semibold text-text-primary">What makes us unique?</h3>
               <ul className="space-y-2 text-sm text-text-secondary">
                 <li>
-                  🔐 <strong>Password-only login</strong> - No email, no username required to sign
-                  in
+                  🔐 <strong>Single ID login</strong> - No emails, no passwords
                 </li>
                 <li>
-                  🎭 <strong>MBTI-based connections</strong> - Match with personalities that vibe
-                  with you
+                  🎭 <strong>Yin/Yang & MBTI connections</strong> - Match with personalities that
+                  vibe with you
                 </li>
                 <li>
-                  📍 <strong>Location-aware</strong> - Discover nearby vibes and local content
+                  📍 <strong>Location-aware</strong> - Discover nearby posts and local content
                 </li>
                 <li>
-                  ❤️ <strong>Vibes system</strong> - Like posts and build your karma
+                  ❤️ <strong>Vibes system</strong> - Engage and build your karma
                 </li>
               </ul>
             </div>
@@ -332,17 +365,6 @@ export function SignupWizard() {
             >
               {showGeneratingSpinner ? 'Generating...' : 'Get Started'}
             </Button>
-
-            <p className="text-sm text-text-secondary">
-              Already have an account?{' '}
-              <button
-                type="button"
-                onClick={() => navigate('/login')}
-                className="font-medium text-brand-purple hover:underline"
-              >
-                Login
-              </button>
-            </p>
           </div>
         );
 
@@ -357,16 +379,27 @@ export function SignupWizard() {
             </div>
 
             <div className="rounded-lg border-2 border-brand-purple bg-brand-purple/5 p-6">
-              <div className="mb-4 flex items-center justify-between rounded-md bg-surface p-4 font-mono text-lg">
-                <span className="font-bold text-text-primary">{signupData.pigeonId}</span>
+              <div className="mb-4 flex items-center gap-2">
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={handleCopyPigeonId}
-                  leftIcon={<Copy className="h-4 w-4" />}
+                  onClick={handleGeneratePigeonId}
+                  className="shrink-0"
+                  title="Generate new ID"
                 >
-                  {copiedPigeonId ? 'Copied!' : 'Copy'}
+                  <RotateCcw className="h-4 w-4" />
                 </Button>
+                <div className="flex flex-1 items-center justify-between rounded-md bg-surface p-4 font-mono text-lg">
+                  <span className="font-bold text-text-primary">{signupData.pigeonId}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCopyPigeonId}
+                    className="shrink-0"
+                  >
+                    {copiedPigeonId ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
 
               <div className="space-y-2 text-sm">
@@ -374,19 +407,8 @@ export function SignupWizard() {
                 <ul className="list-inside list-disc space-y-1 text-text-secondary">
                   <li>This acts as your password across all devices</li>
                   <li>There's no way to recover it if lost</li>
-                  <li>Write it down or save it in a password manager</li>
-                  <li>Never share it with anyone</li>
                 </ul>
               </div>
-            </div>
-
-            <div className="flex gap-3">
-              <Button variant="outline" onClick={handleGeneratePigeonId} className="flex-1">
-                Generate New ID
-              </Button>
-              <Button onClick={handleNext} className="flex-1">
-                I've Saved It
-              </Button>
             </div>
           </div>
         );
@@ -396,17 +418,22 @@ export function SignupWizard() {
           <div className="space-y-6">
             <div className="space-y-2 text-center">
               <h2 className="text-2xl font-bold text-text-primary">Choose a Username</h2>
-              <p className="text-text-secondary">This is how others will see you on VibesApp</p>
+              <p className="text-text-secondary">Your public identity</p>
             </div>
 
             <div className="space-y-4">
               <Input
-                label="Username"
                 value={signupData.userName}
                 onChange={(e) => setSignupData((prev) => ({ ...prev, userName: e.target.value }))}
-                placeholder="Enter username"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleNext();
+                  }
+                }}
+                placeholder="cool_username"
                 required
                 helperText="3-20 characters, letters and numbers only"
+                className={showUsernameError ? 'animate-shake' : ''}
               />
             </div>
           </div>
