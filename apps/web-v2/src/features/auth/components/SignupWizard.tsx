@@ -479,7 +479,8 @@ export function SignupWizard() {
             </div>
 
             <div className="space-y-6 rounded-lg border border-border bg-surface-elevated p-6">
-              <div className="flex items-center justify-center">
+              <div className="flex items-center justify-center gap-4">
+                <span className="text-sm font-semibold text-text-primary">YIN</span>
                 <button
                   type="button"
                   onClick={() =>
@@ -488,29 +489,20 @@ export function SignupWizard() {
                       polarity: prev.polarity === 'yin' ? 'yang' : 'yin',
                     }))
                   }
-                  className="relative inline-flex h-16 w-32 items-center rounded-full bg-surface-elevated ring-2 ring-border transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+                  className="relative inline-flex h-14 w-28 items-center rounded-full bg-surface ring-2 ring-border transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-purple focus:ring-offset-2"
                   aria-label={`Current polarity: ${signupData.polarity.toUpperCase()}`}
                 >
                   <span
-                    className={`inline-block h-12 w-12 transform rounded-full bg-gradient-to-br shadow-lg transition-all ${
+                    className={`absolute inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-lg shadow-lg transition-all duration-300 ease-in-out ${
                       signupData.polarity === 'yang'
                         ? 'translate-x-16 from-orange-400 to-red-500'
                         : 'translate-x-2 from-blue-400 to-purple-500'
                     }`}
-                  />
-                  <span className="absolute left-3 text-xs font-medium text-text-secondary">
-                    YIN
-                  </span>
-                  <span className="absolute right-3 text-xs font-medium text-text-secondary">
-                    YANG
+                  >
+                    {signupData.polarity === 'yin' ? '🌙' : '☀️'}
                   </span>
                 </button>
-              </div>
-
-              <div className="text-center">
-                <p className="text-lg font-semibold text-text-primary">
-                  Currently: {signupData.polarity.toUpperCase()}
-                </p>
+                <span className="text-sm font-semibold text-text-primary">YANG</span>
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-sm">

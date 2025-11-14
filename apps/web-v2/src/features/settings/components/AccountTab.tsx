@@ -367,28 +367,25 @@ export function AccountTab() {
         <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Polarity
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-center gap-4">
+          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">YIN</span>
           <button
             type="button"
             onClick={handlePolarityToggle}
-            className="relative inline-flex h-12 w-24 items-center rounded-full bg-gray-200 dark:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+            className="relative inline-flex h-14 w-28 items-center rounded-full bg-gray-100 dark:bg-gray-800 ring-2 ring-gray-300 dark:ring-gray-600 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-purple focus:ring-offset-2"
             aria-label={`Current polarity: ${polarity}`}
           >
             <span
-              className={`inline-block h-10 w-10 transform rounded-full bg-white dark:bg-gray-900 shadow-lg transition-transform ${
-                polarity === 'YANG' ? 'translate-x-12' : 'translate-x-1'
+              className={`absolute inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-lg shadow-lg transition-all duration-300 ease-in-out ${
+                polarity === 'YANG'
+                  ? 'translate-x-16 from-orange-400 to-red-500'
+                  : 'translate-x-2 from-blue-400 to-purple-500'
               }`}
-            />
-            <span className="absolute left-2 text-xs font-medium text-gray-600 dark:text-gray-400">
-              YIN
-            </span>
-            <span className="absolute right-2 text-xs font-medium text-gray-600 dark:text-gray-400">
-              YANG
+            >
+              {polarity === 'YIN' ? '🌙' : '☀️'}
             </span>
           </button>
-          <span className="text-sm text-gray-600 dark:text-gray-400">
-            Currently: <span className="font-medium">{polarity}</span>
-          </span>
+          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">YANG</span>
         </div>
       </div>
 
