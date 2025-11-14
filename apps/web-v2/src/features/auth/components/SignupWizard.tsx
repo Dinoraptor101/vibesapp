@@ -175,13 +175,6 @@ export function SignupWizard() {
     }
   };
 
-  const handleSkip = () => {
-    setError('');
-    if (currentStep < STEPS.length) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -558,7 +551,7 @@ export function SignupWizard() {
         return (
           <div className="space-y-6">
             <div className="space-y-2 text-center">
-              <h2 className="text-2xl font-bold text-text-primary">Add a Profile Picture</h2>
+              <h2 className="text-2xl font-bold text-text-primary">Your Picture</h2>
               <p className="text-text-secondary">
                 Optional - you can add this later from your profile
               </p>
@@ -673,23 +666,8 @@ export function SignupWizard() {
             </Button>
           )}
 
-          {!STEPS[currentStep - 1]?.required && currentStep < STEPS.length && (
-            <Button
-              variant="ghost"
-              onClick={handleSkip}
-              disabled={isSubmitting}
-              className="ml-auto"
-            >
-              Skip
-            </Button>
-          )}
-
           {currentStep < STEPS.length && currentStep > 1 && (
-            <Button
-              onClick={handleNext}
-              disabled={isSubmitting}
-              className={!STEPS[currentStep - 1]?.required ? '' : 'ml-auto'}
-            >
+            <Button onClick={handleNext} disabled={isSubmitting} className="ml-auto">
               Next
             </Button>
           )}
