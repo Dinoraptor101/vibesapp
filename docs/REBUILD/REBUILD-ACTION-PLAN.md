@@ -1,9 +1,42 @@
 # Frontend Rebuild - Action Plan & Checklist
 
-**Status:** Planning Phase  
-**Start Date:** November 3, 2025  
-**Estimated Duration:** 8-10 weeks  
-**Team Size:** 1-2 developers
+**Status:** Phase 4.7 Complete - Comment System Redesign Complete  
+**Last Updated:** November 14, 2025, 3:00 AM  
+**Current Phase:** Phase 4.8 - Post Detail Page & Comments  
+**Team Size:** 1 developer
+
+---
+
+## 🎉 Recent Accomplishments (November 14, 2025)
+
+### Phase 4.7: Post Feed Grid Redesign ✅
+- [X] Responsive grid layout (1-4 columns based on viewport)
+- [X] Polaroid-style post cards (edge-to-edge images)
+- [X] Username + timestamp below image (removed overlay)
+- [X] Image clickable to post detail page
+- [X] Minimal padding for maximum image space
+
+### Phase 4.8: Comment System Overhaul ✅
+- [X] Fixed comment submission (dedicated `/api/comments` endpoint)
+- [X] Modern UX pattern (Enter key + Send button)
+- [X] Removed blur-to-save (bad UX)
+- [X] Fixed theme support (visible in all themes)
+- [X] Visual reply threading with indent + connecting line
+- [X] Separated `commentOn` from `replyTo` in database schema
+- [X] Flat comment structure (all replies at same level)
+- [X] Recursive threading logic (replies to replies handled correctly)
+- [X] Backend filter to exclude comments from post feed
+- [X] Avatar + username clickable to user profile
+- [X] Age-only display (removed MBTI from comments)
+- [X] Timestamp placement optimized
+
+### Technical Debt Resolved ✅
+- [X] Post model: Added `replyToCommentId` field for reply relationships
+- [X] Post model: Made `image` field optional (comments don't need images)
+- [X] Comment controller: Dedicated comment creation logic
+- [X] Backend: Filter comments from posts endpoint (`!post.commentOn`)
+- [X] Frontend: PostCard returns null if no image (safety check)
+- [X] Type definitions: Updated Post interface with new fields
 
 ---
 
