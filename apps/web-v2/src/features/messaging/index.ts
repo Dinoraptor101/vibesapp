@@ -15,6 +15,9 @@ export { useConversations } from './hooks/useConversations';
 export { useConversation } from './hooks/useConversation';
 export { useSendMessage } from './hooks/useSendMessage';
 export { useMarkAsRead } from './hooks/useMarkAsRead';
+// Phase 4.6: New optimized polling hooks
+export { useMessagingPolling } from './hooks/useMessagingPolling';
+export { useAutoMarkAsRead } from './hooks/useAutoMarkAsRead';
 
 // Components
 export { DMRequestModal } from './components/DMRequestModal';

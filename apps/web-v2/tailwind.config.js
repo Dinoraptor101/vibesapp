@@ -31,6 +31,7 @@ export default {
         // Semantic brand colors
         brand: {
           DEFAULT: '#21a1f1',
+          primary: '#21a1f1', // Add explicit 'primary' for bg-brand-primary class
           50: '#e6f7ff',
           100: '#bae7ff',
           200: '#91d5ff',
