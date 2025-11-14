@@ -152,6 +152,7 @@ This ensures AI agents can pick up exactly where you left off!
 - [X] 4.3 - DM Request System (✅ Complete - Nov 10, 2025) - Backend only
 - [X] 4.4 - Messaging Interface (✅ Complete - Nov 12, 2025)
 - [X] 4.5 - Activity Feed (✅ Complete - Nov 12, 2025)
+- [ ] 4.6 - Read/Unread System Optimization (⏸️ Not started)
 
 ### Phase 5: Discovery (Week 10-11)
 - [ ] 5.1 - Search Interface (⏸️ Not started)
@@ -1170,7 +1171,39 @@ This ensures AI agents can pick up exactly where you left off!
   - Currently using console.warn placeholders for mark-as-read mutations
   - Backend needs to create follow activities, post activities, etc. (only reply/reaction activities exist)
 - **Status:** ✅ Phase 4.5 complete - Activity Feed fully functional with existing backend activities
-- **Next:** Phase 5.1 - Search Interface
+- **Next:** Phase 4.6 - Read/Unread System Optimization
+
+### Session 30 - November 13, 2025
+- **Completed:** Planning Phase 4.6 - Read/Unread System Optimization
+- **Time taken:** ~2 hours
+- **Deliverables:**
+  - **System Analysis:**
+    - Identified infinite polling loop issues in current mark-as-read system
+    - Analyzed performance problems with per-message `readBy` arrays (O(n) operations)
+    - Documented current polling intervals and their inefficiencies
+    - Found `conversationId: undefined` errors and `userId` vs `_id` mismatches
+  - **Architecture Design:**
+    - Proposed cursor-based read tracking system (O(1) operations)
+    - Designed lazy migration strategy with zero downtime
+    - Visibility-based read detection using Intersection Observer API
+    - Unified polling system with adaptive intervals
+  - **Documentation Updates:**
+    - Added Phase 4.6 to REBUILD-PROMPTS.md with comprehensive prompt
+    - Created REBUILD-READ-UNREAD-SYSTEM.md (45-page detailed architecture document)
+    - Updated REBUILD-ACTION-PLAN.md with Phase 2.6 (Read/Unread Optimization)
+    - Preserved Phase 5 structure as requested (no modifications to Discovery phase)
+  - **Technical Specifications:**
+    - Database schema: Replace `readBy` arrays with `readCursors` object
+    - Backend: Lazy migration utility + O(1) cursor-based API updates
+    - Frontend: `useMessagingPolling()` + `useAutoMarkAsRead()` hooks
+    - Performance: 90%+ faster mark-as-read, 80%+ fewer database operations
+  - **Migration Plan:**
+    - Zero-risk lazy migration on conversation access
+    - Conservative approach: mark existing messages as read during upgrade
+    - Gradual rollout over weeks/months with full conversation history preservation
+- **Issues:** None - comprehensive design approved for implementation
+- **Status:** ✅ Phase 4.6 architecture complete and documented
+- **Next:** Implement Phase 4.6 using the detailed prompt in REBUILD-PROMPTS.md
 
 ### Session 21 - November 7, 2025
 - **Completed:** Prompt 3.2 - Posts Feed
@@ -3105,6 +3138,194 @@ Key Technical Details:
 - Build successful
 
 **✋ STOP HERE - Confirm Phase 4.2 complete before Phase 4.3**
+
+---
+
+## 📊 Prompt 4.6 - Read/Unread System Optimization
+
+**Purpose:** Optimize the messaging read/unread tracking system for better performance, eliminate infinite polling loops, and implement a cursor-based read tracking system with lazy migration.
+
+**Complexity:** 🎯 Claude Sonnet (Complex architecture changes)  
+**Estimated Time:** 4-6 hours  
+**Completed:** [ ] No
+
+### 📋 Context & Current Problems
+
+**Current Issues:**
+- Infinite loop in `markAsRead` functionality causing repeated API calls
+- Per-message `readBy` arrays causing database performance issues  
+- `conversationId: undefined` errors in frontend requests
+- New messages arriving via polling not automatically marked as read
+- Complex state management with `useRef` flags and cleanup functions
+
+**Current System:**
+- Each message has `readBy: [userId]` array
+- `markMessagesAsRead` iterates through ALL messages to update arrays
+- Frontend uses `useRef` flags to prevent infinite loops
+- Multiple polling intervals (10s, 30s) for different features
+
+### 🎯 Deliverables
+
+#### **Backend Changes**
+
+**1. Database Schema Enhancement**
+- [ ] Add `readCursors` field to Conversation model:
+```javascript
+readCursors: {
+  [userId]: {
+    lastReadMessageId: ObjectId,  // Last message this user has read
+    lastReadAt: Date               // When they last read it  
+  }
+}
+```
+- [ ] Keep existing `readBy` arrays temporarily for lazy migration
+- [ ] Add lazy migration utility function `ensureConversationHasCursors()`
+
+**2. API Endpoint Updates**
+- [ ] Update `getConversations()` to calculate unread counts using cursors
+- [ ] Update `getConversation()` to include unread count and lazy migration
+- [ ] Update `markMessagesAsRead()` to use O(1) cursor updates instead of O(n) iteration
+- [ ] All endpoints support both legacy (readBy) and new (cursor) systems during migration
+
+**3. Performance Optimizations**
+- [ ] Cursor-based unread calculation: O(1) instead of O(n)
+- [ ] No more array iteration for mark-as-read operations
+- [ ] Automatic lazy migration when conversations are accessed
+
+#### **Frontend Changes**
+
+**4. Unified Polling System**
+- [ ] Create `useMessagingPolling()` hook that manages all messaging queries
+- [ ] Automatic detection of active conversation from URL
+- [ ] Adaptive polling intervals based on tab visibility
+- [ ] Single source of truth for conversation and message data
+
+**5. Visibility-Based Read Tracking**
+- [ ] Create `useAutoMarkAsRead()` hook with Intersection Observer API
+- [ ] Mark messages as read when user is actually viewing the conversation (50%+ visible)
+- [ ] Automatic handling of new messages arriving via polling
+- [ ] No more `useRef` flags or complex effect dependencies
+
+**6. Remove Infinite Loop Sources**
+- [ ] Remove `markAsReadMutation` from useEffect dependencies
+- [ ] Replace component-mount-based marking with visibility-based marking
+- [ ] Eliminate manual query invalidation that causes re-renders
+
+#### **System Architecture**
+
+**7. Optimized Polling Strategy**
+- [ ] Active conversation: 5s interval (down from 10s for better real-time feel)
+- [ ] Conversations list: 30s interval (unchanged)
+- [ ] DM requests: 60s interval (up from 30s, less time-critical)
+- [ ] Tab visibility detection: 6x slower polling when tab hidden
+
+**8. Migration Strategy**
+- [ ] Lazy migration: Only upgrade conversations when accessed
+- [ ] Conservative approach: Mark all existing messages as read during upgrade
+- [ ] Preserve conversation history (no data loss)
+- [ ] Gradual migration over weeks/months
+
+### 📖 Implementation References
+
+**Architecture Document:** See the detailed system design in this prompt's context above.
+
+**Key Design Decisions:**
+- **Cursor-based tracking:** Single pointer per user per conversation
+- **Lazy migration:** Upgrade conversations on-demand, zero downtime
+- **Visibility-based marking:** Use Intersection Observer instead of component mount
+- **Unified polling:** Single hook manages all messaging queries
+
+### 🧪 Validation Steps
+
+#### **Backend Testing**
+- [ ] Test lazy migration: Old conversation → new system seamlessly
+- [ ] Test performance: New cursor queries vs old readBy queries
+- [ ] Test unread calculation accuracy with cursor system
+- [ ] Test both legacy and new conversations work simultaneously
+
+#### **Frontend Testing**  
+- [ ] Test infinite loop elimination: No repeated markAsRead calls
+- [ ] Test visibility detection: Only marks read when user viewing conversation
+- [ ] Test new message handling: Messages arriving via polling marked automatically
+- [ ] Test polling optimization: Adaptive intervals based on tab visibility
+
+#### **End-to-End Testing**
+- [ ] User opens conversation → marked as read automatically
+- [ ] User receives new message while viewing → marked as read automatically  
+- [ ] User receives new message while NOT viewing → stays unread, badge updates
+- [ ] Tab hidden → polling slows down, tab visible → polling resumes
+- [ ] Legacy conversations work normally and upgrade transparently
+
+### 🔧 Technical Implementation
+
+**PROMPT TO COPY:**
+
+```
+I need to optimize the read/unread messaging system in our React + Node.js app. We have performance issues and infinite loops with the current mark-as-read functionality.
+
+CURRENT ISSUES:
+- Infinite loop: markAsRead() triggers query invalidation → refetch → re-render → markAsRead() again
+- Performance: Each message has readBy[] array, causing O(n) iteration on every mark-as-read
+- New messages via polling (10s interval) don't get marked as read automatically
+- Frontend uses complex useRef flags to prevent infinite re-marking
+
+GOAL: Implement cursor-based read tracking with lazy migration
+
+BACKEND CHANGES NEEDED:
+1. Add readCursors field to Conversation model:
+   readCursors: {
+     [userId]: {
+       lastReadMessageId: ObjectId,
+       lastReadAt: Date
+     }
+   }
+
+2. Create lazy migration utility that runs when conversations are accessed:
+   - If conversation.readCursors doesn't exist, create it
+   - Set lastReadMessageId to last message (conservative: mark all as read)
+   - Save and continue with cursor-based logic
+
+3. Update these endpoints to use cursors:
+   - GET /api/dm/conversations/:userId - calculate unread using cursor
+   - GET /api/dm/conversation/:conversationId - include unread count
+   - POST /api/dm/conversation/:conversationId/markAsRead - O(1) cursor update
+
+FRONTEND CHANGES NEEDED:
+1. Create useMessagingPolling() hook:
+   - Detects active conversation from URL (/messages/:id)
+   - Polls active conversation every 5s, others every 30s
+   - Uses tab visibility API for adaptive polling
+
+2. Create useAutoMarkAsRead() hook:
+   - Uses Intersection Observer to detect when messages are 50%+ visible
+   - Only marks as read when user actually viewing conversation
+   - Handles new messages from polling automatically
+   - No useRef flags needed
+
+3. Remove infinite loop sources:
+   - Remove markAsReadMutation from useEffect dependencies
+   - Replace mount-based marking with visibility-based marking
+
+CURRENT FILES TO UPDATE:
+- apps/api/src/models/Conversation.js
+- apps/api/src/controllers/dm.js  
+- apps/web-v2/src/features/messaging/hooks/useConversations.ts
+- apps/web-v2/src/features/messaging/hooks/useConversation.ts
+- apps/web-v2/src/features/messaging/components/ConversationView.tsx
+
+Please implement this cursor-based system with lazy migration. Focus on eliminating the infinite loops while maintaining all existing functionality.
+```
+
+**Acceptance Criteria:**
+- [ ] No infinite markAsRead loops
+- [ ] New messages automatically marked as read when visible
+- [ ] Legacy conversations work and upgrade transparently  
+- [ ] Polling intervals optimized (5s active, 30s list, 60s requests)
+- [ ] All TypeScript errors resolved
+- [ ] Build successful
+- [ ] No loss of conversation history
+
+**✋ STOP HERE - Confirm Phase 4.6 complete before Phase 5.1**
 
 ---
 
