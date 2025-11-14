@@ -3,43 +3,95 @@
  * GPS location permission or manual city input
  */
 
-import { MapPin } from 'lucide-react';
-import { useState } from 'react';
-import { Button, Input } from '@/components/ui-next';
+import { MapPin, Send } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui-next';
+import './LocationStep.css'; // Import shake animation
 
 interface LocationStepProps {
   location: { lat: number; lon: number } | null;
   onLocationChange: (location: { lat: number; lon: number } | null) => void;
+  onAutoSuccess?: () => void; // Callback when auto-location succeeds
 }
 
-export function LocationStep({ location, onLocationChange }: LocationStepProps) {
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
+export function LocationStep({ location, onLocationChange, onAutoSuccess }: LocationStepProps) {
+  const [isGettingLocation, setIsGettingLocation] = useState(true); // Start with true for auto-detect
   const [error, setError] = useState('');
-  const [manualEntry, setManualEntry] = useState(false);
   const [cityName, setCityName] = useState('');
+  const [displayLocation, setDisplayLocation] = useState('');
+  const [showError, setShowError] = useState(false);
+  const [autoAttempted, setAutoAttempted] = useState(false);
 
-  const handleGetLocation = () => {
+  // Auto-detect location on mount
+  useEffect(() => {
+    if (!autoAttempted && !location) {
+      handleGetLocation(true); // Pass true for silent auto-detect
+    } else if (location && onAutoSuccess) {
+      // If location already exists, proceed immediately
+      onAutoSuccess();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
+
+  const handleGetLocation = (isAutoDetect = false) => {
     if (!navigator.geolocation) {
-      setError('Geolocation is not supported by your browser');
-      setManualEntry(true);
+      if (!isAutoDetect) {
+        setError('Geolocation is not supported by your browser');
+      }
+      setAutoAttempted(true);
+      setIsGettingLocation(false);
       return;
     }
 
     setIsGettingLocation(true);
     setError('');
+    if (!isAutoDetect) {
+      setCityName(''); // Clear manual input when using GPS
+    }
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        onLocationChange({
-          lat: position.coords.latitude,
-          lon: position.coords.longitude,
-        });
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        onLocationChange({ lat, lon });
+
+        // Reverse geocode to get city name
+        try {
+          const GEOCODING_URL = import.meta.env.VITE_GEOCODING_URL;
+          if (GEOCODING_URL) {
+            const response = await fetch(`${GEOCODING_URL}?lat=${lat}&lon=${lon}&format=json`);
+            if (response.ok) {
+              const data = await response.json();
+              const city = data.address?.city || data.address?.town || data.address?.village || '';
+              const state = data.address?.state || '';
+              const country = data.address?.country || '';
+
+              if (city && state) {
+                setDisplayLocation(`${city}, ${state}`);
+              } else if (city) {
+                setDisplayLocation(`${city}, ${country}`);
+              }
+            }
+          }
+        } catch (err) {
+          console.error('Error reverse geocoding:', err);
+        }
+
+        setAutoAttempted(true);
         setIsGettingLocation(false);
+
+        // If auto-detect succeeded, trigger callback to advance
+        if (isAutoDetect && onAutoSuccess) {
+          onAutoSuccess();
+        }
       },
       (err) => {
         console.error('Error getting location:', err);
-        setError('Unable to get your location. Please enter your city manually.');
-        setManualEntry(true);
+        if (!isAutoDetect) {
+          setError('Unable to get your location. Please enter your city manually.');
+        }
+        setAutoAttempted(true);
         setIsGettingLocation(false);
       },
       {
@@ -52,7 +104,10 @@ export function LocationStep({ location, onLocationChange }: LocationStepProps) 
 
   const handleManualLocationSubmit = async () => {
     if (!cityName.trim()) {
-      setError('Please enter a city name');
+      // Trigger shake animation
+      setShowError(true);
+      setCityName('');
+      setTimeout(() => setShowError(false), 500);
       return;
     }
 
@@ -60,8 +115,6 @@ export function LocationStep({ location, onLocationChange }: LocationStepProps) 
     setError('');
 
     try {
-      // Use a geocoding service to convert city name to coordinates
-      // For now, using OpenStreetMap Nominatim (free, no API key required)
       const GEOCODING_URL = import.meta.env.VITE_GEOCODING_URL;
 
       if (!GEOCODING_URL) {
@@ -79,94 +132,76 @@ export function LocationStep({ location, onLocationChange }: LocationStepProps) 
       const data = await response.json();
 
       if (data.length === 0) {
-        throw new Error('City not found. Please try a different name.');
+        // City not found - shake and clear
+        setShowError(true);
+        setCityName('');
+        setTimeout(() => setShowError(false), 500);
+        return;
       }
 
+      const result = data[0];
       onLocationChange({
-        lat: parseFloat(data[0].lat),
-        lon: parseFloat(data[0].lon),
+        lat: parseFloat(result.lat),
+        lon: parseFloat(result.lon),
       });
-      setManualEntry(false);
+
+      // Set display location from geocoding result
+      const city =
+        result.address?.city || result.address?.town || result.address?.village || result.name;
+      const state = result.address?.state || '';
+
+      if (city && state) {
+        setDisplayLocation(`${city}, ${state}`);
+      } else {
+        setDisplayLocation(city || result.display_name.split(',').slice(0, 2).join(','));
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to find location');
+      // Error - shake and clear
+      setShowError(true);
+      setCityName('');
+      setTimeout(() => setShowError(false), 500);
     } finally {
       setIsGettingLocation(false);
     }
   };
 
   return (
-    <div className="space-y-6">
-      {!location ? (
+    <div className="space-y-4">
+      {isGettingLocation && !autoAttempted ? (
+        // Show loading indicator during initial auto-detect
+        <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-surface-elevated p-12">
+          <MapPin className="mb-4 h-12 w-12 animate-pulse text-brand-purple" />
+          <p className="text-sm text-text-secondary">Getting your location...</p>
+        </div>
+      ) : !location ? (
         <>
-          {!manualEntry ? (
-            <div className="space-y-4">
-              <div className="flex flex-col items-center justify-center space-y-4 rounded-lg border border-border bg-surface-elevated p-8">
-                <MapPin className="h-16 w-16 text-brand-purple" />
-                <p className="text-center text-sm text-text-secondary">
-                  We'll use your location to show you nearby vibes and local content
-                </p>
-                <Button
-                  onClick={handleGetLocation}
-                  loading={isGettingLocation}
-                  disabled={isGettingLocation}
-                  size="lg"
-                  leftIcon={!isGettingLocation ? <MapPin className="h-5 w-5" /> : undefined}
-                >
-                  {isGettingLocation ? 'Getting Location...' : 'Use My Location'}
-                </Button>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setManualEntry(true)}
-                className="mx-auto block text-sm font-medium text-brand-purple hover:underline"
-              >
-                Or enter your city manually
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Input
-                  label="City Name"
-                  value={cityName}
-                  onChange={(e) => setCityName(e.target.value)}
-                  placeholder="e.g., San Francisco, CA"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleManualLocationSubmit();
-                    }
-                  }}
-                />
-              </div>
-
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setManualEntry(false);
-                    setError('');
-                  }}
-                  disabled={isGettingLocation}
-                >
-                  Back
-                </Button>
-                <Button
-                  onClick={handleManualLocationSubmit}
-                  loading={isGettingLocation}
-                  disabled={isGettingLocation || !cityName.trim()}
-                  className="flex-1"
-                >
-                  {isGettingLocation ? 'Finding...' : 'Find Location'}
-                </Button>
-              </div>
-
-              <p className="text-center text-xs text-text-secondary">
-                We'll convert your city to coordinates for location-based features
-              </p>
-            </div>
-          )}
+          <div className="relative">
+            <input
+              type="text"
+              value={cityName}
+              onChange={(e) => setCityName(e.target.value)}
+              placeholder="San Francisco, CA"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && cityName.trim()) {
+                  e.preventDefault();
+                  handleManualLocationSubmit();
+                }
+              }}
+              disabled={isGettingLocation}
+              className={`w-full rounded-lg border border-border bg-surface px-4 py-3 pr-12 text-text-primary placeholder-text-tertiary focus:border-brand-purple focus:outline-none focus:ring-2 focus:ring-brand-purple/20 disabled:opacity-50 ${
+                showError ? 'animate-shake' : ''
+              }`}
+            />
+            <button
+              type="button"
+              onClick={handleManualLocationSubmit}
+              disabled={isGettingLocation || !cityName.trim()}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md bg-brand-purple p-2 text-white transition-all hover:bg-brand-purple/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Find this city"
+            >
+              <Send className="h-5 w-5" />
+            </button>
+          </div>
 
           {error && (
             <div className="rounded-lg border border-warning-border bg-warning-bg p-4 text-sm text-warning-text">
@@ -180,19 +215,17 @@ export function LocationStep({ location, onLocationChange }: LocationStepProps) 
             <div className="text-center">
               <MapPin className="mx-auto mb-4 h-12 w-12 text-green-600" />
               <p className="mb-2 font-semibold text-text-primary">Location Set!</p>
-              <p className="text-sm text-text-secondary">
-                Coordinates: {location.lat.toFixed(4)}, {location.lon.toFixed(4)}
-              </p>
+              {displayLocation && <p className="text-sm text-text-secondary">{displayLocation}</p>}
             </div>
           </div>
 
           <Button
             variant="outline"
             onClick={() => {
-              onLocationChange(null); // Reset to null to show location picker again
-              setManualEntry(false);
+              onLocationChange(null);
               setError('');
-              setCityName(''); // Clear city name input
+              setCityName('');
+              setDisplayLocation('');
             }}
             className="w-full"
           >
