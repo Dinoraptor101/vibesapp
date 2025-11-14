@@ -546,6 +546,10 @@ export function SignupWizard() {
               onLocationChange={(location: { lat: number; lon: number } | null) =>
                 setSignupData((prev) => ({ ...prev, location }))
               }
+              onAutoSuccess={() => {
+                // Auto-advance to step 7 when GPS succeeds
+                setCurrentStep(7);
+              }}
             />
           </div>
         );
