@@ -95,6 +95,30 @@ export default {
           negative: '#ab1c1c',
           'negative-hover': '#991818',
         },
+
+        // MBTI category colors (theme-aware via CSS variables)
+        mbti: {
+          analyst: {
+            bg: 'var(--mbti-analyst-bg)',
+            border: 'var(--mbti-analyst-border)',
+            hover: 'var(--mbti-analyst-hover)',
+          },
+          diplomat: {
+            bg: 'var(--mbti-diplomat-bg)',
+            border: 'var(--mbti-diplomat-border)',
+            hover: 'var(--mbti-diplomat-hover)',
+          },
+          sentinel: {
+            bg: 'var(--mbti-sentinel-bg)',
+            border: 'var(--mbti-sentinel-border)',
+            hover: 'var(--mbti-sentinel-hover)',
+          },
+          explorer: {
+            bg: 'var(--mbti-explorer-bg)',
+            border: 'var(--mbti-explorer-border)',
+            hover: 'var(--mbti-explorer-hover)',
+          },
+        },
       },
 
       fontSize: {

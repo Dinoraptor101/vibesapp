@@ -163,15 +163,14 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       'w-full px-4 py-2 rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-0 resize-none';
 
     // Background and text colors
-    const colorClasses =
-      'bg-light-bg-base dark:bg-dark-bg-base text-light-text-primary dark:text-dark-text-primary placeholder:text-light-text-secondary dark:placeholder:text-dark-text-secondary';
+    const colorClasses = 'bg-surface text-text-primary placeholder:text-text-secondary';
 
     // Border states
     const borderClasses = error
       ? 'border-2 border-error focus:ring-error/50'
       : success
         ? 'border-2 border-success focus:ring-success/50'
-        : 'border border-light-border dark:border-dark-border focus:ring-brand focus:border-brand';
+        : 'border border-border focus:ring-brand focus:border-brand';
 
     // Disabled state
     const disabledClasses = disabled ? 'opacity-50 cursor-not-allowed' : '';
@@ -191,18 +190,12 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 
     // Determine feedback message and styling
     const feedbackMessage = (typeof error === 'string' && error) || success || helperText;
-    const feedbackColor = error
-      ? 'text-error'
-      : success
-        ? 'text-success'
-        : 'text-light-text-secondary dark:text-dark-text-secondary';
+    const feedbackColor = error ? 'text-error' : success ? 'text-success' : 'text-text-secondary';
 
     // Character counter visibility and styling
     const showCounter = showCharCount && maxLength && charCount >= maxLength * charCountThreshold;
     const isOverLimit = maxLength && charCount > maxLength;
-    const counterColor = isOverLimit
-      ? 'text-error font-medium'
-      : 'text-light-text-secondary dark:text-dark-text-secondary';
+    const counterColor = isOverLimit ? 'text-error font-medium' : 'text-text-secondary';
 
     return (
       <div className={wrapperClassName}>
@@ -210,7 +203,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         {label && (
           <label
             htmlFor={internalId}
-            className="block text-sm font-medium text-light-text-primary dark:text-dark-text-primary mb-1.5"
+            className="block text-sm font-medium text-text-primary mb-1.5"
           >
             {label}
             {required && <span className="text-error ml-1">*</span>}

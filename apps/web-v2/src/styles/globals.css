@@ -21,6 +21,20 @@
     --border: #e0e0e0;
     --background: #f8f8f8;
     --foreground: #000000;
+    
+    /* MBTI category colors - Light theme */
+    --mbti-analyst-bg: #faf5ff;
+    --mbti-analyst-border: #e9d5ff;
+    --mbti-analyst-hover: #f3e8ff;
+    --mbti-diplomat-bg: #f0fdf4;
+    --mbti-diplomat-border: #bbf7d0;
+    --mbti-diplomat-hover: #dcfce7;
+    --mbti-sentinel-bg: #eff6ff;
+    --mbti-sentinel-border: #bfdbfe;
+    --mbti-sentinel-hover: #dbeafe;
+    --mbti-explorer-bg: #fffbeb;
+    --mbti-explorer-border: #fde68a;
+    --mbti-explorer-hover: #fef3c7;
   }
 
   body {
@@ -41,6 +55,20 @@
     --border: #555555;
     --background: #333333;
     --foreground: #ffffff;
+    
+    /* MBTI category colors - Dim theme */
+    --mbti-analyst-bg: rgba(139, 92, 246, 0.15);
+    --mbti-analyst-border: rgba(139, 92, 246, 0.3);
+    --mbti-analyst-hover: rgba(139, 92, 246, 0.25);
+    --mbti-diplomat-bg: rgba(34, 197, 94, 0.15);
+    --mbti-diplomat-border: rgba(34, 197, 94, 0.3);
+    --mbti-diplomat-hover: rgba(34, 197, 94, 0.25);
+    --mbti-sentinel-bg: rgba(59, 130, 246, 0.15);
+    --mbti-sentinel-border: rgba(59, 130, 246, 0.3);
+    --mbti-sentinel-hover: rgba(59, 130, 246, 0.25);
+    --mbti-explorer-bg: rgba(251, 191, 36, 0.15);
+    --mbti-explorer-border: rgba(251, 191, 36, 0.3);
+    --mbti-explorer-hover: rgba(251, 191, 36, 0.25);
   }
 
   /* Dark theme semantic tokens */
@@ -55,6 +83,20 @@
     --border: #333333;
     --background: #000000;
     --foreground: #ffffff;
+    
+    /* MBTI category colors - Dark theme */
+    --mbti-analyst-bg: rgba(139, 92, 246, 0.2);
+    --mbti-analyst-border: rgba(139, 92, 246, 0.4);
+    --mbti-analyst-hover: rgba(139, 92, 246, 0.3);
+    --mbti-diplomat-bg: rgba(34, 197, 94, 0.2);
+    --mbti-diplomat-border: rgba(34, 197, 94, 0.4);
+    --mbti-diplomat-hover: rgba(34, 197, 94, 0.3);
+    --mbti-sentinel-bg: rgba(59, 130, 246, 0.2);
+    --mbti-sentinel-border: rgba(59, 130, 246, 0.4);
+    --mbti-sentinel-hover: rgba(59, 130, 246, 0.3);
+    --mbti-explorer-bg: rgba(251, 191, 36, 0.2);
+    --mbti-explorer-border: rgba(251, 191, 36, 0.4);
+    --mbti-explorer-hover: rgba(251, 191, 36, 0.3);
   }
 }
 
