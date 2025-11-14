@@ -417,7 +417,7 @@ export function SignupWizard() {
         return (
           <div className="space-y-6">
             <div className="space-y-2 text-center">
-              <h2 className="text-2xl font-bold text-text-primary">Choose a Username</h2>
+              <h2 className="text-2xl font-bold text-text-primary">Your Username</h2>
               <p className="text-text-secondary">Your public identity</p>
             </div>
 
@@ -443,10 +443,8 @@ export function SignupWizard() {
         return (
           <div className="space-y-6">
             <div className="space-y-2 text-center">
-              <h2 className="text-2xl font-bold text-text-primary">What's Your MBTI Type?</h2>
-              <p className="text-text-secondary">
-                This helps us connect you with compatible personalities
-              </p>
+              <h2 className="text-2xl font-bold text-text-primary">Your MBTI Personality</h2>
+              <p className="text-text-secondary">Help others understand how you think</p>
             </div>
 
             <MBTISelector

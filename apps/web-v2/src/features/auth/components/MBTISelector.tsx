@@ -178,17 +178,6 @@ export function MBTISelector({ value, onChange }: MBTISelectorProps) {
           <span className="text-text-secondary">Explorer</span>
         </div>
       </div>
-
-      {/* Selected Type Info */}
-      {value && (
-        <div className="rounded-lg border border-border bg-surface-elevated p-4">
-          <p className="text-sm text-text-secondary">
-            Selected: <span className="font-semibold text-text-primary">{value}</span>
-            {' - '}
-            <span>{MBTI_TYPES.find((m) => m.type === value)?.name}</span>
-          </p>
-        </div>
-      )}
     </div>
   );
 }
