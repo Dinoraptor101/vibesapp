@@ -5,30 +5,37 @@
 
 import { MapPin, Send } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui-next';
 import './LocationStep.css'; // Import shake animation
 
 interface LocationStepProps {
   location: { lat: number; lon: number } | null;
   onLocationChange: (location: { lat: number; lon: number } | null) => void;
-  onAutoSuccess?: () => void; // Callback when auto-location succeeds
+  // Removed onAutoSuccess - no longer auto-advancing
 }
 
-export function LocationStep({ location, onLocationChange, onAutoSuccess }: LocationStepProps) {
-  const [isGettingLocation, setIsGettingLocation] = useState(true); // Start with true for auto-detect
+export function LocationStep({ location, onLocationChange }: LocationStepProps) {
+  const [isGettingLocation, setIsGettingLocation] = useState(false); // Start false, set true when actually requesting
+  const [showLoadingSpinner, setShowLoadingSpinner] = useState(false); // ZEN: 1-second delay
   const [error, setError] = useState('');
   const [cityName, setCityName] = useState('');
   const [displayLocation, setDisplayLocation] = useState('');
   const [showError, setShowError] = useState(false);
   const [autoAttempted, setAutoAttempted] = useState(false);
 
-  // Auto-detect location on mount
+  // ZEN: 1-second delay before showing loading spinner
+  useEffect(() => {
+    if (isGettingLocation) {
+      const timer = setTimeout(() => setShowLoadingSpinner(true), 1000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowLoadingSpinner(false);
+    }
+  }, [isGettingLocation]);
+
+  // Auto-detect location on mount (ZEN: minimize interaction)
   useEffect(() => {
     if (!autoAttempted && !location) {
       handleGetLocation(true); // Pass true for silent auto-detect
-    } else if (location && onAutoSuccess) {
-      // If location already exists, proceed immediately
-      onAutoSuccess();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
@@ -63,14 +70,40 @@ export function LocationStep({ location, onLocationChange, onAutoSuccess }: Loca
             const response = await fetch(`${GEOCODING_URL}?lat=${lat}&lon=${lon}&format=json`);
             if (response.ok) {
               const data = await response.json();
-              const city = data.address?.city || data.address?.town || data.address?.village || '';
-              const state = data.address?.state || '';
-              const country = data.address?.country || '';
+              const address = data.address || {};
 
-              if (city && state) {
-                setDisplayLocation(`${city}, ${state}`);
-              } else if (city) {
-                setDisplayLocation(`${city}, ${country}`);
+              // Build a more detailed address string
+              const parts = [];
+
+              // Add neighborhood or suburb if available
+              if (address.neighbourhood || address.suburb) {
+                parts.push(address.neighbourhood || address.suburb);
+              }
+
+              // Add city/town/village
+              const locality =
+                address.city || address.town || address.village || address.municipality;
+              if (locality) {
+                parts.push(locality);
+              }
+
+              // Add state/region
+              if (address.state) {
+                parts.push(address.state);
+              }
+
+              // Add country for international locations
+              if (address.country && address.country_code !== 'us') {
+                parts.push(address.country);
+              }
+
+              // Fallback to display_name if we couldn't build a good address
+              if (parts.length === 0 && data.display_name) {
+                // Take first 2-3 parts of display_name
+                const displayParts = data.display_name.split(',').slice(0, 3);
+                setDisplayLocation(displayParts.join(',').trim());
+              } else {
+                setDisplayLocation(parts.join(', '));
               }
             }
           }
@@ -81,10 +114,8 @@ export function LocationStep({ location, onLocationChange, onAutoSuccess }: Loca
         setAutoAttempted(true);
         setIsGettingLocation(false);
 
-        // If auto-detect succeeded, trigger callback to advance
-        if (isAutoDetect && onAutoSuccess) {
-          onAutoSuccess();
-        }
+        // ZEN: Show detected location, let user confirm (no auto-advance)
+        // User will click "Next" button in SignupWizard to proceed
       },
       (err) => {
         console.error('Error getting location:', err);
@@ -145,15 +176,38 @@ export function LocationStep({ location, onLocationChange, onAutoSuccess }: Loca
         lon: parseFloat(result.lon),
       });
 
-      // Set display location from geocoding result
-      const city =
-        result.address?.city || result.address?.town || result.address?.village || result.name;
-      const state = result.address?.state || '';
+      // Set display location from geocoding result with better formatting
+      const address = result.address || {};
+      const parts = [];
 
-      if (city && state) {
-        setDisplayLocation(`${city}, ${state}`);
+      // Add neighborhood or suburb if available
+      if (address.neighbourhood || address.suburb) {
+        parts.push(address.neighbourhood || address.suburb);
+      }
+
+      // Add city/town/village
+      const locality =
+        address.city || address.town || address.village || address.municipality || result.name;
+      if (locality) {
+        parts.push(locality);
+      }
+
+      // Add state/region
+      if (address.state) {
+        parts.push(address.state);
+      }
+
+      // Add country for international locations
+      if (address.country && address.country_code !== 'us') {
+        parts.push(address.country);
+      }
+
+      // Fallback to display_name if we couldn't build a good address
+      if (parts.length === 0 && result.display_name) {
+        const displayParts = result.display_name.split(',').slice(0, 3);
+        setDisplayLocation(displayParts.join(',').trim());
       } else {
-        setDisplayLocation(city || result.display_name.split(',').slice(0, 2).join(','));
+        setDisplayLocation(parts.join(', '));
       }
     } catch {
       // Error - shake and clear
@@ -167,72 +221,95 @@ export function LocationStep({ location, onLocationChange, onAutoSuccess }: Loca
 
   return (
     <div className="space-y-4">
-      {isGettingLocation && !autoAttempted ? (
-        // Show loading indicator during initial auto-detect
-        <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-surface-elevated p-12">
-          <MapPin className="mb-4 h-12 w-12 animate-pulse text-brand-purple" />
-          <p className="text-sm text-text-secondary">Getting your location...</p>
-        </div>
-      ) : !location ? (
-        <>
-          <div className="relative">
-            <input
-              type="text"
-              value={cityName}
-              onChange={(e) => setCityName(e.target.value)}
-              placeholder="San Francisco, CA"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && cityName.trim()) {
-                  e.preventDefault();
-                  handleManualLocationSubmit();
-                }
-              }}
-              disabled={isGettingLocation}
-              className={`w-full rounded-lg border border-border bg-surface px-4 py-3 pr-12 text-text-primary placeholder-text-tertiary focus:border-brand-purple focus:outline-none focus:ring-2 focus:ring-brand-purple/20 disabled:opacity-50 ${
-                showError ? 'animate-shake' : ''
-              }`}
-            />
-            <button
-              type="button"
-              onClick={handleManualLocationSubmit}
-              disabled={isGettingLocation || !cityName.trim()}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md bg-brand-purple p-2 text-white transition-all hover:bg-brand-purple/90 disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Find this city"
-            >
-              <Send className="h-5 w-5" />
-            </button>
+      {/* Fixed-height container for smooth transitions (ZEN: no layout shifts) */}
+      <div className="min-h-[200px] flex items-center justify-center">
+        {isGettingLocation && showLoadingSpinner && !autoAttempted ? (
+          // ZEN: Show loading only after 1-second delay (avoid flash for fast GPS)
+          <div className="flex flex-col items-center justify-center w-full">
+            <MapPin className="mb-4 h-12 w-12 animate-pulse text-brand-purple" />
+            <p className="text-sm text-text-secondary">Getting your location...</p>
           </div>
-
-          {error && (
-            <div className="rounded-lg border border-warning-border bg-warning-bg p-4 text-sm text-warning-text">
-              {error}
+        ) : !location ? (
+          <div className="w-full space-y-4">
+            <div className="relative">
+              <input
+                type="text"
+                value={cityName}
+                onChange={(e) => setCityName(e.target.value)}
+                placeholder="San Francisco, CA"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && cityName.trim()) {
+                    e.preventDefault();
+                    handleManualLocationSubmit();
+                  }
+                }}
+                disabled={isGettingLocation}
+                className={`w-full rounded-lg border border-border bg-surface px-4 py-3 pr-12 text-text-primary placeholder-text-tertiary focus:border-brand-purple focus:outline-none focus:ring-2 focus:ring-brand-purple/20 disabled:opacity-50 ${
+                  showError ? 'animate-shake' : ''
+                }`}
+              />
+              <button
+                type="button"
+                onClick={handleManualLocationSubmit}
+                disabled={isGettingLocation || !cityName.trim()}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md bg-brand-purple p-2 text-white transition-all hover:bg-brand-purple/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Find this city"
+              >
+                <Send className="h-5 w-5" />
+              </button>
             </div>
-          )}
-        </>
-      ) : (
-        <div className="space-y-4">
-          <div className="flex items-center justify-center rounded-lg border border-border bg-surface-elevated p-8">
-            <div className="text-center">
-              <MapPin className="mx-auto mb-4 h-12 w-12 text-green-600" />
-              <p className="mb-2 font-semibold text-text-primary">Location Set!</p>
-              {displayLocation && <p className="text-sm text-text-secondary">{displayLocation}</p>}
+
+            {error && (
+              <div className="rounded-lg border border-warning-border bg-warning-bg p-4 text-sm text-warning-text">
+                {error}
+              </div>
+            )}
+          </div>
+        ) : (
+          // Location confirmed state - clean and minimal
+          <div className="w-full">
+            <div className="rounded-lg border border-border bg-surface-elevated p-6">
+              {/* Centered location icon */}
+              <div className="flex justify-center mb-3">
+                <MapPin className="h-8 w-8 text-green-600" />
+              </div>
+
+              {/* Location text with inline edit button */}
+              <div className="flex items-center justify-center gap-2">
+                {displayLocation && (
+                  <p className="text-sm text-text-secondary leading-relaxed">{displayLocation}</p>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    onLocationChange(null);
+                    setError('');
+                    setCityName('');
+                    setDisplayLocation('');
+                  }}
+                  className="text-text-tertiary hover:text-brand-purple transition-colors flex-shrink-0"
+                  aria-label="Change location"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                    <path d="m15 5 4 4" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
-
-          <Button
-            variant="outline"
-            onClick={() => {
-              onLocationChange(null);
-              setError('');
-              setCityName('');
-              setDisplayLocation('');
-            }}
-            className="w-full"
-          >
-            Change Location
-          </Button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
