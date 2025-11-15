@@ -84,7 +84,7 @@ export function PostActions({
         size="sm"
         onClick={handleHeart}
         className={cn(
-          'gap-1.5 text-gray-600 dark:text-gray-400',
+          'gap-1.5 text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400',
           hasHearted && 'text-pink-600 dark:text-pink-500'
         )}
         aria-label={hasHearted ? 'Remove heart' : 'Heart post'}
@@ -98,7 +98,7 @@ export function PostActions({
         variant="ghost"
         size="sm"
         onClick={handleComment}
-        className="gap-1.5 text-gray-600 dark:text-gray-400"
+        className="gap-1.5 text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400"
         aria-label="Comment on post"
       >
         <MessageCircle className="w-5 h-5" aria-hidden="true" />
@@ -110,7 +110,7 @@ export function PostActions({
         variant="ghost"
         size="sm"
         onClick={handleShare}
-        className="text-gray-600 dark:text-gray-400"
+        className="text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400"
         aria-label="Share post"
       >
         <Share2 className="w-5 h-5" aria-hidden="true" />
@@ -122,7 +122,7 @@ export function PostActions({
           variant="ghost"
           size="sm"
           onClick={handleReport}
-          className="ml-auto text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500"
+          className="ml-auto text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400 hover:text-red-600 dim:hover:text-red-550 dark:hover:text-red-500"
           aria-label="Report post"
         >
           <Flag className="w-5 h-5" aria-hidden="true" />

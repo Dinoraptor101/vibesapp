@@ -114,7 +114,7 @@ const DialogContent = React.forwardRef<
           <DialogPrimitive.Close
             className={cn(
               'absolute right-4 top-4 rounded-lg p-2',
-              'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
+              'text-gray-500 hover:text-gray-700 dim:text-gray-450 dim:hover:text-gray-250 dark:text-gray-400 dark:hover:text-gray-200',
               'hover:bg-gray-100 dark:hover:bg-gray-700',
               'transition-colors',
               'focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800',
@@ -168,7 +168,10 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn('text-2xl font-semibold text-gray-900 dark:text-white', className)}
+    className={cn(
+      'text-2xl font-semibold text-gray-900 dim:text-gray-100 dark:text-white',
+      className
+    )}
     {...props}
   />
 ));
@@ -184,7 +187,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn('text-sm text-gray-600 dark:text-gray-400', className)}
+    className={cn('text-sm text-gray-600 dim:text-gray-500 dark:text-gray-400', className)}
     {...props}
   />
 ));
@@ -194,7 +197,10 @@ DialogDescription.displayName = DialogPrimitive.Description.displayName;
  * DialogBody - Body/content section between header and footer
  */
 const DialogBody = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn('px-6 py-4', 'text-gray-700 dark:text-gray-300', className)} {...props} />
+  <div
+    className={cn('px-6 py-4', 'text-gray-700 dim:text-gray-200 dark:text-gray-300', className)}
+    {...props}
+  />
 );
 DialogBody.displayName = 'DialogBody';
 

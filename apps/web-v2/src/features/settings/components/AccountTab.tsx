@@ -237,7 +237,7 @@ export function AccountTab() {
     <div className="p-4 pb-8 space-y-6">
       {/* Profile Photo */}
       <div>
-        <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <div className="block text-sm font-medium text-gray-700 dim:text-gray-200 dark:text-gray-300 mb-2">
           Profile Photo
         </div>
         <div className="flex items-center gap-4">
@@ -245,7 +245,7 @@ export function AccountTab() {
             src={user?.profilePictureUrl}
             alt={user?.username || 'User'}
             size="xl"
-            className="ring-2 ring-gray-200 dark:ring-gray-700"
+            className="ring-2 ring-gray-200 dim:ring-gray-600 dark:ring-gray-700"
           />
           <Button
             onClick={handleAvatarClick}
@@ -279,7 +279,7 @@ export function AccountTab() {
       <div>
         <label
           htmlFor="bio"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          className="block text-sm font-medium text-gray-700 dim:text-gray-200 dark:text-gray-300 mb-2"
         >
           Bio
         </label>
@@ -290,11 +290,11 @@ export function AccountTab() {
           onBlur={handleBioBlur}
           maxLength={200}
           rows={3}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"
+          className="w-full px-3 py-2 border border-gray-300 dim:border-gray-500 dark:border-gray-600 rounded-lg bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-gray-100 dark:text-gray-100 placeholder-gray-500 dim:placeholder-gray-450 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"
           placeholder="Tell others about yourself..."
         />
         {bio.length >= 180 && (
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-sm text-gray-500 dim:text-gray-450 dark:text-gray-400 mt-1">
             {bio.length}/200 characters
           </p>
         )}
@@ -304,7 +304,7 @@ export function AccountTab() {
       <div>
         <label
           htmlFor="mbti"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          className="block text-sm font-medium text-gray-700 dim:text-gray-200 dark:text-gray-300 mb-2"
         >
           MBTI Type
         </label>
@@ -312,7 +312,7 @@ export function AccountTab() {
           id="mbti"
           value={mbti}
           onChange={(e) => handleMbtiChange(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-gray-300 dim:border-gray-500 dark:border-gray-600 rounded-lg bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-gray-100 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
         >
           {MBTI_TYPES.map((type) => (
             <option key={type} value={type}>
@@ -326,7 +326,7 @@ export function AccountTab() {
       <div>
         <label
           htmlFor="zipCode"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          className="block text-sm font-medium text-gray-700 dim:text-gray-200 dark:text-gray-300 mb-2"
         >
           Location (Zip Code)
         </label>
@@ -338,7 +338,7 @@ export function AccountTab() {
             onChange={(e) => setZipCode(e.target.value)}
             onBlur={handleZipCodeBlur}
             placeholder="60601"
-            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+            className="flex-1 px-3 py-2 border border-gray-300 dim:border-gray-500 dark:border-gray-600 rounded-lg bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-gray-100 dark:text-gray-100 placeholder-gray-500 dim:placeholder-gray-450 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
           />
           <Button
             onClick={handleGPSClick}
@@ -355,7 +355,7 @@ export function AccountTab() {
           </Button>
         </div>
         {locationStr && (
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+          <p className="text-sm text-gray-500 dim:text-gray-450 dark:text-gray-400 mt-1 flex items-center gap-1">
             <MapPin className="w-3 h-3" />
             {locationStr}
           </p>
@@ -364,15 +364,17 @@ export function AccountTab() {
 
       {/* Polarity */}
       <div>
-        <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <div className="block text-sm font-medium text-gray-700 dim:text-gray-200 dark:text-gray-300 mb-2">
           Polarity
         </div>
         <div className="flex items-center justify-center gap-4">
-          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">YIN</span>
+          <span className="text-sm font-semibold text-gray-700 dim:text-gray-200 dark:text-gray-300">
+            YIN
+          </span>
           <button
             type="button"
             onClick={handlePolarityToggle}
-            className="relative inline-flex h-14 w-28 items-center rounded-full bg-gray-100 dark:bg-gray-800 ring-2 ring-gray-300 dark:ring-gray-600 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-purple focus:ring-offset-2"
+            className="relative inline-flex h-14 w-28 items-center rounded-full bg-gray-100 dim:bg-gray-700 dark:bg-gray-800 ring-2 ring-gray-300 dim:ring-gray-500 dark:ring-gray-600 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-purple focus:ring-offset-2"
             aria-label={`Current polarity: ${polarity}`}
           >
             <span
@@ -385,7 +387,9 @@ export function AccountTab() {
               {polarity === 'YIN' ? '🌙' : '☀️'}
             </span>
           </button>
-          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">YANG</span>
+          <span className="text-sm font-semibold text-gray-700 dim:text-gray-200 dark:text-gray-300">
+            YANG
+          </span>
         </div>
       </div>
 
@@ -394,7 +398,9 @@ export function AccountTab() {
 
       {/* Security */}
       <div>
-        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Security</h3>
+        <h3 className="text-sm font-medium text-gray-700 dim:text-gray-200 dark:text-gray-300 mb-3">
+          Security
+        </h3>
         <Button onClick={handleCopyPigeonId} variant="secondary" className="mb-3">
           <Copy className="w-4 h-4 mr-2" />
           Copy Pigeon ID

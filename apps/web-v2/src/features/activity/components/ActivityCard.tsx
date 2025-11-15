@@ -161,7 +161,9 @@ export function ActivityCard({ activity, onMarkAsRead }: ActivityCardProps) {
       {/* Content */}
       <div className="flex-1 min-w-0">
         {/* Message */}
-        <p className="text-sm text-gray-900 dark:text-gray-100 font-medium">{message}</p>
+        <p className="text-sm text-gray-900 dim:text-gray-100 dark:text-gray-100 font-medium">
+          {message}
+        </p>
 
         {/* MBTI Badge (if available) */}
         {activity.actor.mbti && activity.type !== 'post_hidden' && (
@@ -174,13 +176,13 @@ export function ActivityCard({ activity, onMarkAsRead }: ActivityCardProps) {
 
         {/* Preview text (for messages, comments, etc.) */}
         {activity.metadata?.messagePreview && (
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 truncate">
+          <p className="mt-1 text-sm text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400 truncate">
             {activity.metadata.messagePreview}
           </p>
         )}
 
         {/* Timestamp */}
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">
+        <p className="mt-1 text-xs text-gray-500 dim:text-gray-500 dark:text-gray-500">
           {formatRelativeTime(activity.createdAt)}
         </p>
       </div>

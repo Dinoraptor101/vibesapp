@@ -32,21 +32,21 @@ export function ButtonExamplesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-light-bg-base dark:bg-dark-bg-base p-8">
+    <div className="min-h-screen bg-light-bg-base dim:bg-dim-bg-base dark:bg-dark-bg-base p-8">
       <div className="max-w-6xl mx-auto space-y-12">
         {/* Header */}
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-light-text-primary dark:text-dark-text-primary">
+          <h1 className="text-4xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary">
             Button Component
           </h1>
-          <p className="text-light-text-secondary dark:text-dark-text-secondary text-lg">
+          <p className="text-light-text-secondary dim:text-dim-text-secondary dark:text-dark-text-secondary text-lg">
             All variants, sizes, states, and features
           </p>
         </div>
 
         {/* Variants Section */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary border-b border-light-border dark:border-dark-border pb-2">
+          <h2 className="text-2xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary border-b border-light-border dim:border-dim-border dark:border-dark-border pb-2">
             Variants
           </h2>
           <div className="flex flex-wrap gap-4">
@@ -60,7 +60,7 @@ export function ButtonExamplesPage() {
 
         {/* Sizes Section */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary border-b border-light-border dark:border-dark-border pb-2">
+          <h2 className="text-2xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary border-b border-light-border dim:border-dim-border dark:border-dark-border pb-2">
             Sizes
           </h2>
           <div className="flex flex-wrap items-center gap-4">
@@ -72,12 +72,12 @@ export function ButtonExamplesPage() {
 
         {/* States Section */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary border-b border-light-border dark:border-dark-border pb-2">
+          <h2 className="text-2xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary border-b border-light-border dim:border-dim-border dark:border-dark-border pb-2">
             States
           </h2>
           <div className="space-y-4">
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-light-text-primary dark:text-dark-text-primary">
+              <h3 className="text-lg font-semibold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary">
                 Default
               </h3>
               <div className="flex flex-wrap gap-4">
@@ -88,7 +88,7 @@ export function ButtonExamplesPage() {
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-light-text-primary dark:text-dark-text-primary">
+              <h3 className="text-lg font-semibold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary">
                 Disabled
               </h3>
               <div className="flex flex-wrap gap-4">
@@ -103,7 +103,7 @@ export function ButtonExamplesPage() {
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-light-text-primary dark:text-dark-text-primary">
+              <h3 className="text-lg font-semibold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary">
                 Loading
               </h3>
               <div className="flex flex-wrap gap-4">
@@ -131,13 +131,13 @@ export function ButtonExamplesPage() {
 
         {/* Icons Section */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary border-b border-light-border dark:border-dark-border pb-2">
+          <h2 className="text-2xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary border-b border-light-border dim:border-dim-border dark:border-dark-border pb-2">
             With Icons
           </h2>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-light-text-primary dark:text-dark-text-primary">
+              <h3 className="text-lg font-semibold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary">
                 Left Icon
               </h3>
               <div className="flex flex-wrap gap-4">
@@ -155,7 +155,7 @@ export function ButtonExamplesPage() {
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-light-text-primary dark:text-dark-text-primary">
+              <h3 className="text-lg font-semibold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary">
                 Right Icon
               </h3>
               <div className="flex flex-wrap gap-4">
@@ -170,7 +170,7 @@ export function ButtonExamplesPage() {
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-light-text-primary dark:text-dark-text-primary">
+              <h3 className="text-lg font-semibold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary">
                 Both Icons
               </h3>
               <div className="flex flex-wrap gap-4">
@@ -187,7 +187,7 @@ export function ButtonExamplesPage() {
 
         {/* Loading with Icons Section */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary border-b border-light-border dark:border-dark-border pb-2">
+          <h2 className="text-2xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary border-b border-light-border dim:border-dim-border dark:border-dark-border pb-2">
             Loading States with Icons
           </h2>
           <div className="flex flex-wrap gap-4">
@@ -219,7 +219,7 @@ export function ButtonExamplesPage() {
 
         {/* Size Variations with Icons */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary border-b border-light-border dark:border-dark-border pb-2">
+          <h2 className="text-2xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary border-b border-light-border dim:border-dim-border dark:border-dark-border pb-2">
             Icon Sizes
           </h2>
           <div className="flex flex-wrap items-center gap-4">
@@ -237,7 +237,7 @@ export function ButtonExamplesPage() {
 
         {/* Full Width Section */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary border-b border-light-border dark:border-dark-border pb-2">
+          <h2 className="text-2xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary border-b border-light-border dim:border-dim-border dark:border-dark-border pb-2">
             Full Width
           </h2>
           <div className="space-y-4">
@@ -262,14 +262,14 @@ export function ButtonExamplesPage() {
 
         {/* Real World Examples */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary border-b border-light-border dark:border-dark-border pb-2">
+          <h2 className="text-2xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary border-b border-light-border dim:border-dim-border dark:border-dark-border pb-2">
             Real World Examples
           </h2>
 
           <div className="space-y-8">
             {/* Form Actions */}
-            <div className="p-6 bg-light-bg-elevated dark:bg-dark-bg-elevated rounded-lg space-y-4">
-              <h3 className="text-lg font-semibold text-light-text-primary dark:text-dark-text-primary">
+            <div className="p-6 bg-light-bg-elevated dim:bg-dim-bg-elevated dark:bg-dark-bg-elevated rounded-lg space-y-4">
+              <h3 className="text-lg font-semibold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary">
                 Form Actions
               </h3>
               <div className="flex gap-4">
@@ -285,11 +285,11 @@ export function ButtonExamplesPage() {
             </div>
 
             {/* Card Actions */}
-            <div className="p-6 bg-light-bg-elevated dark:bg-dark-bg-elevated rounded-lg space-y-4">
-              <h3 className="text-lg font-semibold text-light-text-primary dark:text-dark-text-primary">
+            <div className="p-6 bg-light-bg-elevated dim:bg-dim-bg-elevated dark:bg-dark-bg-elevated rounded-lg space-y-4">
+              <h3 className="text-lg font-semibold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary">
                 Card Actions
               </h3>
-              <p className="text-light-text-secondary dark:text-dark-text-secondary">
+              <p className="text-light-text-secondary dim:text-dim-text-secondary dark:text-dark-text-secondary">
                 This is a sample card with action buttons
               </p>
               <div className="flex gap-3">
@@ -306,11 +306,11 @@ export function ButtonExamplesPage() {
             </div>
 
             {/* Destructive Action */}
-            <div className="p-6 bg-light-bg-elevated dark:bg-dark-bg-elevated rounded-lg space-y-4">
-              <h3 className="text-lg font-semibold text-light-text-primary dark:text-dark-text-primary">
+            <div className="p-6 bg-light-bg-elevated dim:bg-dim-bg-elevated dark:bg-dark-bg-elevated rounded-lg space-y-4">
+              <h3 className="text-lg font-semibold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary">
                 Destructive Actions
               </h3>
-              <p className="text-light-text-secondary dark:text-dark-text-secondary">
+              <p className="text-light-text-secondary dim:text-dim-text-secondary dark:text-dark-text-secondary">
                 Are you sure you want to delete this item?
               </p>
               <div className="flex gap-4">
@@ -329,7 +329,7 @@ export function ButtonExamplesPage() {
         </section>
 
         {/* Footer Note */}
-        <div className="text-center text-sm text-light-text-secondary dark:text-dark-text-secondary border-t border-light-border dark:border-dark-border pt-8">
+        <div className="text-center text-sm text-light-text-secondary dim:text-dim-text-secondary dark:text-dark-text-secondary border-t border-light-border dim:border-dim-border dark:border-dark-border pt-8">
           <p>
             Toggle dark mode to see how buttons adapt to different themes. All buttons include
             proper ARIA attributes and keyboard navigation support.

@@ -121,7 +121,9 @@ export function ProfilePage() {
 
           {/* Posts Grid */}
           <div>
-            <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">Posts</h2>
+            <h2 className="mb-4 text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-white">
+              Posts
+            </h2>
             {userId && <ProfilePosts userId={userId} />}
           </div>
         </div>

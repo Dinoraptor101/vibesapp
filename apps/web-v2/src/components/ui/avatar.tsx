@@ -48,7 +48,7 @@ export function Avatar({
       ) : (
         <div
           className={cn(
-            'flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400',
+            'flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dim:text-gray-500 dark:text-gray-400',
             sizeClass,
             'ring-2 ring-gray-200 dark:ring-gray-700'
           )}

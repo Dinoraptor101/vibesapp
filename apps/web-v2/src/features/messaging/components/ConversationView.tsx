@@ -62,7 +62,9 @@ export function ConversationView() {
   if (!activeConversation) {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-2">
-        <p className="text-gray-600 dark:text-gray-400">Conversation not found</p>
+        <p className="text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400">
+          Conversation not found
+        </p>
         <button
           type="button"
           onClick={() => navigate('/messages')}
@@ -75,13 +77,13 @@ export function ConversationView() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-white dark:bg-gray-900">
+    <div className="flex h-screen flex-col bg-white dim:bg-gray-800 dark:bg-gray-900">
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
         <button
           type="button"
           onClick={() => navigate('/messages')}
-          className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+          className="text-gray-600 hover:text-gray-900 dim:text-gray-500 dim:hover:text-gray-100 dark:text-gray-400 dark:hover:text-white"
         >
           <ArrowLeft className="h-6 w-6" />
         </button>
@@ -99,7 +101,7 @@ export function ConversationView() {
 
           <div className="flex-1 text-left">
             <div className="flex items-center gap-2">
-              <h2 className="font-semibold text-gray-900 dark:text-white">
+              <h2 className="font-semibold text-gray-900 dim:text-gray-100 dark:text-white">
                 {otherUser?.username || 'Unknown'}
               </h2>
               {otherUser?.mbtiPersonality && (
@@ -116,7 +118,7 @@ export function ConversationView() {
       <div id="messages-container" className="flex-1 space-y-4 overflow-y-auto p-4">
         {!activeConversation?.messages || activeConversation.messages.length === 0 ? (
           <div className="flex h-full items-center justify-center text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-gray-500 dim:text-gray-450 dark:text-gray-400">
               No messages yet. Start the conversation!
             </p>
           </div>

@@ -72,8 +72,12 @@ export function ActivityList({
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4">
-        <p className="text-red-500 dark:text-red-400 font-medium mb-2">Failed to load activities</p>
-        <p className="text-sm text-gray-600 dark:text-gray-400">{error.message}</p>
+        <p className="text-red-500 dim:text-red-450 dark:text-red-400 font-medium mb-2">
+          Failed to load activities
+        </p>
+        <p className="text-sm text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400">
+          {error.message}
+        </p>
       </div>
     );
   }
@@ -82,7 +86,9 @@ export function ActivityList({
   if (!activities || activities.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4">
-        <p className="text-gray-600 dark:text-gray-400 text-center">{emptyMessage}</p>
+        <p className="text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400 text-center">
+          {emptyMessage}
+        </p>
       </div>
     );
   }
@@ -95,7 +101,7 @@ export function ActivityList({
       {/* Today */}
       {grouped.today.length > 0 && (
         <div>
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 px-4 mb-2">
+          <h3 className="text-sm font-semibold text-gray-700 dim:text-gray-200 dark:text-gray-300 px-4 mb-2">
             Today
           </h3>
           <div className="space-y-1">
@@ -109,7 +115,7 @@ export function ActivityList({
       {/* Yesterday */}
       {grouped.yesterday.length > 0 && (
         <div>
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 px-4 mb-2">
+          <h3 className="text-sm font-semibold text-gray-700 dim:text-gray-200 dark:text-gray-300 px-4 mb-2">
             Yesterday
           </h3>
           <div className="space-y-1">
@@ -123,7 +129,7 @@ export function ActivityList({
       {/* This Week */}
       {grouped.thisWeek.length > 0 && (
         <div>
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 px-4 mb-2">
+          <h3 className="text-sm font-semibold text-gray-700 dim:text-gray-200 dark:text-gray-300 px-4 mb-2">
             This Week
           </h3>
           <div className="space-y-1">
@@ -137,7 +143,7 @@ export function ActivityList({
       {/* Older */}
       {grouped.older.length > 0 && (
         <div>
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 px-4 mb-2">
+          <h3 className="text-sm font-semibold text-gray-700 dim:text-gray-200 dark:text-gray-300 px-4 mb-2">
             Older
           </h3>
           <div className="space-y-1">

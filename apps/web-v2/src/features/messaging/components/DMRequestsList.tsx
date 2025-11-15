@@ -26,10 +26,10 @@ export function DMRequestsList() {
       <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
         <AlertCircle className="h-12 w-12 text-red-500" />
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h3 className="text-lg font-semibold text-gray-900 dim:text-gray-100 dark:text-white">
             Failed to load DM requests
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-500 dim:text-gray-450 dark:text-gray-400">
             {error instanceof Error ? error.message : 'Something went wrong'}
           </p>
         </div>
@@ -45,10 +45,10 @@ export function DMRequestsList() {
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
         <span className="text-6xl">📬</span>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h3 className="text-lg font-semibold text-gray-900 dim:text-gray-100 dark:text-white">
           No pending DM requests
         </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-gray-500 dim:text-gray-450 dark:text-gray-400">
           When someone requests to DM you, it will appear here
         </p>
       </div>

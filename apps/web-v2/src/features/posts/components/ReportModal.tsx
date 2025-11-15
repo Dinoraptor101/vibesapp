@@ -87,7 +87,7 @@ export function ReportModal({ isOpen, onClose, onSubmit, isLoading }: ReportModa
                 'focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2',
                 selectedReason === reason.value
                   ? 'border-brand bg-brand/5 dark:bg-brand/10'
-                  : 'border-gray-200 dark:border-gray-700'
+                  : 'border-gray-200 dim:border-gray-600 dark:border-gray-700'
               )}
               aria-pressed={selectedReason === reason.value}
             >
@@ -106,8 +106,10 @@ export function ReportModal({ isOpen, onClose, onSubmit, isLoading }: ReportModa
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{reason.label}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
+                  <p className="font-medium text-gray-900 dim:text-gray-100 dark:text-gray-100">
+                    {reason.label}
+                  </p>
+                  <p className="text-sm text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400 mt-0.5">
                     {reason.description}
                   </p>
                 </div>

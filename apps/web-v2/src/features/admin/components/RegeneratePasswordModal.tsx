@@ -45,7 +45,7 @@ export function RegeneratePasswordModal({
           {/* Password Display */}
           <div className="rounded-lg border-2 border-brand/20 bg-brand/5 p-4">
             <div className="flex items-center justify-between gap-2">
-              <code className="text-lg font-mono font-semibold text-gray-900 dark:text-white break-all">
+              <code className="text-lg font-mono font-semibold text-gray-900 dim:text-gray-100 dark:text-white break-all">
                 {password}
               </code>
               <Button size="sm" variant="outline" onClick={handleCopy} className="flex-shrink-0">
@@ -65,8 +65,8 @@ export function RegeneratePasswordModal({
           </div>
 
           {/* Warning */}
-          <div className="rounded-lg bg-warning-50 dark:bg-warning-500/10 border border-warning-200 dark:border-warning-500/20 p-3">
-            <p className="text-sm text-warning-800 dark:text-warning-200">
+          <div className="rounded-lg bg-warning-50 dim:bg-warning-500/15 dark:bg-warning-500/10 border border-warning-200 dim:border-warning-500/25 dark:border-warning-500/20 p-3">
+            <p className="text-sm text-warning-800 dim:text-warning-200 dark:text-warning-200">
               ⚠️ <strong>Important:</strong> This password will not be shown again after closing this
               modal. Make sure to copy it before proceeding.
             </p>

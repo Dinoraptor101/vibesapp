@@ -17,7 +17,7 @@ function App() {
         {/* Demo Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {/* Card 1 - Brand Color */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 transition-all hover:shadow-lg hover:-translate-y-1">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dim:border-gray-600 dark:border-gray-700 transition-all hover:shadow-lg hover:-translate-y-1">
             <div className="w-12 h-12 rounded-full bg-brand flex items-center justify-center mb-4">
               <span className="text-white text-xl font-bold">🎨</span>
             </div>
@@ -34,7 +34,7 @@ function App() {
           </div>
 
           {/* Card 2 - Vibes Positive */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 transition-all hover:shadow-lg hover:-translate-y-1">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dim:border-gray-600 dark:border-gray-700 transition-all hover:shadow-lg hover:-translate-y-1">
             <div className="w-12 h-12 rounded-full bg-vibe-positive flex items-center justify-center mb-4">
               <span className="text-white text-xl font-bold">👍</span>
             </div>
@@ -49,7 +49,7 @@ function App() {
           </div>
 
           {/* Card 3 - Vibes Negative */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 transition-all hover:shadow-lg hover:-translate-y-1">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dim:border-gray-600 dark:border-gray-700 transition-all hover:shadow-lg hover:-translate-y-1">
             <div className="w-12 h-12 rounded-full bg-vibe-negative flex items-center justify-center mb-4">
               <span className="text-white text-xl font-bold">👎</span>
             </div>
@@ -67,7 +67,7 @@ function App() {
         </div>
 
         {/* Typography Demo */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 border border-gray-200 dark:border-gray-700 mb-16">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 border border-gray-200 dim:border-gray-600 dark:border-gray-700 mb-16">
           <h2 className="text-2xl font-semibold mb-6">Typography Scale</h2>
           <div className="space-y-4">
             <div>
@@ -98,7 +98,7 @@ function App() {
         </div>
 
         {/* Instructions */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 border border-gray-200 dim:border-gray-600 dark:border-gray-700">
           <h2 className="text-2xl font-semibold mb-4">✅ Phase 0.2 Complete!</h2>
           <div className="space-y-3 text-sm opacity-80">
             <p>✅ Tailwind CSS configured with custom theme</p>

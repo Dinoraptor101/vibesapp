@@ -51,7 +51,9 @@ export function DMRequestCard({ request }: DMRequestCardProps) {
 
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-gray-900 dark:text-white">{sender.username}</span>
+            <span className="font-semibold text-gray-900 dim:text-gray-100 dark:text-white">
+              {sender.username}
+            </span>
             {sender.mbtiPersonality && (
               <Badge variant="brand" size="sm">
                 {sender.mbtiPersonality}
@@ -59,7 +61,7 @@ export function DMRequestCard({ request }: DMRequestCardProps) {
             )}
           </div>
 
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-500 dim:text-gray-450 dark:text-gray-400">
             {formatDistanceToNow(new Date(request.createdAt), { addSuffix: true })}
           </p>
         </div>
@@ -68,7 +70,7 @@ export function DMRequestCard({ request }: DMRequestCardProps) {
       {/* Request Message */}
       {request.message && (
         <div className="mb-4 rounded bg-gray-50 p-3 dark:bg-gray-900">
-          <p className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">
+          <p className="whitespace-pre-wrap text-sm text-gray-700 dim:text-gray-200 dark:text-gray-300">
             {showFullMessage ? request.message : messagePreview}
           </p>
           {showExpandLink && (

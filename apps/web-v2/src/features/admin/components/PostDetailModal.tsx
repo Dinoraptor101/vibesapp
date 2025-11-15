@@ -106,12 +106,12 @@ export function PostDetailModal({
             <div className="p-4 bg-bg-secondary rounded-lg space-y-2">
               <div className="font-semibold">Status:</div>
               {post.isHidden ? (
-                <div className="text-red-600 dark:text-red-400">
+                <div className="text-red-600 dim:text-red-500 dark:text-red-400">
                   ⚠️ This post has been auto-hidden due to receiving {post.dislikeCount} dislikes
                   from unique users (threshold: {Math.ceil(post.proximal_users / 3)} dislikes)
                 </div>
               ) : (
-                <div className="text-yellow-600 dark:text-yellow-400">
+                <div className="text-yellow-600 dim:text-yellow-500 dark:text-yellow-400">
                   ⚠️ This post has {post.dislikeCount} dislikes but is still visible. It will be
                   auto-hidden at {Math.ceil(post.proximal_users / 3)} dislikes.
                 </div>
