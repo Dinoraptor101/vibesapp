@@ -27,7 +27,9 @@ export function ConversationList() {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
         <AlertCircle className="h-12 w-12 text-red-500" />
-        <p className="text-sm text-gray-600 dark:text-gray-400">Failed to load conversations</p>
+        <p className="text-sm text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400">
+          Failed to load conversations
+        </p>
         <button
           type="button"
           onClick={() => refetch()}
@@ -42,11 +44,11 @@ export function ConversationList() {
   if (!conversations || conversations.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
-        <MessageCircle className="h-16 w-16 text-gray-300 dark:text-gray-600" />
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <MessageCircle className="h-16 w-16 text-gray-300 dim:text-gray-550 dark:text-gray-600" />
+        <h3 className="text-lg font-semibold text-gray-900 dim:text-gray-100 dark:text-white">
           No conversations yet
         </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-gray-500 dim:text-gray-450 dark:text-gray-400">
           Send a DM request to start a conversation
         </p>
       </div>
@@ -89,7 +91,7 @@ export function ConversationList() {
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-gray-900 dark:text-white">
+                  <span className="font-semibold text-gray-900 dim:text-gray-100 dark:text-white">
                     {otherUser?.username || 'Unknown'}
                   </span>
                   {otherUser?.mbtiPersonality && (
@@ -99,14 +101,14 @@ export function ConversationList() {
                   )}
                 </div>
                 {lastMessage && (
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                  <span className="text-xs text-gray-500 dim:text-gray-450 dark:text-gray-400">
                     {formatRelativeTime(lastMessage.timestamp)}
                   </span>
                 )}
               </div>
 
               {lastMessage && (
-                <p className="truncate text-sm text-gray-600 dark:text-gray-400">
+                <p className="truncate text-sm text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400">
                   {lastMessage.senderId === user?._id && 'You: '}
                   {lastMessage.body}
                 </p>

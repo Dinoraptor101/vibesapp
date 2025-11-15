@@ -47,21 +47,21 @@ export function InputExamplesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-light-bg-base dark:bg-dark-bg-base p-8">
+    <div className="min-h-screen bg-light-bg-base dim:bg-dim-bg-base dark:bg-dark-bg-base p-8">
       <div className="max-w-4xl mx-auto space-y-12">
         {/* Header */}
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-light-text-primary dark:text-dark-text-primary">
+          <h1 className="text-4xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary">
             Input Components
           </h1>
-          <p className="text-light-text-secondary dark:text-dark-text-secondary text-lg">
+          <p className="text-light-text-secondary dim:text-dim-text-secondary dark:text-dark-text-secondary text-lg">
             Input, Textarea, and Label with all states and features
           </p>
         </div>
 
         {/* Basic Inputs */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary border-b border-light-border dark:border-dark-border pb-2">
+          <h2 className="text-2xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary border-b border-light-border dim:border-dim-border dark:border-dark-border pb-2">
             Basic Input
           </h2>
           <div className="space-y-6">
@@ -78,7 +78,7 @@ export function InputExamplesPage() {
 
         {/* Validation States */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary border-b border-light-border dark:border-dark-border pb-2">
+          <h2 className="text-2xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary border-b border-light-border dim:border-dim-border dark:border-dark-border pb-2">
             Validation States
           </h2>
           <div className="space-y-6">
@@ -105,7 +105,7 @@ export function InputExamplesPage() {
 
         {/* Password Input */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary border-b border-light-border dark:border-dark-border pb-2">
+          <h2 className="text-2xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary border-b border-light-border dim:border-dim-border dark:border-dark-border pb-2">
             Password Input with Toggle
           </h2>
           <div className="space-y-6">
@@ -134,7 +134,7 @@ export function InputExamplesPage() {
 
         {/* Required Fields */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary border-b border-light-border dark:border-dark-border pb-2">
+          <h2 className="text-2xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary border-b border-light-border dim:border-dim-border dark:border-dark-border pb-2">
             Required Fields
           </h2>
           <div className="space-y-6">
@@ -153,7 +153,7 @@ export function InputExamplesPage() {
 
         {/* Disabled State */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary border-b border-light-border dark:border-dark-border pb-2">
+          <h2 className="text-2xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary border-b border-light-border dim:border-dim-border dark:border-dark-border pb-2">
             Disabled State
           </h2>
           <div className="space-y-6">
@@ -169,7 +169,7 @@ export function InputExamplesPage() {
 
         {/* Textarea Basic */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary border-b border-light-border dark:border-dark-border pb-2">
+          <h2 className="text-2xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary border-b border-light-border dim:border-dim-border dark:border-dark-border pb-2">
             Textarea
           </h2>
           <div className="space-y-6">
@@ -186,7 +186,7 @@ export function InputExamplesPage() {
 
         {/* Textarea with Character Counter */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary border-b border-light-border dark:border-dark-border pb-2">
+          <h2 className="text-2xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary border-b border-light-border dim:border-dim-border dark:border-dark-border pb-2">
             Character Counter
           </h2>
           <div className="space-y-6">
@@ -214,7 +214,7 @@ export function InputExamplesPage() {
 
         {/* Textarea Auto-Resize */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary border-b border-light-border dark:border-dark-border pb-2">
+          <h2 className="text-2xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary border-b border-light-border dim:border-dim-border dark:border-dark-border pb-2">
             Auto-Resize Textarea
           </h2>
           <div className="space-y-6">
@@ -232,7 +232,7 @@ export function InputExamplesPage() {
 
         {/* Textarea Validation */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary border-b border-light-border dark:border-dark-border pb-2">
+          <h2 className="text-2xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary border-b border-light-border dim:border-dim-border dark:border-dark-border pb-2">
             Textarea Validation
           </h2>
           <div className="space-y-6">
@@ -260,7 +260,7 @@ export function InputExamplesPage() {
 
         {/* Standalone Labels */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary border-b border-light-border dark:border-dark-border pb-2">
+          <h2 className="text-2xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary border-b border-light-border dim:border-dim-border dark:border-dark-border pb-2">
             Standalone Labels
           </h2>
           <div className="space-y-6">
@@ -270,7 +270,7 @@ export function InputExamplesPage() {
                 id="standalone-input"
                 type="text"
                 placeholder="Input with standalone label"
-                className="w-full px-4 py-2 rounded-lg border border-light-border dark:border-dark-border bg-light-bg-base dark:bg-dark-bg-base text-light-text-primary dark:text-dark-text-primary mt-1.5"
+                className="w-full px-4 py-2 rounded-lg border border-light-border dim:border-dim-border dark:border-dark-border bg-light-bg-base dim:bg-dim-bg-base dark:bg-dark-bg-base text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary mt-1.5"
               />
             </div>
             <div>
@@ -281,7 +281,7 @@ export function InputExamplesPage() {
                 id="required-input"
                 type="text"
                 placeholder="This field is required"
-                className="w-full px-4 py-2 rounded-lg border border-light-border dark:border-dark-border bg-light-bg-base dark:bg-dark-bg-base text-light-text-primary dark:text-dark-text-primary mt-1.5"
+                className="w-full px-4 py-2 rounded-lg border border-light-border dim:border-dim-border dark:border-dark-border bg-light-bg-base dim:bg-dim-bg-base dark:bg-dark-bg-base text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary mt-1.5"
               />
             </div>
           </div>
@@ -289,11 +289,11 @@ export function InputExamplesPage() {
 
         {/* Real World Example - Form */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary border-b border-light-border dark:border-dark-border pb-2">
+          <h2 className="text-2xl font-bold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary border-b border-light-border dim:border-dim-border dark:border-dark-border pb-2">
             Real World Example - Contact Form
           </h2>
-          <div className="p-6 bg-light-bg-elevated dark:bg-dark-bg-elevated rounded-lg space-y-6">
-            <h3 className="text-lg font-semibold text-light-text-primary dark:text-dark-text-primary">
+          <div className="p-6 bg-light-bg-elevated dim:bg-dim-bg-elevated dark:bg-dark-bg-elevated rounded-lg space-y-6">
+            <h3 className="text-lg font-semibold text-light-text-primary dim:text-dim-text-primary dark:text-dark-text-primary">
               Get in Touch
             </h3>
 
@@ -327,7 +327,7 @@ export function InputExamplesPage() {
         </section>
 
         {/* Footer Note */}
-        <div className="text-center text-sm text-light-text-secondary dark:text-dark-text-secondary border-t border-light-border dark:border-dark-border pt-8">
+        <div className="text-center text-sm text-light-text-secondary dim:text-dim-text-secondary dark:text-dark-text-secondary border-t border-light-border dim:border-dim-border dark:border-dark-border pt-8">
           <p>
             All components include proper ARIA attributes, validation states, and dark mode support.
             Toggle dark mode to see theme adaptation.

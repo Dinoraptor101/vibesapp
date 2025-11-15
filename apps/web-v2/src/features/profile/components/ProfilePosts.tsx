@@ -130,7 +130,7 @@ export function ProfilePosts({ userId }: ProfilePostsProps) {
 
       {/* End Message */}
       {!hasNextPage && posts.length > 0 && (
-        <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-center text-sm text-gray-500 dim:text-gray-450 dark:text-gray-400">
           You've reached the end! 🎉
         </p>
       )}

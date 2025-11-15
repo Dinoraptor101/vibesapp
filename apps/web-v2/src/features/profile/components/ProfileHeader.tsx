@@ -29,11 +29,13 @@ export function ProfileHeader({ profile, isOwnProfile, onDMRequest }: ProfileHea
         <div className="flex-1 space-y-2">
           {/* Username and Age */}
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-2xl font-bold text-gray-900 dim:text-gray-100 dark:text-white">
               @{profile.username}
             </h1>
             {profile.age && (
-              <span className="text-sm text-gray-500 dark:text-gray-400">Age: {profile.age}</span>
+              <span className="text-sm text-gray-500 dim:text-gray-450 dark:text-gray-400">
+                Age: {profile.age}
+              </span>
             )}
           </div>
 
@@ -41,7 +43,7 @@ export function ProfileHeader({ profile, isOwnProfile, onDMRequest }: ProfileHea
           <div className="flex items-center gap-2">
             {profile.mbtiPersonality && <Badge variant="brand">{profile.mbtiPersonality}</Badge>}
             {profile.polarity && (
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <span className="text-sm font-medium text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400">
                 • {profile.polarity.toUpperCase()}
               </span>
             )}
@@ -49,7 +51,7 @@ export function ProfileHeader({ profile, isOwnProfile, onDMRequest }: ProfileHea
 
           {/* Distance */}
           {profile.distance && (
-            <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center gap-1 text-sm text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400">
               <MapPin size={16} />
               <span>{profile.distance}</span>
             </div>
@@ -75,7 +77,9 @@ export function ProfileHeader({ profile, isOwnProfile, onDMRequest }: ProfileHea
       {/* Bio */}
       {profile.bio && (
         <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
-          <p className="whitespace-pre-wrap text-gray-700 dark:text-gray-300">{profile.bio}</p>
+          <p className="whitespace-pre-wrap text-gray-700 dim:text-gray-200 dark:text-gray-300">
+            {profile.bio}
+          </p>
         </div>
       )}
     </div>

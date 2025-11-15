@@ -55,14 +55,14 @@ export const DialogExamplesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gray-50 dim:bg-gray-800 dark:bg-gray-900 p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="text-4xl font-bold text-gray-900 dim:text-gray-100 dark:text-white mb-2">
             Dialog / Modal Component
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
+          <p className="text-lg text-gray-600 dim:text-gray-500 dark:text-gray-400">
             Accessible modal dialogs built with Radix UI primitives. Supports keyboard navigation,
             focus trapping, and smooth animations.
           </p>
@@ -70,10 +70,10 @@ export const DialogExamplesPage = () => {
 
         {/* Section 1: Basic Dialog */}
         <section className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-2xl font-semibold text-gray-900 dim:text-gray-100 dark:text-white mb-4">
             1. Basic Dialog
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-gray-600 dim:text-gray-500 dark:text-gray-400 mb-4">
             Simple dialog with title, description, and action buttons.
           </p>
           <div className="flex gap-4 flex-wrap">
@@ -109,10 +109,10 @@ export const DialogExamplesPage = () => {
 
         {/* Section 2: Confirmation Dialog */}
         <section className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-2xl font-semibold text-gray-900 dim:text-gray-100 dark:text-white mb-4">
             2. Confirmation Dialog
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-gray-600 dim:text-gray-500 dark:text-gray-400 mb-4">
             Destructive action confirmation with warning icon and loading state.
           </p>
           <div className="flex gap-4 flex-wrap">
@@ -125,8 +125,8 @@ export const DialogExamplesPage = () => {
               <DialogContent size="sm">
                 <DialogHeader>
                   <div className="flex items-center gap-3">
-                    <div className="rounded-full bg-red-100 dark:bg-red-900/30 p-3">
-                      <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+                    <div className="rounded-full bg-red-100 dim:bg-red-800/30 dark:bg-red-900/30 p-3">
+                      <AlertCircle className="h-6 w-6 text-red-600 dim:text-red-500 dark:text-red-400" />
                     </div>
                     <DialogTitle>Delete Account?</DialogTitle>
                   </div>
@@ -155,10 +155,10 @@ export const DialogExamplesPage = () => {
 
         {/* Section 3: Form Dialog */}
         <section className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-2xl font-semibold text-gray-900 dim:text-gray-100 dark:text-white mb-4">
             3. Form Dialog
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-gray-600 dim:text-gray-500 dark:text-gray-400 mb-4">
             Dialog with form inputs for data collection.
           </p>
           <div className="flex gap-4 flex-wrap">
@@ -235,10 +235,10 @@ export const DialogExamplesPage = () => {
 
         {/* Section 4: Dialog Sizes */}
         <section className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-2xl font-semibold text-gray-900 dim:text-gray-100 dark:text-white mb-4">
             4. Dialog Sizes
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-gray-600 dim:text-gray-500 dark:text-gray-400 mb-4">
             Four size options: sm (400px), md (600px), lg (800px), full (95vw).
           </p>
           <div className="flex gap-4 flex-wrap">
@@ -316,7 +316,7 @@ export const DialogExamplesPage = () => {
                     Takes up almost the entire viewport width. Perfect for image viewers, video
                     players, or immersive experiences.
                   </p>
-                  <div className="bg-gray-100 dark:bg-gray-700 rounded-lg h-64 flex items-center justify-center">
+                  <div className="bg-gray-100 dim:bg-gray-600 dark:bg-gray-700 rounded-lg h-64 flex items-center justify-center">
                     <ImagePlus className="h-16 w-16 text-gray-400" />
                   </div>
                 </DialogBody>
@@ -330,10 +330,10 @@ export const DialogExamplesPage = () => {
 
         {/* Section 5: Scrollable Content */}
         <section className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-2xl font-semibold text-gray-900 dim:text-gray-100 dark:text-white mb-4">
             5. Scrollable Content
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-gray-600 dim:text-gray-500 dark:text-gray-400 mb-4">
             Dialog with long content that scrolls within max-height (90vh).
           </p>
           <div className="flex gap-4 flex-wrap">
@@ -407,10 +407,10 @@ export const DialogExamplesPage = () => {
 
         {/* Section 6: Image Preview Dialog */}
         <section className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-2xl font-semibold text-gray-900 dim:text-gray-100 dark:text-white mb-4">
             6. Image Preview Dialog
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-gray-600 dim:text-gray-500 dark:text-gray-400 mb-4">
             Full-size dialog without padding for image preview.
           </p>
           <div className="flex gap-4 flex-wrap">
@@ -439,10 +439,10 @@ export const DialogExamplesPage = () => {
 
         {/* Section 7: Nested Dialogs */}
         <section className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-2xl font-semibold text-gray-900 dim:text-gray-100 dark:text-white mb-4">
             7. Nested Dialogs
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-gray-600 dim:text-gray-500 dark:text-gray-400 mb-4">
             You can nest dialogs for multi-step confirmations (use sparingly).
           </p>
           <div className="flex gap-4 flex-wrap">
@@ -506,10 +506,10 @@ export const DialogExamplesPage = () => {
 
         {/* Section 8: No Close Button */}
         <section className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-2xl font-semibold text-gray-900 dim:text-gray-100 dark:text-white mb-4">
             8. Dialog Without Close Button
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-gray-600 dim:text-gray-500 dark:text-gray-400 mb-4">
             Force user to take an action by hiding the close button (showClose=false).
           </p>
           <div className="flex gap-4 flex-wrap">
@@ -540,11 +540,11 @@ export const DialogExamplesPage = () => {
         </section>
 
         {/* Accessibility Notes */}
-        <section className="mb-12 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-          <h2 className="text-xl font-semibold text-blue-900 dark:text-blue-100 mb-3">
+        <section className="mb-12 p-6 bg-blue-50 dim:bg-blue-800/20 dark:bg-blue-900/20 rounded-lg border border-blue-200 dim:border-blue-700 dark:border-blue-800">
+          <h2 className="text-xl font-semibold text-blue-900 dim:text-blue-100 dark:text-blue-100 mb-3">
             ♿ Accessibility Features
           </h2>
-          <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-200">
+          <ul className="space-y-2 text-sm text-blue-800 dim:text-blue-200 dark:text-blue-200">
             <li>✅ Keyboard navigation (Tab, Shift+Tab, ESC to close)</li>
             <li>✅ Focus trap - focus stays inside dialog</li>
             <li>✅ Focus restoration - returns focus after close</li>

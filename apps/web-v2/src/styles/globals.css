@@ -21,7 +21,7 @@
     --border: #e0e0e0;
     --background: #f8f8f8;
     --foreground: #000000;
-    
+
     /* MBTI category colors - Light theme */
     --mbti-analyst-bg: #faf5ff;
     --mbti-analyst-border: #e9d5ff;
@@ -55,7 +55,7 @@
     --border: #555555;
     --background: #333333;
     --foreground: #ffffff;
-    
+
     /* MBTI category colors - Dim theme */
     --mbti-analyst-bg: rgba(139, 92, 246, 0.15);
     --mbti-analyst-border: rgba(139, 92, 246, 0.3);
@@ -83,7 +83,7 @@
     --border: #333333;
     --background: #000000;
     --foreground: #ffffff;
-    
+
     /* MBTI category colors - Dark theme */
     --mbti-analyst-bg: rgba(139, 92, 246, 0.2);
     --mbti-analyst-border: rgba(139, 92, 246, 0.4);

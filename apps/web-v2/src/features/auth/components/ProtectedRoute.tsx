@@ -24,7 +24,9 @@ export function ProtectedRoute({ children, redirectTo = '/login' }: ProtectedRou
       <div className="flex items-center justify-center min-h-screen bg-light-bg-base dark:bg-dark-bg-base">
         <div className="flex flex-col items-center gap-4">
           <Spinner size="xl" variant="primary" />
-          <p className="text-light-text-secondary dark:bg-dark-text-secondary">Loading...</p>
+          <p className="text-light-text-secondary dim:text-dim-text-secondary dark:text-dark-text-secondary">
+            Loading...
+          </p>
         </div>
       </div>
     );

@@ -29,8 +29,10 @@ interface StatItemProps {
 function StatItem({ label, count }: StatItemProps) {
   return (
     <div className="flex flex-col items-center">
-      <span className="text-2xl font-bold text-gray-900 dark:text-white">{count}</span>
-      <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
+      <span className="text-2xl font-bold text-gray-900 dim:text-gray-100 dark:text-white">
+        {count}
+      </span>
+      <span className="text-sm text-gray-500 dim:text-gray-450 dark:text-gray-400">{label}</span>
     </div>
   );
 }

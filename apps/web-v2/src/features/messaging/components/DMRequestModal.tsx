@@ -63,7 +63,7 @@ export function DMRequestModal({ userId, username, open, onOpenChange }: DMReque
           <div className="space-y-2">
             <label
               htmlFor="dm-message"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="text-sm font-medium text-gray-700 dim:text-gray-200 dark:text-gray-300"
             >
               Message (optional)
             </label>
@@ -82,7 +82,7 @@ export function DMRequestModal({ userId, username, open, onOpenChange }: DMReque
               }
             />
             {showCounter && !isOverLimit && (
-              <p className="text-right text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-right text-sm text-gray-500 dim:text-gray-450 dark:text-gray-400">
                 {message.length} / {MAX_MESSAGE_LENGTH}
               </p>
             )}

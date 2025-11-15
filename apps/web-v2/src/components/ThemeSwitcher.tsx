@@ -28,8 +28,10 @@ export function ThemeSwitcher() {
 
   return (
     <div className="fixed top-4 right-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-sm font-semibold mb-3 text-gray-900 dark:text-white">Theme</h3>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-200 dim:border-gray-600 dark:border-gray-700">
+        <h3 className="text-sm font-semibold mb-3 text-gray-900 dim:text-gray-100 dark:text-white">
+          Theme
+        </h3>
         <div className="flex gap-2">
           <button
             type="button"

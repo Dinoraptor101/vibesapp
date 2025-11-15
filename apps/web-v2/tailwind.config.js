@@ -177,5 +177,10 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // Custom plugin to add 'dim' variant support
+    ({ addVariant }) => {
+      addVariant('dim', '.dim &');
+    },
+  ],
 };
