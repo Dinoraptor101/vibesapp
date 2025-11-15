@@ -405,8 +405,8 @@ export function AccountTab() {
           <Copy className="w-4 h-4 mr-2" />
           Copy Pigeon ID
         </Button>
-        <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-          <p className="text-sm text-yellow-800 dark:text-yellow-200">
+        <div className="p-3 bg-yellow-50 dim:bg-yellow-900/30 dark:bg-yellow-900/20 border border-yellow-200 dim:border-yellow-700/50 dark:border-yellow-800 rounded-lg">
+          <p className="text-sm text-yellow-800 dim:text-yellow-300 dark:text-yellow-200">
             <span className="font-medium">[!] Never Share!</span> Anyone with your Pigeon ID can
             pretend to be you.
           </p>

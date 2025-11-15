@@ -23,7 +23,7 @@ export function SettingsPage() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="p-2 hover:bg-gray-100 dim:hover:bg-gray-650 dark:hover:bg-gray-700 rounded-full transition-colors"
+            className="p-2 hover:bg-gray-100 dim:hover:bg-gray-600 dark:hover:bg-gray-700 rounded-full transition-colors"
             aria-label="Go back"
           >
             <ChevronLeft className="w-5 h-5" />
