@@ -37,13 +37,13 @@ export function UserBadge({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           {/* Username */}
-          <span className={`${textSize} font-semibold text-text-primary truncate`}>
+          <span className={`${textSize} font-semibold text-text-primary truncate max-w-[120px]`}>
             @{user.userName}
           </span>
 
           {/* MBTI Badge */}
           {showMBTI && user.mbtiPersonality && (
-            <Badge variant="default" size="sm">
+            <Badge variant="default" size="sm" className="flex-shrink-0">
               {user.mbtiPersonality}
             </Badge>
           )}
