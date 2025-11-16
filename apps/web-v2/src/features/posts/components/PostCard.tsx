@@ -69,7 +69,7 @@ export function PostCard({ post, onLike, onReport }: PostCardProps) {
   }
 
   return (
-    <Card noPadding>
+    <Card noPadding className="min-w-[280px]">
       {/* Image - Full width, edge-to-edge, clickable to post detail */}
       <Link to={`/post/${post._id}`} className="block">
         <div className="relative aspect-square bg-surface-alt overflow-hidden">
@@ -89,9 +89,9 @@ export function PostCard({ post, onLike, onReport }: PostCardProps) {
       {/* Footer with user info, caption, and actions */}
       <div className="p-3">
         {/* Username (left) + Timestamp (right) */}
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-2 gap-2">
           <UserBadge user={post.user} size="sm" clickable={true} />
-          <span className="text-xs text-text-tertiary">
+          <span className="text-xs text-text-tertiary flex-shrink-0 max-w-[60px] truncate">
             {formatRelativeTime(new Date(post.createdAt))}
           </span>
         </div>
