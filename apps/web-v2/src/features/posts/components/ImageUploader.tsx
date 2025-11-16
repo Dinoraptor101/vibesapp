@@ -167,14 +167,14 @@ export function ImageUploader({
         className={`
           block relative border-2 border-dashed rounded-lg p-8
           transition-colors duration-200
-          ${isDragging ? 'border-brand-primary bg-brand-primary/5' : 'border-border'}
-          ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-brand-primary'}
+          ${isDragging ? 'border-brand-primary bg-brand-primary/5' : 'border-border dim:border-gray-600'}
+          ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-brand-primary dim:hover:border-brand-primary'}
         `}
       >
         {isCompressing ? (
           <div className="flex flex-col items-center justify-center space-y-3">
             <Loader2 className="w-12 h-12 text-brand-primary animate-spin" />
-            <p className="text-sm text-text-secondary">Compressing image...</p>
+            <p className="text-sm text-text-secondary dim:text-gray-300">Compressing image...</p>
           </div>
         ) : (
           <>
@@ -183,16 +183,20 @@ export function ImageUploader({
               {isDragging ? (
                 <Upload className="w-12 h-12 text-brand-primary" />
               ) : (
-                <ImageIcon className="w-12 h-12 text-text-tertiary" />
+                <ImageIcon className="w-12 h-12 text-text-tertiary dim:text-gray-400" />
               )}
 
               {/* Text */}
               <div className="text-center">
-                <p className="text-base font-medium text-text-primary">
+                <p className="text-base font-medium text-text-primary dim:text-gray-100">
                   {isDragging ? 'Drop image here' : 'Drag and drop an image'}
                 </p>
-                <p className="text-sm text-text-secondary mt-1">or click to browse</p>
-                <p className="text-xs text-text-tertiary mt-2">JPEG, PNG, WebP • Max 10MB</p>
+                <p className="text-sm text-text-secondary dim:text-gray-300 mt-1">
+                  or click to browse
+                </p>
+                <p className="text-xs text-text-tertiary dim:text-gray-400 mt-2">
+                  JPEG, PNG, WebP • Max 10MB
+                </p>
               </div>
             </div>
           </>
@@ -201,8 +205,8 @@ export function ImageUploader({
 
       {/* Error message */}
       {error && (
-        <div className="mt-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-          <p className="text-sm text-red-500">{error}</p>
+        <div className="mt-2 p-3 bg-red-500/10 dim:bg-red-500/20 border border-red-500/20 dim:border-red-500/30 rounded-lg">
+          <p className="text-sm text-red-500 dim:text-red-400">{error}</p>
         </div>
       )}
     </div>

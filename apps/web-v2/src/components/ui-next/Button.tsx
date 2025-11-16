@@ -124,8 +124,9 @@ export const Button: React.FC<ButtonProps> = ({
     primary:
       'bg-brand text-white hover:bg-brand-600 focus-visible:ring-brand dark:bg-brand dark:hover:bg-brand-600',
     secondary:
-      'bg-surface-elevated border border-border text-text-primary hover:bg-surface-hover focus-visible:ring-brand/30',
-    ghost: 'bg-transparent text-text-primary hover:bg-surface-hover focus-visible:ring-brand/30',
+      'bg-surface-elevated border border-border text-text-primary hover:bg-surface-hover focus-visible:ring-brand/30 dim:bg-gray-700 dim:border-gray-600 dim:hover:bg-gray-650 dim:focus-visible:ring-brand/30',
+    ghost:
+      'bg-transparent text-text-primary hover:bg-surface-hover focus-visible:ring-brand/30 dim:hover:bg-gray-700 dim:focus-visible:ring-brand/30',
     destructive:
       'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500 dark:bg-red-600 dark:hover:bg-red-700',
     outline:

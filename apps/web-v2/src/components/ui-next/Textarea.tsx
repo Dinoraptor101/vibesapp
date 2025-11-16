@@ -163,14 +163,15 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       'w-full px-4 py-2 rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-0 resize-none';
 
     // Background and text colors
-    const colorClasses = 'bg-surface text-text-primary placeholder:text-text-secondary';
+    const colorClasses =
+      'bg-surface text-text-primary placeholder:text-text-secondary dim:bg-gray-700 dim:text-gray-100 dim:placeholder:text-gray-400';
 
     // Border states
     const borderClasses = error
-      ? 'border-2 border-error focus:ring-error/50'
+      ? 'border-2 border-error focus:ring-error/50 dim:border-error dim:focus:ring-error/50'
       : success
-        ? 'border-2 border-success focus:ring-success/50'
-        : 'border border-border focus:ring-brand focus:border-brand';
+        ? 'border-2 border-success focus:ring-success/50 dim:border-success dim:focus:ring-success/50'
+        : 'border border-border focus:ring-brand focus:border-brand dim:border-gray-600 dim:focus:ring-brand/50 dim:focus:border-brand';
 
     // Disabled state
     const disabledClasses = disabled ? 'opacity-50 cursor-not-allowed' : '';

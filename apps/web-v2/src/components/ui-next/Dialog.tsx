@@ -96,8 +96,8 @@ const DialogContent = React.forwardRef<
           'fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%]',
           'w-[90vw] max-h-[90vh] overflow-y-auto',
           sizeClasses[size],
-          'rounded-2xl border border-gray-200 dark:border-gray-700',
-          'bg-white dark:bg-gray-800',
+          'rounded-2xl border border-gray-200 dim:border-gray-600 dark:border-gray-700',
+          'bg-white dim:bg-gray-700 dark:bg-gray-800',
           'shadow-2xl',
           'data-[state=open]:animate-in data-[state=closed]:animate-out',
           'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
@@ -150,7 +150,7 @@ const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
   <div
     className={cn(
       'flex flex-col-reverse sm:flex-row sm:justify-end gap-2 px-6 pb-6 pt-4',
-      'border-t border-gray-200 dark:border-gray-700',
+      'border-t border-gray-200 dim:border-gray-600 dark:border-gray-700',
       className
     )}
     {...props}
