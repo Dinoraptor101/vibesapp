@@ -20,11 +20,7 @@ export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
   const [showSuccess, setShowSuccess] = useState(false);
   const createPostMutation = useCreatePost();
 
-  const handleSubmit = async (data: {
-    image: string;
-    text?: string;
-    location: { lat: number; lon: number };
-  }) => {
+  const handleSubmit = async (data: { image: string; text?: string }) => {
     try {
       await createPostMutation.mutateAsync(data);
 
@@ -61,12 +57,14 @@ export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
         <DialogBody>
           {showSuccess ? (
             <div className="flex flex-col items-center justify-center py-12 space-y-4">
-              <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center">
-                <CheckCircle className="w-8 h-8 text-green-500" />
+              <div className="w-16 h-16 rounded-full bg-green-500/10 dim:bg-green-500/20 flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-green-500 dim:text-green-400" />
               </div>
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-text-primary">Post Created!</h3>
-                <p className="text-sm text-text-secondary mt-1">
+                <h3 className="text-lg font-semibold text-text-primary dim:text-gray-100">
+                  Post Created!
+                </h3>
+                <p className="text-sm text-text-secondary dim:text-gray-300 mt-1">
                   Your post is now live on the feed
                 </p>
               </div>
