@@ -70,7 +70,7 @@ export function PostCard({ post, onLike, onReport }: PostCardProps) {
 
   return (
     <Card noPadding className="min-w-[280px]">
-      {/* Image - Full width, edge-to-edge, clickable to post detail */}
+      {/* Image with Caption Overlay - Full width, edge-to-edge */}
       <Link to={`/post/${post._id}`} className="block">
         <div className="relative aspect-square bg-surface-alt overflow-hidden">
           <img
@@ -83,28 +83,30 @@ export function PostCard({ post, onLike, onReport }: PostCardProps) {
               e.currentTarget.src = import.meta.env.VITE_PLACEHOLDER_IMAGE_URL || '';
             }}
           />
+
+          {/* Caption Overlay - Only shown if caption exists */}
+          {post.text && (
+            <div className="absolute bottom-0 left-0 right-0 px-4 py-3 bg-gradient-to-t from-black/75 via-black/50 to-transparent">
+              <p className="text-white text-sm font-medium leading-snug line-clamp-2">
+                {stripHtml(post.text)}
+              </p>
+            </div>
+          )}
         </div>
       </Link>
 
-      {/* Footer with user info, caption, and actions */}
+      {/* Footer with user info and actions - Fixed position */}
       <div className="p-3">
         {/* Username (left) + Timestamp (right) */}
-        <div className="flex items-center justify-between mb-2 gap-2">
+        <div className="flex items-center justify-between gap-2">
           <UserBadge user={post.user} size="sm" clickable={true} />
           <span className="text-xs text-text-tertiary flex-shrink-0 max-w-[60px] truncate">
             {formatRelativeTime(new Date(post.createdAt))}
           </span>
         </div>
 
-        {/* Caption */}
-        {post.text && (
-          <div className="text-text-primary text-sm leading-relaxed line-clamp-2 mb-3">
-            {stripHtml(post.text)}
-          </div>
-        )}
-
         {/* Actions */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 mt-3">
           {/* Like (Heart) */}
           <button
             type="button"
