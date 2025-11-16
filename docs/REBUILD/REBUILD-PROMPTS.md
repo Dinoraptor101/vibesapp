@@ -157,6 +157,7 @@ This ensures AI agents can pick up exactly where you left off!
 - [X] 4.8 - Comment System Overhaul (✅ Complete - Nov 14, 2025)
 - [ ] 4.9 - Post Feed Tabs Cleanup (⚠️ Blocked - Nov 14, 2025)
 - [ ] 4.10 - Activity Feed Overhaul (⚠️ Blocked - Nov 14, 2025)
+- [ ] 4.11 - Fix Tech Debt (⏸️ Not started)
 
 ### Phase 5: Discovery (Week 10-11)
 - [ ] 5.1 - Search Interface (⏸️ Not started)
