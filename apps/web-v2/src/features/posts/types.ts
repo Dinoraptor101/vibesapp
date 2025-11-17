@@ -69,6 +69,10 @@ export interface PostWithStats extends Post {
 export interface CreatePostPayload {
   text?: string;
   image: string; // S3 URL after upload
+  location: {
+    lat: number;
+    lon: number;
+  };
 }
 
 export interface UpdatePostPayload {

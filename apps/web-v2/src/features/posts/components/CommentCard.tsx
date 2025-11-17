@@ -8,6 +8,7 @@ import { Heart, MessageCircle, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Avatar } from '@/components/ui-next/Avatar';
 import { useAuth } from '@/features/auth';
+import { getAvatarUrl } from '@/lib/avatarUtils';
 import { cn } from '@/lib/cn';
 import { formatRelativeTime } from '@/lib/utils';
 import type { Post } from '../types';
@@ -55,7 +56,7 @@ export function CommentCard({ comment, onHeart, onReply, onDelete, className }: 
       {/* Avatar */}
       <button type="button" onClick={handleProfileClick} className="shrink-0">
         <Avatar
-          src={comment.user.profilePictureUrl}
+          src={getAvatarUrl(comment.user.profilePictureUrl)}
           alt={comment.user.userName}
           name={comment.user.userName}
           size="sm"

@@ -2,17 +2,24 @@
  * CreatePostForm Component
  *
  * Form for creating a new post with image upload and optional caption.
+ * Silently gets user location in background (required by backend).
  */
 
 import { AlertCircle, Loader2 } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button, Textarea } from '@/components/ui-next';
 import { uploadImage } from '../api/s3Service';
 import type { ImageFile, UploadProgress } from '../utils/imageUtils';
 import { ImageUploader } from './ImageUploader';
 
+interface Location {
+  lat: number;
+  lon: number;
+  city?: string;
+}
+
 interface CreatePostFormProps {
-  onSubmit: (data: { image: string; text?: string }) => void;
+  onSubmit: (data: { image: string; text?: string; location: Location }) => void;
   onCancel: () => void;
   isSubmitting?: boolean;
 }
@@ -22,8 +29,36 @@ const MAX_CAPTION_LENGTH = 500;
 export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: CreatePostFormProps) {
   const [selectedImage, setSelectedImage] = useState<ImageFile | null>(null);
   const [caption, setCaption] = useState('');
+  const [location, setLocation] = useState<Location | null>(null);
   const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Silently get user location on mount (required by backend, but hidden from UI)
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      console.warn('Geolocation not supported');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocation({
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+        });
+      },
+      (err) => {
+        console.warn('Could not get location:', err.message);
+        // Set a default location (will be rejected by backend if location is truly required)
+        // Backend requires location, so we need some value
+      },
+      {
+        timeout: 5000,
+        maximumAge: 300000, // 5 minutes
+        enableHighAccuracy: false,
+      }
+    );
+  }, []);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -36,6 +71,11 @@ export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: Cre
         return;
       }
 
+      if (!location) {
+        setError('Unable to determine location. Please enable location services and try again.');
+        return;
+      }
+
       try {
         // Upload image to S3
         const imageKey = await uploadImage(selectedImage.compressed, setUploadProgress);
@@ -44,30 +84,79 @@ export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: Cre
         onSubmit({
           image: imageKey,
           text: caption.trim() || undefined,
+          location,
         });
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to upload image');
         setUploadProgress(null);
       }
     },
-    [selectedImage, caption, onSubmit]
+    [selectedImage, caption, location, onSubmit]
   );
 
-  const canSubmit = selectedImage && !isSubmitting;
+  const canSubmit = selectedImage && location && !isSubmitting;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Image uploader */}
+      {/* Image uploader with progress overlay */}
       <div>
         <div className="block text-sm font-medium text-text-primary dim:text-gray-100 mb-2">
           Photo <span className="text-red-500 dim:text-red-400">*</span>
         </div>
-        <ImageUploader
-          onImageSelect={setSelectedImage}
-          onImageRemove={() => setSelectedImage(null)}
-          selectedImage={selectedImage}
-          disabled={isSubmitting || uploadProgress !== null}
-        />
+        <div className="relative">
+          <ImageUploader
+            onImageSelect={setSelectedImage}
+            onImageRemove={() => setSelectedImage(null)}
+            selectedImage={selectedImage}
+            disabled={isSubmitting || uploadProgress !== null}
+          />
+
+          {/* Circular Progress Overlay (ZEN style) */}
+          {uploadProgress && selectedImage && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-lg">
+              <div className="relative">
+                {/* Circular progress ring */}
+                <svg
+                  className="w-24 h-24 transform -rotate-90"
+                  viewBox="0 0 100 100"
+                  role="img"
+                  aria-label="Upload progress"
+                >
+                  <title>Upload progress: {uploadProgress.percentage}%</title>
+                  {/* Background circle */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    stroke="currentColor"
+                    strokeWidth="6"
+                    fill="none"
+                    className="text-white/20"
+                  />
+                  {/* Progress circle */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    stroke="currentColor"
+                    strokeWidth="6"
+                    fill="none"
+                    strokeDasharray={`${2 * Math.PI * 45}`}
+                    strokeDashoffset={`${2 * Math.PI * 45 * (1 - uploadProgress.percentage / 100)}`}
+                    className="text-white transition-all duration-300"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                {/* Percentage text */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-2xl font-semibold text-white">
+                    {uploadProgress.percentage}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Caption */}
@@ -92,24 +181,6 @@ export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: Cre
           {caption.length}/{MAX_CAPTION_LENGTH}
         </div>
       </div>
-
-      {/* Upload progress */}
-      {uploadProgress && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-text-secondary dim:text-gray-300">Uploading...</span>
-            <span className="text-text-primary dim:text-gray-100 font-medium">
-              {uploadProgress.percentage}%
-            </span>
-          </div>
-          <div className="w-full bg-surface-secondary dim:bg-gray-700 rounded-full h-2 overflow-hidden">
-            <div
-              className="h-full bg-brand-primary transition-all duration-300"
-              style={{ width: `${uploadProgress.percentage}%` }}
-            />
-          </div>
-        </div>
-      )}
 
       {/* Error message */}
       {error && (

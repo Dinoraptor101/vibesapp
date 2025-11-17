@@ -10,6 +10,7 @@ import { LogOut, Moon, Settings, Sun, Sunrise, User } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar } from '@/components/ui-next';
 import { useAuth } from '@/features/auth/context/useAuth';
+import { getAvatarUrl } from '@/lib/avatarUtils';
 import type { Theme } from '@/lib/theme';
 import { useTheme } from '@/lib/useTheme';
 
@@ -37,7 +38,12 @@ export function UserMenu() {
           className="rounded-full focus:outline-none focus:ring-2 focus:ring-brand-purple focus:ring-offset-2 focus:ring-offset-surface"
           aria-label="User menu"
         >
-          <Avatar src={user.profilePictureUrl} alt={user.username} name={user.username} size="md" />
+          <Avatar
+            src={getAvatarUrl(user.profilePictureUrl)}
+            alt={user.username}
+            name={user.username}
+            size="md"
+          />
         </button>
       </DropdownMenu.Trigger>
 
