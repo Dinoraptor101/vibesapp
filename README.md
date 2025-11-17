@@ -156,6 +156,10 @@ cp .env.example .env
 
 ## 🚢 Deployment
 
+⚠️ **IMPORTANT**: Before deploying Web V2 to production, you **MUST** run the database migration script! 
+
+📖 **See [Production Deployment Guide](docs/13-production-deployment.md) for complete instructions.**
+
 ### Frontend (Heroku)
 The React application is deployed to Heroku with static file serving.
 
@@ -168,6 +172,13 @@ The Node.js API is deployed as a separate Heroku dyno.
 
 ```bash
 nx deploy api
+```
+
+### Database Migrations
+```bash
+# Run BEFORE deploying Web V2 to production
+cd apps/api
+node scripts/addUserFieldsToPosts.js
 ```
 
 ### Database
@@ -188,6 +199,8 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 - [Testing Strategy](docs/09-testing-strategy.md)
 - [User Journey](docs/10-user-journey.md)
 - [Feature Documentation](docs/11-feature-documentation.md)
+- [ESLint Coding Standards](docs/12-eslint-coding-standards.md)
+- [**Production Deployment**](docs/13-production-deployment.md) ⚠️ **Critical for V2 Release**
 
 ## 🤝 Contributing
 
