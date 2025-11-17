@@ -22,11 +22,17 @@ interface CreatePostFormProps {
   onSubmit: (data: { image: string; text?: string; location: Location }) => void;
   onCancel: () => void;
   isSubmitting?: boolean;
+  onArticleModeChange?: (isArticleMode: boolean) => void; // Notify parent when switching to article mode
 }
 
-const MAX_CAPTION_LENGTH = 500;
+const MAX_CAPTION_LENGTH = 5000;
 
-export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: CreatePostFormProps) {
+export function CreatePostForm({
+  onSubmit,
+  onCancel,
+  isSubmitting = false,
+  onArticleModeChange,
+}: CreatePostFormProps) {
   const [selectedImage, setSelectedImage] = useState<ImageFile | null>(null);
   const [caption, setCaption] = useState('');
   const [location, setLocation] = useState<Location | null>(null);
@@ -59,6 +65,12 @@ export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: Cre
       }
     );
   }, []);
+
+  // Notify parent when switching between caption/article mode
+  useEffect(() => {
+    const isArticleMode = caption.length > 100;
+    onArticleModeChange?.(isArticleMode);
+  }, [caption.length, onArticleModeChange]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -159,13 +171,16 @@ export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: Cre
         </div>
       </div>
 
-      {/* Caption */}
+      {/* Caption / Article */}
       <div>
         <label
           htmlFor="caption"
           className="block text-sm font-medium text-text-primary dim:text-gray-100 mb-2"
         >
-          Caption <span className="text-text-tertiary dim:text-gray-400">(Optional)</span>
+          <span className="transition-all duration-300">
+            {caption.length > 100 ? 'Article' : 'Caption'}
+          </span>{' '}
+          <span className="text-text-tertiary dim:text-gray-400">(Optional)</span>
         </label>
         <Textarea
           id="caption"
@@ -173,13 +188,16 @@ export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: Cre
           onChange={(e) => setCaption(e.target.value)}
           placeholder="Share your thoughts..."
           maxLength={MAX_CAPTION_LENGTH}
-          rows={3}
+          rows={caption.length <= 100 ? 3 : 8}
           disabled={isSubmitting || uploadProgress !== null}
-          className="resize-none"
+          className="resize-none max-h-[50vh] overflow-y-auto transition-all duration-300"
         />
-        <div className="mt-1 text-sm text-text-tertiary dim:text-gray-400 text-right">
-          {caption.length}/{MAX_CAPTION_LENGTH}
-        </div>
+        {/* Only show character count when approaching limit (80% = 4000 chars) */}
+        {caption.length >= MAX_CAPTION_LENGTH * 0.8 && (
+          <div className="mt-1 text-sm text-text-tertiary dim:text-gray-400 text-right animate-in fade-in duration-300">
+            {caption.length}/{MAX_CAPTION_LENGTH}
+          </div>
+        )}
       </div>
 
       {/* Error message */}

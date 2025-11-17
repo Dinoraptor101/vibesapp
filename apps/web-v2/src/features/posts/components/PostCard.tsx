@@ -21,9 +21,10 @@ interface PostCardProps {
   onLike?: (postId: string) => void;
   onReport?: (postId: string) => void;
   onComment?: (postId: string) => void; // Legacy prop - not used in new design
+  hideCaption?: boolean; // Hide caption overlay when showing full caption section in detail view
 }
 
-export function PostCard({ post, onLike, onReport }: PostCardProps) {
+export function PostCard({ post, onLike, onReport, hideCaption = false }: PostCardProps) {
   const { user: currentUser } = useAuth();
 
   // Calculate stats from reactions
@@ -84,8 +85,8 @@ export function PostCard({ post, onLike, onReport }: PostCardProps) {
             }}
           />
 
-          {/* Caption Overlay - Only shown if caption exists */}
-          {post.text && (
+          {/* Caption Overlay - Only shown if caption exists and not hidden */}
+          {post.text && !hideCaption && (
             <div className="absolute bottom-0 left-0 right-0 px-4 py-3 bg-gradient-to-t from-black/75 via-black/50 to-transparent">
               <p className="text-white text-sm font-medium leading-snug line-clamp-2">
                 {stripHtml(post.text)}
