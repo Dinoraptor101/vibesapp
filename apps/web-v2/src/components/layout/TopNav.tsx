@@ -6,16 +6,14 @@
  */
 
 import { Bell, Home, MessageSquare, Plus } from 'lucide-react';
-import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui-next';
 import { useUnreadCounts } from '@/features/activity';
-import { CreatePostModal } from '@/features/posts';
 import { UserMenu } from './UserMenu';
 
 export function TopNav() {
   const location = useLocation();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   // Fetch real unread counts from Activity API
   // Note: This is safe to call even when not logged in because the query
@@ -108,7 +106,7 @@ export function TopNav() {
           variant="primary"
           size="md"
           leftIcon={<Plus className="w-5 h-5" />}
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={() => navigate('/create-post')}
           aria-label="Create post"
         >
           <span className="hidden lg:inline">Post</span>
@@ -117,9 +115,6 @@ export function TopNav() {
         {/* User Menu */}
         <UserMenu />
       </div>
-
-      {/* Create Post Modal */}
-      <CreatePostModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
     </nav>
   );
 }
