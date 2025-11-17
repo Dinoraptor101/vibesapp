@@ -35,6 +35,14 @@ const UserSubSchema = new mongoose.Schema(
         required: true,
       },
     },
+    profilePictureUrl: {
+      type: String,
+      required: false,
+    },
+    mbtiPersonality: {
+      type: String,
+      required: false,
+    },
   },
   { _id: false }
 );

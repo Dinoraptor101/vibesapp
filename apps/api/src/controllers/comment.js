@@ -66,6 +66,8 @@ exports.createComment = async (req, res) => {
           lat: location.lat,
           lon: location.lon,
         },
+        profilePictureUrl: user.profilePictureUrl,
+        mbtiPersonality: user.mbtiPersonality,
       },
       reactions: [],
       reports: [],
