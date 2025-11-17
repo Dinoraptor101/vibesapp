@@ -8,6 +8,7 @@
 import { MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Avatar, Badge } from '@/components/ui-next';
+import { getAvatarUrl } from '@/lib/avatarUtils';
 import type { PostUser } from '../types';
 
 interface UserBadgeProps {
@@ -31,7 +32,7 @@ export function UserBadge({
   const content = (
     <div className="flex items-center gap-3">
       {/* Avatar */}
-      <Avatar name={user.userName} size={avatarSize} />
+      <Avatar src={getAvatarUrl(user.profilePictureUrl)} name={user.userName} size={avatarSize} />
 
       {/* User info */}
       <div className="flex-1 min-w-0">

@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/features/auth/context/AuthContext';
+import { uploadImage } from '@/features/posts/api/s3Service';
+import { compressImage } from '@/features/posts/utils/imageUtils';
+import { getAvatarUrl } from '@/lib/avatarUtils';
 import { getCookie } from '@/lib/api';
 import { useAccountUpdates } from '../hooks/useAccountUpdates';
 
@@ -197,11 +200,40 @@ export function AccountTab() {
     setUploadingAvatar(true);
 
     try {
-      // TODO: Implement actual S3 upload with presigned URL
-      // For now, skip avatar updates to avoid 413 Payload Too Large
-      // Base64 encoding makes images too large for PATCH requests
-      console.warn('Avatar upload disabled - implement S3 presigned URL upload');
-      setUploadingAvatar(false);
+      // Compress image (800x800 for avatar)
+      const compressedBlob = await compressImage(file, 800, 800, 0.85);
+
+      // Create preview URL for immediate display
+      const previewUrl = URL.createObjectURL(compressedBlob);
+
+      // Upload to S3
+      const imageKey = await uploadImage(compressedBlob);
+
+      // Construct full CDN URL
+      const CDN_URL = import.meta.env.VITE_CDN_URL;
+      if (!CDN_URL) {
+        throw new Error('VITE_CDN_URL environment variable is required');
+      }
+      const fullAvatarUrl = imageKey.startsWith('http') ? imageKey : `${CDN_URL}/${imageKey}`;
+
+      // Update profile with new avatar URL
+      queueUpdate(
+        { avatar: fullAvatarUrl },
+        {
+          onSuccess: () => {
+            console.log('Avatar uploaded successfully');
+            setUploadingAvatar(false);
+            // Clean up preview URL
+            URL.revokeObjectURL(previewUrl);
+          },
+          onError: (error) => {
+            console.error('Failed to update avatar:', error);
+            setUploadingAvatar(false);
+            // Clean up preview URL
+            URL.revokeObjectURL(previewUrl);
+          },
+        }
+      );
     } catch (error) {
       console.error('Avatar upload error:', error);
       setUploadingAvatar(false);
@@ -241,12 +273,24 @@ export function AccountTab() {
           Profile Photo
         </div>
         <div className="flex items-center gap-4">
-          <Avatar
-            src={user?.profilePictureUrl}
-            alt={user?.username || 'User'}
-            size="xl"
-            className="ring-2 ring-gray-200 dim:ring-gray-600 dark:ring-gray-700"
-          />
+          <div
+            onClick={handleAvatarClick}
+            className="cursor-pointer hover:opacity-80 transition-opacity"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                handleAvatarClick();
+              }
+            }}
+          >
+            <Avatar
+              src={getAvatarUrl(user?.profilePictureUrl)}
+              alt={user?.username || 'User'}
+              size="xl"
+              className="ring-2 ring-gray-200 dim:ring-gray-600 dark:ring-gray-700"
+            />
+          </div>
           <Button
             onClick={handleAvatarClick}
             disabled={uploadingAvatar}

@@ -20,7 +20,11 @@ export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
   const [showSuccess, setShowSuccess] = useState(false);
   const createPostMutation = useCreatePost();
 
-  const handleSubmit = async (data: { image: string; text?: string }) => {
+  const handleSubmit = async (data: {
+    image: string;
+    text?: string;
+    location: { lat: number; lon: number };
+  }) => {
     try {
       await createPostMutation.mutateAsync(data);
 

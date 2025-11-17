@@ -13,7 +13,6 @@ import {
   compressImage,
   createImagePreview,
   revokeImagePreview,
-  formatFileSize,
   type ImageFile,
 } from '../utils/imageUtils';
 
@@ -134,14 +133,6 @@ export function ImageUploader({
         >
           <X className="w-4 h-4" />
         </Button>
-
-        {/* File info */}
-        <div className="mt-2 text-sm text-text-secondary">
-          <p>Original: {formatFileSize(selectedImage.file.size)}</p>
-          {selectedImage.compressed && (
-            <p>Compressed: {formatFileSize(selectedImage.compressed.size)}</p>
-          )}
-        </div>
       </div>
     );
   }

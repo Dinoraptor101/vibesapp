@@ -12,6 +12,10 @@ import type { CreatePostPayload, Post } from '../types';
 interface CreatePostVariables {
   image: string; // S3 key
   text?: string;
+  location: {
+    lat: number;
+    lon: number;
+  };
 }
 
 export function useCreatePost() {
@@ -27,6 +31,7 @@ export function useCreatePost() {
       const payload: CreatePostPayload = {
         image: variables.image,
         text: variables.text,
+        location: variables.location,
       };
 
       // Call API (backend will add userId from auth)

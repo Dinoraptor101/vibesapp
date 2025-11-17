@@ -5,6 +5,7 @@
 
 import { MapPin, MessageCircle } from 'lucide-react';
 import { Avatar, Badge, Button } from '@/components/ui-next';
+import { getAvatarUrl } from '@/lib/avatarUtils';
 import type { ProfileData } from '../hooks/useProfile';
 import { FollowButton } from './FollowButton';
 
@@ -20,7 +21,7 @@ export function ProfileHeader({ profile, isOwnProfile, onDMRequest }: ProfileHea
       {/* Avatar and Basic Info */}
       <div className="flex items-start gap-4">
         <Avatar
-          src={profile.profilePictureUrl}
+          src={getAvatarUrl(profile.profilePictureUrl)}
           alt={profile.username}
           name={profile.username}
           size="xl"
@@ -43,7 +44,7 @@ export function ProfileHeader({ profile, isOwnProfile, onDMRequest }: ProfileHea
           <div className="flex items-center gap-2">
             {profile.mbtiPersonality && <Badge variant="brand">{profile.mbtiPersonality}</Badge>}
             {profile.polarity && (
-              <span className="text-sm font-medium text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400">
+              <span className="text-sm font-medium text-gray-600 dim:text-gray-400 dark:text-gray-400">
                 • {profile.polarity.toUpperCase()}
               </span>
             )}
@@ -51,7 +52,7 @@ export function ProfileHeader({ profile, isOwnProfile, onDMRequest }: ProfileHea
 
           {/* Distance */}
           {profile.distance && (
-            <div className="flex items-center gap-1 text-sm text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400">
+            <div className="flex items-center gap-1 text-sm text-gray-600 dim:text-gray-400 dark:text-gray-400">
               <MapPin size={16} />
               <span>{profile.distance}</span>
             </div>
@@ -76,7 +77,7 @@ export function ProfileHeader({ profile, isOwnProfile, onDMRequest }: ProfileHea
 
       {/* Bio */}
       {profile.bio && (
-        <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
+        <div className="rounded-lg bg-gray-50 dim:bg-gray-700 dark:bg-gray-800 p-4">
           <p className="whitespace-pre-wrap text-gray-700 dim:text-gray-200 dark:text-gray-300">
             {profile.bio}
           </p>
