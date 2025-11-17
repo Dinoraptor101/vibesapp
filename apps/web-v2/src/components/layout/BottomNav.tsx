@@ -1,14 +1,12 @@
 import { Bell, Home, MessageSquare, Plus, User } from 'lucide-react';
-import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUnreadCounts } from '@/features/activity';
 import { useAuth } from '@/features/auth/context/useAuth';
-import { CreatePostModal } from '@/features/posts';
 
 export function BottomNav() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user } = useAuth();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Fetch real unread counts from Activity API
   const { data: activityCounts } = useUnreadCounts();
@@ -60,7 +58,7 @@ export function BottomNav() {
         {/* Create Post */}
         <button
           type="button"
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={() => navigate('/create-post')}
           className="flex flex-col items-center gap-1 px-4 py-2 min-w-[64px]"
           aria-label="Create post"
         >
@@ -106,9 +104,6 @@ export function BottomNav() {
           <span className="text-xs font-medium">Profile</span>
         </Link>
       </div>
-
-      {/* Create Post Modal */}
-      <CreatePostModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
     </nav>
   );
 }
