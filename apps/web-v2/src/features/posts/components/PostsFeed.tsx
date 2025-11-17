@@ -23,8 +23,8 @@ export function PostsFeed({ className }: PostsFeedProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const [reportingPostId, setReportingPostId] = useState<string | null>(null);
 
-  // Filter state
-  const { filters, setNearby, setFollowing, setSort, isFiltering } = usePostFilters();
+  // Filter state (tab-based)
+  const { filters, activeTab, setActiveTab, isFiltering } = usePostFilters();
 
   // Posts data with infinite scroll
   const {
@@ -72,14 +72,7 @@ export function PostsFeed({ className }: PostsFeedProps) {
   if (isError) {
     return (
       <div className={className}>
-        <FilterBar
-          nearbyEnabled={!!filters.nearby}
-          followingEnabled={!!filters.following}
-          sortOption={filters.sort}
-          onNearbyToggle={setNearby}
-          onFollowingToggle={setFollowing}
-          onSortChange={setSort}
-        />
+        <FilterBar activeTab={activeTab} onTabChange={setActiveTab} />
         <div className="flex flex-col items-center justify-center py-12 px-4">
           <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
           <h2 className="text-xl font-semibold text-text-primary mb-2">Failed to load posts</h2>
@@ -96,14 +89,7 @@ export function PostsFeed({ className }: PostsFeedProps) {
   if (isLoading) {
     return (
       <div className={className}>
-        <FilterBar
-          nearbyEnabled={!!filters.nearby}
-          followingEnabled={!!filters.following}
-          sortOption={filters.sort}
-          onNearbyToggle={setNearby}
-          onFollowingToggle={setFollowing}
-          onSortChange={setSort}
-        />
+        <FilterBar activeTab={activeTab} onTabChange={setActiveTab} />
         <div className="space-y-4 p-4">
           <PostSkeleton />
           <PostSkeleton />
@@ -117,14 +103,7 @@ export function PostsFeed({ className }: PostsFeedProps) {
   if (posts.length === 0) {
     return (
       <div className={className}>
-        <FilterBar
-          nearbyEnabled={!!filters.nearby}
-          followingEnabled={!!filters.following}
-          sortOption={filters.sort}
-          onNearbyToggle={setNearby}
-          onFollowingToggle={setFollowing}
-          onSortChange={setSort}
-        />
+        <FilterBar activeTab={activeTab} onTabChange={setActiveTab} />
         <div className="flex flex-col items-center justify-center py-12 px-4">
           <div className="text-6xl mb-4">🕊️</div>
           <h2 className="text-xl font-semibold text-text-primary mb-2">No posts yet</h2>
@@ -141,14 +120,7 @@ export function PostsFeed({ className }: PostsFeedProps) {
   // Posts list
   return (
     <div className={className}>
-      <FilterBar
-        nearbyEnabled={!!filters.nearby}
-        followingEnabled={!!filters.following}
-        sortOption={filters.sort}
-        onNearbyToggle={setNearby}
-        onFollowingToggle={setFollowing}
-        onSortChange={setSort}
-      />
+      <FilterBar activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Posts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">

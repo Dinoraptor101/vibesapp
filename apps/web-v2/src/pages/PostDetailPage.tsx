@@ -9,7 +9,6 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout';
 import { Button } from '@/components/ui-next';
-import { stripHtml } from '@/lib/utils';
 import {
   CommentInput,
   CommentList,
@@ -19,6 +18,7 @@ import {
   useCreateComment,
   usePost,
 } from '@/features/posts';
+import { stripHtml } from '@/lib/utils';
 
 export function PostDetailPage() {
   const { postId } = useParams<{ postId: string }>();
@@ -150,7 +150,6 @@ export function PostDetailPage() {
               {/* Full Caption Section - Only shown when caption exceeds 100 chars (≈2 lines) */}
               {showFullCaptionSection && (
                 <div className="mt-6 p-4 bg-surface-elevated dim:bg-gray-700 dark:bg-gray-800 border border-border dim:border-gray-600 dark:border-gray-700 rounded-lg">
-                  {/* eslint-disable-next-line react/no-danger */}
                   <div
                     className="text-text-primary dim:text-gray-100 dark:text-gray-200 text-sm leading-relaxed prose prose-sm max-w-none
                       prose-headings:text-text-primary dim:prose-headings:text-gray-100 dark:prose-headings:text-gray-200
@@ -160,7 +159,7 @@ export function PostDetailPage() {
                       prose-a:text-brand-primary hover:prose-a:text-brand-600
                       prose-ul:text-text-primary dim:prose-ul:text-gray-100 dark:prose-ul:text-gray-200
                       prose-ol:text-text-primary dim:prose-ol:text-gray-100 dark:prose-ol:text-gray-200"
-                    dangerouslySetInnerHTML={{ __html: post.text }}
+                    dangerouslySetInnerHTML={{ __html: post.text || '' }}
                   />
                 </div>
               )}

@@ -53,6 +53,7 @@ interface SignupResponse extends LoginResponse {
 function transformUserData(data: LoginResponse): User {
   return {
     _id: data.userId,
+    userId: data.userId, // UUID - business logic identifier
     username: data.username, // Already normalized by backend
     polarity: data.polarity || 'neutral',
     mbtiPersonality: data.mbtiPersonality,

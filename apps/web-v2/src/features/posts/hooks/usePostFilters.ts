@@ -1,26 +1,18 @@
 /**
  * Post Feed Filters Hook
  *
- * Manages filter state for the posts feed including nearby posts,
- * following filter, MBTI filter, and sort options.
+ * Manages filter state for the posts feed with mutually exclusive tabs.
+ * Phase 4.9 (Nov 17, 2025): Simplified to tab-based filtering
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import type { FeedTab } from '../components/FilterBar';
 import type { PostFilters } from '../types';
 
-// Design Change (Nov 7, 2025): Removed 'popular' sort - no vibe score calculation
-export type SortOption = 'recent' | 'nearby';
-
-export interface FeedFilters extends PostFilters {
-  sort: SortOption;
-}
-
 interface UsePostFiltersReturn {
-  filters: FeedFilters;
-  setNearby: (enabled: boolean) => void;
-  setFollowing: (enabled: boolean) => void;
-  setSort: (sort: SortOption) => void;
-  resetFilters: () => void;
+  filters: PostFilters;
+  activeTab: FeedTab;
+  setActiveTab: (tab: FeedTab) => void;
   isFiltering: boolean;
 }
 
@@ -55,13 +47,11 @@ async function getCurrentLocation(): Promise<{ lat: number; lon: number } | null
 const DEFAULT_NEARBY_RADIUS = 10000; // 10km in meters
 
 /**
- * Hook for managing post feed filters
+ * Hook for managing post feed filters with tab-based navigation
  */
 export function usePostFilters(): UsePostFiltersReturn {
-  const [filters, setFilters] = useState<FeedFilters>({
-    sort: 'recent',
-  });
-
+  const [activeTab, setActiveTab] = useState<FeedTab>('nearby');
+  const [filters, setFilters] = useState<PostFilters>({});
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
 
   // Get user location on mount
@@ -73,76 +63,38 @@ export function usePostFilters(): UsePostFiltersReturn {
     });
   }, []);
 
-  // Enable/disable nearby filter
-  const setNearby = useCallback(
-    (enabled: boolean) => {
-      setFilters((prev) => {
-        if (!enabled) {
-          // Remove nearby filter - create new object without 'nearby' key
-          const newFilters: FeedFilters = { sort: prev.sort };
-          if (prev.following) newFilters.following = prev.following;
-          if (prev.userId) newFilters.userId = prev.userId;
-          if (prev.includeHidden) newFilters.includeHidden = prev.includeHidden;
-          return newFilters;
-        }
-
-        // Add nearby filter with current location
-        if (!userLocation) {
-          console.warn('Location not available for nearby filter');
-          return prev;
-        }
-
-        return {
-          ...prev,
-          nearby: {
-            lat: userLocation.lat,
-            lon: userLocation.lon,
-            radius: DEFAULT_NEARBY_RADIUS,
-          },
-        };
-      });
-    },
-    [userLocation]
-  );
-
-  // Enable/disable following filter
-  const setFollowing = useCallback((enabled: boolean) => {
-    setFilters((prev) => {
-      if (!enabled) {
-        // Remove following filter - create new object without 'following' key
-        const newFilters: FeedFilters = { sort: prev.sort };
-        if (prev.nearby) newFilters.nearby = prev.nearby;
-        if (prev.userId) newFilters.userId = prev.userId;
-        if (prev.includeHidden) newFilters.includeHidden = prev.includeHidden;
-        return newFilters;
+  // Update filters when tab changes
+  useEffect(() => {
+    if (activeTab === 'nearby') {
+      // Nearby tab: Posts within proximity radius (from settings)
+      if (!userLocation) {
+        console.warn('Location not available for nearby filter');
+        setFilters({});
+        return;
       }
 
-      return {
-        ...prev,
+      setFilters({
+        nearby: {
+          lat: userLocation.lat,
+          lon: userLocation.lon,
+          radius: DEFAULT_NEARBY_RADIUS,
+        },
+      });
+    } else {
+      // Following tab: Posts from people you follow
+      setFilters({
         following: true,
-      };
-    });
-  }, []);
+      });
+    }
+  }, [activeTab, userLocation]);
 
-  // Set sort option
-  const setSort = useCallback((sort: SortOption) => {
-    setFilters((prev) => ({ ...prev, sort }));
-  }, []);
-
-  // Reset all filters
-  const resetFilters = useCallback(() => {
-    setFilters({ sort: 'recent' });
-  }, []);
-
-  // Check if any filters are active (excluding sort)
-  const isFiltering = !!(filters.nearby || filters.following || filters.userId);
+  // Check if any filters are active
+  const isFiltering = !!(filters.nearby || filters.following);
 
   return {
     filters,
-    setNearby,
-    setFollowing,
-    setSort,
-    resetFilters,
+    activeTab,
+    setActiveTab,
     isFiltering,
   };
 }
