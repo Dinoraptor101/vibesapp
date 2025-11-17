@@ -161,7 +161,7 @@ This ensures AI agents can pick up exactly where you left off!
 
 ### Phase 5: Discovery (Week 10-11)
 - [ ] 5.1 - Search Interface (⏸️ Not started)
-- [ ] 5.2 - Offline Support (⏸️ Not started)
+- [ ] 5.2 - Offline Support & PWA (⏸️ Not started)
 - [ ] 5.3 - Performance Optimization (⏸️ Not started)
 
 ### Phase 6: Polish (Week 12-13)

@@ -5,6 +5,7 @@ export { Label } from './Label';
 export { Avatar } from './Avatar';
 export { Badge } from './Badge';
 export { Spinner, Skeleton } from './Loading';
+export { ZenLoader, ZenSuspense } from './ZenLoader';
 export { Card, CardHeader, CardContent, CardFooter } from './Card';
 export {
   Dialog,
