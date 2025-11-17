@@ -90,7 +90,7 @@ export function ConversationView() {
 
         <button
           type="button"
-          onClick={() => otherUser?._id && navigate(`/profile/${otherUser._id}`)}
+          onClick={() => otherUser?.userId && navigate(`/profile/${otherUser.userId}`)}
           className="flex flex-1 items-center gap-3 hover:opacity-80 transition-opacity"
         >
           <Avatar

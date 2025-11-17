@@ -42,7 +42,7 @@ export function ProfilePage() {
     }
   }, [isError, error]);
 
-  const isOwnProfile = currentUser?._id === userId;
+  const isOwnProfile = currentUser?.userId === userId;
 
   // Handle Message button click
   const handleMessageClick = () => {

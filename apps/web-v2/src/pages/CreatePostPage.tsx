@@ -9,8 +9,8 @@ import { CheckCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout';
-import { useCreatePost } from '@/features/posts/hooks/useCreatePost';
 import { CreatePostForm } from '@/features/posts/components/CreatePostForm';
+import { useCreatePost } from '@/features/posts/hooks/useCreatePost';
 
 export function CreatePostPage() {
   const navigate = useNavigate();

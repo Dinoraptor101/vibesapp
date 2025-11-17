@@ -92,7 +92,7 @@ export function BottomNav() {
 
         {/* Profile */}
         <Link
-          to={`/profile/${user._id}`}
+          to={`/profile/${user.userId}`}
           className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors min-w-[64px] ${
             location.pathname.startsWith('/profile') ? 'text-brand-purple' : 'text-text-secondary'
           }`}

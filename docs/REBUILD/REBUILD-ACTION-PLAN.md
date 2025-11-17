@@ -42,21 +42,29 @@
 
 ## 🚨 Known Issues & Next Priorities (November 14, 2025)
 
-### Priority 1: Post Feed Tabs Cleanup ⚠️
-**Issue:** Feed displays redundant/confusing tabs
-- Current: Shows "Nearby | Following | Recent | Nearby" (redundant)
-- Expected: Only "Nearby | Following" tabs
-- **Nearby tab:** Shows posts within proximity radius (configured in Settings → Preferences)
-- **Following tab:** Shows posts from people you follow
-- Both tabs should show posts sorted chronologically (newest first)
-- Tabs are **mutually exclusive** (only one active at a time)
+### ✅ COMPLETE: Post Feed Tabs Cleanup (Nov 17, 2025)
+**Previous Issue:** Feed displayed redundant/confusing tabs
+- Old: "Nearby | Following | Recent | Nearby" (redundant)
+- New: Only "Nearby | Following" tabs (mutually exclusive)
 
-**Impact:** Medium - Confusing UX, duplicate content
-**Files to modify:**
-- `apps/web-v2/src/features/posts/components/PostsFeed.tsx` - Remove redundant tabs
-- Verify API calls use correct filters (`nearby` vs `following`)
+**Implementation:**
+- Replaced toggle buttons with tab-style UI
+- Tab indicator animates smoothly (purple underline)
+- Full ARIA accessibility (role="tablist", aria-selected)
+- Nearby defaults on load, no localStorage persistence
+- Both tabs sorted chronologically (newest first)
 
-### Priority 2: Activity Feed Overhaul ⚠️
+**Files Modified:**
+- `FilterBar.tsx` - Tab-based UI with 50% width each
+- `usePostFilters.ts` - Simplified to activeTab state
+- `PostsFeed.tsx` - Uses new tab interface
+- `index.ts` - Exports FeedTab type
+
+**Status:** ✅ Complete - Simple, clear, no redundancy
+
+---
+
+### Priority 2: Activity Feed Overhaul ⚠️ NEXT UP
 **Issue:** Activity notifications not working with new comment/heart system
 - Comment likes not generating notifications
 - Comment replies not generating notifications

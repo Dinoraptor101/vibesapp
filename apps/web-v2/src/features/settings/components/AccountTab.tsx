@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { uploadImage } from '@/features/posts/api/s3Service';
 import { compressImage } from '@/features/posts/utils/imageUtils';
-import { getAvatarUrl } from '@/lib/avatarUtils';
 import { getCookie } from '@/lib/api';
+import { getAvatarUrl } from '@/lib/avatarUtils';
 import { useAccountUpdates } from '../hooks/useAccountUpdates';
 
 const MBTI_TYPES = [

@@ -1241,6 +1241,42 @@ This ensures AI agents can pick up exactly where you left off!
 - **Status:** 🎉 **PHASE 4.6 COMPLETE - Messaging system optimized and production ready!**
 - **Next:** Phase 5.1 - Search Interface (Discovery features)
 
+### Session 34 - November 17, 2025
+- **Completed:** Phase 4.9 - Post Feed Tabs Cleanup
+- **Time taken:** ~1 hour (including design analysis phase)
+- **Context:** Simplified post feed filtering from complex multi-button system to simple two-tab design
+- **Deliverables:**
+  - **FilterBar Component** (`features/posts/components/FilterBar.tsx`):
+    - Replaced 6 buttons with 2 mutually exclusive tabs
+    - Tab-style UI with 50% width each
+    - Purple bottom border indicator (2px, animated)
+    - Full ARIA accessibility (role="tablist", role="tab", aria-selected)
+    - Smooth transition animation (200ms)
+  - **usePostFilters Hook** (`features/posts/hooks/usePostFilters.ts`):
+    - Simplified from toggle-based to tab-based state management
+    - Single activeTab state ('nearby' | 'following')
+    - Derived filters based on active tab (mutually exclusive)
+    - Removed sort state (always chronological)
+    - Nearby defaults on load, no localStorage persistence
+  - **PostsFeed Component** (`features/posts/components/PostsFeed.tsx`):
+    - Updated to use new tab interface
+    - Single activeTab and setActiveTab props
+    - All 4 states updated (error, loading, empty, main list)
+  - **Type Exports** (`features/posts/index.ts`):
+    - Added FeedTab export ('nearby' | 'following')
+    - Removed SortOption export (no longer needed)
+- **Design Decisions:**
+  - Twitter/X pattern: Mutually exclusive tabs (not combinatorial filters)
+  - Nearby as default (location-first philosophy)
+  - No tab persistence (fresh start each session)
+  - Honors user proximity setting from Settings → Preferences
+  - Both tabs sorted chronologically (newest first)
+- **Bug Fixes:**
+  - Fixed pre-existing TypeScript error in PostDetailPage (post.text undefined)
+- **Issues:** None - all TypeScript/linting errors resolved, build successful (1.4 MB, 312 KB gzipped)
+- **Status:** ✅ Phase 4.9 complete - Feed tabs simplified from 6 buttons to 2 tabs
+- **Next:** Phase 4.10 - Activity Feed Overhaul (remove Messages tab, add comment notifications)
+
 ### Session 21 - November 7, 2025
 - **Completed:** Prompt 3.2 - Posts Feed
 - **Time taken:** ~2 hours

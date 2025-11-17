@@ -23,6 +23,7 @@ export { CommentSkeleton } from './components/CommentSkeleton';
 export { CreatePostForm } from './components/CreatePostForm';
 export { CreatePostModal } from './components/CreatePostModal';
 export { FilterBar } from './components/FilterBar';
+export type { FeedTab } from './components/FilterBar';
 export { ImageUploader } from './components/ImageUploader';
 export { ImageViewer } from './components/ImageViewer';
 export { PostActions } from './components/PostActions';
@@ -42,7 +43,6 @@ export { useHeartComment } from './hooks/useHeartComment';
 export { useInfinitePosts } from './hooks/useInfinitePosts';
 export { usePost } from './hooks/usePost';
 export { usePostFilters } from './hooks/usePostFilters';
-export type { FeedFilters, SortOption } from './hooks/usePostFilters';
 export { useReportPost } from './hooks/useReportPost';
 
 // API Services

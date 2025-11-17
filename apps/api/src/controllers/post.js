@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const { S3 } = require('@aws-sdk/client-s3');
 const Post = require('../models/Post');
 const User = require('../models/User');
+const Follow = require('../models/Follow');
 const { createReplyActivity, createReactionActivity } = require('./activity');
 const ReactionActivity = require('../models/ReactionActivity');
 const ReplyActivity = require('../models/ReplyActivity');
@@ -170,14 +171,42 @@ const getPosts = async (req, res) => {
   const withReplies = req.query.withReplies === 'true';
   const userId = req.query.userId; // Filter by specific user
   const replyTo = req.query.replyTo; // Filter by parent post (for comments)
+  const following = req.query.following === 'true'; // Filter by following users
 
   try {
     // Build query filter
-    let query = { isHidden: false };
+    const query = { isHidden: false };
 
     // Filter by user if provided
     if (userId) {
       query['user.userId'] = userId;
+    }
+
+    // Filter by following users if requested
+    if (following) {
+      const currentUserId = req.validatedUserId; // Get from auth middleware
+
+      if (!currentUserId) {
+        return res.status(401).json({ message: 'User not authenticated' });
+      }
+
+      // Get list of users the current user is following
+      const followingList = await Follow.find({ follower: currentUserId }).select('following');
+      const followingUserIds = followingList.map((f) => f.following);
+
+      // If not following anyone, return empty result
+      if (followingUserIds.length === 0) {
+        return res.status(200).json({
+          posts: [],
+          page: pageNumber,
+          limit: limitNumber,
+          total: 0,
+          hasMore: false,
+        });
+      }
+
+      // Filter posts by following users
+      query['user.userId'] = { $in: followingUserIds };
     }
 
     // Filter by parent post if provided (for fetching comments)

@@ -457,7 +457,7 @@ const getUserProfile = async (req, res) => {
 
     // Get counts
     const [postsCount, followersCount, followingCount] = await Promise.all([
-      Post.countDocuments({ userId }),
+      Post.countDocuments({ 'user.userId': userId }),
       Follow.countDocuments({ following: userId }),
       Follow.countDocuments({ follower: userId }),
     ]);
@@ -516,10 +516,17 @@ const getUserProfile = async (req, res) => {
 // Toggle follow/unfollow
 const toggleFollow = async (req, res) => {
   console.log('Toggling follow status...');
+  console.log(
+    'req.user:',
+    req.user ? { userId: req.user.userId, userName: req.user.userName } : 'undefined'
+  );
+  console.log('req.params.userId:', req.params.userId);
+
   const { userId } = req.params;
   const followerId = req.user?.userId;
 
   if (!followerId) {
+    console.error('Missing followerId - req.user:', req.user);
     return res.status(401).json({ message: 'Unauthorized' });
   }
 

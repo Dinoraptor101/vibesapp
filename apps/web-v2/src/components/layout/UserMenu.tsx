@@ -62,7 +62,7 @@ export function UserMenu() {
           {/* Profile */}
           <DropdownMenu.Item asChild>
             <Link
-              to={`/profile/${user._id}`}
+              to={`/profile/${user.userId}`}
               className="flex items-center gap-3 px-3 py-2 text-sm text-text-primary rounded-md hover:bg-surface-hover cursor-pointer outline-none focus:bg-surface-hover"
             >
               <User className="w-4 h-4" />

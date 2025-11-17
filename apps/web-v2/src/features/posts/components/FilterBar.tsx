@@ -1,85 +1,66 @@
 /**
  * FilterBar Component
  *
- * Filter controls for the posts feed including nearby toggle,
- * following filter, and sort options.
+ * Mutually exclusive tabs for Nearby and Following feeds.
+ * Both tabs show posts sorted chronologically (newest first).
+ *
+ * Phase 4.9 (Nov 17, 2025): Simplified to two mutually exclusive tabs
  */
 
 import { MapPin, Users } from 'lucide-react';
-import { Button } from '@/components/ui-next';
 import { cn } from '@/lib/cn';
-import type { SortOption } from '../hooks/usePostFilters';
+
+export type FeedTab = 'nearby' | 'following';
 
 interface FilterBarProps {
-  nearbyEnabled: boolean;
-  followingEnabled: boolean;
-  sortOption: SortOption;
-  onNearbyToggle: (enabled: boolean) => void;
-  onFollowingToggle: (enabled: boolean) => void;
-  onSortChange: (sort: SortOption) => void;
+  activeTab: FeedTab;
+  onTabChange: (tab: FeedTab) => void;
   className?: string;
 }
 
-export function FilterBar({
-  nearbyEnabled,
-  followingEnabled,
-  sortOption,
-  onNearbyToggle,
-  onFollowingToggle,
-  onSortChange,
-  className,
-}: FilterBarProps) {
+export function FilterBar({ activeTab, onTabChange, className }: FilterBarProps) {
   return (
     <div
-      className={cn(
-        'flex items-center gap-2 p-3 border-b border-border bg-surface overflow-x-auto',
-        className
-      )}
+      role="tablist"
+      className={cn('flex items-center border-b border-border bg-surface', className)}
     >
-      {/* Nearby Filter */}
-      <Button
-        variant={nearbyEnabled ? 'primary' : 'ghost'}
-        size="sm"
-        onClick={() => onNearbyToggle(!nearbyEnabled)}
-        className={cn('shrink-0', nearbyEnabled && 'bg-brand-purple hover:bg-brand-purple/90')}
+      {/* Nearby Tab */}
+      <button
+        type="button"
+        role="tab"
+        aria-selected={activeTab === 'nearby'}
+        onClick={() => onTabChange('nearby')}
+        className={cn(
+          'flex-1 flex items-center justify-center gap-2 py-3 px-4',
+          'font-medium text-sm transition-all duration-200',
+          'border-b-2',
+          activeTab === 'nearby'
+            ? 'text-brand-purple border-brand-purple'
+            : 'text-text-secondary border-transparent hover:text-text-primary hover:bg-surface-hover'
+        )}
       >
-        <MapPin className="w-4 h-4 mr-1.5" />
+        <MapPin className="w-4 h-4" />
         Nearby
-      </Button>
+      </button>
 
-      {/* Following Filter */}
-      <Button
-        variant={followingEnabled ? 'primary' : 'ghost'}
-        size="sm"
-        onClick={() => onFollowingToggle(!followingEnabled)}
-        className={cn('shrink-0', followingEnabled && 'bg-brand-purple hover:bg-brand-purple/90')}
+      {/* Following Tab */}
+      <button
+        type="button"
+        role="tab"
+        aria-selected={activeTab === 'following'}
+        onClick={() => onTabChange('following')}
+        className={cn(
+          'flex-1 flex items-center justify-center gap-2 py-3 px-4',
+          'font-medium text-sm transition-all duration-200',
+          'border-b-2',
+          activeTab === 'following'
+            ? 'text-brand-purple border-brand-purple'
+            : 'text-text-secondary border-transparent hover:text-text-primary hover:bg-surface-hover'
+        )}
       >
-        <Users className="w-4 h-4 mr-1.5" />
+        <Users className="w-4 h-4" />
         Following
-      </Button>
-
-      {/* Divider */}
-      <div className="w-px h-6 bg-border shrink-0" />
-
-      {/* Sort Options - Popular removed (Nov 7, 2025: no vibe score) */}
-      <div className="flex items-center gap-1 shrink-0">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onSortChange('recent')}
-          className={cn(sortOption === 'recent' && 'bg-surface-alt')}
-        >
-          Recent
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onSortChange('nearby')}
-          className={cn(sortOption === 'nearby' && 'bg-surface-alt')}
-        >
-          Nearby
-        </Button>
-      </div>
+      </button>
     </div>
   );
 }
