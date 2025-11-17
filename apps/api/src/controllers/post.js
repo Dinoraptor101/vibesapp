@@ -79,6 +79,8 @@ const createPost = async (req, res) => {
         birthMonth: user.birthMonth,
         sex: user.sex,
         location: { lat, lon },
+        profilePictureUrl: user.profilePictureUrl,
+        mbtiPersonality: user.mbtiPersonality,
       },
       replyTo: replyToPost,
       proximal_users: usersWithin100Miles,
