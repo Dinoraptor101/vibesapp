@@ -1,24 +1,17 @@
 /**
- * Authentication Context for VibesApp
+ * Authentication Provider Component
  *
  * Manages user authentication state, login/logout, and session persistence.
  * Uses Pigeon ID (password-only) authentication system.
  */
 
 import type { ReactNode } from 'react';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { deleteCookie, getCookie, setCookie } from '@/lib/api';
-import type { AuthState, User } from '@/types';
+import type { User } from '@/types';
 import { authApi } from '../services/authApi';
-
-interface AuthContextType extends AuthState {
-  login: (pigeonId: string) => Promise<void>;
-  logout: () => void;
-  refreshUser: () => Promise<void>;
-}
-
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import { AuthContext, type AuthContextType } from './types';
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -139,15 +132,4 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
-
-/**
- * Custom hook to access Auth context
- */
-export function useAuth(): AuthContextType {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
-  return context;
 }

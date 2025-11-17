@@ -9,7 +9,7 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useRef, useCallback } from 'react';
-import { useAuth } from '@/features/auth/context/AuthContext';
+import { useAuth } from '@/features/auth/context/useAuth';
 import api from '@/lib/api';
 
 interface AccountUpdate {
