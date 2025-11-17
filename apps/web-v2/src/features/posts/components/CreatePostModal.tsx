@@ -18,6 +18,7 @@ interface CreatePostModalProps {
 
 export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isArticleMode, setIsArticleMode] = useState(false);
   const createPostMutation = useCreatePost();
 
   const handleSubmit = async (data: {
@@ -53,7 +54,7 @@ export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent size="md">
+      <DialogContent size={isArticleMode ? 'lg' : 'md'} className="transition-all duration-300">
         <DialogHeader>
           <DialogTitle>Create Post</DialogTitle>
         </DialogHeader>
@@ -78,6 +79,7 @@ export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
               onSubmit={handleSubmit}
               onCancel={handleClose}
               isSubmitting={createPostMutation.isPending}
+              onArticleModeChange={setIsArticleMode}
             />
           )}
         </DialogBody>
