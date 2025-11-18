@@ -930,6 +930,24 @@ const reactToPost = async (req, res) => {
 
       await post.save();
 
+      // Create reaction activity using new unified model
+      await createActivity({
+        recipientId: post.user.userId,
+        type: 'reaction',
+        actor: {
+          userId: user.userId,
+          username: user.userName,
+          avatar: user.profilePictureUrl,
+        },
+        target: {
+          type: post.commentOn ? 'comment' : 'post',
+          id: post._id,
+          thumbnail: post.image,
+          preview: post.text,
+        },
+      });
+      console.info('Reaction activity created for', post.commentOn ? 'comment' : 'post');
+
       return res.status(200).json({
         success: true,
         post,

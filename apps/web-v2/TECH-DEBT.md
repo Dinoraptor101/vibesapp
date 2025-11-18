@@ -4,7 +4,21 @@ This document tracks known issues, UX improvements, and technical debt items tha
 
 ---
 
-## Signup Flow Issues
+## 🚨 High Priority (Blocking Features)
+
+### ✅ ~~1. Heart on Comment Notifications Not Working~~ - FIXED Nov 17, 2025
+**Status:** ✅ Fixed
+
+**What was fixed:**
+Added `createActivity()` call in `reactToPost()` function to create notification when someone hearts a comment.
+
+**Location:** `apps/api/src/controllers/post.js` (reactToPost function)
+
+---
+
+## 📋 Medium Priority (UX Improvements)
+
+---
 
 ### 1. Skip Button Redundancy
 **Priority:** Medium  
