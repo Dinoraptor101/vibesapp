@@ -61,7 +61,7 @@ export function ProfileHeader({ profile, isOwnProfile, onDMRequest }: ProfileHea
           {/* Action Buttons */}
           {!isOwnProfile && (
             <div className="flex gap-2">
-              <FollowButton userId={profile._id} isFollowing={profile.isFollowing} />
+              <FollowButton userId={profile.userId} isFollowing={profile.isFollowing} />
               <Button
                 variant="outline"
                 size="md"
