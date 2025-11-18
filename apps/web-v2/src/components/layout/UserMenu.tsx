@@ -35,7 +35,7 @@ export function UserMenu() {
       <DropdownMenu.Trigger asChild>
         <button
           type="button"
-          className="rounded-full focus:outline-none focus:ring-2 focus:ring-brand-purple focus:ring-offset-2 focus:ring-offset-surface"
+          className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-purple"
           aria-label="User menu"
         >
           <Avatar
