@@ -958,6 +958,71 @@ const reactToPost = async (req, res) => {
   }
 };
 
+/**
+ * Search posts globally by text
+ * GET /api/posts/search?q=searchTerm&page=1&limit=20
+ */
+const searchPosts = async (req, res) => {
+  const { q, page = 1, limit = 20 } = req.query;
+
+  try {
+    // Validate search query
+    if (!q || typeof q !== 'string' || q.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Search query is required',
+      });
+    }
+
+    const searchTerm = q.trim();
+    const pageNumber = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 20;
+
+    // Build search query
+    // Search in post text field using case-insensitive regex
+    const searchQuery = {
+      text: { $regex: searchTerm, $options: 'i' },
+      isHidden: false, // Only show visible posts
+      commentOn: { $exists: false }, // Exclude comments, only show posts
+    };
+
+    // Get total count for pagination
+    const total = await Post.countDocuments(searchQuery);
+
+    // Execute search with pagination
+    const posts = await Post.find(searchQuery)
+      .sort({ createdAt: -1 }) // Newest first
+      .skip((pageNumber - 1) * limitNumber)
+      .limit(limitNumber)
+      .lean(); // Use lean() for better performance
+
+    // Calculate pagination info
+    const totalPages = Math.ceil(total / limitNumber);
+    const hasMore = pageNumber < totalPages;
+
+    return res.status(200).json({
+      success: true,
+      posts: posts.map((post) => ({
+        ...post,
+        post: post._id, // Map _id to post field for frontend compatibility
+      })),
+      pagination: {
+        page: pageNumber,
+        limit: limitNumber,
+        total,
+        totalPages,
+        hasMore,
+      },
+    });
+  } catch (error) {
+    console.error('Error searching posts:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+};
+
 module.exports = {
   createPost,
   getPosts,
@@ -967,5 +1032,6 @@ module.exports = {
   unlikePost,
   reactToPost,
   reportPost,
+  searchPosts,
   getDistanceFromLatLonInMiles,
 };

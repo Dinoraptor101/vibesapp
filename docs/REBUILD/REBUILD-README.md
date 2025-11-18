@@ -215,6 +215,37 @@ This comprehensive documentation package provides everything needed to rebuild t
 
 ---
 
+### 6. [REBUILD-WEB-V2-TESTING-PLAN.md](./REBUILD-WEB-V2-TESTING-PLAN.md)
+**Comprehensive Testing Strategy** (Future Implementation)
+
+**What it covers:**
+- Testing pyramid strategy (60% Unit, 30% Component, 10% E2E)
+- Complete setup instructions for Playwright + Vitest
+- Feature-by-feature test breakdown (110+ test cases)
+- Configuration examples and test templates
+- 4-week implementation timeline
+- CI/CD integration strategy
+- Testing best practices and maintenance guidelines
+
+**When to use:**
+- Planning testing automation implementation
+- Setting up Playwright and Vitest
+- Writing unit, component, and E2E tests
+- Establishing testing standards and coverage goals
+- Configuring CI/CD test pipelines
+
+**Key sections:**
+- Testing architecture (Unit/Component/E2E breakdown)
+- Setup & configuration (Vitest, Playwright, MSW)
+- Feature testing checklists (Auth, Posts, Messaging, etc.)
+- Code examples (3 complete test templates)
+- 4-week implementation roadmap
+- Success metrics (>80% coverage, <5min runtime)
+
+**Status:** 📅 **Planned for future implementation** - Execute after core rebuild features are stable
+
+---
+
 ## 🎯 Quick Start
 
 ### If you want to...
@@ -233,6 +264,9 @@ This comprehensive documentation package provides everything needed to rebuild t
 
 **Ensure consistency:**
 → Reference `REBUILD-UI-PATTERNS.md`
+
+**Plan testing automation:**
+→ Review `REBUILD-WEB-V2-TESTING-PLAN.md` (for future implementation)
 
 ---
 
@@ -294,14 +328,20 @@ apps/web-v2/
 - [x] UI pattern documentation
 - [x] Learning documentation
 - [x] Detailed action plan
+- [x] Testing automation plan (Playwright + Vitest)
 - [x] Branch created (`rebuilding-front-end`)
 
-### Next Steps
+### Next Steps (Current Phase)
 1. Review documentation
 2. Get stakeholder approval
 3. Set up new Vite project (`apps/web-v2`)
 4. Configure Tailwind CSS
 5. Build first design system component
+
+### Future Steps (Post-Rebuild)
+1. Implement testing automation (see REBUILD-WEB-V2-TESTING-PLAN.md)
+2. Achieve >80% test coverage
+3. Setup CI/CD test pipelines
 
 ---
 
@@ -351,6 +391,7 @@ apps/web-v2/
 - [REBUILD-UI-PATTERNS.md](./REBUILD-UI-PATTERNS.md)
 - [REBUILD-LEARNINGS.md](./REBUILD-LEARNINGS.md)
 - [REBUILD-ACTION-PLAN.md](./REBUILD-ACTION-PLAN.md) ⭐ **Daily reference**
+- [REBUILD-WEB-V2-TESTING-PLAN.md](./REBUILD-WEB-V2-TESTING-PLAN.md) 📅 **Future implementation**
 
 ---
 
@@ -388,8 +429,8 @@ apps/web-v2/
 | Date | Document | Changes |
 |------|----------|---------|
 | Nov 3, 2025 | All | Initial creation |
-| | | |
-| | | |
+| Nov 18, 2025 | REBUILD-WEB-V2-TESTING-PLAN.md | Added comprehensive testing plan (future implementation) |
+| Nov 18, 2025 | REBUILD-README.md | Updated to include testing plan reference |
 
 ---
 
