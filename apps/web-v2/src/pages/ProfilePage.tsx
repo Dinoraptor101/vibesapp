@@ -8,7 +8,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout';
 import { Button, Spinner } from '@/components/ui-next';
 import { useAuth } from '@/features/auth';
-import { DMRequestModal } from '@/features/messaging/components/DMRequestModal';
 import { useDMRequestStatus } from '@/features/messaging/hooks/useDMRequestStatus';
 import { ProfileHeader } from '@/features/profile/components/ProfileHeader';
 import { ProfilePosts } from '@/features/profile/components/ProfilePosts';
@@ -19,7 +18,6 @@ export function ProfilePage() {
   const { userId } = useParams<{ userId: string }>();
   const { user: currentUser } = useAuth();
   const navigate = useNavigate();
-  const [showDMModal, setShowDMModal] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
 
   const { data: profile, isLoading, isError, error } = useProfile(userId);
@@ -67,8 +65,8 @@ export function ProfilePage() {
       return;
     }
 
-    // Otherwise, show DM request modal
-    setShowDMModal(true);
+    // Otherwise, show DM request page
+    navigate(`/dm-request/${userId}`);
   };
 
   // ZEN: Show loading only after 1 second delay (avoid flash for fast loads)
@@ -110,6 +108,7 @@ export function ProfilePage() {
             profile={profile}
             isOwnProfile={isOwnProfile}
             onDMRequest={handleMessageClick}
+            dmStatus={dmStatus?.reason}
           />
 
           {/* Stats */}
@@ -128,16 +127,6 @@ export function ProfilePage() {
           </div>
         </div>
       </div>
-
-      {/* DM Request Modal */}
-      {userId && profile && (
-        <DMRequestModal
-          userId={userId}
-          username={profile.username}
-          open={showDMModal}
-          onOpenChange={setShowDMModal}
-        />
-      )}
     </AppLayout>
   );
 }

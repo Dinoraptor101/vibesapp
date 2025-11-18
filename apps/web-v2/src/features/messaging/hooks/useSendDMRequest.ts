@@ -4,7 +4,6 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
 import api from '@/lib/api';
 import type { DMRequest, SendDMRequestPayload } from '../types';
 
@@ -26,12 +25,12 @@ export function useSendDMRequest() {
       // Invalidate DM request status for this user
       queryClient.invalidateQueries({ queryKey: ['dm-request-status', variables.userId] });
 
-      // Show success toast
-      toast.success('DM request sent!');
+      // ZEN: No toast messages, silent success
+      console.log('DM request sent successfully to user:', variables.userId);
     },
     onError: (error) => {
+      // ZEN: Log errors to console only, never show to user
       console.error('Failed to send DM request:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to send DM request');
     },
   });
 }

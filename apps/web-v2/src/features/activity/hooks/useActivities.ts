@@ -7,7 +7,24 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/features/auth';
 import { activityService } from '../api/activityService';
-import type { Activity, ActivityCounts, ActivityCategory } from '../types';
+import type { Activity, ActivityCategory } from '../types';
+
+/**
+ * Helper function to categorize activities
+ */
+function categorizeActivity(activity: Activity): ActivityCategory {
+  if (activity.type === 'dm_request' || activity.type === 'dm_message') {
+    return 'messages';
+  }
+  if (
+    activity.type === 'new_follower' ||
+    activity.type === 'following_post' ||
+    activity.type === 'nearby_post'
+  ) {
+    return 'social';
+  }
+  return 'me';
+}
 
 /**
  * Hook to fetch all activities for the current user
@@ -28,7 +45,7 @@ export function useActivities(category?: ActivityCategory) {
 
       // Filter by category if specified
       if (category && category !== 'all') {
-        return activities.filter((a) => a.category === category);
+        return activities.filter((a) => categorizeActivity(a) === category);
       }
 
       return activities;
@@ -46,7 +63,7 @@ export function useActivities(category?: ActivityCategory) {
 export function useUnreadCounts() {
   const { user } = useAuth();
 
-  return useQuery<ActivityCounts, Error>({
+  return useQuery({
     queryKey: ['activity-counts', user?._id],
     queryFn: async () => {
       if (!user?._id) {

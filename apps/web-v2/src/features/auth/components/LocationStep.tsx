@@ -61,7 +61,7 @@ export function LocationStep({ location, onLocationChange }: LocationStepProps) 
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
 
-        onLocationChange({ lat, lon });
+        let locationCaptionFound = false;
 
         // Reverse geocode to get city name
         try {
@@ -101,14 +101,27 @@ export function LocationStep({ location, onLocationChange }: LocationStepProps) 
               if (parts.length === 0 && data.display_name) {
                 // Take first 2-3 parts of display_name
                 const displayParts = data.display_name.split(',').slice(0, 3);
-                setDisplayLocation(displayParts.join(',').trim());
-              } else {
+                const caption = displayParts.join(',').trim();
+                if (caption) {
+                  setDisplayLocation(caption);
+                  locationCaptionFound = true;
+                }
+              } else if (parts.length > 0) {
                 setDisplayLocation(parts.join(', '));
+                locationCaptionFound = true;
               }
             }
           }
         } catch (err) {
           console.error('Error reverse geocoding:', err);
+        }
+
+        // Only set location if we successfully got a caption
+        if (locationCaptionFound) {
+          onLocationChange({ lat, lon });
+        } else {
+          // Caption not found - request manual entry silently
+          onLocationChange(null);
         }
 
         setAutoAttempted(true);
@@ -289,6 +302,7 @@ export function LocationStep({ location, onLocationChange }: LocationStepProps) 
                   }}
                   className="text-text-tertiary hover:text-brand-purple transition-colors flex-shrink-0"
                   aria-label="Change location"
+                  title="Change location"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -300,6 +314,7 @@ export function LocationStep({ location, onLocationChange }: LocationStepProps) 
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
+                    aria-hidden="true"
                   >
                     <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
                     <path d="m15 5 4 4" />

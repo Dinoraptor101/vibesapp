@@ -8,6 +8,7 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchPosts, reactToPost } from '../api/postService';
 import type { Post, PostFilters, PostsResponse } from '../types';
+import { useAuth } from '@/features/auth';
 
 interface UseInfinitePostsOptions {
   filters?: PostFilters;
@@ -37,6 +38,8 @@ export function useInfinitePosts({
   enabled = true,
 }: UseInfinitePostsOptions = {}): UseInfinitePostsReturn {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const currentUserId = user?.userId;
 
   // Create unique query key based on filters
   const queryKey = ['posts', 'infinite', filters];
@@ -74,7 +77,9 @@ export function useInfinitePosts({
     mutationFn: (postId: string) => {
       // Check current like state to determine action
       const post = posts.find((p) => p._id === postId);
-      const hasLike = post?.reactions.some((r) => r.type === 'like');
+      const hasLike = post?.reactions.some(
+        (r) => r.type === 'like' && r.userId === currentUserId,
+      );
       // If already liked, unlike (null), otherwise like
       return reactToPost(postId, hasLike ? null : 'like');
     },
@@ -144,7 +149,15 @@ export function useInfinitePosts({
 
   // Mutation for disliking a post
   const dislikeMutation = useMutation({
-    mutationFn: (postId: string) => reactToPost(postId, 'dislike'),
+    mutationFn: (postId: string) => {
+      // Check current dislike state to determine action
+      const post = posts.find((p) => p._id === postId);
+      const hasDislike = post?.reactions.some(
+        (r) => r.type === 'dislike' && r.userId === currentUserId,
+      );
+      // If already disliked, remove dislike (null), otherwise dislike
+      return reactToPost(postId, hasDislike ? null : 'dislike');
+    },
     onMutate: async (postId) => {
       await queryClient.cancelQueries({ queryKey });
       const previousData = queryClient.getQueryData(queryKey);

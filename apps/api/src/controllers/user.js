@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Post = require('../models/Post'); // Add this line
 const Follow = require('../models/Follow');
+const { createActivity } = require('./activityNew');
 const karma = require('./karma');
 const UserHandler = require('../handlers/UserHandler');
 
@@ -558,6 +559,25 @@ const toggleFollow = async (req, res) => {
         follower: followerId,
         following: userId,
       });
+
+      // Create new_follower activity for the target user
+      const followerUser = await User.findOne({ userId: followerId });
+      if (followerUser) {
+        await createActivity({
+          recipientId: userId,
+          type: 'new_follower',
+          actor: {
+            userId: followerUser.userId,
+            username: followerUser.userName,
+            avatar: followerUser.profilePictureUrl,
+          },
+          target: {
+            type: 'user',
+            id: followerId,
+          },
+        }).catch((err) => console.error('Failed to create follow activity:', err));
+      }
+
       console.log('Followed successfully');
       return res.status(200).json({ isFollowing: true, message: 'Followed' });
     }
@@ -603,6 +623,44 @@ const getFollowing = async (req, res) => {
   }
 };
 
+// Update notification preferences
+const updateNotificationPreferences = async (req, res) => {
+  console.log('Updating notification preferences...');
+  const { userId } = req.params;
+  const preferences = req.body;
+
+  try {
+    const user = await User.findOne({ userId });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Update only provided preferences
+    const allowedPreferences = [
+      'new_follower',
+      'following_post',
+      'nearby_post',
+      'comment',
+      'comment_reply',
+      'post_hidden',
+      'reactions',
+    ];
+
+    allowedPreferences.forEach((pref) => {
+      if (preferences[pref] !== undefined) {
+        user.notificationPreferences[pref] = preferences[pref];
+      }
+    });
+
+    await user.save();
+    console.log('Notification preferences updated successfully');
+    res.status(200).json({ notificationPreferences: user.notificationPreferences });
+  } catch (error) {
+    console.error('Error updating notification preferences:', error);
+    res.status(500).json({ message: 'Error updating notification preferences', error });
+  }
+};
+
 module.exports = {
   generateUniquePigeonId,
   createUser,
@@ -615,4 +673,5 @@ module.exports = {
   toggleFollow,
   getFollowers,
   getFollowing,
+  updateNotificationPreferences,
 };

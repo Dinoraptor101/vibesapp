@@ -5,7 +5,7 @@
  */
 
 import apiClient from '@/lib/api';
-import type { Activity, BackendActivity, ActivityCounts, ActivityCategory } from '../types';
+import type { Activity, BackendActivity } from '../types';
 
 /**
  * Transform backend activity to frontend Activity interface
@@ -13,27 +13,11 @@ import type { Activity, BackendActivity, ActivityCounts, ActivityCategory } from
 function transformActivity(backendActivity: BackendActivity): Activity {
   const type = backendActivity.type as Activity['type'];
 
-  // Determine category based on type
-  let category: ActivityCategory = 'all';
-  let priority: Activity['priority'] = 'low';
-
-  if (type === 'dm_request' || type === 'dm_message') {
-    category = 'messages';
-    priority = 'high';
-  } else if (type === 'new_follower' || type === 'following_post' || type === 'nearby_post') {
-    category = 'social';
-    priority = 'medium';
-  } else {
-    category = 'me';
-    priority = 'low';
-  }
-
   // Build actor object
   const actor = {
     userId: backendActivity.userId || backendActivity.authorUserId || '',
     username: backendActivity.username || backendActivity.authorUsername || 'Unknown',
     avatar: undefined, // Backend doesn't provide avatar in activity response
-    mbti: undefined,
   };
 
   // Build target object if applicable
@@ -54,9 +38,8 @@ function transformActivity(backendActivity: BackendActivity): Activity {
 
   return {
     _id: backendActivity._id,
+    recipientId: backendActivity.originalPosterId || '',
     type,
-    category,
-    priority,
     isRead: backendActivity.isRead,
     readAt: undefined,
     createdAt: new Date(backendActivity.createdAt),
@@ -81,22 +64,36 @@ export async function getActivities(userId: string): Promise<Activity[]> {
 /**
  * Get unread activity counts by category
  */
-export async function getUnreadCounts(userId: string): Promise<ActivityCounts> {
+export async function getUnreadCounts(userId: string) {
   if (!userId || userId === 'undefined') {
     console.warn('getUnreadCounts called with invalid userId:', userId);
     return { all: 0, messages: 0, social: 0, me: 0 };
   }
 
   // For now, fetch all activities and count client-side
-  // TODO: Backend could provide a dedicated endpoint for efficiency
   const activities = await getActivities(userId);
   const unreadActivities = activities.filter((a) => !a.isRead);
 
+  // Categorize based on activity type
+  const categorizeActivity = (activity: Activity) => {
+    if (activity.type === 'dm_request' || activity.type === 'dm_message') {
+      return 'messages';
+    }
+    if (
+      activity.type === 'new_follower' ||
+      activity.type === 'following_post' ||
+      activity.type === 'nearby_post'
+    ) {
+      return 'social';
+    }
+    return 'me';
+  };
+
   return {
     all: unreadActivities.length,
-    messages: unreadActivities.filter((a) => a.category === 'messages').length,
-    social: unreadActivities.filter((a) => a.category === 'social').length,
-    me: unreadActivities.filter((a) => a.category === 'me').length,
+    messages: unreadActivities.filter((a) => categorizeActivity(a) === 'messages').length,
+    social: unreadActivities.filter((a) => categorizeActivity(a) === 'social').length,
+    me: unreadActivities.filter((a) => categorizeActivity(a) === 'me').length,
   };
 }
 

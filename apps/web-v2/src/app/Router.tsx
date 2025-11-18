@@ -29,6 +29,7 @@ import { HomePage } from '@/pages/HomePage';
 import { MessagesPage } from '@/pages/MessagesPage';
 import { PostDetailPage } from '@/pages/PostDetailPage';
 import { ProfilePage } from '@/pages/ProfilePage';
+import { SendDMRequestPage } from '@/pages/SendDMRequestPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 
 function NotFoundPage() {
@@ -105,6 +106,14 @@ export function Router() {
             element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dm-request/:userId"
+            element={
+              <ProtectedRoute>
+                <SendDMRequestPage />
               </ProtectedRoute>
             }
           />
