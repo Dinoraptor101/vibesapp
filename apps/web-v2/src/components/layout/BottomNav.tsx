@@ -1,7 +1,8 @@
-import { Bell, Home, MessageSquare, Plus, User } from 'lucide-react';
+import { Bell, Home, MessageSquare, Plus } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUnreadCounts } from '@/features/activity';
 import { useAuth } from '@/features/auth/context/useAuth';
+import { UserMenu } from './UserMenu';
 
 export function BottomNav() {
   const location = useLocation();
@@ -90,19 +91,10 @@ export function BottomNav() {
           <span className="text-xs font-medium">Messages</span>
         </Link>
 
-        {/* Profile */}
-        <Link
-          to={`/profile/${user.userId}`}
-          className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors min-w-[64px] ${
-            location.pathname.startsWith('/profile') ? 'text-brand-purple' : 'text-text-secondary'
-          }`}
-          aria-label="Profile"
-        >
-          <User
-            className={`w-6 h-6 ${location.pathname.startsWith('/profile') ? 'fill-current' : ''}`}
-          />
-          <span className="text-xs font-medium">Profile</span>
-        </Link>
+        {/* User Menu */}
+        <div className="flex flex-col items-center gap-1 px-4 py-2 min-w-[64px]">
+          <UserMenu />
+        </div>
       </div>
     </nav>
   );
