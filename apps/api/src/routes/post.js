@@ -11,9 +11,10 @@ const {
   reportPost,
 } = require('../controllers/post');
 const { checkPostingRestrictions } = require('../middleware/strikeEnforcement');
+const pigeonAuth = require('../middleware/pigeonAuth');
 
 router.post('/create', checkPostingRestrictions, createPost);
-router.get('/', getPosts);
+router.get('/', pigeonAuth, getPosts);
 router.get('/:id', getPostById);
 router.delete('/:postId', deletePost);
 router.post('/:id/like', likePost);

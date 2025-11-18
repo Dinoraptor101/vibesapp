@@ -8,15 +8,16 @@ module.exports = async (req, res, next) => {
     return next();
   }
 
-  // Allow GET requests to pass through without validation
-  if (req.method === 'GET') {
-    return next();
-  }
-
   // Extract the Pigeon ID from the request headers
   const pigeonId = req.headers['x-pigeon-id'];
 
-  // If no Pigeon ID is provided, respond with a 403 Forbidden status
+  // For GET requests, if no Pigeon ID is provided, allow the request to continue
+  // but don't set validatedUserId (for public endpoints)
+  if (req.method === 'GET' && !pigeonId) {
+    return next();
+  }
+
+  // If no Pigeon ID is provided for non-GET requests, respond with a 403 Forbidden status
   if (!pigeonId) {
     console.log('403 Forbidden: Missing Pigeon ID');
     return res.status(403).json({ error: 'Forbidden: Missing Pigeon ID' });
@@ -34,13 +35,15 @@ module.exports = async (req, res, next) => {
     // Attach the validated userId to the request object
     req.validatedUserId = user.userId;
 
-    // Check if the request's userId matches the validated userId
-    const requestUserId = req.body.userId || req.params.userId;
-    if (requestUserId && requestUserId !== req.validatedUserId) {
-      console.log(
-        `403 User ID mismatch: requestUserId=${requestUserId}, validatedUserId=${req.validatedUserId}`
-      );
-      return res.status(403).json({ error: 'Forbidden: User ID mismatch' });
+    // For non-GET requests, check if the request's userId matches the validated userId
+    if (req.method !== 'GET') {
+      const requestUserId = req.body.userId || req.params.userId;
+      if (requestUserId && requestUserId !== req.validatedUserId) {
+        console.log(
+          `403 User ID mismatch: requestUserId=${requestUserId}, validatedUserId=${req.validatedUserId}`
+        );
+        return res.status(403).json({ error: 'Forbidden: User ID mismatch' });
+      }
     }
 
     // Proceed to the next middleware or route handler

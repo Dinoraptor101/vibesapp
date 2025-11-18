@@ -77,18 +77,34 @@ export interface Activity {
  */
 export interface BackendActivity {
   _id: string;
+  recipientId?: string;
   type: string;
-  post?: string; // MongoDB ObjectId
-  authorUsername?: string; // Normalized by backend
-  username?: string; // Normalized by backend
-  userId?: string;
   isRead: boolean;
+  readAt?: string | Date;
   createdAt: string | Date;
-  // Additional fields from different activity types
+
+  // New unified structure (from Activity model)
+  actor?: {
+    userId: string;
+    username: string;
+    avatar?: string;
+  };
+  target?: {
+    type: string;
+    id: string;
+    preview?: string;
+    thumbnail?: string;
+  };
+
+  // Legacy fields (for backward compatibility with old activity types)
+  post?: string; // MongoDB ObjectId
+  authorUsername?: string;
+  username?: string;
+  userId?: string;
   replyPost?: string;
   originalPosterId?: string;
   watcherUserId?: string;
-  watcherUsername?: string; // Normalized by backend
+  watcherUsername?: string;
   authorUserId?: string;
   messageId?: string;
   groupChatId?: string;
