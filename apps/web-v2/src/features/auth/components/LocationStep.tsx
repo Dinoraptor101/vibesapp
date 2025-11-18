@@ -68,7 +68,6 @@ export function LocationStep({ location, onLocationChange }: LocationStepProps) 
       return;
     }
 
-    setIsGettingLocation(true);
     setError('');
 
     try {
@@ -140,8 +139,6 @@ export function LocationStep({ location, onLocationChange }: LocationStepProps) 
       setShowError(true);
       setCityName('');
       setTimeout(() => setShowError(false), 500);
-    } finally {
-      setIsGettingLocation(false);
     }
   };
 

@@ -72,6 +72,11 @@ export function AccountTab() {
       // Initialize location display (city only for now until backend supports state/country)
       if (user.location) {
         const display = user.location.city || '';
+        console.log('Initializing location from user data:', {
+          city: user.location.city,
+          lat: user.location.latitude,
+          lon: user.location.longitude,
+        });
 
         setLocationCity(display); // Initialize the input field
         setOriginalLocationDisplay(display);
@@ -83,6 +88,8 @@ export function AccountTab() {
               }
             : null
         );
+      } else {
+        console.log('No user location data available');
       }
     }
   }, [user]);
