@@ -5,7 +5,7 @@
  * Displays a scrollable list of posts with loading states and error handling.
  */
 
-import { AlertCircle, Loader2, MapPinOff } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui-next';
@@ -85,8 +85,8 @@ export function PostsFeed({ className }: PostsFeedProps) {
     );
   }
 
-  // Loading state (initial load)
-  if (isLoading) {
+  // Loading state (initial load) OR location being determined for nearby tab
+  if (isLoading || (activeTab === 'nearby' && !hasLocation)) {
     return (
       <div className={className}>
         <FilterBar activeTab={activeTab} onTabChange={setActiveTab} />
@@ -94,18 +94,6 @@ export function PostsFeed({ className }: PostsFeedProps) {
           <PostSkeleton />
           <PostSkeleton />
           <PostSkeleton />
-        </div>
-      </div>
-    );
-  }
-
-  // No location state (for Nearby tab only)
-  if (activeTab === 'nearby' && !hasLocation) {
-    return (
-      <div className={className}>
-        <FilterBar activeTab={activeTab} onTabChange={setActiveTab} />
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <MapPinOff className="w-32 h-32 text-text-tertiary opacity-40" strokeWidth={1.5} />
         </div>
       </div>
     );

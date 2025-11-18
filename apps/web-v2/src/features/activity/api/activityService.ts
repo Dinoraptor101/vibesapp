@@ -13,23 +13,37 @@ import type { Activity, BackendActivity } from '../types';
 function transformActivity(backendActivity: BackendActivity): Activity {
   const type = backendActivity.type as Activity['type'];
 
-  // Build actor object
+  // Build actor object - handle both new unified structure and legacy formats
   const actor = {
-    userId: backendActivity.userId || backendActivity.authorUserId || '',
-    username: backendActivity.username || backendActivity.authorUsername || 'Unknown',
-    avatar: undefined, // Backend doesn't provide avatar in activity response
+    userId:
+      backendActivity.actor?.userId || backendActivity.userId || backendActivity.authorUserId || '',
+    username:
+      backendActivity.actor?.username ||
+      backendActivity.username ||
+      backendActivity.authorUsername ||
+      'unknown',
+    avatar: backendActivity.actor?.avatar || undefined,
   };
 
   // Build target object if applicable
   let target: Activity['target'] | undefined;
-  if (backendActivity.post) {
+  if (backendActivity.target) {
+    // New unified structure
+    target = {
+      type: backendActivity.target.type as 'post' | 'comment' | 'user',
+      id: backendActivity.target.id,
+      preview: backendActivity.target.preview,
+      thumbnail: backendActivity.target.thumbnail,
+    };
+  } else if (backendActivity.post) {
+    // Legacy structure fallback
     target = {
       type: 'post',
       id: backendActivity.post,
     };
   }
 
-  // Build metadata
+  // Build metadata for legacy support
   const metadata: Activity['metadata'] = {};
   if (backendActivity.post) metadata.postId = backendActivity.post;
   if (backendActivity.replyPost) metadata.commentId = backendActivity.replyPost;
@@ -38,10 +52,10 @@ function transformActivity(backendActivity: BackendActivity): Activity {
 
   return {
     _id: backendActivity._id,
-    recipientId: backendActivity.originalPosterId || '',
+    recipientId: backendActivity.recipientId || backendActivity.originalPosterId || '',
     type,
     isRead: backendActivity.isRead,
-    readAt: undefined,
+    readAt: backendActivity.readAt ? new Date(backendActivity.readAt) : undefined,
     createdAt: new Date(backendActivity.createdAt),
     actor,
     target,
@@ -101,24 +115,14 @@ export async function getUnreadCounts(userId: string) {
  * Mark a single activity as read
  */
 export async function markAsRead(activityId: string): Promise<void> {
-  // Backend endpoint doesn't exist yet, so this is a placeholder
-  // TODO: Backend needs POST /activity/:activityId/read endpoint
-  console.warn('markAsRead not implemented in backend yet:', activityId);
-
-  // For now, we'll just make a dummy call
-  // await apiClient.post(`/activity/${activityId}/read`);
+  await apiClient.patch(`/api/activities/${activityId}/read`);
 }
 
 /**
  * Mark all activities as read
  */
 export async function markAllAsRead(userId: string): Promise<void> {
-  // Backend endpoint doesn't exist yet, so this is a placeholder
-  // TODO: Backend needs POST /activity/read-all endpoint
-  console.warn('markAllAsRead not implemented in backend yet:', userId);
-
-  // For now, we'll just make a dummy call
-  // await apiClient.post(`/activity/read-all`, { userId });
+  await apiClient.patch(`/api/activities/${userId}/read-all`);
 }
 
 /**

@@ -100,9 +100,9 @@ function getNavigationPath(activity: Activity): string | null {
     case 'reaction':
     case 'comment':
     case 'post_hidden':
-      return activity.target?.id ? `/posts/${activity.target.id}` : null;
+      return activity.target?.id ? `/post/${activity.target.id}` : null;
     case 'comment_reply':
-      return activity.target?.id ? `/posts/${activity.target.id}` : null;
+      return activity.target?.id ? `/post/${activity.target.id}` : null;
     // Legacy types
     case 'dm_request':
       return '/messages';
@@ -112,7 +112,7 @@ function getNavigationPath(activity: Activity): string | null {
         : '/messages';
     case 'post_yang':
     case 'post_yin':
-      return activity.metadata?.postId ? `/posts/${activity.metadata.postId}` : null;
+      return activity.metadata?.postId ? `/post/${activity.metadata.postId}` : null;
     default:
       return null;
   }
@@ -123,6 +123,14 @@ export function ActivityCard({ activity, onMarkAsRead }: ActivityCardProps) {
   const icon = getActivityIcon(activity.type);
   const message = getActivityMessage(activity);
   const navigationPath = getNavigationPath(activity);
+
+  // Construct full CDN URL for thumbnail
+  const CDN_URL = import.meta.env.VITE_CDN_URL;
+  const thumbnailUrl = activity.target?.thumbnail
+    ? activity.target.thumbnail.startsWith('http')
+      ? activity.target.thumbnail
+      : `${CDN_URL}/${activity.target.thumbnail}`
+    : undefined;
 
   const handleClick = () => {
     if (!activity.isRead && onMarkAsRead) {
@@ -192,13 +200,9 @@ export function ActivityCard({ activity, onMarkAsRead }: ActivityCardProps) {
         </p>
       </div>
 
-      {activity.target?.thumbnail && (
+      {thumbnailUrl && (
         <div className="flex-shrink-0">
-          <img
-            src={activity.target.thumbnail}
-            alt="Post"
-            className="h-12 w-12 rounded object-cover"
-          />
+          <img src={thumbnailUrl} alt="Post" className="h-12 w-12 rounded object-cover" />
         </div>
       )}
     </button>

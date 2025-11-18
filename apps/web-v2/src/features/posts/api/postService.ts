@@ -39,6 +39,7 @@ export async function fetchPosts(
   const params = new URLSearchParams();
 
   if (filters?.userId) params.append('userId', filters.userId);
+  if (filters?.following) params.append('following', 'true');
   if (filters?.nearby) {
     params.append('latitude', filters.nearby.lat.toString());
     params.append('longitude', filters.nearby.lon.toString());
