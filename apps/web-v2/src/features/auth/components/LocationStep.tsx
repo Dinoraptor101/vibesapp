@@ -5,6 +5,7 @@
 
 import { MapPin, Send } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useLocationGPS } from '@/hooks/useLocationGPS';
 import './LocationStep.css'; // Import shake animation
 
 interface LocationStepProps {
@@ -14,7 +15,7 @@ interface LocationStepProps {
 }
 
 export function LocationStep({ location, onLocationChange }: LocationStepProps) {
-  const [isGettingLocation, setIsGettingLocation] = useState(false); // Start false, set true when actually requesting
+  const { isGettingLocation, getGPSLocation } = useLocationGPS();
   const [showLoadingSpinner, setShowLoadingSpinner] = useState(false); // ZEN: 1-second delay
   const [error, setError] = useState('');
   const [cityName, setCityName] = useState('');
@@ -40,110 +41,22 @@ export function LocationStep({ location, onLocationChange }: LocationStepProps) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
 
-  const handleGetLocation = (isAutoDetect = false) => {
-    if (!navigator.geolocation) {
-      if (!isAutoDetect) {
-        setError('Geolocation is not supported by your browser');
-      }
-      setAutoAttempted(true);
-      setIsGettingLocation(false);
-      return;
-    }
-
-    setIsGettingLocation(true);
-    setError('');
+  const handleGetLocation = async (isAutoDetect = false) => {
     if (!isAutoDetect) {
       setCityName(''); // Clear manual input when using GPS
     }
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
+    const result = await getGPSLocation();
+    setAutoAttempted(true);
 
-        let locationCaptionFound = false;
-
-        // Reverse geocode to get city name
-        try {
-          const GEOCODING_URL = import.meta.env.VITE_GEOCODING_URL;
-          if (GEOCODING_URL) {
-            const response = await fetch(`${GEOCODING_URL}?lat=${lat}&lon=${lon}&format=json`);
-            if (response.ok) {
-              const data = await response.json();
-              const address = data.address || {};
-
-              // Build a more detailed address string
-              const parts = [];
-
-              // Add neighborhood or suburb if available
-              if (address.neighbourhood || address.suburb) {
-                parts.push(address.neighbourhood || address.suburb);
-              }
-
-              // Add city/town/village
-              const locality =
-                address.city || address.town || address.village || address.municipality;
-              if (locality) {
-                parts.push(locality);
-              }
-
-              // Add state/region
-              if (address.state) {
-                parts.push(address.state);
-              }
-
-              // Add country for international locations
-              if (address.country && address.country_code !== 'us') {
-                parts.push(address.country);
-              }
-
-              // Fallback to display_name if we couldn't build a good address
-              if (parts.length === 0 && data.display_name) {
-                // Take first 2-3 parts of display_name
-                const displayParts = data.display_name.split(',').slice(0, 3);
-                const caption = displayParts.join(',').trim();
-                if (caption) {
-                  setDisplayLocation(caption);
-                  locationCaptionFound = true;
-                }
-              } else if (parts.length > 0) {
-                setDisplayLocation(parts.join(', '));
-                locationCaptionFound = true;
-              }
-            }
-          }
-        } catch (err) {
-          console.error('Error reverse geocoding:', err);
-        }
-
-        // Only set location if we successfully got a caption
-        if (locationCaptionFound) {
-          onLocationChange({ lat, lon });
-        } else {
-          // Caption not found - request manual entry silently
-          onLocationChange(null);
-        }
-
-        setAutoAttempted(true);
-        setIsGettingLocation(false);
-
-        // ZEN: Show detected location, let user confirm (no auto-advance)
-        // User will click "Next" button in SignupWizard to proceed
-      },
-      (err) => {
-        console.error('Error getting location:', err);
-        if (!isAutoDetect) {
-          setError('Unable to get your location. Please enter your city manually.');
-        }
-        setAutoAttempted(true);
-        setIsGettingLocation(false);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      }
-    );
+    if (result) {
+      onLocationChange({ lat: result.lat, lon: result.lon });
+      setDisplayLocation(result.city);
+      setError('');
+      // ZEN: Show detected location, let user confirm (no auto-advance)
+    } else if (!isAutoDetect) {
+      setError('Unable to get your location. Please enter your city manually.');
+    }
   };
 
   const handleManualLocationSubmit = async () => {

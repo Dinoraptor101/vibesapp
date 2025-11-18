@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/features/auth/context/useAuth';
 import { uploadImage } from '@/features/posts/api/s3Service';
 import { compressImage } from '@/features/posts/utils/imageUtils';
+import { useLocationGPS } from '@/hooks/useLocationGPS';
 import { getCookie } from '@/lib/api';
 import { getAvatarUrl } from '@/lib/avatarUtils';
 import { useAccountUpdates } from '../hooks/useAccountUpdates';
@@ -33,6 +34,7 @@ export function AccountTab() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { queueUpdate } = useAccountUpdates();
+  const { isGettingLocation, getGPSLocation } = useLocationGPS();
 
   // Form state (editable)
   const [bio, setBio] = useState(user?.bio || '');
@@ -51,10 +53,8 @@ export function AccountTab() {
   // UI state
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const gpsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Update local state when user changes
   useEffect(() => {
@@ -178,90 +178,18 @@ export function AccountTab() {
 
   // GPS handler
   const handleGPSClick = async () => {
-    if (!navigator.geolocation) {
-      console.error('GPS not supported on this device');
-      return;
+    const result = await getGPSLocation();
+    if (result) {
+      setLocationCoords({ lat: result.lat, lon: result.lon });
+      setLocationCity(result.city);
+      console.log('GPS location fetched:', result.city);
     }
-
-    setIsGettingLocation(true);
-
-    // Show spinner only if GPS takes > 1 second
-    gpsTimeoutRef.current = setTimeout(() => {
-      setIsGettingLocation(true);
-    }, 1000);
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        // Clear timeout
-        if (gpsTimeoutRef.current) {
-          clearTimeout(gpsTimeoutRef.current);
-        }
-
-        const { latitude, longitude } = position.coords;
-        setLocationCoords({ lat: latitude, lon: longitude });
-
-        // Reverse geocode to get city (state/country will be supported later)
-        try {
-          const GEOCODING_URL = import.meta.env.VITE_GEOCODING_URL;
-          if (GEOCODING_URL) {
-            // Use /reverse endpoint for reverse geocoding
-            const reverseUrl = GEOCODING_URL.replace('/search', '/reverse');
-            const response = await fetch(
-              `${reverseUrl}?lat=${latitude}&lon=${longitude}&format=json`
-            );
-            if (response.ok) {
-              const data = await response.json();
-              console.log('Reverse geocoding response:', data);
-              const address = data.address || {};
-
-              // Try multiple fields to get the best city name
-              const city =
-                address.city ||
-                address.town ||
-                address.village ||
-                address.municipality ||
-                address.county ||
-                address.state;
-
-              if (city) {
-                setLocationCity(city);
-                console.log('GPS location fetched:', city);
-              } else {
-                // Fallback to coordinates if no city found
-                const coordsDisplay = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-                setLocationCity(coordsDisplay);
-                console.warn('No city found in geocoding response, using coordinates');
-              }
-            } else {
-              // Fallback to coordinates if geocoding fails
-              const coordsDisplay = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-              setLocationCity(coordsDisplay);
-            }
-          }
-        } catch (err) {
-          console.error('Error reverse geocoding:', err);
-          const coordsDisplay = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-          setLocationCity(coordsDisplay);
-        }
-
-        setIsGettingLocation(false);
-      },
-      (error) => {
-        // Clear timeout
-        if (gpsTimeoutRef.current) {
-          clearTimeout(gpsTimeoutRef.current);
-        }
-        setIsGettingLocation(false);
-        console.error('GPS error:', error);
-      }
-    );
   };
 
   // Handle manual city input
   const handleCityInputKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && locationCity.trim()) {
       e.preventDefault();
-      setIsGettingLocation(true);
 
       try {
         const GEOCODING_URL = import.meta.env.VITE_GEOCODING_URL;
@@ -281,7 +209,6 @@ export function AccountTab() {
 
         if (data.length === 0) {
           console.error('Location not found');
-          setIsGettingLocation(false);
           return;
         }
 
@@ -299,8 +226,6 @@ export function AccountTab() {
         setLocationCity(display);
       } catch (error) {
         console.error('Geocoding error:', error);
-      } finally {
-        setIsGettingLocation(false);
       }
     }
   };
