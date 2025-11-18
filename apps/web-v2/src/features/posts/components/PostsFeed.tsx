@@ -5,7 +5,7 @@
  * Displays a scrollable list of posts with loading states and error handling.
  */
 
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2, MapPinOff } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui-next';
 import { useInfinitePosts } from '../hooks/useInfinitePosts';
@@ -24,7 +24,7 @@ export function PostsFeed({ className }: PostsFeedProps) {
   const [reportingPostId, setReportingPostId] = useState<string | null>(null);
 
   // Filter state (tab-based)
-  const { filters, activeTab, setActiveTab, isFiltering } = usePostFilters();
+  const { filters, activeTab, setActiveTab, isFiltering, hasLocation } = usePostFilters();
 
   // Posts data with infinite scroll
   const {
@@ -94,6 +94,18 @@ export function PostsFeed({ className }: PostsFeedProps) {
           <PostSkeleton />
           <PostSkeleton />
           <PostSkeleton />
+        </div>
+      </div>
+    );
+  }
+
+  // No location state (for Nearby tab only)
+  if (activeTab === 'nearby' && !hasLocation) {
+    return (
+      <div className={className}>
+        <FilterBar activeTab={activeTab} onTabChange={setActiveTab} />
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <MapPinOff className="w-32 h-32 text-text-tertiary opacity-40" strokeWidth={1.5} />
         </div>
       </div>
     );

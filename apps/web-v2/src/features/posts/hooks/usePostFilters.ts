@@ -15,6 +15,7 @@ interface UsePostFiltersReturn {
   activeTab: FeedTab;
   setActiveTab: (tab: FeedTab) => void;
   isFiltering: boolean;
+  hasLocation: boolean;
 }
 
 // Get user's current location from multiple sources
@@ -116,5 +117,6 @@ export function usePostFilters(): UsePostFiltersReturn {
     activeTab,
     setActiveTab,
     isFiltering,
+    hasLocation: !!userLocation,
   };
 }
