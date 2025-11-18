@@ -51,6 +51,10 @@ app.use((req, res, next) => {
   next();
 });
 
+// Health check route (public, no auth required)
+const healthCheckRouter = require('./routes/healthCheck');
+app.use('/api/health', healthCheckRouter);
+
 // Import and use the API key middleware
 const apiKeyMiddleware = require('./middleware/apiKey');
 const pigeonAuthMiddleware = require('./middleware/pigeonAuth');
@@ -67,7 +71,6 @@ const activityRouter = require('./routes/activity');
 const adminRouter = require('./routes/admin');
 const groupChatRoutes = require('./routes/groupchat');
 const messageRoutes = require('./routes/message');
-const healthCheckRouter = require('./routes/healthCheck');
 const recaptchaRoutes = require('./routes/recaptcha');
 const dmRoutes = require('./routes/dm');
 const dmRequestRoutes = require('./routes/dmRequest');
@@ -92,7 +95,6 @@ useRoute('/api/issues', issueRoutes);
 useRoute('/api/activities', activityRouter);
 useRoute('/api/admin', adminRouter);
 useRoute('/api/groupChats', groupChatRoutes);
-useRoute('/api/health', healthCheckRouter);
 useRoute('/api/recaptcha', recaptchaRoutes);
 useRoute('/api/dm', dmRoutes);
 useRoute('/api/dm-requests', dmRequestRoutes);
