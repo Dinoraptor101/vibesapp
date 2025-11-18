@@ -150,7 +150,9 @@ export function PostsFeed({ className }: PostsFeedProps) {
           </div>
         )}
         {!hasNextPage && posts.length > 0 && (
-          <p className="text-center text-text-tertiary text-sm">You've reached the end! 🎉</p>
+          <div className="flex justify-center py-4">
+            <div className="w-32 h-px bg-border opacity-50" />
+          </div>
         )}
       </div>
 
