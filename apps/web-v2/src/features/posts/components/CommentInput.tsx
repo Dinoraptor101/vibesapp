@@ -47,8 +47,21 @@ export function CommentInput({
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = 'auto';
-      textarea.style.height = `${textarea.scrollHeight}px`;
+      // Reset height to recalculate
+      textarea.style.height = '44px'; // Start from minHeight
+
+      // Calculate new height capped at max
+      const scrollHeight = textarea.scrollHeight;
+      const newHeight = Math.min(scrollHeight, 200);
+
+      // Only enable scrolling if content exceeds max height
+      if (scrollHeight > 200) {
+        textarea.style.overflowY = 'auto';
+        textarea.style.height = '200px';
+      } else {
+        textarea.style.overflowY = 'hidden';
+        textarea.style.height = `${newHeight}px`;
+      }
     }
   }, [value]);
 
@@ -131,7 +144,7 @@ export function CommentInput({
             isFocused ? 'border-brand' : 'border-border hover:border-brand/50',
             disabled && 'opacity-50 cursor-not-allowed'
           )}
-          style={{ minHeight: '44px', maxHeight: '200px' }}
+          style={{ minHeight: '44px' }}
         />
 
         {/* Send Button */}

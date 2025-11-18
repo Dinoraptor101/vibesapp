@@ -166,7 +166,7 @@ export function CommentList({ postId, onReply, className }: CommentListProps) {
 
   // Comments list
   return (
-    <div className={cn('space-y-1', className)}>
+    <div className={cn('space-y-1 overflow-visible', className)}>
       {threadedComments.map((comment) => (
         <CommentCard
           key={comment._id}
