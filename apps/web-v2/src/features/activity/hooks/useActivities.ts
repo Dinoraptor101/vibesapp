@@ -52,7 +52,10 @@ export function useActivities(category?: ActivityCategory) {
     },
     enabled: !!user?._id,
     refetchInterval: 30000, // Poll every 30 seconds
+    refetchIntervalInBackground: false, // Stop polling when tab hidden
     staleTime: 20000, // Consider data stale after 20 seconds
+    retry: 1, // Only retry once on failure
+    retryDelay: 5000, // Wait 5s before retry
   });
 }
 
@@ -74,7 +77,10 @@ export function useUnreadCounts() {
     },
     enabled: !!user?._id,
     refetchInterval: 30000, // Poll every 30 seconds
+    refetchIntervalInBackground: false, // Stop polling when tab hidden
     staleTime: 20000,
+    retry: 1,
+    retryDelay: 5000,
   });
 }
 
@@ -93,7 +99,10 @@ export function useHasUnread() {
     },
     enabled: !!user?._id,
     refetchInterval: 30000,
+    refetchIntervalInBackground: false, // Stop polling when tab hidden
     staleTime: 20000,
+    retry: 1,
+    retryDelay: 5000,
   });
 }
 

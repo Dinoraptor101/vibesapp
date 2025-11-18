@@ -13,8 +13,7 @@ import {
   CommentInput,
   CommentList,
   PostCard,
-  ReportPostDialog,
-  reactToPost,
+  toggleLikePost,
   useCreateComment,
   usePost,
 } from '@/features/posts';
@@ -24,7 +23,6 @@ export function PostDetailPage() {
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
   const { post, isLoading, isError, error, refetch } = usePost(postId || '');
-  const [reportingPostId, setReportingPostId] = useState<string | null>(null);
   const [isLiking, setIsLiking] = useState(false);
   const [replyTo, setReplyTo] = useState<{ id: string; username: string } | undefined>();
 
@@ -41,21 +39,19 @@ export function PostDetailPage() {
 
     try {
       setIsLiking(true);
-      // Check if user has already liked
-      const hasLike = post.reactions.some((r) => r.type === 'like');
-      // Toggle like/unlike
-      await reactToPost(postId, hasLike ? null : 'like');
+      // Backend handles the toggle logic
+      await toggleLikePost(postId);
       // Refetch post to get updated data
       await refetch();
     } catch (error) {
-      console.error('Error liking post:', error);
+      console.error('Error toggling like:', error);
     } finally {
       setIsLiking(false);
     }
   };
 
   const handleReport = (postId: string) => {
-    setReportingPostId(postId);
+    navigate(`/report/${postId}`);
   };
 
   const handleComment = () => {
@@ -187,15 +183,6 @@ export function PostDetailPage() {
           <CommentList postId={postId || ''} onReply={handleReply} />
         </div>
       </div>
-
-      {/* Report Dialog */}
-      {reportingPostId && (
-        <ReportPostDialog
-          postId={reportingPostId}
-          isOpen={!!reportingPostId}
-          onClose={() => setReportingPostId(null)}
-        />
-      )}
     </AppLayout>
   );
 }

@@ -80,22 +80,11 @@ export async function createPost(data: CreatePostPayload): Promise<Post> {
 }
 
 /**
- * React to a post (like or dislike)
+ * Toggle like on a post (backend handles like/unlike logic)
  */
-export async function reactToPost(
-  postId: string,
-  type: 'like' | 'dislike' | null
-): Promise<ReactionResponse> {
-  if (type === null) {
-    // Remove reaction (unlike/undislike)
-    const response = await apiClient.delete<ReactionResponse>(`/api/posts/${postId}/reaction`);
-    return response;
-  }
-
-  const endpoint = type === 'like' ? 'like' : 'dislike';
-  // No body needed - backend uses auth middleware for userId and user's stored location
-  const response = await apiClient.post<ReactionResponse>(`/api/posts/${postId}/${endpoint}`, {});
-
+export async function toggleLikePost(postId: string): Promise<ReactionResponse> {
+  // Simply POST to the like endpoint - backend will toggle like/unlike automatically
+  const response = await apiClient.post<ReactionResponse>(`/api/posts/${postId}/like`, {});
   return response;
 }
 

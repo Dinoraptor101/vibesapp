@@ -484,7 +484,7 @@ const deleteImageFromS3 = async (imageKey) => {
   }
 };
 
-// like a post
+// Toggle like on a post (like if not liked, unlike if already liked)
 const likePost = async (req, res) => {
   const userId = req.validatedUserId; // Get from auth middleware
   const { id: postHex } = req.params;
@@ -512,12 +512,46 @@ const likePost = async (req, res) => {
       return res.status(400).json({ message: 'Username is required' });
     }
 
-    // Prevent liking a post that is already reacted to
-    const existingReaction = post.reactions.find((reaction) => reaction.userId === userId);
+    // Check if user already has a reaction on this post
+    const existingReactionIndex = post.reactions.findIndex(
+      (reaction) => reaction.userId === userId
+    );
+    const existingReaction =
+      existingReactionIndex !== -1 ? post.reactions[existingReactionIndex] : null;
+
+    // If user already liked this post, UNLIKE it
     if (existingReaction) {
-      console.error('User already voted on this post');
-      return res.status(409).json({ message: 'You already voted on this post' });
+      console.info('User already liked this post, removing like');
+
+      // Calculate if the like was proximal (within 100 miles)
+      const distance = getDistanceFromLatLonInMiles(
+        existingReaction.location.lat,
+        existingReaction.location.lon,
+        post.user.location.lat,
+        post.user.location.lon
+      );
+      const wasProximal = distance <= 100;
+
+      // Remove the reaction
+      post.reactions.splice(existingReactionIndex, 1);
+
+      // Adjust proximal_likes counter if it was a proximal like
+      if (wasProximal && post.proximal_likes > 0) {
+        post.proximal_likes -= 1;
+      }
+
+      await post.save();
+
+      return res.status(200).json({
+        success: true,
+        action: 'unliked',
+        message: 'Post unliked successfully',
+        proximal_likes: post.proximal_likes,
+        post,
+      });
     }
+
+    // Otherwise, ADD a like
 
     // Use user's current location from their profile
     const location = user.location || { lat: 0, lon: 0 };
@@ -586,7 +620,13 @@ const likePost = async (req, res) => {
       });
 
       console.info('Reaction activity created successfully');
-      return res.status(200).json({ message: 'Post liked successfully' });
+      return res.status(200).json({
+        success: true,
+        action: 'liked',
+        message: 'Post liked successfully',
+        proximal_likes: post.proximal_likes,
+        post,
+      });
     } catch (activityError) {
       console.error('Error during proximal check or activity creation:', activityError);
       return res.status(500).json({ message: 'Error during proximal check or activity creation' });

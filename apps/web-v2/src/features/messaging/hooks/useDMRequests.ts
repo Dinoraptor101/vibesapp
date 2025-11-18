@@ -21,5 +21,8 @@ export function useDMRequests() {
     },
     staleTime: 1 * 60 * 1000, // 1 minute
     refetchInterval: 30 * 1000, // Refetch every 30 seconds for real-time updates
+    refetchIntervalInBackground: false, // Stop polling when tab hidden
+    retry: 1, // Only retry once on failure
+    retryDelay: 5000, // Wait 5s before retry
   });
 }

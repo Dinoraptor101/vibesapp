@@ -55,5 +55,5 @@ export {
   getNearbyPosts,
   getPostsByMBTI,
   getUserPosts,
-  reactToPost,
+  toggleLikePost,
 } from './api/postService';
