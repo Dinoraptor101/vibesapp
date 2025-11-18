@@ -15,5 +15,8 @@ export const useConversation = (conversationId: string | undefined) => {
     enabled: !!conversationId,
     staleTime: 1000 * 60 * 1, // 1 minute
     refetchInterval: 1000 * 10, // Refetch every 10 seconds for real-time messages
+    refetchIntervalInBackground: false, // Stop polling when tab hidden
+    retry: 1, // Only retry once on failure
+    retryDelay: 5000, // Wait 5s before retry
   });
 };

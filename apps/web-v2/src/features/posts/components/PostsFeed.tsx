@@ -6,14 +6,14 @@
  */
 
 import { AlertCircle, Loader2, MapPinOff } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui-next';
 import { useInfinitePosts } from '../hooks/useInfinitePosts';
 import { usePostFilters } from '../hooks/usePostFilters';
 import { FilterBar } from './FilterBar';
 import { PostsGrid } from './PostsGrid';
 import { PostSkeleton } from './PostSkeleton';
-import { ReportPostDialog } from './ReportPostDialog';
 
 interface PostsFeedProps {
   className?: string;
@@ -21,7 +21,7 @@ interface PostsFeedProps {
 
 export function PostsFeed({ className }: PostsFeedProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  const [reportingPostId, setReportingPostId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   // Filter state (tab-based)
   const { filters, activeTab, setActiveTab, isFiltering, hasLocation } = usePostFilters();
@@ -36,7 +36,7 @@ export function PostsFeed({ className }: PostsFeedProps) {
     isFetchingNextPage,
     fetchNextPage,
     refetch,
-    likePost,
+    toggleLike,
   } = useInfinitePosts({ filters: filters });
 
   // Infinite scroll observer
@@ -65,7 +65,7 @@ export function PostsFeed({ className }: PostsFeedProps) {
 
   // Handle report
   const handleReport = (postId: string) => {
-    setReportingPostId(postId);
+    navigate(`/report/${postId}`);
   };
 
   // Error state
@@ -137,7 +137,7 @@ export function PostsFeed({ className }: PostsFeedProps) {
       {/* Posts Grid */}
       <PostsGrid
         posts={posts}
-        onLike={likePost}
+        onLike={toggleLike}
         onReport={handleReport}
         onComment={handleComment}
       />
@@ -155,15 +155,6 @@ export function PostsFeed({ className }: PostsFeedProps) {
           </div>
         )}
       </div>
-
-      {/* Report Dialog */}
-      {reportingPostId && (
-        <ReportPostDialog
-          postId={reportingPostId}
-          isOpen={!!reportingPostId}
-          onClose={() => setReportingPostId(null)}
-        />
-      )}
     </div>
   );
 }

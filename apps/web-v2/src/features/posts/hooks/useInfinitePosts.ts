@@ -6,9 +6,8 @@
  */
 
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchPosts, reactToPost } from '../api/postService';
+import { fetchPosts, toggleLikePost } from '../api/postService';
 import type { Post, PostFilters, PostsResponse } from '../types';
-import { useAuth } from '@/features/auth';
 
 interface UseInfinitePostsOptions {
   filters?: PostFilters;
@@ -25,8 +24,7 @@ interface UseInfinitePostsReturn {
   isFetchingNextPage: boolean;
   fetchNextPage: () => void;
   refetch: () => void;
-  likePost: (postId: string) => void;
-  dislikePost: (postId: string) => void;
+  toggleLike: (postId: string) => void;
 }
 
 /**
@@ -38,8 +36,6 @@ export function useInfinitePosts({
   enabled = true,
 }: UseInfinitePostsOptions = {}): UseInfinitePostsReturn {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
-  const currentUserId = user?.userId;
 
   // Create unique query key based on filters
   const queryKey = ['posts', 'infinite', filters];
@@ -72,146 +68,15 @@ export function useInfinitePosts({
   // Flatten all pages into single posts array
   const posts = data?.pages.flatMap((page) => page.posts) ?? [];
 
-  // Mutation for liking/unliking a post (toggles)
-  const likeMutation = useMutation({
-    mutationFn: (postId: string) => {
-      // Check current like state to determine action
-      const post = posts.find((p) => p._id === postId);
-      const hasLike = post?.reactions.some(
-        (r) => r.type === 'like' && r.userId === currentUserId,
-      );
-      // If already liked, unlike (null), otherwise like
-      return reactToPost(postId, hasLike ? null : 'like');
-    },
-    onMutate: async (postId) => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey });
-
-      // Snapshot previous value
-      const previousData = queryClient.getQueryData(queryKey);
-
-      // Optimistically update
-      queryClient.setQueryData(queryKey, (old: { pages: PostsResponse[] } | undefined) => {
-        if (!old) return old;
-
-        return {
-          ...old,
-          pages: old.pages.map((page) => ({
-            ...page,
-            posts: page.posts.map((post: Post) => {
-              if (post._id !== postId) return post;
-
-              // Remove dislike if exists, add like
-              const reactions = post.reactions.filter((r) => r.type !== 'dislike');
-              const hasLike = reactions.some((r) => r.type === 'like');
-
-              if (hasLike) {
-                // Remove like
-                return {
-                  ...post,
-                  reactions: reactions.filter((r) => r.type !== 'like'),
-                  proximal_likes: Math.max(0, post.proximal_likes - 1),
-                };
-              }
-
-              // Add like
-              return {
-                ...post,
-                reactions: [
-                  ...reactions,
-                  {
-                    userId: 'current-user', // Will be replaced with actual user ID
-                    type: 'like' as const,
-                    location: { lat: 0, lon: 0 },
-                  },
-                ],
-                proximal_likes: post.proximal_likes + 1,
-              };
-            }),
-          })),
-        };
-      });
-
-      return { previousData };
-    },
-    onError: (err, _postId, context) => {
-      // Rollback on error
-      if (context?.previousData) {
-        queryClient.setQueryData(queryKey, context.previousData);
-      }
-      console.error('Error liking post:', err);
+  // Mutation for toggling like on a post
+  // Backend handles the like/unlike logic - no need to check state here
+  const toggleLikeMutation = useMutation({
+    mutationFn: (postId: string) => toggleLikePost(postId),
+    onError: (err) => {
+      console.error('Error toggling like:', err);
     },
     onSettled: () => {
-      // Refetch after mutation
-      queryClient.invalidateQueries({ queryKey });
-    },
-  });
-
-  // Mutation for disliking a post
-  const dislikeMutation = useMutation({
-    mutationFn: (postId: string) => {
-      // Check current dislike state to determine action
-      const post = posts.find((p) => p._id === postId);
-      const hasDislike = post?.reactions.some(
-        (r) => r.type === 'dislike' && r.userId === currentUserId,
-      );
-      // If already disliked, remove dislike (null), otherwise dislike
-      return reactToPost(postId, hasDislike ? null : 'dislike');
-    },
-    onMutate: async (postId) => {
-      await queryClient.cancelQueries({ queryKey });
-      const previousData = queryClient.getQueryData(queryKey);
-
-      queryClient.setQueryData(queryKey, (old: { pages: PostsResponse[] } | undefined) => {
-        if (!old) return old;
-
-        return {
-          ...old,
-          pages: old.pages.map((page) => ({
-            ...page,
-            posts: page.posts.map((post: Post) => {
-              if (post._id !== postId) return post;
-
-              // Remove like if exists, add dislike
-              const reactions = post.reactions.filter((r) => r.type !== 'like');
-              const hasDislike = reactions.some((r) => r.type === 'dislike');
-
-              if (hasDislike) {
-                // Remove dislike
-                return {
-                  ...post,
-                  reactions: reactions.filter((r) => r.type !== 'dislike'),
-                  proximal_dislikes: Math.max(0, post.proximal_dislikes - 1),
-                };
-              }
-
-              // Add dislike
-              return {
-                ...post,
-                reactions: [
-                  ...reactions,
-                  {
-                    userId: 'current-user',
-                    type: 'dislike' as const,
-                    location: { lat: 0, lon: 0 },
-                  },
-                ],
-                proximal_dislikes: post.proximal_dislikes + 1,
-              };
-            }),
-          })),
-        };
-      });
-
-      return { previousData };
-    },
-    onError: (err, _postId, context) => {
-      if (context?.previousData) {
-        queryClient.setQueryData(queryKey, context.previousData);
-      }
-      console.error('Error disliking post:', err);
-    },
-    onSettled: () => {
+      // Refetch to get updated state from backend
       queryClient.invalidateQueries({ queryKey });
     },
   });
@@ -225,7 +90,6 @@ export function useInfinitePosts({
     isFetchingNextPage,
     fetchNextPage: () => fetchNextPage(),
     refetch: () => refetch(),
-    likePost: (postId: string) => likeMutation.mutate(postId),
-    dislikePost: (postId: string) => dislikeMutation.mutate(postId),
+    toggleLike: (postId: string) => toggleLikeMutation.mutate(postId),
   };
 }

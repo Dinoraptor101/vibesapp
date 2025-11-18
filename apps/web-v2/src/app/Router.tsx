@@ -29,6 +29,7 @@ import { HomePage } from '@/pages/HomePage';
 import { MessagesPage } from '@/pages/MessagesPage';
 import { PostDetailPage } from '@/pages/PostDetailPage';
 import { ProfilePage } from '@/pages/ProfilePage';
+import { ReportPostPage } from '@/pages/ReportPostPage';
 import { SendDMRequestPage } from '@/pages/SendDMRequestPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 
@@ -114,6 +115,14 @@ export function Router() {
             element={
               <ProtectedRoute>
                 <SendDMRequestPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/report/:postId"
+            element={
+              <ProtectedRoute>
+                <ReportPostPage />
               </ProtectedRoute>
             }
           />
