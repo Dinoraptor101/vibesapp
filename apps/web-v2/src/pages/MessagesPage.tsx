@@ -16,13 +16,9 @@ export function MessagesPage() {
 
   return (
     <AppLayout>
-      <div className="container mx-auto max-w-4xl">
-        <h1 className="mb-6 px-4 pt-8 text-3xl font-bold text-gray-900 dim:text-gray-100 dark:text-white">
-          Messages
-        </h1>
-
+      <div className="max-w-2xl mx-auto">
         {/* Tab Navigation */}
-        <div className="mb-6 flex border-b border-gray-200 dim:border-gray-600 dark:border-gray-700">
+        <div className="sticky top-0 z-10 bg-background mb-6 flex border-b border-gray-200 dim:border-gray-600 dark:border-gray-700">
           <button
             type="button"
             onClick={() => setActiveTab('conversations')}

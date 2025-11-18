@@ -84,7 +84,7 @@ function getActivityMessage(activity: Activity): string {
 function getNavigationPath(activity: Activity): string | null {
   switch (activity.type) {
     case 'dm_request':
-      return '/messages'; // Will open DM requests tab
+      return '/messages';
     case 'dm_message':
       return activity.metadata?.conversationId
         ? `/messages/${activity.metadata.conversationId}`
@@ -114,12 +114,10 @@ export function ActivityCard({ activity, onMarkAsRead }: ActivityCardProps) {
   const navigationPath = getNavigationPath(activity);
 
   const handleClick = () => {
-    // Mark as read
     if (!activity.isRead && onMarkAsRead) {
       onMarkAsRead(activity._id);
     }
 
-    // Navigate to target
     if (navigationPath) {
       navigate(navigationPath);
     }
@@ -141,14 +139,19 @@ export function ActivityCard({ activity, onMarkAsRead }: ActivityCardProps) {
       className={`
         w-full text-left flex items-start gap-3 p-4 rounded-lg transition-colors
         ${navigationPath ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800' : 'cursor-default'}
-        ${!activity.isRead ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
         disabled:cursor-default
       `}
     >
-      {/* Icon */}
+      {!activity.isRead ? (
+        <div className="flex-shrink-0 mt-1.5">
+          <div className="h-2 w-2 rounded-full bg-purple-500" />
+        </div>
+      ) : (
+        <div className="flex-shrink-0 w-2" />
+      )}
+
       <div className="flex-shrink-0 mt-1">{icon}</div>
 
-      {/* Avatar (for user-related activities) */}
       {activity.actor.userId && activity.type !== 'post_hidden' && (
         <Avatar
           src={activity.actor.avatar}
@@ -158,14 +161,11 @@ export function ActivityCard({ activity, onMarkAsRead }: ActivityCardProps) {
         />
       )}
 
-      {/* Content */}
       <div className="flex-1 min-w-0">
-        {/* Message */}
         <p className="text-sm text-gray-900 dim:text-gray-100 dark:text-gray-100 font-medium">
           {message}
         </p>
 
-        {/* MBTI Badge (if available) */}
         {activity.actor.mbti && activity.type !== 'post_hidden' && (
           <div className="mt-1">
             <Badge variant="default" size="sm">
@@ -174,27 +174,17 @@ export function ActivityCard({ activity, onMarkAsRead }: ActivityCardProps) {
           </div>
         )}
 
-        {/* Preview text (for messages, comments, etc.) */}
         {activity.metadata?.messagePreview && (
-          <p className="mt-1 text-sm text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400 truncate">
+          <p className="mt-1 text-sm text-gray-600 dim:text-gray-500 dark:text-gray-400 truncate">
             {activity.metadata.messagePreview}
           </p>
         )}
 
-        {/* Timestamp */}
-        <p className="mt-1 text-xs text-gray-500 dim:text-gray-500 dark:text-gray-500">
+        <p className="mt-1 text-xs text-gray-400 dim:text-gray-600 dark:text-gray-600">
           {formatRelativeTime(activity.createdAt)}
         </p>
       </div>
 
-      {/* Unread indicator */}
-      {!activity.isRead && (
-        <div className="flex-shrink-0">
-          <div className="h-2 w-2 rounded-full bg-blue-500" />
-        </div>
-      )}
-
-      {/* Target thumbnail (for posts) */}
       {activity.target?.thumbnail && (
         <div className="flex-shrink-0">
           <img
