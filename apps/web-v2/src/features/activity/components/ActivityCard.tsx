@@ -65,6 +65,12 @@ function getActivityMessage(activity: Activity): string {
     case 'comment_reply':
       return `${username} replied to your comment`;
     case 'reaction':
+      // Check if it's a comment or post reaction
+      if (activity.target?.type === 'comment') {
+        return activity.groupCount && activity.groupCount > 1
+          ? `${activity.groupCount} people liked your comment`
+          : `${username} liked your comment`;
+      }
       return activity.groupCount && activity.groupCount > 1
         ? `${activity.groupCount} people liked your post`
         : `${username} liked your post`;
@@ -157,7 +163,7 @@ export function ActivityCard({ activity, onMarkAsRead }: ActivityCardProps) {
       disabled={!navigationPath}
       className={`
         w-full text-left flex items-start gap-3 p-4 rounded-lg transition-colors
-        ${navigationPath ? 'cursor-pointer hover:bg-gray-100 dim:hover:bg-gray-750 dark:hover:bg-gray-800' : 'cursor-default'}
+        ${navigationPath ? 'cursor-pointer hover:bg-gray-100 dim:hover:bg-gray-800/50 dark:hover:bg-gray-800' : 'cursor-default'}
         disabled:cursor-default
       `}
     >

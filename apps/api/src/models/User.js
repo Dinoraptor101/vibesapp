@@ -106,6 +106,10 @@ const UserSchema = new mongoose.Schema({
   },
 });
 
+// Create geospatial index for location-based queries (nearby users/posts)
+// Using 2d index (supports { lat, lon } format)
+UserSchema.index({ 'location.lat': 1, 'location.lon': 1 });
+
 // SECURITY: Ensure pigeonId is never exposed in JSON responses
 // NORMALIZATION: Transform field names to match frontend expectations
 UserSchema.set('toJSON', {
