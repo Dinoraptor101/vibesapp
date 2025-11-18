@@ -60,7 +60,7 @@ class ApiClient {
       },
     });
 
-    this.apiKey = import.meta.env.VITE_API_KEY;
+    this.apiKey = import.meta.env.VITE_BACKEND_API_KEY;
 
     // Setup interceptors
     this.setupInterceptors();
