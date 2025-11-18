@@ -5,10 +5,11 @@
  * - Debounced batch updates (300ms)
  * - Error callbacks for rollback
  * - Optimistic UI updates with revert on failure
+ * - Flush pending updates on unmount
  */
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 import { useAuth } from '@/features/auth/context/useAuth';
 import api from '@/lib/api';
 
@@ -16,8 +17,7 @@ interface AccountUpdate {
   avatar?: string;
   bio?: string;
   mbtiPersonality?: string;
-  zipCode?: string;
-  location?: { lat: number; lon: number };
+  location?: { lat: number; lon: number; city?: string };
   polarity?: 'yin' | 'yang';
   proximityRange?: number;
 }
@@ -92,6 +92,36 @@ export function useAccountUpdates() {
     },
     [user, refreshUser, queryClient]
   );
+
+  /**
+   * Flush any pending updates when component unmounts
+   * This ensures changes are saved even if user navigates away quickly
+   */
+  useEffect(() => {
+    return () => {
+      // If there are pending updates, send them immediately
+      if (Object.keys(updateQueue.current).length > 0) {
+        const updates = { ...updateQueue.current };
+        const callbacks = { ...callbacksRef.current };
+
+        // Clear timeout to prevent duplicate send
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+
+        // Send immediately (async, fire-and-forget since component is unmounting)
+        api
+          .patch(`/api/users/${user?._id}`, updates)
+          .then(() => {
+            callbacks.onSuccess?.();
+          })
+          .catch((error) => {
+            console.error('Failed to flush pending updates on unmount:', error);
+            callbacks.onError?.(error, updates);
+          });
+      }
+    };
+  }, [user]);
 
   return { queueUpdate };
 }
