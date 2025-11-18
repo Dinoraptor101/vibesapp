@@ -98,12 +98,10 @@ export function LoginForm() {
           {/* Return icon button - morphs to error icon */}
           <Button
             type="submit"
-            variant="primary"
+            variant={showError ? 'destructive' : 'primary'}
             size="md"
             disabled={isLoading || !pigeonId.trim()}
-            className={`h-12 w-12 min-w-[48px] p-0 rounded-l-none border-l-0 transition-all duration-300 ${
-              showError ? 'bg-vibe-negative hover:bg-vibe-negative' : ''
-            }`}
+            className="h-12 w-12 min-w-[48px] p-0 rounded-l-none border-l-0 transition-all duration-300"
             aria-label="Login"
           >
             <div className="relative w-5 h-5 flex items-center justify-center">

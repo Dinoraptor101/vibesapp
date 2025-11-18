@@ -1,5 +1,8 @@
+import { Bell, BellOff } from 'lucide-react';
 import { useState } from 'react';
 import { useAccountUpdates } from '../hooks/useAccountUpdates';
+import { useNotificationPreferences } from '../hooks/useNotificationPreferences';
+import { useUpdatePreferences } from '../hooks/useUpdatePreferences';
 
 const PROXIMITY_OPTIONS = [
   { value: 50, label: '50 kilometers' },
@@ -7,15 +10,62 @@ const PROXIMITY_OPTIONS = [
   { value: 150, label: '150 kilometers' },
 ];
 
+const NOTIFICATION_TYPES = [
+  {
+    key: 'new_follower' as const,
+    label: 'New Followers',
+    description: 'When someone follows you',
+  },
+  {
+    key: 'following_post' as const,
+    label: 'Posts from Following',
+    description: 'When someone you follow posts',
+  },
+  {
+    key: 'nearby_post' as const,
+    label: 'Nearby Posts',
+    description: 'When someone nearby posts',
+  },
+  {
+    key: 'comment' as const,
+    label: 'Comments',
+    description: 'When someone comments on your post',
+  },
+  {
+    key: 'comment_reply' as const,
+    label: 'Comment Replies',
+    description: 'When someone replies to your comment',
+  },
+  {
+    key: 'reactions' as const,
+    label: 'Reactions',
+    description: 'When someone likes your post',
+  },
+  {
+    key: 'post_hidden' as const,
+    label: 'Post Moderation',
+    description: 'When your post is hidden by community reports',
+  },
+];
+
 export function PreferencesTab() {
   const { queueUpdate } = useAccountUpdates();
   const [proximityRange, setProximityRange] = useState(100); // Default 100km
+
+  const { data: preferences, isLoading } = useNotificationPreferences();
+  const updatePreferences = useUpdatePreferences();
 
   const handleProximityChange = (newRange: number) => {
     setProximityRange(newRange);
     queueUpdate({ proximityRange: newRange });
   };
 
+  const handleToggleNotification = (key: string) => {
+    if (!preferences) return;
+
+    const newValue = !preferences[key as keyof typeof preferences];
+    updatePreferences.mutate({ [key]: newValue });
+  };
   return (
     <div className="p-4 pb-8 space-y-6">
       {/* Proximity Range */}
@@ -46,11 +96,57 @@ export function PreferencesTab() {
       {/* Divider */}
       <div className="border-t border-gray-200 dark:border-gray-700" />
 
-      {/* Future Settings */}
+      {/* Notification Preferences */}
       <div>
-        <p className="text-sm text-gray-500 dim:text-gray-450 dark:text-gray-400">
-          Notification settings coming soon...
+        <h3 className="text-base font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100 mb-1">
+          Notification Preferences
+        </h3>
+        <p className="text-sm text-gray-500 dim:text-gray-450 dark:text-gray-400 mb-4">
+          Choose which activities you want to be notified about
         </p>
+
+        {isLoading ? (
+          <div className="space-y-4">
+            {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+              <div
+                key={i}
+                className="h-16 bg-gray-100 dim:bg-gray-700 dark:bg-gray-800 rounded-lg animate-pulse"
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {NOTIFICATION_TYPES.map((type) => {
+              const isEnabled = preferences?.[type.key] ?? true;
+
+              return (
+                <button
+                  key={type.key}
+                  type="button"
+                  onClick={() => handleToggleNotification(type.key)}
+                  className="w-full flex items-center justify-between p-4 rounded-lg border border-gray-200 dim:border-gray-600 dark:border-gray-700 hover:bg-gray-50 dim:hover:bg-gray-750 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <div className="flex-1 text-left">
+                    <div className="font-medium text-gray-900 dim:text-gray-100 dark:text-gray-100">
+                      {type.label}
+                    </div>
+                    <div className="text-sm text-gray-500 dim:text-gray-450 dark:text-gray-400">
+                      {type.description}
+                    </div>
+                  </div>
+
+                  <div className="ml-4">
+                    {isEnabled ? (
+                      <Bell className="w-5 h-5 text-brand-600 dim:text-brand-500 dark:text-brand-400" />
+                    ) : (
+                      <BellOff className="w-5 h-5 text-gray-400 dim:text-gray-500 dark:text-gray-500" />
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

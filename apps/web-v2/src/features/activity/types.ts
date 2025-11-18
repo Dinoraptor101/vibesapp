@@ -5,19 +5,19 @@
  */
 
 export type ActivityType =
-  // Messages Tab
-  | 'dm_request' // Someone sent you a DM request
-  | 'dm_message' // New message in a conversation
-  // Social Tab
+  // New unified activity types from backend
   | 'new_follower' // Someone followed you
   | 'following_post' // Someone you follow posted
   | 'nearby_post' // Someone posted nearby
-  // Me Tab
-  | 'post_yang' // Someone liked your post (Yang vibe)
-  | 'post_yin' // Someone disliked your post (Yin vibe)
   | 'comment' // Someone commented on your post
   | 'comment_reply' // Someone replied to your comment
-  | 'post_hidden'; // Your post was auto-hidden (3+ Yin vibes)
+  | 'reaction' // Someone liked your post
+  | 'post_hidden' // Your post was auto-hidden (3+ reports)
+  // Legacy types (for backward compatibility)
+  | 'dm_request' // Someone sent you a DM request
+  | 'dm_message' // New message in a conversation
+  | 'post_yang' // Legacy - Someone liked your post (Yang vibe)
+  | 'post_yin'; // Legacy - Someone disliked your post (Yin vibe)
 
 export type ActivityCategory = 'messages' | 'social' | 'me' | 'all';
 
@@ -25,13 +25,12 @@ export type ActivityPriority = 'high' | 'medium' | 'low';
 
 /**
  * Base Activity Interface
- * Represents a single notification/activity item
+ * Matches backend unified Activity model
  */
 export interface Activity {
   _id: string;
+  recipientId: string; // Who receives the notification
   type: ActivityType;
-  category: ActivityCategory;
-  priority: ActivityPriority;
   isRead: boolean;
   readAt?: Date;
   createdAt: Date;
@@ -41,18 +40,17 @@ export interface Activity {
     userId: string;
     username: string;
     avatar?: string;
-    mbti?: string;
   };
 
-  // Target of the activity (post, comment, conversation, etc.)
+  // Target of the activity (post, comment, user)
   target?: {
-    type: 'post' | 'comment' | 'conversation';
+    type: 'post' | 'comment' | 'user';
     id: string;
-    thumbnail?: string; // For post images
+    thumbnail?: string; // Image URL for posts
     preview?: string; // Text preview
   };
 
-  // Optional metadata
+  // Optional metadata (legacy support)
   metadata?: {
     messagePreview?: string; // For DM messages
     conversationId?: string; // For DM activities
@@ -63,7 +61,7 @@ export interface Activity {
   };
 
   // Grouping support (e.g., "5 people liked your post")
-  groupKey?: string; // e.g., "post:123:yang"
+  groupKey?: string; // e.g., "post:123:reaction"
   groupCount?: number; // Number of similar activities grouped
   groupActors?: Array<{
     // First 3-5 actors in group

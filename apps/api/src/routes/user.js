@@ -39,4 +39,11 @@ router.put('/:userId', userController.updateUser);
 // PATCH endpoint to update existing user details (same handler as PUT)
 router.patch('/:userId', userController.updateUser);
 
+// PATCH endpoint to update notification preferences
+router.patch(
+  '/:userId/notification-preferences',
+  authenticate,
+  userController.updateNotificationPreferences
+);
+
 module.exports = router;

@@ -13,9 +13,31 @@ interface ProfileHeaderProps {
   profile: ProfileData;
   isOwnProfile: boolean;
   onDMRequest: () => void;
+  dmStatus?: 'connected' | 'pending' | 'received' | 'none';
 }
 
-export function ProfileHeader({ profile, isOwnProfile, onDMRequest }: ProfileHeaderProps) {
+export function ProfileHeader({
+  profile,
+  isOwnProfile,
+  onDMRequest,
+  dmStatus,
+}: ProfileHeaderProps) {
+  // Determine button text and state
+  const getMessageButtonProps = () => {
+    if (dmStatus === 'pending') {
+      return {
+        text: 'Requested',
+        disabled: true,
+      };
+    }
+    return {
+      text: 'Message',
+      disabled: false,
+    };
+  };
+
+  const messageButtonProps = getMessageButtonProps();
+
   return (
     <div className="space-y-6">
       {/* Avatar and Basic Info */}
@@ -67,8 +89,9 @@ export function ProfileHeader({ profile, isOwnProfile, onDMRequest }: ProfileHea
                 size="md"
                 leftIcon={<MessageCircle size={16} />}
                 onClick={onDMRequest}
+                disabled={messageButtonProps.disabled}
               >
-                Message
+                {messageButtonProps.text}
               </Button>
             </div>
           )}

@@ -3,10 +3,12 @@ const { S3 } = require('@aws-sdk/client-s3');
 const Post = require('../models/Post');
 const User = require('../models/User');
 const Follow = require('../models/Follow');
-const { createReplyActivity, createReactionActivity } = require('./activity');
+const { createReplyActivity } = require('./activity');
 const ReactionActivity = require('../models/ReactionActivity');
 const ReplyActivity = require('../models/ReplyActivity');
 const karma = require('./karma');
+const { createActivity } = require('./activityNew');
+const Activity = require('../models/Activity');
 const { startSession } = require('mongoose');
 const GroupChat = require('../models/Groupchat');
 const WatchersList = require('../models/WatchersList');
@@ -131,6 +133,90 @@ const createPost = async (req, res) => {
         originalPostId: originalPost._id,
         replyPostId: newPost._id,
       });
+    } else {
+      // Only create following_post and nearby_post for new posts (not replies)
+      console.time('createPostActivities');
+
+      // 1. Notify followers (following_post) - use batch insert for performance
+      const followers = await Follow.find({ following: userId }).session(session);
+      if (followers.length > 0) {
+        const followerActivities = [];
+        for (const follower of followers) {
+          const followerUser = await User.findOne({ userId: follower.follower }).session(session);
+          if (followerUser && followerUser.notificationPreferences?.following_post !== false) {
+            followerActivities.push({
+              recipientId: follower.follower,
+              type: 'following_post',
+              actor: {
+                userId: user.userId,
+                username: user.userName,
+                avatar: user.profilePictureUrl,
+              },
+              target: {
+                type: 'post',
+                id: newPost._id,
+                thumbnail: newPost.image,
+                preview: newPost.text,
+              },
+              isRead: false,
+              createdAt: new Date(),
+            });
+          }
+        }
+
+        if (followerActivities.length > 0) {
+          await Activity.insertMany(followerActivities, { session });
+          console.info(`Created ${followerActivities.length} following_post activities`);
+        }
+      }
+
+      // 2. Notify nearby users (nearby_post) - within 50km radius
+      const nearbyUsers = await User.find({
+        userId: { $ne: userId }, // Exclude self
+        location: {
+          $near: {
+            $geometry: {
+              type: 'Point',
+              coordinates: [lon, lat],
+            },
+            $maxDistance: 50000, // 50km in meters
+          },
+        },
+      })
+        .limit(100)
+        .session(session); // Limit to 100 nearest users for performance
+
+      if (nearbyUsers.length > 0) {
+        const nearbyActivities = [];
+        for (const nearbyUser of nearbyUsers) {
+          if (nearbyUser.notificationPreferences?.nearby_post !== false) {
+            nearbyActivities.push({
+              recipientId: nearbyUser.userId,
+              type: 'nearby_post',
+              actor: {
+                userId: user.userId,
+                username: user.userName,
+                avatar: user.profilePictureUrl,
+              },
+              target: {
+                type: 'post',
+                id: newPost._id,
+                thumbnail: newPost.image,
+                preview: newPost.text,
+              },
+              isRead: false,
+              createdAt: new Date(),
+            });
+          }
+        }
+
+        if (nearbyActivities.length > 0) {
+          await Activity.insertMany(nearbyActivities, { session });
+          console.info(`Created ${nearbyActivities.length} nearby_post activities`);
+        }
+      }
+
+      console.timeEnd('createPostActivities');
     }
 
     await session.commitTransaction();
@@ -483,11 +569,20 @@ const likePost = async (req, res) => {
 
       await post.save();
 
-      await createReactionActivity({
-        userId: userId,
-        type: 'like',
-        post: post,
-        originalPosterId: post.user.userId,
+      // Create reaction activity using new unified model
+      await createActivity({
+        recipientId: post.user.userId,
+        type: 'reaction',
+        actor: {
+          userId: user.userId,
+          username: user.userName,
+          avatar: user.profilePictureUrl,
+        },
+        target: {
+          type: 'post',
+          id: post._id,
+          thumbnail: post.image,
+        },
       });
 
       console.info('Reaction activity created successfully');
@@ -594,6 +689,24 @@ const reportPost = async (req, res) => {
       post.hiddenBy = 'auto';
       isHidden = true;
       message = 'Post auto-hidden due to community reports';
+
+      // Create post_hidden activity to notify the post author
+      await createActivity({
+        recipientId: post.user.userId,
+        type: 'post_hidden',
+        actor: {
+          userId: 'system',
+          username: 'VibesApp',
+          avatar: null,
+        },
+        target: {
+          type: 'post',
+          id: post._id,
+          thumbnail: post.image,
+          preview: post.text,
+        },
+      });
+      console.info('post_hidden activity created for user:', post.user.userId);
 
       // Add strike to post author
       const postAuthor = await User.findOne({ userId: post.user.userId });
@@ -719,7 +832,7 @@ const reactToPost = async (req, res) => {
 
       // Update proximal counts if it was proximal
       const user = await User.findOne({ userId });
-      if (user && user.location) {
+      if (user?.location) {
         const distance = getDistanceFromLatLonInMiles(
           user.location.lat,
           user.location.lon,

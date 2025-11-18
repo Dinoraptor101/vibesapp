@@ -91,6 +91,15 @@ const UserSchema = new mongoose.Schema({
   bio: {
     type: String,
   },
+  notificationPreferences: {
+    new_follower: { type: Boolean, default: true },
+    following_post: { type: Boolean, default: true },
+    nearby_post: { type: Boolean, default: true },
+    comment: { type: Boolean, default: true },
+    comment_reply: { type: Boolean, default: true },
+    post_hidden: { type: Boolean, default: true },
+    reactions: { type: Boolean, default: true },
+  },
   createdAt: {
     type: Date,
     default: Date.now,

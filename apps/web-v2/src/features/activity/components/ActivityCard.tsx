@@ -4,9 +4,9 @@
  * Displays a single activity/notification with appropriate icon, message, and actions
  */
 
-import { Bell, MessageCircle, ThumbsDown, ThumbsUp, UserPlus } from 'lucide-react';
+import { Heart, MessageCircle, Reply, UserPlus, ImageIcon, MapPin, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Avatar, Badge } from '@/components/ui-next';
+import { Avatar } from '@/components/ui-next';
 import { formatRelativeTime } from '@/lib/utils';
 import type { Activity } from '../types';
 
@@ -20,25 +20,30 @@ interface ActivityCardProps {
  */
 function getActivityIcon(type: Activity['type']) {
   switch (type) {
-    case 'dm_request':
-    case 'dm_message':
-      return <MessageCircle className="h-5 w-5 text-blue-500" />;
     case 'new_follower':
       return <UserPlus className="h-5 w-5 text-green-500" />;
     case 'following_post':
+      return <ImageIcon className="h-5 w-5 text-purple-500" />;
     case 'nearby_post':
-      return <Bell className="h-5 w-5 text-purple-500" />;
-    case 'post_yang':
-      return <ThumbsUp className="h-5 w-5 text-green-500" />;
-    case 'post_yin':
-      return <ThumbsDown className="h-5 w-5 text-red-500" />;
+      return <MapPin className="h-5 w-5 text-blue-500" />;
     case 'comment':
-    case 'comment_reply':
       return <MessageCircle className="h-5 w-5 text-blue-500" />;
+    case 'comment_reply':
+      return <Reply className="h-5 w-5 text-blue-500" />;
+    case 'reaction':
+      return <Heart className="h-5 w-5 text-red-500" />;
     case 'post_hidden':
-      return <Bell className="h-5 w-5 text-orange-500" />;
+      return <EyeOff className="h-5 w-5 text-orange-500" />;
+    // Legacy types
+    case 'dm_request':
+    case 'dm_message':
+      return <MessageCircle className="h-5 w-5 text-blue-500" />;
+    case 'post_yang':
+      return <Heart className="h-5 w-5 text-green-500" />;
+    case 'post_yin':
+      return <Heart className="h-5 w-5 text-red-500" />;
     default:
-      return <Bell className="h-5 w-5 text-gray-500" />;
+      return <Heart className="h-5 w-5 text-gray-500" />;
   }
 }
 
@@ -46,19 +51,30 @@ function getActivityIcon(type: Activity['type']) {
  * Get activity message based on type
  */
 function getActivityMessage(activity: Activity): string {
-  const username = activity.actor.username;
+  const username = `@${activity.actor.username}`;
 
   switch (activity.type) {
+    case 'new_follower':
+      return `${username} followed you`;
+    case 'following_post':
+      return `${username} posted a photo`;
+    case 'nearby_post':
+      return `${username} posted nearby`;
+    case 'comment':
+      return `${username} commented on your post`;
+    case 'comment_reply':
+      return `${username} replied to your comment`;
+    case 'reaction':
+      return activity.groupCount && activity.groupCount > 1
+        ? `${activity.groupCount} people liked your post`
+        : `${username} liked your post`;
+    case 'post_hidden':
+      return 'Your post was hidden by community reports';
+    // Legacy types
     case 'dm_request':
       return `${username} sent you a message request`;
     case 'dm_message':
       return `${username} sent you a message`;
-    case 'new_follower':
-      return `${username} started following you`;
-    case 'following_post':
-      return `${username} posted something new`;
-    case 'nearby_post':
-      return `${username} posted nearby${activity.metadata?.location ? ` in ${activity.metadata.location}` : ''}`;
     case 'post_yang':
       return activity.groupCount && activity.groupCount > 1
         ? `${activity.groupCount} people liked your post`
@@ -67,12 +83,6 @@ function getActivityMessage(activity: Activity): string {
       return activity.groupCount && activity.groupCount > 1
         ? `${activity.groupCount} people disliked your post`
         : `${username} disliked your post`;
-    case 'comment':
-      return `${username} commented on your post`;
-    case 'comment_reply':
-      return `${username} replied to your comment`;
-    case 'post_hidden':
-      return 'Your post was auto-hidden due to community feedback';
     default:
       return 'New activity';
   }
@@ -83,25 +93,26 @@ function getActivityMessage(activity: Activity): string {
  */
 function getNavigationPath(activity: Activity): string | null {
   switch (activity.type) {
+    case 'new_follower':
+      return `/profile/${activity.actor.userId}`;
+    case 'following_post':
+    case 'nearby_post':
+    case 'reaction':
+    case 'comment':
+    case 'post_hidden':
+      return activity.target?.id ? `/posts/${activity.target.id}` : null;
+    case 'comment_reply':
+      return activity.target?.id ? `/posts/${activity.target.id}` : null;
+    // Legacy types
     case 'dm_request':
       return '/messages';
     case 'dm_message':
       return activity.metadata?.conversationId
         ? `/messages/${activity.metadata.conversationId}`
         : '/messages';
-    case 'new_follower':
-      return `/profile/${activity.actor.userId}`;
-    case 'following_post':
-    case 'nearby_post':
     case 'post_yang':
     case 'post_yin':
-    case 'comment':
-    case 'post_hidden':
       return activity.metadata?.postId ? `/posts/${activity.metadata.postId}` : null;
-    case 'comment_reply':
-      return activity.metadata?.postId
-        ? `/posts/${activity.metadata.postId}#comment-${activity.metadata.commentId}`
-        : null;
     default:
       return null;
   }
@@ -138,13 +149,13 @@ export function ActivityCard({ activity, onMarkAsRead }: ActivityCardProps) {
       disabled={!navigationPath}
       className={`
         w-full text-left flex items-start gap-3 p-4 rounded-lg transition-colors
-        ${navigationPath ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800' : 'cursor-default'}
+        ${navigationPath ? 'cursor-pointer hover:bg-gray-100 dim:hover:bg-gray-750 dark:hover:bg-gray-800' : 'cursor-default'}
         disabled:cursor-default
       `}
     >
       {!activity.isRead ? (
         <div className="flex-shrink-0 mt-1.5">
-          <div className="h-2 w-2 rounded-full bg-purple-500" />
+          <div className="h-2 w-2 rounded-full bg-brand-500" />
         </div>
       ) : (
         <div className="flex-shrink-0 w-2" />
@@ -162,16 +173,12 @@ export function ActivityCard({ activity, onMarkAsRead }: ActivityCardProps) {
       )}
 
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-gray-900 dim:text-gray-100 dark:text-gray-100 font-medium">
-          {message}
-        </p>
+        <p className="text-sm text-gray-900 dim:text-gray-100 dark:text-gray-100">{message}</p>
 
-        {activity.actor.mbti && activity.type !== 'post_hidden' && (
-          <div className="mt-1">
-            <Badge variant="default" size="sm">
-              {activity.actor.mbti}
-            </Badge>
-          </div>
+        {activity.target?.preview && (
+          <p className="mt-1 text-sm text-gray-600 dim:text-gray-500 dark:text-gray-400 truncate">
+            {activity.target.preview}
+          </p>
         )}
 
         {activity.metadata?.messagePreview && (

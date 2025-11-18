@@ -1,5 +1,6 @@
 const Post = require('../models/Post');
 const User = require('../models/User');
+const { createActivity } = require('./activityNew');
 
 /**
  * Create a comment on a post
@@ -75,6 +76,49 @@ exports.createComment = async (req, res) => {
     });
 
     await comment.save();
+
+    // Create activity notification
+    if (replyToCommentId) {
+      // This is a reply to another comment - notify the comment author
+      const parentComment = await Post.findById(replyToCommentId);
+      if (parentComment && parentComment.user.userId !== user._id.toString()) {
+        await createActivity({
+          recipientId: parentComment.user.userId,
+          type: 'comment_reply',
+          actor: {
+            userId: user._id.toString(),
+            username: user.userName,
+            avatar: user.profilePictureUrl,
+          },
+          target: {
+            type: 'comment',
+            id: comment._id,
+            preview: comment.text,
+          },
+        });
+        console.info('comment_reply activity created for user:', parentComment.user.userId);
+      }
+    } else {
+      // This is a top-level comment on a post - notify the post author
+      if (parentPost.user.userId !== user._id.toString()) {
+        await createActivity({
+          recipientId: parentPost.user.userId,
+          type: 'comment',
+          actor: {
+            userId: user._id.toString(),
+            username: user.userName,
+            avatar: user.profilePictureUrl,
+          },
+          target: {
+            type: 'post',
+            id: parentPost._id,
+            thumbnail: parentPost.image,
+            preview: comment.text,
+          },
+        });
+        console.info('comment activity created for user:', parentPost.user.userId);
+      }
+    }
 
     // Return populated comment
     const populatedComment = await Post.findById(comment._id);

@@ -1,0 +1,139 @@
+const Activity = require('../models/Activity');
+const User = require('../models/User');
+
+/**
+ * Get activities for a user
+ * Returns activities sorted by newest first
+ */
+const getActivities = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const activities = await Activity.find({ recipientId: userId })
+      .sort({ createdAt: -1 })
+      .limit(100); // Limit to prevent huge responses
+
+    res.status(200).json(activities);
+  } catch (error) {
+    console.error('Error fetching activities:', error);
+    res.status(500).json({ error: 'Server error while fetching activities' });
+  }
+};
+
+/**
+ * Mark activity as read
+ */
+const markAsRead = async (req, res) => {
+  try {
+    const { activityId } = req.params;
+
+    const activity = await Activity.findByIdAndUpdate(
+      activityId,
+      { isRead: true, readAt: new Date() },
+      { new: true }
+    );
+
+    if (!activity) {
+      return res.status(404).json({ error: 'Activity not found' });
+    }
+
+    res.status(200).json(activity);
+  } catch (error) {
+    console.error('Error marking activity as read:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+/**
+ * Mark all activities as read
+ */
+const markAllAsRead = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    await Activity.updateMany(
+      { recipientId: userId, isRead: false },
+      { isRead: true, readAt: new Date() }
+    );
+
+    res.status(200).json({ message: 'All activities marked as read' });
+  } catch (error) {
+    console.error('Error marking all as read:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+/**
+ * Get unread activity counts
+ */
+const getUnreadCounts = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const unreadCount = await Activity.countDocuments({
+      recipientId: userId,
+      isRead: false,
+    });
+
+    res.status(200).json({ unreadCount });
+  } catch (error) {
+    console.error('Error fetching unread counts:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+/**
+ * Create activity helper (called by other controllers)
+ */
+const createActivity = async ({ recipientId, type, actor, target }) => {
+  try {
+    // Check if recipient has this notification type enabled
+    const recipient = await User.findOne({ userId: recipientId });
+    if (!recipient) {
+      console.error('Recipient not found:', recipientId);
+      return null;
+    }
+
+    // Map activity types to preference keys
+    const preferenceMap = {
+      new_follower: 'new_follower',
+      following_post: 'following_post',
+      nearby_post: 'nearby_post',
+      comment: 'comment',
+      comment_reply: 'comment_reply',
+      post_hidden: 'post_hidden',
+      reaction: 'reactions',
+    };
+
+    const preferenceKey = preferenceMap[type];
+    if (preferenceKey && recipient.notificationPreferences[preferenceKey] === false) {
+      console.log(`User ${recipientId} has disabled ${type} notifications`);
+      return null;
+    }
+
+    // Create activity
+    const activity = new Activity({
+      recipientId,
+      type,
+      actor,
+      target,
+      isRead: false,
+      createdAt: new Date(),
+    });
+
+    await activity.save();
+    console.log('Activity created:', type, 'for', recipientId);
+    return activity;
+  } catch (error) {
+    console.error('Error creating activity:', error);
+    throw error;
+  }
+};
+
+module.exports = {
+  getActivities,
+  markAsRead,
+  markAllAsRead,
+  getUnreadCounts,
+  createActivity,
+};
