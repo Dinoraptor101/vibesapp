@@ -5,7 +5,8 @@
  * Phase 4.9 (Nov 17, 2025): Simplified to tab-based filtering
  */
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useAuth } from '@/features/auth';
 import type { FeedTab } from '../components/FilterBar';
 import type { PostFilters } from '../types';
 
@@ -16,9 +17,13 @@ interface UsePostFiltersReturn {
   isFiltering: boolean;
 }
 
-// Get user's current location
-async function getCurrentLocation(): Promise<{ lat: number; lon: number } | null> {
-  return new Promise((resolve) => {
+// Get user's current location from multiple sources
+async function getUserLocation(userProfileLocation?: {
+  latitude: number;
+  longitude: number;
+}): Promise<{ lat: number; lon: number } | null> {
+  // Try browser geolocation first
+  const browserLocation = await new Promise<{ lat: number; lon: number } | null>((resolve) => {
     if (!navigator.geolocation) {
       resolve(null);
       return;
@@ -32,7 +37,7 @@ async function getCurrentLocation(): Promise<{ lat: number; lon: number } | null
         });
       },
       (error) => {
-        console.error('Error getting location:', error);
+        console.error('Browser geolocation error:', error);
         resolve(null);
       },
       {
@@ -42,6 +47,20 @@ async function getCurrentLocation(): Promise<{ lat: number; lon: number } | null
       }
     );
   });
+
+  if (browserLocation) {
+    return browserLocation;
+  }
+
+  // Fall back to user's profile location
+  if (userProfileLocation) {
+    return {
+      lat: userProfileLocation.latitude,
+      lon: userProfileLocation.longitude,
+    };
+  }
+
+  return null;
 }
 
 const DEFAULT_NEARBY_RADIUS = 10000; // 10km in meters
@@ -50,25 +69,26 @@ const DEFAULT_NEARBY_RADIUS = 10000; // 10km in meters
  * Hook for managing post feed filters with tab-based navigation
  */
 export function usePostFilters(): UsePostFiltersReturn {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<FeedTab>('nearby');
   const [filters, setFilters] = useState<PostFilters>({});
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
 
   // Get user location on mount
   useEffect(() => {
-    getCurrentLocation().then((location) => {
+    getUserLocation(user?.location).then((location) => {
       if (location) {
         setUserLocation(location);
       }
     });
-  }, []);
+  }, [user?.location]);
 
   // Update filters when tab changes
   useEffect(() => {
     if (activeTab === 'nearby') {
       // Nearby tab: Posts within proximity radius (from settings)
       if (!userLocation) {
-        console.warn('Location not available for nearby filter');
+        // ZEN: Don't warn, just show empty filters (backend will handle it)
         setFilters({});
         return;
       }

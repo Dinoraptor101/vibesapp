@@ -11,7 +11,7 @@ import { Button } from '@/components/ui-next';
 import { useInfinitePosts } from '../hooks/useInfinitePosts';
 import { usePostFilters } from '../hooks/usePostFilters';
 import { FilterBar } from './FilterBar';
-import { PostCard } from './PostCard';
+import { PostsGrid } from './PostsGrid';
 import { PostSkeleton } from './PostSkeleton';
 import { ReportPostDialog } from './ReportPostDialog';
 
@@ -123,17 +123,12 @@ export function PostsFeed({ className }: PostsFeedProps) {
       <FilterBar activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Posts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-        {posts.map((post) => (
-          <PostCard
-            key={post._id}
-            post={post}
-            onLike={likePost}
-            onReport={handleReport}
-            onComment={handleComment}
-          />
-        ))}
-      </div>
+      <PostsGrid
+        posts={posts}
+        onLike={likePost}
+        onReport={handleReport}
+        onComment={handleComment}
+      />
 
       {/* Load more trigger */}
       <div ref={loadMoreRef} className="py-4">
