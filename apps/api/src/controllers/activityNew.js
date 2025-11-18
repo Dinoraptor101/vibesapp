@@ -87,12 +87,20 @@ const getUnreadCounts = async (req, res) => {
  */
 const createActivity = async ({ recipientId, type, actor, target }) => {
   try {
+    console.info('📢 createActivity called:', { recipientId, type, actorId: actor.userId });
+
     // Check if recipient has this notification type enabled
     const recipient = await User.findOne({ userId: recipientId });
     if (!recipient) {
-      console.error('Recipient not found:', recipientId);
+      console.error('❌ Recipient not found:', recipientId);
       return null;
     }
+
+    console.info('✅ Recipient found:', {
+      userId: recipient.userId,
+      username: recipient.userName,
+      notificationPreferences: recipient.notificationPreferences,
+    });
 
     // Map activity types to preference keys
     const preferenceMap = {
@@ -107,7 +115,7 @@ const createActivity = async ({ recipientId, type, actor, target }) => {
 
     const preferenceKey = preferenceMap[type];
     if (preferenceKey && recipient.notificationPreferences[preferenceKey] === false) {
-      console.log(`User ${recipientId} has disabled ${type} notifications`);
+      console.log(`🔕 User ${recipientId} has disabled ${type} notifications`);
       return null;
     }
 
@@ -122,10 +130,15 @@ const createActivity = async ({ recipientId, type, actor, target }) => {
     });
 
     await activity.save();
-    console.log('Activity created:', type, 'for', recipientId);
+    console.log('💾 Activity saved successfully:', {
+      activityId: activity._id,
+      type,
+      recipientId,
+      actorId: actor.userId,
+    });
     return activity;
   } catch (error) {
-    console.error('Error creating activity:', error);
+    console.error('❌ Error creating activity:', error);
     throw error;
   }
 };

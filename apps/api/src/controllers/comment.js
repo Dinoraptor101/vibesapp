@@ -58,7 +58,7 @@ exports.createComment = async (req, res) => {
       commentOn: postId, // Use commentOn instead of replyTo
       replyToCommentId: replyToCommentId || null, // Store reply relationship
       user: {
-        userId: user._id.toString(),
+        userId: user.userId, // FIXED: Use user.userId (UUID) instead of user._id (ObjectId)
         userName: user.userName,
         birthYear: user.birthYear,
         birthMonth: user.birthMonth,
@@ -80,32 +80,48 @@ exports.createComment = async (req, res) => {
     // Create activity notification
     if (replyToCommentId) {
       // This is a reply to another comment - notify the comment author
+      console.info('🔔 Comment reply detected - replyToCommentId:', replyToCommentId);
       const parentComment = await Post.findById(replyToCommentId);
-      if (parentComment && parentComment.user.userId !== user._id.toString()) {
-        await createActivity({
+      console.info('🔍 Parent comment found:', {
+        id: parentComment?._id,
+        authorUserId: parentComment?.user.userId,
+        currentUserId: user.userId,
+        isSameUser: parentComment?.user.userId === user.userId,
+      });
+
+      if (parentComment && parentComment.user.userId !== user.userId) {
+        console.info('✅ Creating comment_reply activity for user:', parentComment.user.userId);
+        const activity = await createActivity({
           recipientId: parentComment.user.userId,
           type: 'comment_reply',
           actor: {
-            userId: user._id.toString(),
+            userId: user.userId,
             username: user.userName,
             avatar: user.profilePictureUrl,
           },
           target: {
-            type: 'comment',
-            id: comment._id,
+            type: 'post', // Navigate to parent post, not comment
+            id: postId, // Parent post ID, not comment ID
+            thumbnail: parentPost.image,
             preview: comment.text,
           },
         });
-        console.info('comment_reply activity created for user:', parentComment.user.userId);
+        console.info('🎉 comment_reply activity created:', {
+          activityId: activity?._id,
+          recipientId: parentComment.user.userId,
+          actorId: user.userId,
+        });
+      } else {
+        console.info('⚠️ Skipped notification - same user or parent comment not found');
       }
     } else {
       // This is a top-level comment on a post - notify the post author
-      if (parentPost.user.userId !== user._id.toString()) {
+      if (parentPost.user.userId !== user.userId) {
         await createActivity({
           recipientId: parentPost.user.userId,
           type: 'comment',
           actor: {
-            userId: user._id.toString(),
+            userId: user.userId,
             username: user.userName,
             avatar: user.profilePictureUrl,
           },
@@ -212,7 +228,7 @@ exports.deleteComment = async (req, res) => {
     }
 
     // Check ownership
-    if (comment.user.userId !== user._id.toString()) {
+    if (comment.user.userId !== user.userId) {
       return res.status(403).json({
         success: false,
         message: 'You can only delete your own comments',

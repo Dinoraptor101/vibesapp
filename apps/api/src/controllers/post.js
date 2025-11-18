@@ -171,17 +171,14 @@ const createPost = async (req, res) => {
       }
 
       // 2. Notify nearby users (nearby_post) - within 50km radius
+      // Using simple lat/lon range query (more compatible, doesn't require geospatial index)
+      const latRange = 0.45; // ~50km in degrees latitude
+      const lonRange = 0.45; // ~50km in degrees longitude (approximate at mid-latitudes)
+
       const nearbyUsers = await User.find({
         userId: { $ne: userId }, // Exclude self
-        location: {
-          $near: {
-            $geometry: {
-              type: 'Point',
-              coordinates: [lon, lat],
-            },
-            $maxDistance: 50000, // 50km in meters
-          },
-        },
+        'location.lat': { $gte: lat - latRange, $lte: lat + latRange },
+        'location.lon': { $gte: lon - lonRange, $lte: lon + lonRange },
       })
         .limit(100)
         .session(session); // Limit to 100 nearest users for performance
@@ -941,7 +938,7 @@ const reactToPost = async (req, res) => {
         },
         target: {
           type: post.commentOn ? 'comment' : 'post',
-          id: post._id,
+          id: post.commentOn || post._id, // Use parent post ID for comments, post ID for posts
           thumbnail: post.image,
           preview: post.text,
         },
