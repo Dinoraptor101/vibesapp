@@ -51,6 +51,10 @@ const UserSchema = new mongoose.Schema({
       type: Number,
       required: true,
     },
+    city: {
+      type: String,
+      required: false,
+    },
   },
   vibes: {
     type: Number,

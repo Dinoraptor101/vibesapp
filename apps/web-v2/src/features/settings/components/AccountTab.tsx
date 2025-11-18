@@ -34,21 +34,24 @@ export function AccountTab() {
   const navigate = useNavigate();
   const { queueUpdate } = useAccountUpdates();
 
-  // Form state
+  // Form state (editable)
   const [bio, setBio] = useState(user?.bio || '');
   const [mbti, setMbti] = useState(user?.mbtiPersonality || 'INFJ');
-  const [zipCode, setZipCode] = useState('');
-  const [locationStr, setLocationStr] = useState(
-    user?.location ? `${user.location.city || ''}` : ''
-  );
+  const [locationCity, setLocationCity] = useState('');
+  const [locationCoords, setLocationCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [polarity, setPolarity] = useState<'YIN' | 'YANG'>(
     (user?.polarity?.toUpperCase() as 'YIN' | 'YANG') || 'YANG'
   );
 
+  // Original values for change detection
+  const [originalBio, setOriginalBio] = useState(user?.bio || '');
+  const [originalMbti, setOriginalMbti] = useState(user?.mbtiPersonality || 'INFJ');
+  const [originalLocationDisplay, setOriginalLocationDisplay] = useState('');
+
   // UI state
-  const [gpsLoading, setGpsLoading] = useState(false);
-  const [showGpsSpinner, setShowGpsSpinner] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const gpsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -56,107 +59,250 @@ export function AccountTab() {
   // Update local state when user changes
   useEffect(() => {
     if (user) {
-      setBio(user.bio || '');
-      setMbti(user.mbtiPersonality || 'INFJ');
-      setLocationStr(user.location?.city || '');
-      setPolarity((user.polarity?.toUpperCase() as 'YIN' | 'YANG') || 'YANG');
+      const userBio = user.bio || '';
+      const userMbti = user.mbtiPersonality || 'INFJ';
+      const userPolarity = (user.polarity?.toUpperCase() as 'YIN' | 'YANG') || 'YANG';
+
+      setBio(userBio);
+      setMbti(userMbti);
+      setPolarity(userPolarity);
+      setOriginalBio(userBio);
+      setOriginalMbti(userMbti);
+
+      // Initialize location display (city only for now until backend supports state/country)
+      if (user.location) {
+        const display = user.location.city || '';
+
+        setLocationCity(display); // Initialize the input field
+        setOriginalLocationDisplay(display);
+        setLocationCoords(
+          user.location.latitude && user.location.longitude
+            ? {
+                lat: user.location.latitude,
+                lon: user.location.longitude,
+              }
+            : null
+        );
+      }
     }
   }, [user]);
 
-  // Bio handler with auto-save on blur
-  const handleBioBlur = () => {
-    if (bio.length > 200) {
-      setBio(user?.bio || ''); // Silent revert
-      console.log('Bio exceeds 200 characters, reverted');
-      return;
-    }
-    if (bio !== user?.bio) {
-      const previousBio = user?.bio || '';
-      queueUpdate(
-        { bio },
-        {
-          onError: (error) => {
-            // ZEN: Silent revert on error, log to console only
-            console.error('Failed to update bio:', error);
-            setBio(previousBio);
-          },
-        }
-      );
-    }
-  };
+  // Check if any field has changed
+  const hasChanges =
+    bio !== originalBio || mbti !== originalMbti || locationCity !== originalLocationDisplay;
 
-  // MBTI handler with auto-save
-  const handleMbtiChange = (newMbti: string) => {
-    const previousMbti = mbti;
-    setMbti(newMbti);
-    queueUpdate(
-      { mbtiPersonality: newMbti },
-      {
-        onError: (error) => {
-          // ZEN: Silent revert on error, log to console only
-          console.error('Failed to update MBTI:', error);
-          setMbti(previousMbti);
-        },
+  // Save handler
+  const handleSave = async () => {
+    if (!hasChanges) return;
+
+    setIsSaving(true);
+
+    try {
+      const updates: {
+        bio?: string;
+        mbtiPersonality?: string;
+        location?: { lat: number; lon: number; city?: string; state?: string; country?: string };
+      } = {};
+
+      if (bio !== originalBio) {
+        updates.bio = bio;
       }
-    );
-  };
 
-  // Zip code handler with auto-save on blur
-  const handleZipCodeBlur = () => {
-    if (zipCode?.trim()) {
-      queueUpdate({ zipCode });
+      if (mbti !== originalMbti) {
+        updates.mbtiPersonality = mbti;
+      }
+
+      if (locationCity !== originalLocationDisplay) {
+        // Need to geocode if we don't have coordinates
+        if (!locationCoords && locationCity.trim()) {
+          try {
+            const GEOCODING_URL = import.meta.env.VITE_GEOCODING_URL;
+            if (GEOCODING_URL) {
+              const response = await fetch(
+                `${GEOCODING_URL}?q=${encodeURIComponent(locationCity)}&format=json&limit=1`
+              );
+              if (response.ok) {
+                const data = await response.json();
+                if (data.length > 0) {
+                  const result = data[0];
+                  const lat = parseFloat(result.lat);
+                  const lon = parseFloat(result.lon);
+                  updates.location = {
+                    lat,
+                    lon,
+                    city: locationCity || undefined,
+                  };
+                  setLocationCoords({ lat, lon });
+                  console.log('Geocoded and added location:', updates.location);
+                } else {
+                  console.warn('No geocoding results found for:', locationCity);
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Error geocoding city:', error);
+          }
+        } else if (locationCoords && locationCity.trim()) {
+          // We have coordinates, update with new city name
+          updates.location = {
+            ...locationCoords,
+            city: locationCity,
+          };
+          console.log('Updated location with existing coords:', updates.location);
+        } else if (!locationCity.trim() && locationCoords) {
+          // City was cleared, just send coords
+          updates.location = {
+            ...locationCoords,
+            city: undefined,
+          };
+          console.log('Cleared city, keeping coords:', updates.location);
+        }
+      }
+
+      console.log('Sending updates:', updates);
+      // Send updates
+      await queueUpdate(updates);
+
+      // Update original values
+      setOriginalBio(bio);
+      setOriginalMbti(mbti);
+      setOriginalLocationDisplay(locationCity);
+
+      console.log('Settings saved successfully');
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  // GPS button handler
-  const handleGPSClick = () => {
+  // GPS handler
+  const handleGPSClick = async () => {
     if (!navigator.geolocation) {
       console.error('GPS not supported on this device');
       return;
     }
 
-    setGpsLoading(true);
+    setIsGettingLocation(true);
 
     // Show spinner only if GPS takes > 1 second
     gpsTimeoutRef.current = setTimeout(() => {
-      setShowGpsSpinner(true);
+      setIsGettingLocation(true);
     }, 1000);
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        // Clear timeout and hide spinner
+      async (position) => {
+        // Clear timeout
         if (gpsTimeoutRef.current) {
           clearTimeout(gpsTimeoutRef.current);
         }
-        setGpsLoading(false);
-        setShowGpsSpinner(false);
 
         const { latitude, longitude } = position.coords;
+        setLocationCoords({ lat: latitude, lon: longitude });
 
-        // Geocode to get location string (simplified - would need geocoding API)
-        const locStr = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-        setLocationStr(locStr);
+        // Reverse geocode to get city (state/country will be supported later)
+        try {
+          const GEOCODING_URL = import.meta.env.VITE_GEOCODING_URL;
+          if (GEOCODING_URL) {
+            // Use /reverse endpoint for reverse geocoding
+            const reverseUrl = GEOCODING_URL.replace('/search', '/reverse');
+            const response = await fetch(
+              `${reverseUrl}?lat=${latitude}&lon=${longitude}&format=json`
+            );
+            if (response.ok) {
+              const data = await response.json();
+              console.log('Reverse geocoding response:', data);
+              const address = data.address || {};
 
-        // Queue update
-        queueUpdate({
-          location: { lat: latitude, lon: longitude },
-        });
+              // Try multiple fields to get the best city name
+              const city =
+                address.city ||
+                address.town ||
+                address.village ||
+                address.municipality ||
+                address.county ||
+                address.state;
 
-        // ZEN: Silent success, no toast
-        console.log('Location updated:', locStr);
+              if (city) {
+                setLocationCity(city);
+                console.log('GPS location fetched:', city);
+              } else {
+                // Fallback to coordinates if no city found
+                const coordsDisplay = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+                setLocationCity(coordsDisplay);
+                console.warn('No city found in geocoding response, using coordinates');
+              }
+            } else {
+              // Fallback to coordinates if geocoding fails
+              const coordsDisplay = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+              setLocationCity(coordsDisplay);
+            }
+          }
+        } catch (err) {
+          console.error('Error reverse geocoding:', err);
+          const coordsDisplay = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+          setLocationCity(coordsDisplay);
+        }
+
+        setIsGettingLocation(false);
       },
       (error) => {
-        // Clear timeout and hide spinner
+        // Clear timeout
         if (gpsTimeoutRef.current) {
           clearTimeout(gpsTimeoutRef.current);
         }
-        setGpsLoading(false);
-        setShowGpsSpinner(false);
-
-        // Silent fail - keep current value
+        setIsGettingLocation(false);
         console.error('GPS error:', error);
       }
     );
+  };
+
+  // Handle manual city input
+  const handleCityInputKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && locationCity.trim()) {
+      e.preventDefault();
+      setIsGettingLocation(true);
+
+      try {
+        const GEOCODING_URL = import.meta.env.VITE_GEOCODING_URL;
+        if (!GEOCODING_URL) {
+          throw new Error('VITE_GEOCODING_URL environment variable is required');
+        }
+
+        const response = await fetch(
+          `${GEOCODING_URL}?q=${encodeURIComponent(locationCity)}&format=json&limit=1`
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to geocode location');
+        }
+
+        const data = await response.json();
+
+        if (data.length === 0) {
+          console.error('Location not found');
+          setIsGettingLocation(false);
+          return;
+        }
+
+        const result = data[0];
+        const lat = parseFloat(result.lat);
+        const lon = parseFloat(result.lon);
+
+        setLocationCoords({ lat, lon });
+
+        // Set display location from geocoding result (city only for now)
+        const address = result.address || {};
+        const city =
+          address.city || address.town || address.village || address.municipality || result.name;
+        const display = city || result.display_name;
+        setLocationCity(display);
+      } catch (error) {
+        console.error('Geocoding error:', error);
+      } finally {
+        setIsGettingLocation(false);
+      }
+    }
   };
 
   // Polarity toggle handler
@@ -273,16 +419,11 @@ export function AccountTab() {
           Profile Photo
         </div>
         <div className="flex items-center gap-4">
-          <div
+          <button
+            type="button"
             onClick={handleAvatarClick}
-            className="cursor-pointer hover:opacity-80 transition-opacity"
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                handleAvatarClick();
-              }
-            }}
+            className="cursor-pointer hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-brand-500 rounded-full"
+            aria-label="Change profile photo"
           >
             <Avatar
               src={getAvatarUrl(user?.profilePictureUrl)}
@@ -290,7 +431,7 @@ export function AccountTab() {
               size="xl"
               className="ring-2 ring-gray-200 dim:ring-gray-600 dark:ring-gray-700"
             />
-          </div>
+          </button>
           <Button
             onClick={handleAvatarClick}
             disabled={uploadingAvatar}
@@ -331,7 +472,6 @@ export function AccountTab() {
           id="bio"
           value={bio}
           onChange={(e) => setBio(e.target.value)}
-          onBlur={handleBioBlur}
           maxLength={200}
           rows={3}
           className="w-full px-3 py-2 border border-gray-300 dim:border-gray-500 dark:border-gray-600 rounded-lg bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-gray-100 dark:text-gray-100 placeholder-gray-500 dim:placeholder-gray-450 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"
@@ -355,7 +495,7 @@ export function AccountTab() {
         <select
           id="mbti"
           value={mbti}
-          onChange={(e) => handleMbtiChange(e.target.value)}
+          onChange={(e) => setMbti(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 dim:border-gray-500 dark:border-gray-600 rounded-lg bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-gray-100 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
         >
           {MBTI_TYPES.map((type) => (
@@ -366,45 +506,60 @@ export function AccountTab() {
         </select>
       </div>
 
-      {/* Location (Zip Code) */}
+      {/* Location */}
       <div>
         <label
-          htmlFor="zipCode"
+          htmlFor="location"
           className="block text-sm font-medium text-gray-700 dim:text-gray-200 dark:text-gray-300 mb-2"
         >
-          Location (Zip Code)
+          Location
         </label>
         <div className="flex gap-2">
           <input
-            id="zipCode"
+            id="location"
             type="text"
-            value={zipCode}
-            onChange={(e) => setZipCode(e.target.value)}
-            onBlur={handleZipCodeBlur}
-            placeholder="60601"
+            value={locationCity}
+            onChange={(e) => setLocationCity(e.target.value)}
+            onKeyDown={handleCityInputKeyDown}
+            placeholder="Enter city name"
             className="flex-1 px-3 py-2 border border-gray-300 dim:border-gray-500 dark:border-gray-600 rounded-lg bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-gray-100 dark:text-gray-100 placeholder-gray-500 dim:placeholder-gray-450 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+            disabled={isGettingLocation}
           />
           <Button
             onClick={handleGPSClick}
-            disabled={gpsLoading}
+            disabled={isGettingLocation}
             variant="secondary"
             size="sm"
             aria-label="Use current location"
           >
-            {showGpsSpinner ? (
+            {isGettingLocation ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <MapPin className="w-4 h-4" />
             )}
           </Button>
         </div>
-        {locationStr && (
-          <p className="text-sm text-gray-500 dim:text-gray-450 dark:text-gray-400 mt-1 flex items-center gap-1">
-            <MapPin className="w-3 h-3" />
-            {locationStr}
-          </p>
-        )}
       </div>
+
+      {/* Save Button */}
+      <Button
+        onClick={handleSave}
+        disabled={!hasChanges || isSaving}
+        variant="primary"
+        className="w-full"
+      >
+        {isSaving ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            Saving...
+          </>
+        ) : (
+          'Save Changes'
+        )}
+      </Button>
+
+      {/* Divider */}
+      <div className="border-t border-gray-200 dark:border-gray-700" />
 
       {/* Polarity */}
       <div>
