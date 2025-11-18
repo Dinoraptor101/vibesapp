@@ -168,3 +168,37 @@ export async function getPostsByMBTI(
     },
   };
 }
+
+/**
+ * Search posts globally by text
+ */
+export async function searchPosts(query: string, page = 1, limit = 20): Promise<PostsResponse> {
+  const params = new URLSearchParams({
+    q: query,
+    page: page.toString(),
+    limit: limit.toString(),
+  });
+
+  const response = await apiClient.get<{
+    success: boolean;
+    posts: Post[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasMore: boolean;
+    };
+  }>(`/api/posts/search?${params.toString()}`);
+
+  // Transform to match our PostsResponse interface
+  return {
+    posts: response.posts,
+    pagination: {
+      page: response.pagination.page,
+      limit: response.pagination.limit,
+      total: response.pagination.total,
+      hasMore: response.pagination.hasMore,
+    },
+  };
+}

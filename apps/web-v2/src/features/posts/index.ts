@@ -33,6 +33,7 @@ export { PostSkeleton } from './components/PostSkeleton';
 export { PostsFeed } from './components/PostsFeed';
 export { ReportModal } from './components/ReportModal';
 export { ReportPostDialog } from './components/ReportPostDialog';
+export { SearchBar } from './components/SearchBar';
 export { UserBadge } from './components/UserBadge';
 
 // Hooks
@@ -55,5 +56,6 @@ export {
   getNearbyPosts,
   getPostsByMBTI,
   getUserPosts,
+  searchPosts,
   toggleLikePost,
 } from './api/postService';
