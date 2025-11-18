@@ -6,7 +6,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { Spinner } from '@/components/ui-next';
-import { PostCard, PostSkeleton, type Post } from '@/features/posts';
+import { PostsGrid, PostSkeleton, type Post } from '@/features/posts';
 import api from '@/lib/api';
 
 interface ProfilePostsProps {
@@ -96,10 +96,7 @@ export function ProfilePosts({ userId }: ProfilePostsProps) {
   // ZEN: Show loading only after 1 second
   if (isLoading && showLoading) {
     return (
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-        <PostSkeleton />
-        <PostSkeleton />
-        <PostSkeleton />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
         <PostSkeleton />
         <PostSkeleton />
         <PostSkeleton />
@@ -114,12 +111,8 @@ export function ProfilePosts({ userId }: ProfilePostsProps) {
 
   return (
     <div className="space-y-6">
-      {/* Posts Grid */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-        {posts.map((post) => (
-          <PostCard key={post._id} post={post} />
-        ))}
-      </div>
+      {/* Posts Grid - Shared component for consistent layout */}
+      <PostsGrid posts={posts} />
 
       {/* Load More Trigger */}
       {hasNextPage && (

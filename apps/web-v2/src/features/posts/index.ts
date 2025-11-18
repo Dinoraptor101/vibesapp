@@ -28,6 +28,7 @@ export { ImageUploader } from './components/ImageUploader';
 export { ImageViewer } from './components/ImageViewer';
 export { PostActions } from './components/PostActions';
 export { PostCard } from './components/PostCard';
+export { PostsGrid } from './components/PostsGrid';
 export { PostSkeleton } from './components/PostSkeleton';
 export { PostsFeed } from './components/PostsFeed';
 export { ReportModal } from './components/ReportModal';
