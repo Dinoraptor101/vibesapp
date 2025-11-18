@@ -8,34 +8,19 @@
  * - Me: Likes/dislikes, comments, replies on your posts
  */
 
-import { Bell, Check } from 'lucide-react';
-import { useState } from 'react';
+import { Check } from 'lucide-react';
 import { AppLayout } from '@/components/layout';
-import { Badge, Button } from '@/components/ui-next';
+import { Button } from '@/components/ui-next';
 import { ActivityList } from '@/features/activity/components/ActivityList';
 import {
   useActivities,
   useMarkAsRead,
   useMarkAllAsRead,
-  useUnreadCounts,
 } from '@/features/activity/hooks/useActivities';
-import type { ActivityCategory } from '@/features/activity/types';
-
-const TABS: Array<{ value: ActivityCategory; label: string }> = [
-  { value: 'all', label: 'All' },
-  { value: 'messages', label: 'Messages' },
-  { value: 'social', label: 'Social' },
-  { value: 'me', label: 'Me' },
-];
 
 export function ActivityPage() {
-  const [activeTab, setActiveTab] = useState<ActivityCategory>('all');
-
-  // Fetch activities for active tab
-  const { data: activities = [], isLoading, error } = useActivities(activeTab);
-
-  // Fetch unread counts for badge display
-  const { data: counts } = useUnreadCounts();
+  // Fetch all activities (no tabs, no category filter)
+  const { data: activities = [], isLoading, error } = useActivities('all');
 
   // Mutations
   const markAsRead = useMarkAsRead();
@@ -49,29 +34,22 @@ export function ActivityPage() {
     markAllAsRead.mutate();
   };
 
-  // Filter to show only unread count for current tab
-  const getUnreadCount = (category: ActivityCategory): number => {
-    if (!counts) return 0;
-    return counts[category] || 0;
-  };
+  // Split activities into unread and read groups
+  const unreadActivities = activities.filter((a) => !a.isRead);
+  const readActivities = activities.filter((a) => a.isRead);
 
-  // Check if there are any unread activities in current tab
-  const hasUnreadInCurrentTab = activities.some((a) => !a.isRead);
+  // Check if there are any unread activities
+  const hasUnread = unreadActivities.length > 0;
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-background">
+      <div className="bg-background">
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-background border-b border-border">
-          <div className="max-w-2xl mx-auto px-4 py-4">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Bell className="h-6 w-6 text-foreground" />
-                <h1 className="text-2xl font-bold text-foreground">Activity</h1>
-              </div>
-
-              {/* Mark All as Read button */}
-              {hasUnreadInCurrentTab && (
+        {hasUnread && (
+          <div className="sticky top-0 z-10 bg-background">
+            <div className="max-w-2xl mx-auto px-4 py-4">
+              <div className="flex items-center justify-end">
+                {/* Mark All as Read button */}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -81,60 +59,67 @@ export function ActivityPage() {
                 >
                   Mark all read
                 </Button>
-              )}
-            </div>
-
-            {/* Tabs */}
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-              {TABS.map((tab) => {
-                const unreadCount = getUnreadCount(tab.value);
-                const isActive = activeTab === tab.value;
-
-                return (
-                  <button
-                    key={tab.value}
-                    type="button"
-                    onClick={() => setActiveTab(tab.value)}
-                    className={`
-                      relative flex items-center gap-2 px-4 py-2 rounded-full
-                      whitespace-nowrap transition-colors font-medium text-sm
-                      ${
-                        isActive
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                      }
-                    `}
-                  >
-                    {tab.label}
-                    {unreadCount > 0 && (
-                      <Badge variant="error" size="sm">
-                        {unreadCount > 99 ? '99+' : unreadCount}
-                      </Badge>
-                    )}
-                  </button>
-                );
-              })}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Activity List */}
         <div className="max-w-2xl mx-auto">
-          <ActivityList
-            activities={activities}
-            isLoading={isLoading}
-            error={error}
-            onMarkAsRead={handleMarkAsRead}
-            emptyMessage={
-              activeTab === 'all'
-                ? 'No activities yet'
-                : activeTab === 'messages'
-                  ? 'No message activities'
-                  : activeTab === 'social'
-                    ? 'No social activities'
-                    : 'No activities on your posts'
-            }
-          />
+          {/* Unread activities */}
+          {unreadActivities.length > 0 && (
+            <ActivityList
+              activities={unreadActivities}
+              isLoading={false}
+              error={null}
+              onMarkAsRead={handleMarkAsRead}
+              emptyMessage=""
+            />
+          )}
+
+          {/* Read activities */}
+          {readActivities.length > 0 && (
+            <ActivityList
+              activities={readActivities}
+              isLoading={false}
+              error={null}
+              onMarkAsRead={handleMarkAsRead}
+              emptyMessage=""
+            />
+          )}
+
+          {/* Loading state */}
+          {isLoading && activities.length === 0 && (
+            <ActivityList
+              activities={[]}
+              isLoading={true}
+              error={null}
+              onMarkAsRead={handleMarkAsRead}
+              emptyMessage=""
+            />
+          )}
+
+          {/* Error state */}
+          {error && (
+            <ActivityList
+              activities={[]}
+              isLoading={false}
+              error={error as Error}
+              onMarkAsRead={handleMarkAsRead}
+              emptyMessage=""
+            />
+          )}
+
+          {/* Empty state */}
+          {!isLoading && !error && activities.length === 0 && (
+            <ActivityList
+              activities={[]}
+              isLoading={false}
+              error={null}
+              onMarkAsRead={handleMarkAsRead}
+              emptyMessage="No activities yet"
+            />
+          )}
         </div>
       </div>
     </AppLayout>
