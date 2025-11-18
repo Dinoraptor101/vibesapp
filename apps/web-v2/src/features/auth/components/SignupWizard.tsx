@@ -153,15 +153,9 @@ export function SignupWizard() {
       }
     }
 
-    if (currentStep === 4 && !signupData.mbtiPersonality) {
-      setError('Please select your MBTI type');
-      return;
-    }
+    // Step 4 MBTI - validation handled by disabled button
     // Step 5 is polarity - no validation needed (has default)
-    if (currentStep === 6 && !signupData.location) {
-      setError('Location is required');
-      return;
-    }
+    // Step 6 location - validation handled by disabled button
 
     if (currentStep < STEPS.length) {
       setCurrentStep(currentStep + 1);
@@ -173,6 +167,15 @@ export function SignupWizard() {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
+  };
+
+  // Helper function to check if username is valid
+  const isUsernameValid = (username: string): boolean => {
+    if (!username || username.length < 3 || username.length > 20) {
+      return false;
+    }
+    const alphanumericRegex = /^[a-zA-Z0-9]+$/;
+    return alphanumericRegex.test(username);
   };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -663,7 +666,16 @@ export function SignupWizard() {
           )}
 
           {currentStep < STEPS.length && currentStep > 1 && (
-            <Button onClick={handleNext} disabled={isSubmitting} className="ml-auto">
+            <Button
+              onClick={handleNext}
+              disabled={
+                isSubmitting ||
+                (currentStep === 3 && !isUsernameValid(signupData.userName)) ||
+                (currentStep === 4 && !signupData.mbtiPersonality) ||
+                (currentStep === 6 && !signupData.location)
+              }
+              className="ml-auto"
+            >
               Next
             </Button>
           )}
