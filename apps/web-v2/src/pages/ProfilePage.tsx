@@ -11,7 +11,6 @@ import { useAuth } from '@/features/auth';
 import { useDMRequestStatus } from '@/features/messaging/hooks/useDMRequestStatus';
 import { ProfileHeader } from '@/features/profile/components/ProfileHeader';
 import { ProfilePosts } from '@/features/profile/components/ProfilePosts';
-import { ProfileStats } from '@/features/profile/components/ProfileStats';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 
 export function ProfilePage() {
@@ -109,10 +108,6 @@ export function ProfilePage() {
             isOwnProfile={isOwnProfile}
             onDMRequest={handleMessageClick}
             dmStatus={dmStatus?.reason}
-          />
-
-          {/* Stats */}
-          <ProfileStats
             postsCount={profile.postsCount}
             followersCount={profile.followersCount}
             followingCount={profile.followingCount}
