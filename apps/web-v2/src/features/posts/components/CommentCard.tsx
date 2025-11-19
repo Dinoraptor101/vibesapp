@@ -104,12 +104,22 @@ export function CommentCard({ comment, onHeart, onReply, onDelete, className }: 
             <button
               type="button"
               onClick={() => onHeart(comment._id, userHasHearted)}
+              disabled={isOwnComment}
               className={cn(
                 'flex items-center gap-1 text-xs transition-colors',
-                userHasHearted
-                  ? 'text-vibe-positive'
-                  : 'text-text-tertiary hover:text-vibe-positive'
+                isOwnComment
+                  ? 'opacity-50 cursor-not-allowed'
+                  : userHasHearted
+                    ? 'text-vibe-positive'
+                    : 'text-text-tertiary hover:text-vibe-positive'
               )}
+              aria-label={
+                isOwnComment
+                  ? 'Cannot heart your own comment'
+                  : userHasHearted
+                    ? 'Remove heart'
+                    : 'Heart comment'
+              }
             >
               <Heart className={cn('w-4 h-4', userHasHearted && 'fill-current')} />
               {heartCount > 0 && <span>{heartCount}</span>}
