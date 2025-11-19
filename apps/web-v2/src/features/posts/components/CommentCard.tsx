@@ -1,10 +1,10 @@
 /**
  * CommentCard Component
  *
- * Displays an individual comment with user info, text, heart button, reply button, and delete option.
+ * Displays an individual comment with user info, text, heart button, and reply button.
  */
 
-import { Heart, MessageCircle, Trash2 } from 'lucide-react';
+import { Heart, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Avatar } from '@/components/ui-next/Avatar';
 import { useAuth } from '@/features/auth';
@@ -17,11 +17,10 @@ interface CommentCardProps {
   comment: Post; // Comments are posts with replyTo field
   onHeart?: (commentId: string, isHearted: boolean) => void;
   onReply?: (commentId: string, username: string) => void;
-  onDelete?: (commentId: string) => void;
   className?: string;
 }
 
-export function CommentCard({ comment, onHeart, onReply, onDelete, className }: CommentCardProps) {
+export function CommentCard({ comment, onHeart, onReply, className }: CommentCardProps) {
   const { user: currentUser } = useAuth();
   const navigate = useNavigate();
 
@@ -135,17 +134,6 @@ export function CommentCard({ comment, onHeart, onReply, onDelete, className }: 
             >
               <MessageCircle className="w-4 h-4" />
               <span>Reply</span>
-            </button>
-          )}
-
-          {/* Delete Button (own comments only) */}
-          {onDelete && isOwnComment && (
-            <button
-              type="button"
-              onClick={() => onDelete(comment._id)}
-              className="flex items-center gap-1 text-xs text-text-tertiary hover:text-error transition-colors ml-auto"
-            >
-              <Trash2 className="w-4 h-4" />
             </button>
           )}
         </div>

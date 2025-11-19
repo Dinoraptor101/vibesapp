@@ -4,11 +4,10 @@
  * Container for comments with infinite scroll, loading states, and empty state.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui-next/Button';
 import { cn } from '@/lib/cn';
 import { useComments } from '../hooks/useComments';
-import { useDeleteComment } from '../hooks/useDeleteComment';
 import { useHeartComment } from '../hooks/useHeartComment';
 import type { Post } from '../types';
 import { CommentCard } from './CommentCard';
@@ -32,10 +31,7 @@ export function CommentList({ postId, onReply, className }: CommentListProps) {
     refetch,
   } = useComments(postId);
 
-  const deleteComment = useDeleteComment(postId);
   const heartComment = useHeartComment(postId);
-
-  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
 
   // Intersection observer for infinite scroll
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -114,17 +110,6 @@ export function CommentList({ postId, onReply, className }: CommentListProps) {
     await heartComment.mutateAsync({ commentId, isHearted });
   };
 
-  const handleDelete = async (commentId: string) => {
-    setDeletingCommentId(commentId);
-    try {
-      await deleteComment.mutateAsync(commentId);
-    } catch (err) {
-      console.error('Failed to delete comment:', err);
-    } finally {
-      setDeletingCommentId(null);
-    }
-  };
-
   const handleReply = (comment: Post) => {
     onReply?.(comment._id, comment.user.userName);
   };
@@ -173,8 +158,6 @@ export function CommentList({ postId, onReply, className }: CommentListProps) {
           comment={comment}
           onHeart={handleHeart}
           onReply={() => handleReply(comment)}
-          onDelete={handleDelete}
-          className={cn(deletingCommentId === comment._id && 'opacity-50 pointer-events-none')}
         />
       ))}
 
