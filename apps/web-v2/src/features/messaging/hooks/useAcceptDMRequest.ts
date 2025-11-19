@@ -1,10 +1,10 @@
 /**
  * useAcceptDMRequest Hook
  * Accepts a DM request and creates a conversation
+ * Uses polarity pattern: optimistic update with silent error handling
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
 import api from '@/lib/api';
 
 interface AcceptDMRequestResponse {
@@ -26,13 +26,10 @@ export function useAcceptDMRequest() {
 
       // Invalidate conversations list (for Phase 4.4)
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
-
-      // Show success toast
-      toast.success('DM request accepted!');
     },
     onError: (error) => {
+      // Polarity pattern: silent error handling, console log only
       console.error('Failed to accept DM request:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to accept DM request');
     },
   });
 }

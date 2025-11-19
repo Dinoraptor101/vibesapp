@@ -13,20 +13,20 @@ import {
   CommentInput,
   CommentList,
   PostCard,
-  toggleLikePost,
   useCreateComment,
   usePost,
+  useToggleLike,
 } from '@/features/posts';
 import { stripHtml } from '@/lib/utils';
 
 export function PostDetailPage() {
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
-  const { post, isLoading, isError, error, refetch } = usePost(postId || '');
-  const [isLiking, setIsLiking] = useState(false);
+  const { post, isLoading, isError, error } = usePost(postId || '');
   const [replyTo, setReplyTo] = useState<{ id: string; username: string } | undefined>();
 
   const createComment = useCreateComment(postId || '');
+  const toggleLike = useToggleLike();
 
   // Redirect if no postId
   if (!postId) {
@@ -34,20 +34,9 @@ export function PostDetailPage() {
     return null;
   }
 
-  const handleLike = async (postId: string) => {
-    if (isLiking || !post) return;
-
-    try {
-      setIsLiking(true);
-      // Backend handles the toggle logic
-      await toggleLikePost(postId);
-      // Refetch post to get updated data
-      await refetch();
-    } catch (error) {
-      console.error('Error toggling like:', error);
-    } finally {
-      setIsLiking(false);
-    }
+  const handleLike = (postId: string) => {
+    // Optimistic update with silent error handling (polarity pattern)
+    toggleLike.mutate({ postId });
   };
 
   const handleReport = (postId: string) => {

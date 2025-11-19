@@ -5,9 +5,10 @@
  * Handles loading states, error states, and automatic refetching.
  */
 
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchPosts, toggleLikePost } from '../api/postService';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { fetchPosts } from '../api/postService';
 import type { Post, PostFilters, PostsResponse } from '../types';
+import { useToggleLike } from './useToggleLike';
 
 interface UseInfinitePostsOptions {
   filters?: PostFilters;
@@ -35,8 +36,6 @@ export function useInfinitePosts({
   limit = 20,
   enabled = true,
 }: UseInfinitePostsOptions = {}): UseInfinitePostsReturn {
-  const queryClient = useQueryClient();
-
   // Create unique query key based on filters
   const queryKey = ['posts', 'infinite', filters];
 
@@ -68,19 +67,8 @@ export function useInfinitePosts({
   // Flatten all pages into single posts array
   const posts = data?.pages.flatMap((page) => page.posts) ?? [];
 
-  // Mutation for toggling like on a post
-  // Backend handles the like/unlike logic - no need to check state here
-  // NOTE: Using legacy mutation - consider migrating to useToggleLike hook for offline support
-  const toggleLikeMutation = useMutation({
-    mutationFn: (postId: string) => toggleLikePost(postId),
-    onError: (err) => {
-      console.error('Error toggling like:', err);
-    },
-    onSettled: () => {
-      // Refetch to get updated state from backend
-      queryClient.invalidateQueries({ queryKey });
-    },
-  });
+  // Use polarity pattern for like toggling (optimistic update with silent error handling)
+  const toggleLikeMutation = useToggleLike();
 
   return {
     posts,
@@ -91,6 +79,6 @@ export function useInfinitePosts({
     isFetchingNextPage,
     fetchNextPage: () => fetchNextPage(),
     refetch: () => refetch(),
-    toggleLike: (postId: string) => toggleLikeMutation.mutate(postId),
+    toggleLike: (postId: string) => toggleLikeMutation.mutate({ postId }),
   };
 }
