@@ -46,4 +46,7 @@ router.patch(
   userController.updateNotificationPreferences
 );
 
+// PUT endpoint to regenerate Pigeon ID for a user
+router.put('/:userId/regenerate-pigeon-id', authenticate, userController.regeneratePigeonId);
+
 module.exports = router;
