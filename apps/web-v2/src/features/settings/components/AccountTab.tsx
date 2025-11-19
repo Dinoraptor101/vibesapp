@@ -1,5 +1,5 @@
-import { Camera, Copy, Loader2, LogOut, MapPin } from 'lucide-react';
-import { useRef, useState, useEffect } from 'react';
+import { Camera, Check, Copy, Loader2, LogOut, MapPin } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -45,14 +45,9 @@ export function AccountTab() {
     (user?.polarity?.toUpperCase() as 'YIN' | 'YANG') || 'YANG'
   );
 
-  // Original values for change detection
-  const [originalBio, setOriginalBio] = useState(user?.bio || '');
-  const [originalMbti, setOriginalMbti] = useState(user?.mbtiPersonality || 'INFJ');
-  const [originalLocationDisplay, setOriginalLocationDisplay] = useState('');
-
   // UI state
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [copiedPigeonId, setCopiedPigeonId] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -66,8 +61,6 @@ export function AccountTab() {
       setBio(userBio);
       setMbti(userMbti);
       setPolarity(userPolarity);
-      setOriginalBio(userBio);
-      setOriginalMbti(userMbti);
 
       // Initialize location display (city only for now until backend supports state/country)
       if (user.location) {
@@ -79,7 +72,6 @@ export function AccountTab() {
         });
 
         setLocationCity(display); // Initialize the input field
-        setOriginalLocationDisplay(display);
         setLocationCoords(
           user.location.latitude && user.location.longitude
             ? {
@@ -94,102 +86,40 @@ export function AccountTab() {
     }
   }, [user]);
 
-  // Check if any field has changed
-  const hasChanges =
-    bio !== originalBio || mbti !== originalMbti || locationCity !== originalLocationDisplay;
-
-  // Save handler
-  const handleSave = async () => {
-    if (!hasChanges) return;
-
-    setIsSaving(true);
-
-    try {
-      const updates: {
-        bio?: string;
-        mbtiPersonality?: string;
-        location?: { lat: number; lon: number; city?: string; state?: string; country?: string };
-      } = {};
-
-      if (bio !== originalBio) {
-        updates.bio = bio;
-      }
-
-      if (mbti !== originalMbti) {
-        updates.mbtiPersonality = mbti;
-      }
-
-      if (locationCity !== originalLocationDisplay) {
-        // Need to geocode if we don't have coordinates
-        if (!locationCoords && locationCity.trim()) {
-          try {
-            const GEOCODING_URL = import.meta.env.VITE_GEOCODING_URL;
-            if (GEOCODING_URL) {
-              const response = await fetch(
-                `${GEOCODING_URL}?q=${encodeURIComponent(locationCity)}&format=json&limit=1`
-              );
-              if (response.ok) {
-                const data = await response.json();
-                if (data.length > 0) {
-                  const result = data[0];
-                  const lat = parseFloat(result.lat);
-                  const lon = parseFloat(result.lon);
-                  updates.location = {
-                    lat,
-                    lon,
-                    city: locationCity || undefined,
-                  };
-                  setLocationCoords({ lat, lon });
-                  console.log('Geocoded and added location:', updates.location);
-                } else {
-                  console.warn('No geocoding results found for:', locationCity);
-                }
-              }
-            }
-          } catch (error) {
-            console.error('Error geocoding city:', error);
-          }
-        } else if (locationCoords && locationCity.trim()) {
-          // We have coordinates, update with new city name
-          updates.location = {
-            ...locationCoords,
-            city: locationCity,
-          };
-          console.log('Updated location with existing coords:', updates.location);
-        } else if (!locationCity.trim() && locationCoords) {
-          // City was cleared, just send coords
-          updates.location = {
-            ...locationCoords,
-            city: undefined,
-          };
-          console.log('Cleared city, keeping coords:', updates.location);
-        }
-      }
-
-      console.log('Sending updates:', updates);
-      // Send updates
-      await queueUpdate(updates);
-
-      // Update original values
-      setOriginalBio(bio);
-      setOriginalMbti(mbti);
-      setOriginalLocationDisplay(locationCity);
-
-      console.log('Settings saved successfully');
-    } catch (error) {
-      console.error('Failed to save settings:', error);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   // GPS handler
+  // GPS handler with auto-save
   const handleGPSClick = async () => {
     const result = await getGPSLocation();
     if (result) {
-      setLocationCoords({ lat: result.lat, lon: result.lon });
+      const newCoords = { lat: result.lat, lon: result.lon };
+      setLocationCoords(newCoords);
       setLocationCity(result.city);
-      console.log('GPS location fetched:', result.city);
+
+      // Auto-save GPS location immediately
+      queueUpdate(
+        {
+          location: {
+            lat: result.lat,
+            lon: result.lon,
+            city: result.city,
+          },
+        },
+        {
+          onError: (error) => {
+            // ZEN: Silent error log, revert state
+            console.error('Failed to update GPS location:', error);
+            // Revert to previous values (user data)
+            if (user?.location?.latitude && user.location.longitude) {
+              setLocationCoords({
+                lat: user.location.latitude,
+                lon: user.location.longitude,
+              });
+              setLocationCity(user.location.city || '');
+            }
+          },
+        }
+      );
+      console.log('GPS location auto-saved:', result.city);
     }
   };
 
@@ -197,6 +127,39 @@ export function AccountTab() {
   const handleCityInputKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && locationCity.trim()) {
       e.preventDefault();
+      // Trigger blur to save
+      (e.target as HTMLInputElement).blur();
+    }
+  };
+
+  // Location auto-save (onBlur pattern with geocoding)
+  const handleLocationBlur = async () => {
+    const trimmedCity = locationCity.trim();
+    const currentCity = user?.location?.city || '';
+
+    // Only geocode and save if changed
+    if (trimmedCity !== currentCity) {
+      if (!trimmedCity) {
+        // City cleared - keep coords but clear city
+        if (locationCoords) {
+          queueUpdate(
+            {
+              location: {
+                ...locationCoords,
+                city: undefined,
+              },
+            },
+            {
+              onError: (error) => {
+                console.error('Failed to update location:', error);
+                setLocationCity(currentCity);
+              },
+            }
+          );
+          console.log('Location city cleared, kept coordinates');
+        }
+        return;
+      }
 
       try {
         const GEOCODING_URL = import.meta.env.VITE_GEOCODING_URL;
@@ -205,7 +168,7 @@ export function AccountTab() {
         }
 
         const response = await fetch(
-          `${GEOCODING_URL}?q=${encodeURIComponent(locationCity)}&format=json&limit=1`
+          `${GEOCODING_URL}?q=${encodeURIComponent(trimmedCity)}&format=json&limit=1`
         );
 
         if (!response.ok) {
@@ -216,6 +179,8 @@ export function AccountTab() {
 
         if (data.length === 0) {
           console.error('Location not found');
+          // Revert to original
+          setLocationCity(currentCity);
           return;
         }
 
@@ -223,16 +188,44 @@ export function AccountTab() {
         const lat = parseFloat(result.lat);
         const lon = parseFloat(result.lon);
 
-        setLocationCoords({ lat, lon });
-
-        // Set display location from geocoding result (city only for now)
+        // Extract city from result
         const address = result.address || {};
         const city =
           address.city || address.town || address.village || address.municipality || result.name;
         const display = city || result.display_name;
+
+        const newCoords = { lat, lon };
+        setLocationCoords(newCoords);
         setLocationCity(display);
+
+        // Auto-save location
+        queueUpdate(
+          {
+            location: {
+              lat,
+              lon,
+              city: display,
+            },
+          },
+          {
+            onError: (error) => {
+              console.error('Failed to update location:', error);
+              // Revert to previous values
+              setLocationCity(currentCity);
+              if (user?.location?.latitude && user.location.longitude) {
+                setLocationCoords({
+                  lat: user.location.latitude,
+                  lon: user.location.longitude,
+                });
+              }
+            },
+          }
+        );
+        console.log('Location auto-saved:', display);
       } catch (error) {
         console.error('Geocoding error:', error);
+        // Revert to original
+        setLocationCity(currentCity);
       }
     }
   };
@@ -252,6 +245,45 @@ export function AccountTab() {
         },
       }
     );
+  };
+
+  // Bio auto-save (onBlur pattern)
+  const handleBioBlur = () => {
+    const trimmedBio = bio.trim();
+    const currentUserBio = user?.bio || '';
+
+    // Only save if changed
+    if (trimmedBio !== currentUserBio) {
+      const previousBio = currentUserBio;
+      queueUpdate(
+        { bio: trimmedBio },
+        {
+          onError: (error) => {
+            // ZEN: Silent revert on error, log to console only
+            console.error('Failed to update bio:', error);
+            setBio(previousBio);
+          },
+        }
+      );
+      console.log('Bio auto-saved:', trimmedBio);
+    }
+  };
+
+  // MBTI auto-save (onChange immediate - polarity pattern)
+  const handleMbtiChange = (newMbti: string) => {
+    const previousMbti = mbti;
+    setMbti(newMbti);
+    queueUpdate(
+      { mbtiPersonality: newMbti },
+      {
+        onError: (error) => {
+          // ZEN: Silent revert on error, log to console only
+          console.error('Failed to update MBTI:', error);
+          setMbti(previousMbti);
+        },
+      }
+    );
+    console.log('MBTI auto-saved:', newMbti);
   };
 
   // Avatar upload handler
@@ -327,7 +359,9 @@ export function AccountTab() {
     if (pigeonId) {
       try {
         await navigator.clipboard.writeText(pigeonId);
-        // ZEN: Silent success, no toast (user sees it was copied)
+        setCopiedPigeonId(true);
+        setTimeout(() => setCopiedPigeonId(false), 2000);
+        // ZEN: Silent success, no toast (user sees it was copied via icon change)
         console.log('Pigeon ID copied to clipboard');
       } catch (error) {
         console.error('Failed to copy Pigeon ID:', error);
@@ -404,6 +438,7 @@ export function AccountTab() {
           id="bio"
           value={bio}
           onChange={(e) => setBio(e.target.value)}
+          onBlur={handleBioBlur}
           maxLength={200}
           rows={3}
           className="w-full px-3 py-2 border border-gray-300 dim:border-gray-500 dark:border-gray-600 rounded-lg bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-gray-100 dark:text-gray-100 placeholder-gray-500 dim:placeholder-gray-450 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"
@@ -427,7 +462,7 @@ export function AccountTab() {
         <select
           id="mbti"
           value={mbti}
-          onChange={(e) => setMbti(e.target.value)}
+          onChange={(e) => handleMbtiChange(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 dim:border-gray-500 dark:border-gray-600 rounded-lg bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-gray-100 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
         >
           {MBTI_TYPES.map((type) => (
@@ -453,6 +488,7 @@ export function AccountTab() {
             value={locationCity}
             onChange={(e) => setLocationCity(e.target.value)}
             onKeyDown={handleCityInputKeyDown}
+            onBlur={handleLocationBlur}
             placeholder="Enter city name"
             className="flex-1 px-3 py-2 border border-gray-300 dim:border-gray-500 dark:border-gray-600 rounded-lg bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-gray-100 dark:text-gray-100 placeholder-gray-500 dim:placeholder-gray-450 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             disabled={isGettingLocation}
@@ -472,23 +508,6 @@ export function AccountTab() {
           </Button>
         </div>
       </div>
-
-      {/* Save Button */}
-      <Button
-        onClick={handleSave}
-        disabled={!hasChanges || isSaving}
-        variant="primary"
-        className="w-full"
-      >
-        {isSaving ? (
-          <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Saving...
-          </>
-        ) : (
-          'Save Changes'
-        )}
-      </Button>
 
       {/* Divider */}
       <div className="border-t border-gray-200 dark:border-gray-700" />
@@ -533,7 +552,7 @@ export function AccountTab() {
           Security
         </h3>
         <Button onClick={handleCopyPigeonId} variant="secondary" className="mb-3">
-          <Copy className="w-4 h-4 mr-2" />
+          {copiedPigeonId ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
           Copy Pigeon ID
         </Button>
         <div className="p-3 bg-yellow-50 dim:bg-yellow-900/30 dark:bg-yellow-900/20 border border-yellow-200 dim:border-yellow-700/50 dark:border-yellow-800 rounded-lg">

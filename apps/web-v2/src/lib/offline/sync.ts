@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { toast } from 'sonner';
 import { sendMessage } from '@/features/messaging/api/dmService';
 import { createComment } from '@/features/posts/api/commentService';
 import { toggleLikePost } from '@/features/posts/api/postService';
@@ -71,14 +70,8 @@ export function useAutoSync() {
   useEffect(() => {
     const handleOnline = async () => {
       // Sync when coming back online
-      const result = await syncQueue();
-
-      if (result.successful > 0) {
-        toast.success(`Synced ${result.successful} action(s)`);
-      }
-      if (result.failed > 0) {
-        toast.error(`Failed to sync ${result.failed} action(s)`);
-      }
+      // Polarity pattern: silent sync, no toasts (Zen approach)
+      await syncQueue();
     };
 
     window.addEventListener('online', handleOnline);
