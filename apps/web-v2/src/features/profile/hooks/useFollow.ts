@@ -57,6 +57,8 @@ export function useFollow(userId: string | undefined) {
     onSettled: () => {
       if (userId) {
         queryClient.invalidateQueries({ queryKey: ['profile', userId] });
+        // Invalidate posts feed so Following tab shows newly followed user's posts immediately
+        queryClient.invalidateQueries({ queryKey: ['posts'] });
       }
     },
   });
