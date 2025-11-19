@@ -6,10 +6,11 @@
  */
 
 import { useQueryClient } from '@tanstack/react-query';
+import type { InfiniteData } from '@tanstack/react-query';
 import { useAuth } from '@/features/auth';
 import { useOfflineMutation } from '@/hooks/useOfflineMutation';
 import { createComment, type CreateCommentPayload } from '../api/commentService';
-import type { Post } from '../types';
+import type { Post, PostsResponse } from '../types';
 
 export function useCreateComment(postId: string) {
   const queryClient = useQueryClient();
@@ -43,10 +44,10 @@ export function useCreateComment(postId: string) {
         image: '', // Comments don't have images
         user: {
           userId: user?._id || '',
-          userName: user?.userName || 'You',
-          birthYear: user?.birthYear || 2000,
-          birthMonth: user?.birthMonth || 1,
-          sex: user?.sex || 'other',
+          userName: user?.username || 'You',
+          birthYear: 2000, // Default values for required fields
+          birthMonth: 1,
+          sex: 'other',
           location: {
             lat: user?.location?.latitude || 0,
             lon: user?.location?.longitude || 0,
@@ -66,24 +67,59 @@ export function useCreateComment(postId: string) {
         updatedAt: new Date().toISOString(),
       };
 
-      // Add to comments cache
-      queryClient.setQueryData<{ posts: Post[] }>(['comments', postId], (old) => {
-        if (!old) return { posts: [tempComment] };
+      // Add to comments cache (infinite query structure)
+      queryClient.setQueryData<InfiniteData<PostsResponse>>(['comments', postId], (old) => {
+        if (!old) {
+          return {
+            pages: [
+              {
+                posts: [tempComment],
+                pagination: {
+                  page: 1,
+                  limit: 20,
+                  total: 1,
+                  hasMore: false,
+                },
+              },
+            ],
+            pageParams: [1],
+          };
+        }
+
+        // Add to first page
+        const updatedPages = [...old.pages];
+        if (updatedPages[0]) {
+          updatedPages[0] = {
+            ...updatedPages[0],
+            posts: [tempComment, ...updatedPages[0].posts],
+            pagination: {
+              ...updatedPages[0].pagination,
+              total: updatedPages[0].pagination.total + 1,
+            },
+          };
+        }
+
         return {
           ...old,
-          posts: [...old.posts, tempComment],
+          pages: updatedPages,
         };
       });
     },
     onSuccess: (realComment) => {
       // Replace temp comment with real one
-      queryClient.setQueryData<{ posts: Post[] }>(['comments', postId], (old) => {
-        if (!old) return { posts: [realComment] };
-        return {
-          ...old,
-          posts: old.posts.map((comment) =>
+      queryClient.setQueryData<InfiniteData<PostsResponse>>(['comments', postId], (old) => {
+        if (!old) return old;
+
+        const updatedPages = old.pages.map((page) => ({
+          ...page,
+          posts: page.posts.map((comment) =>
             comment._id.startsWith('temp-') ? realComment : comment
           ),
+        }));
+
+        return {
+          ...old,
+          pages: updatedPages,
         };
       });
 
@@ -94,11 +130,21 @@ export function useCreateComment(postId: string) {
     onError: (error) => {
       console.error('Failed to create comment:', error);
       // Remove optimistic comment on error
-      queryClient.setQueryData<{ posts: Post[] }>(['comments', postId], (old) => {
+      queryClient.setQueryData<InfiniteData<PostsResponse>>(['comments', postId], (old) => {
         if (!old) return old;
+
+        const updatedPages = old.pages.map((page) => ({
+          ...page,
+          posts: page.posts.filter((comment) => !comment._id.startsWith('temp-')),
+          pagination: {
+            ...page.pagination,
+            total: Math.max(0, page.pagination.total - 1),
+          },
+        }));
+
         return {
           ...old,
-          posts: old.posts.filter((comment) => !comment._id.startsWith('temp-')),
+          pages: updatedPages,
         };
       });
     },

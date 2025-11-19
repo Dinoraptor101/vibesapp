@@ -112,10 +112,19 @@ export function PostCard({ post, onLike, onReport, hideCaption = false }: PostCa
           <button
             type="button"
             onClick={handleLike}
+            disabled={!canReport}
             className={`flex items-center gap-1.5 transition-colors duration-200 group ${
-              userHasLiked ? 'text-vibe-positive' : 'text-text-secondary hover:text-vibe-positive'
+              !canReport
+                ? 'opacity-50 cursor-not-allowed'
+                : userHasLiked
+                  ? 'text-vibe-positive'
+                  : 'text-text-secondary hover:text-vibe-positive'
             }`}
-            aria-label={`${userHasLiked ? 'Unlike' : 'Like'} post (${likes} likes)`}
+            aria-label={
+              !canReport
+                ? 'Cannot like your own post'
+                : `${userHasLiked ? 'Unlike' : 'Like'} post (${likes} likes)`
+            }
           >
             <Heart
               className={`w-5 h-5 transition-transform duration-200 ${

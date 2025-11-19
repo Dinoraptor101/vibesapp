@@ -18,6 +18,7 @@ interface PostActionsProps {
   initialComments: number;
   userHasHearted?: boolean;
   userHasReported?: boolean;
+  isOwnPost?: boolean;
   onHeart?: (postId: string) => void;
   onReport?: (postId: string) => void;
   onComment?: (postId: string) => void;
@@ -31,6 +32,7 @@ export function PostActions({
   initialComments,
   userHasHearted,
   userHasReported,
+  isOwnPost = false,
   onHeart,
   onReport,
   onComment,
@@ -83,11 +85,15 @@ export function PostActions({
         variant="ghost"
         size="sm"
         onClick={handleHeart}
+        disabled={isOwnPost}
         className={cn(
           'gap-1.5 text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400',
-          hasHearted && 'text-pink-600 dark:text-pink-500'
+          hasHearted && 'text-pink-600 dark:text-pink-500',
+          isOwnPost && 'opacity-50 cursor-not-allowed'
         )}
-        aria-label={hasHearted ? 'Remove heart' : 'Heart post'}
+        aria-label={
+          isOwnPost ? 'Cannot heart your own post' : hasHearted ? 'Remove heart' : 'Heart post'
+        }
       >
         <Heart className={cn('w-5 h-5', hasHearted && 'fill-current')} aria-hidden="true" />
         <span className="text-sm font-medium">{formatCount(hearts)}</span>
@@ -116,8 +122,8 @@ export function PostActions({
         <Share2 className="w-5 h-5" aria-hidden="true" />
       </Button>
 
-      {/* Report button - hidden after user reports */}
-      {!hasReported && (
+      {/* Report button - hidden for own posts and after user reports */}
+      {!hasReported && !isOwnPost && (
         <Button
           variant="ghost"
           size="sm"
