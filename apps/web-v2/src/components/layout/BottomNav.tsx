@@ -63,7 +63,7 @@ export function BottomNav() {
           className="flex flex-col items-center gap-1 px-4 py-2 min-w-[64px]"
           aria-label="Create post"
         >
-          <div className="bg-brand-purple text-white rounded-full p-3 shadow-lg hover:scale-110 transition-transform">
+          <div className="bg-notification hover:bg-notification-hover text-white rounded-full p-3 shadow-lg hover:scale-110 transition-transform">
             <Plus className="w-6 h-6" strokeWidth={2.5} />
           </div>
         </button>
