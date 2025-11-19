@@ -130,6 +130,16 @@ export const authApi = {
   },
 
   /**
+   * Regenerate Pigeon ID for the current user
+   */
+  async regeneratePigeonId(userId: string): Promise<string> {
+    const response = await apiClient.put<{ message: string; pigeonId: string }>(
+      `/api/users/${userId}/regenerate-pigeon-id`
+    );
+    return response.pigeonId;
+  },
+
+  /**
    * Logout (client-side only - clear cookies)
    */
   logout(): void {

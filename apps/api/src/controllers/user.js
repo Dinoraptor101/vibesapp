@@ -661,6 +661,57 @@ const updateNotificationPreferences = async (req, res) => {
   }
 };
 
+// Regenerate Pigeon ID for a user
+const regeneratePigeonId = async (req, res) => {
+  console.log('Regenerating Pigeon ID for user...');
+  const { userId } = req.params;
+
+  try {
+    const user = await User.findOne({ userId });
+    if (!user) {
+      console.error('User not found');
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Generate new unique Pigeon ID
+    let newPigeonId;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    do {
+      newPigeonId = generatePigeonId();
+      const existingUser = await User.findOne({ pigeonId: newPigeonId });
+
+      if (!existingUser || existingUser.userId === userId) {
+        break;
+      }
+
+      attempts++;
+      console.log(`Attempt ${attempts}: ${newPigeonId} already exists, trying again...`);
+    } while (attempts < maxAttempts);
+
+    if (attempts >= maxAttempts) {
+      console.error('Failed to generate unique Pigeon ID after', maxAttempts, 'attempts');
+      return res
+        .status(500)
+        .json({ message: 'Failed to generate unique Pigeon ID. Please try again.' });
+    }
+
+    // Update user's Pigeon ID
+    user.pigeonId = newPigeonId;
+    await user.save();
+
+    console.log('Pigeon ID regenerated successfully:', newPigeonId);
+    res.status(200).json({
+      message: 'Pigeon ID regenerated successfully',
+      pigeonId: newPigeonId,
+    });
+  } catch (error) {
+    console.error('Error regenerating Pigeon ID:', error);
+    res.status(500).json({ message: 'Error regenerating Pigeon ID', error: error.message });
+  }
+};
+
 module.exports = {
   generateUniquePigeonId,
   createUser,
@@ -674,4 +725,5 @@ module.exports = {
   getFollowers,
   getFollowing,
   updateNotificationPreferences,
+  regeneratePigeonId,
 };
