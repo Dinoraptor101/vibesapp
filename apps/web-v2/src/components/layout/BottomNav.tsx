@@ -40,7 +40,7 @@ export function BottomNav() {
             isActive('/activity')
               ? 'text-brand-purple'
               : unreadActivity > 0
-                ? 'text-vibe-negative'
+                ? 'text-brand-purple'
                 : 'text-text-secondary'
           }`}
           aria-label={`Activity${unreadActivity > 0 ? ` (${unreadActivity} unread)` : ''}`}
@@ -75,7 +75,7 @@ export function BottomNav() {
             isActive('/messages')
               ? 'text-brand-purple'
               : unreadMessages > 0
-                ? 'text-vibe-negative'
+                ? 'text-brand-purple'
                 : 'text-text-secondary'
           }`}
           aria-label={`Messages${unreadMessages > 0 ? ` (${unreadMessages} unread)` : ''}`}

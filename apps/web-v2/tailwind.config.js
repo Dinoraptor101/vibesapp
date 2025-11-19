@@ -88,6 +88,13 @@ export default {
           900: '#003a8c',
         },
 
+        // Notification colors (teal/turquoise for fresh, peaceful notifications)
+        notification: {
+          DEFAULT: '#14b8a6', // teal-500
+          hover: '#0d9488', // teal-600
+          light: '#5eead4', // teal-300
+        },
+
         // Vibe system colors
         vibe: {
           positive: '#4caf50',
