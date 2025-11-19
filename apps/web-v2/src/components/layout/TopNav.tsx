@@ -112,6 +112,7 @@ export function TopNav() {
           leftIcon={<Plus className="w-5 h-5" />}
           onClick={() => navigate('/create-post')}
           aria-label="Create post"
+          className="bg-notification hover:bg-notification-hover"
         >
           <span className="hidden lg:inline">Post</span>
         </Button>
