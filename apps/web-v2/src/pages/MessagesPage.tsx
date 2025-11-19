@@ -41,7 +41,7 @@ export function MessagesPage() {
           >
             Requests
             {pendingCount > 0 && (
-              <Badge variant="error" size="sm">
+              <Badge variant="notification" size="sm">
                 {pendingCount}
               </Badge>
             )}

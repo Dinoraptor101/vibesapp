@@ -34,6 +34,7 @@ const badgeVariants = cva('inline-flex items-center justify-center font-medium t
       warning: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border border-yellow-500/20',
       error: 'bg-vibe-negative/10 text-vibe-negative border border-vibe-negative/20',
       brand: 'bg-brand-primary/10 text-brand-primary border border-brand-primary/20',
+      notification: 'bg-brand-purple/10 text-brand-purple border border-brand-purple/20',
     },
     size: {
       sm: 'text-xs px-2 py-0.5 rounded-full',
@@ -55,6 +56,7 @@ const dotVariants = cva('rounded-full', {
       warning: 'bg-yellow-500',
       error: 'bg-vibe-negative',
       brand: 'bg-brand-primary',
+      notification: 'bg-brand-purple',
     },
     size: {
       sm: 'w-1.5 h-1.5',
