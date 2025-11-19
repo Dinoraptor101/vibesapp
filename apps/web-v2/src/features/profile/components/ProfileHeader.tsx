@@ -14,6 +14,9 @@ interface ProfileHeaderProps {
   isOwnProfile: boolean;
   onDMRequest: () => void;
   dmStatus?: 'connected' | 'pending' | 'received' | 'none';
+  postsCount: number;
+  followersCount: number;
+  followingCount: number;
 }
 
 export function ProfileHeader({
@@ -21,6 +24,9 @@ export function ProfileHeader({
   isOwnProfile,
   onDMRequest,
   dmStatus,
+  postsCount,
+  followersCount,
+  followingCount,
 }: ProfileHeaderProps) {
   // Determine button text and state
   const getMessageButtonProps = () => {
@@ -72,13 +78,23 @@ export function ProfileHeader({
             )}
           </div>
 
-          {/* Distance */}
-          {profile.distance && (
-            <div className="flex items-center gap-1 text-sm text-gray-600 dim:text-gray-400 dark:text-gray-400">
-              <MapPin size={16} />
-              <span>{profile.distance}</span>
-            </div>
-          )}
+          {/* Distance & Stats */}
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500 dim:text-gray-450 dark:text-gray-400">
+            {profile.distance && (
+              <>
+                <div className="flex items-center gap-1">
+                  <MapPin size={14} />
+                  <span>{profile.distance}</span>
+                </div>
+                <span className="text-gray-400">•</span>
+              </>
+            )}
+            <span>{postsCount} posts</span>
+            <span className="text-gray-400">•</span>
+            <span>{followersCount} followers</span>
+            <span className="text-gray-400">•</span>
+            <span>{followingCount} following</span>
+          </div>
 
           {/* Action Buttons */}
           {!isOwnProfile && (
