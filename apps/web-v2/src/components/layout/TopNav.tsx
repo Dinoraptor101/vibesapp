@@ -7,6 +7,7 @@
 
 import { Bell, Home, MessageSquare, Plus } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { OfflineIndicator } from '@/components/shared/OfflineIndicator';
 import { Button } from '@/components/ui-next';
 import { useUnreadCounts } from '@/features/activity';
 import { UserMenu } from './UserMenu';
@@ -101,6 +102,9 @@ export function TopNav() {
 
       {/* Right: Create Post + User Menu */}
       <div className="flex items-center gap-3">
+        {/* Offline Indicator */}
+        <OfflineIndicator />
+
         {/* Create Post Button */}
         <Button
           variant="primary"
