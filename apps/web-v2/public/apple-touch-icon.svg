@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="180" height="180" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="180" height="180" fill="#9333ea" rx="40"/>
+  
+  <!-- Pigeon/Dove emoji placeholder -->
+  <text x="90" y="120" font-size="90" text-anchor="middle" fill="white">🕊️</text>
+</svg>
