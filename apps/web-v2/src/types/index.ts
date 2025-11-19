@@ -4,15 +4,16 @@
  */
 
 // Re-export shared types from the monorepo
-export type {
-  IActivity,
-  IComment,
-  IConversation,
-  IGroupChat,
-  IMessage,
-  IPost,
-  IUserData,
-} from '@vibesapp/shared';
+// NOTE: Temporarily commented out for offline PWA implementation
+// export type {
+//   IActivity,
+//   IComment,
+//   IConversation,
+//   IGroupChat,
+//   IMessage,
+//   IPost,
+//   IUserData,
+// } from '@vibesapp/shared';
 
 // Frontend-specific types
 
