@@ -82,6 +82,14 @@ export function CommentCard({ comment, onHeart, onReply, onDelete, className }: 
           <span className="text-text-tertiary text-xs whitespace-nowrap">
             {formatRelativeTime(new Date(comment.createdAt))}
           </span>
+
+          {/* Syncing Badge for offline comments */}
+          {comment._id.startsWith('temp-') && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-hover text-text-tertiary text-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+              Syncing...
+            </span>
+          )}
         </div>
 
         {/* Comment Text */}

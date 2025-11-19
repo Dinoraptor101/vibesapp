@@ -8,6 +8,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import type React from 'react';
 import { Toaster } from 'sonner';
 import { AdminAuthProvider } from '@/features/admin';
+import { useAutoSync } from '@/lib/offline/sync';
 import { ThemeProvider } from '@/lib/theme';
 
 // Create a client
@@ -25,11 +26,18 @@ interface ProvidersProps {
   children: React.ReactNode;
 }
 
+// Component to initialize offline sync
+function OfflineSync() {
+  useAutoSync();
+  return null;
+}
+
 export function Providers({ children }: ProvidersProps): JSX.Element {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AdminAuthProvider>
+          <OfflineSync />
           <Toaster position="top-right" richColors />
           {children}
           {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}

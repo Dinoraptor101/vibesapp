@@ -1,8 +1,58 @@
 # Offline Mode Strategy
 
 **Created:** November 5, 2025  
-**Status:** Planning - Implementation Guide  
-**Approach:** Hybrid (phased implementation)
+**Updated:** November 18, 2025  
+**Status:** 🚧 In Progress - Test-Driven Development  
+**Approach:** TDD with Comprehensive E2E Test Suite
+
+---
+
+## 🧪 Test-Driven Development Approach
+
+### Why TDD for Offline Features?
+
+Offline functionality is complex with many edge cases. We're using **Test-Driven Development** to:
+- ✅ Define clear specifications via tests
+- ✅ Get immediate feedback during implementation
+- ✅ Prevent regressions
+- ✅ Document expected behavior
+- ✅ Validate complex state management
+
+### TDD Progress
+
+**✅ Red Phase Complete (November 18, 2025)**
+- 19 comprehensive E2E tests written with Playwright
+- All tests failing as expected (no features implemented yet)
+- Tests define complete specification
+
+**🚧 Green Phase (In Progress)**
+- Implementing features to make tests pass
+- Iterative development with test feedback
+- Watch tests progressively turn green
+
+**⏳ Refactor Phase (Upcoming)**
+- Optimize code while tests stay green
+- Polish UI and performance
+- Final documentation
+
+### Test Suite Overview
+
+**19 Tests Across 5 Specification Files:**
+
+| Spec File | Tests | Coverage |
+|-----------|-------|----------|
+| `01-post-creation-offline.spec.ts` | 3 | Post creation, image compression, S3 upload queue |
+| `02-message-sending-offline.spec.ts` | 3 | Messaging, conversation cache, queue ordering |
+| `03-interactions-offline.spec.ts` | 5 | Hearts, comments, batch sync, toggle optimization |
+| `04-conflict-resolution.spec.ts` | 4 | Smart cancellation, batching, silent failures |
+| `05-cache-persistence.spec.ts` | 5 | Reload persistence, hydration, eviction |
+
+**Test Helpers:** `libs/e2e-testing/tests/offline/helpers.ts`
+- 13 utility functions for offline simulation, queue inspection, cache management
+
+**Documentation:**
+- See [PHASE-5.2-TDD-APPROACH.md](./PHASE-5.2-TDD-APPROACH.md) for complete TDD strategy
+- See [PHASE-5.2-SESSION-1-SUMMARY.md](./PHASE-5.2-SESSION-1-SUMMARY.md) for test suite details
 
 ---
 
@@ -65,67 +115,126 @@ export function OfflineIndicator() {
 
 ## Implementation Approach
 
-### Hybrid Strategy (Phased)
+### Updated Implementation Strategy (TDD)
 
-#### Phase 1: Core Features (Week 11)
-**Priority:** Critical user actions that need offline support
+#### ✅ Session 1: Test Suite (Red Phase) - COMPLETE
+**Date:** November 18, 2025
 
-1. **Posts Feed**
-   - Cache viewed posts
-   - Offline viewing of cached posts
-   - Queue new posts for sync
+- Created 19 E2E tests with Playwright
+- Test infrastructure and helpers
+- User scenarios documented (8 scenarios)
+- Architecture decisions finalized
+- All tests validated and failing (TDD Red phase)
 
-2. **Vibes (Like/Dislike)**
-   - Optimistic UI updates
-   - Queue vibe actions
-   - Sync on reconnect
+#### 🚧 Session 2: Queue Infrastructure (Green Phase)
+**Target:** Make queue-related tests pass
 
-3. **Comments**
-   - Queue new comments
-   - Optimistic comment display
-   - Sync on reconnect
+1. **Offline Queue System**
+   - IndexedDB queue with priority support
+   - Conflict detection and smart cancellation
+   - Toggle optimization logic
+   - Dependency tracking
 
-4. **Messages**
-   - Queue new messages
-   - Optimistic message display
-   - Sync on reconnect
+2. **Queue Processor**
+   - Priority-based processing
+   - Exponential backoff retry (1s, 2s, 4s, 8s, 16s max)
+   - Silent failures for 404/410 errors
+   - Batch settings updates
 
-5. **Activities**
-   - Cache recent activities
-   - Mark as read queuing
+3. **Network Monitor**
+   - navigator.onLine tracking
+   - /api/health polling (30s when offline)
+   - Auto queue processing on reconnect
 
-#### Phase 2: Settings & Profile (Week 11)
-**Priority:** User profile updates
+**Expected Test Results:**
+```bash
+✅ 4-6 tests passing (queue operations)
+✘ 13-15 tests failing (need service worker + cache)
+```
 
-1. **Account Updates**
-   - Avatar upload queue
-   - Bio changes queue
-   - MBTI changes queue
-   - Location changes queue
-   - Polarity changes queue
+#### Session 3: Service Worker & Caching
+**Target:** Make cache-related tests pass
 
-2. **Debounced Batch Sync**
-   - 300ms delay
-   - Batch multiple field changes into single update
+1. **Service Worker Setup**
+   - vite-plugin-pwa configuration
+   - Workbox caching strategies
+   - App shell caching
+   - CDN image caching
 
-#### Phase 3: Polish (Week 12)
-**Priority:** Edge cases and refinement
+2. **React Query Persistence**
+   - Posts cache (100 posts, 7-day expiry, LRU)
+   - Conversations cache (50 conversations)
+   - Cache hydration on startup
+   - Automatic eviction
 
-1. **Conflict Resolution**
-   - Last write wins
-   - Handle concurrent edits
+**Expected Test Results:**
+```bash
+✅ 10-12 tests passing (queue + cache)
+✘ 7-9 tests failing (need mutation wrappers)
+```
 
-2. **Queue Management**
-   - Retry failed syncs
-   - Clear stale queue items
+#### Session 4: Mutation Wrappers
+**Target:** Make interaction tests pass
 
-3. **Performance**
-   - Optimize IndexedDB usage
-   - Limit queue size
+1. **Wrap Core Mutations**
+   - useHeartPost with offline queue
+   - useCreateComment with offline queue
+   - useSendMessage with offline queue
+   - useCreatePost with image compression
+
+2. **Optimistic UI Updates**
+   - Instant feedback for all mutations
+   - "syncing..." badges on pending items
+   - Smooth transitions after sync
+
+**Expected Test Results:**
+```bash
+✅ 16-17 tests passing (most features working)
+✘ 2-3 tests failing (edge cases)
+```
+
+#### Session 5: Polish & Conflict Resolution
+**Target:** Make all tests pass
+
+1. **Smart Queue Behavior**
+   - Create→Delete cancellation
+   - Toggle optimization
+   - Silent failures for deleted posts
+   - Dependency tracking
+
+2. **UI Components**
+   - Offline banner
+   - Queue status page
+   - Manual sync trigger
+
+**Expected Test Results:**
+```bash
+✅ 18-19 tests passing (all features working!)
+⏳ 0-1 tests TODO (cache eviction - complex)
+```
+
+#### Session 6: Refactor & Documentation
+**Target:** Optimize and document
+
+1. **Code Quality**
+   - Performance optimization
+   - Memory profiling
+   - Code cleanup
+
+2. **Documentation**
+   - PHASE-5.2-SUMMARY.md
+   - OFFLINE-TESTING-GUIDE.md
+   - Update main README
+
+**Expected Test Results:**
+```bash
+✅ 19/19 tests passing
+Status: Phase 5.2 Complete! 🎉
+```
 
 ---
 
-## Technical Architecture
+## Technical Architecture (Updated for TDD)
 
 ### Service Worker
 ```typescript
@@ -638,34 +747,63 @@ const queryClient = new QueryClient({
 
 ---
 
-## Implementation Checklist
+## Implementation Checklist (Updated for TDD)
 
-### Phase 1: Core Features (Week 11)
-- [ ] Service Worker setup
-- [ ] IndexedDB queue implementation
-- [ ] Offline indicator component
-- [ ] Auto-sync on reconnect
-- [ ] Posts feed caching
-- [ ] Vibes offline support
-- [ ] Comments offline support
-- [ ] Messages offline support
-- [ ] Activities offline support
+### ✅ Session 1: Test Suite (Red Phase) - COMPLETE
+- [x] Create 19 comprehensive E2E tests
+- [x] Test infrastructure and helpers
+- [x] Document user scenarios (8 scenarios)
+- [x] Finalize architecture decisions
+- [x] Validate test execution (all failing as expected)
 
-### Phase 2: Settings & Profile (Week 11)
-- [ ] Account updates queuing
-- [ ] Debounced batch sync (300ms)
-- [ ] Avatar upload queue
-- [ ] Location update queue
+### 🚧 Session 2: Queue Infrastructure (Green Phase) - IN PROGRESS
+- [ ] IndexedDB queue with priority system
+- [ ] Queue processor with retry logic
+- [ ] Network state monitoring
+- [ ] Conflict detection and resolution
+- [ ] Run tests: Expect 4-6 tests passing
 
-### Phase 3: Polish (Week 12)
-- [ ] Conflict resolution (last write wins)
-- [ ] Queue cleanup
-- [ ] Retry logic with backoff
-- [ ] Testing offline scenarios
+### Session 3: Service Worker & Caching
+- [ ] vite-plugin-pwa setup
+- [ ] Workbox caching strategies
+- [ ] React Query persistence
+- [ ] Posts feed caching (100 posts, LRU)
+- [ ] Conversations cache (50 conversations)
+- [ ] Run tests: Expect 10-12 tests passing
+
+### Session 4: Mutation Wrappers
+- [ ] Wrap useHeartPost with offline queue
+- [ ] Wrap useCreateComment with offline queue
+- [ ] Wrap useSendMessage with offline queue
+- [ ] Optimistic UI updates for all
+- [ ] "syncing..." badges
+- [ ] Run tests: Expect 16-17 tests passing
+
+### Session 5: Polish & Conflict Resolution
+- [ ] Smart cancellation (create→delete)
+- [ ] Toggle optimization
+- [ ] Silent failures for deleted posts
+- [ ] Offline banner component
+- [ ] Queue status page
+- [ ] Run tests: Expect 18-19 tests passing
+
+### Session 6: Refactor & Documentation
 - [ ] Performance optimization
+- [ ] Code cleanup
+- [ ] PHASE-5.2-SUMMARY.md
+- [ ] OFFLINE-TESTING-GUIDE.md
+- [ ] Update main README
+- [ ] Final test run: All green!
 
 ---
 
-**Next Step:** Implement Phase 1 during Week 11 of the rebuild timeline.
+**Current Status:** Session 1 Complete (Red Phase) - Ready for Session 2 (Green Phase)
 
-**Reference:** See `REBUILD-ACTION-PLAN.md` Week 11 section for integration with overall project timeline.
+**Next Step:** Implement Queue Infrastructure and watch tests start turning green!
+
+**Documentation Reference:**
+- **TDD Overview:** `PHASE-5.2-TDD-APPROACH.md` - Complete TDD methodology and test suite overview
+- **Test Suite:** `PHASE-5.2-SESSION-1-SUMMARY.md` - Test creation session details
+- **Implementation Plan:** `PHASE-5.2-IMPLEMENTATION-PLAN.md` - Updated plan with TDD approach
+- **Scenario Analysis:** `SCENARIO-1-TDD-ANALYSIS.md` - Detailed commuter scenario breakdown
+- **Timeline:** `REBUILD-ACTION-PLAN.md` - Week 11 integration with overall project

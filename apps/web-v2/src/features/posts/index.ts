@@ -46,6 +46,7 @@ export { useInfinitePosts } from './hooks/useInfinitePosts';
 export { usePost } from './hooks/usePost';
 export { usePostFilters } from './hooks/usePostFilters';
 export { useReportPost } from './hooks/useReportPost';
+export { useToggleLike } from './hooks/useToggleLike';
 
 // API Services
 export {

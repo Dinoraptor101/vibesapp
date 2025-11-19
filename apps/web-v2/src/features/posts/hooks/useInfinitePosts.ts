@@ -70,6 +70,7 @@ export function useInfinitePosts({
 
   // Mutation for toggling like on a post
   // Backend handles the like/unlike logic - no need to check state here
+  // NOTE: Using legacy mutation - consider migrating to useToggleLike hook for offline support
   const toggleLikeMutation = useMutation({
     mutationFn: (postId: string) => toggleLikePost(postId),
     onError: (err) => {
