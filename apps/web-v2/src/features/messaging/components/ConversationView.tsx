@@ -242,7 +242,7 @@ export function ConversationView() {
       {/* Archived Banner or Message Input */}
       {isConversationClosed ? (
         <div className="border-t border-gray-200 dark:border-gray-700 bg-yellow-50 dark:bg-yellow-900/20">
-          <div className="p-4 space-y-3">
+          <div className="p-4">
             <div className="flex items-start gap-2 text-sm text-yellow-800 dark:text-yellow-200">
               <span className="text-lg">⚠️</span>
               <div>
@@ -253,13 +253,6 @@ export function ConversationView() {
                 </p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => otherUser?.userId && navigate(`/profile/${otherUser.userId}`)}
-              className="w-full py-2 px-4 bg-brand-primary hover:bg-brand-dark text-white rounded-lg font-medium transition-colors"
-            >
-              View Profile & Send DM Request
-            </button>
           </div>
         </div>
       ) : (
