@@ -1,6 +1,11 @@
 /**
  * MessageBubble Component
  * Individual message display in chat
+ *
+ * ZEN Animation: Slide & Fade (250ms)
+ * - Your messages: slide from right
+ * - Their messages: slide from left
+ * - Respects prefers-reduced-motion
  */
 
 import { Avatar } from '@/components/ui-next';
@@ -12,6 +17,7 @@ interface MessageBubbleProps {
   isCurrentUser: boolean;
   otherUserAvatar?: string;
   otherUserName?: string;
+  shouldAnimate?: boolean;
 }
 
 export function MessageBubble({
@@ -19,9 +25,17 @@ export function MessageBubble({
   isCurrentUser,
   otherUserAvatar,
   otherUserName,
+  shouldAnimate = true,
 }: MessageBubbleProps) {
   return (
-    <div className={`flex items-end gap-2 ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'}`}>
+    <div
+      className={`flex items-end gap-2 ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'} ${shouldAnimate ? 'animate-slide-fade-in' : ''}`}
+      style={
+        {
+          '--slide-from': isCurrentUser ? '15px' : '-15px',
+        } as React.CSSProperties
+      }
+    >
       {/* Avatar (only for other user) */}
       {!isCurrentUser && <Avatar src={otherUserAvatar} alt={otherUserName || 'User'} size="sm" />}
 

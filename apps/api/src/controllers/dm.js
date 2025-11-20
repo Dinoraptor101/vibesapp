@@ -231,15 +231,14 @@ exports.getConversations = async (req, res) => {
 
     const conversations = await Conversation.find({
       $or: [{ user1Id: user.userId }, { user2Id: user.userId }],
+      status: { $in: ['approved', 'closed'] }, // Include both active and closed (archived)
     });
 
     console.log('Conversations found:', conversations.length);
 
-    // Filter out conversations that are closed AND have no messages (declined conversations)
-    // Also filter out pending conversations for the requester.
+    // Filter out pending conversations for the requester (they see it as a sent request)
     const validConversations = conversations.filter(
       (conversation) =>
-        !(conversation.status === 'closed' && conversation.messages.length === 0) &&
         !(conversation.status === 'pending' && conversation.lastRequesterId === user.userId)
     );
 
@@ -305,7 +304,19 @@ exports.getConversations = async (req, res) => {
 
     console.log('DM requests mapped:', dmRequests.length);
 
-    res.status(200).json(dmRequests);
+    // Sort conversations: approved (active) first, then closed (archived)
+    // Within each group, sort by most recent message
+    const sortedConversations = dmRequests.sort((a, b) => {
+      // Active conversations come before closed/archived
+      if (a.status === 'approved' && b.status === 'closed') return -1;
+      if (a.status === 'closed' && b.status === 'approved') return 1;
+      // Same status - sort by most recent message
+      const aTime = a.lastMessage?.timestamp || a.updatedAt;
+      const bTime = b.lastMessage?.timestamp || b.updatedAt;
+      return new Date(bTime) - new Date(aTime);
+    });
+
+    res.status(200).json(sortedConversations);
   } catch (error) {
     console.error('Error fetching conversations:', error.message);
     res.status(500).json({ error: 'Server error while fetching conversations' });

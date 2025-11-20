@@ -182,6 +182,23 @@ export default {
       transitionTimingFunction: {
         DEFAULT: 'cubic-bezier(0.4, 0, 0.2, 1)',
       },
+
+      keyframes: {
+        'slide-fade-in': {
+          '0%': {
+            opacity: '0',
+            transform: 'translateX(var(--slide-from))',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'translateX(0)',
+          },
+        },
+      },
+
+      animation: {
+        'slide-fade-in': 'slide-fade-in 250ms ease-out',
+      },
     },
   },
   plugins: [

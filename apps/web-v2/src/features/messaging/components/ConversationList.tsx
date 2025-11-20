@@ -1,9 +1,10 @@
 /**
  * ConversationList Component
  * Displays list of all conversations with unread indicators
+ * Shows ended conversations with archived styling at bottom
  */
 
-import { AlertCircle, MessageCircle } from 'lucide-react';
+import { AlertCircle, Archive, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Avatar, Badge, Spinner } from '@/components/ui-next';
 import { useAuth } from '@/features/auth';
@@ -61,13 +62,18 @@ export function ConversationList() {
         const otherUser = conversation.otherUser;
         const lastMessage = conversation.lastMessage;
         const unreadCount = conversation.unreadCount || 0;
+        const isClosed = conversation.status === 'closed';
 
         return (
           <div
             key={conversation._id}
-            className="flex w-full items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 transition-all hover:border-brand-primary hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-brand-primary dark:hover:bg-gray-750"
+            className={`flex w-full items-center gap-3 rounded-lg border bg-white p-3 transition-all ${
+              isClosed
+                ? 'opacity-60 border-gray-200 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600 dark:hover:bg-gray-750'
+                : 'border-gray-200 hover:border-brand-primary hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-brand-primary dark:hover:bg-gray-750'
+            }`}
           >
-            {/* Avatar - clickable to profile */}
+            {/* Avatar - clickable to profile, grayscale if closed */}
             <button
               type="button"
               onClick={(e) => {
@@ -76,11 +82,13 @@ export function ConversationList() {
               }}
               className="hover:opacity-80 transition-opacity"
             >
-              <Avatar
-                src={otherUser?.profilePictureUrl}
-                alt={otherUser?.username || 'User'}
-                size="md"
-              />
+              <div className={isClosed ? 'grayscale' : ''}>
+                <Avatar
+                  src={otherUser?.profilePictureUrl}
+                  alt={otherUser?.username || 'User'}
+                  size="md"
+                />
+              </div>
             </button>
 
             {/* Content - clickable to conversation */}
@@ -99,6 +107,13 @@ export function ConversationList() {
                       {otherUser.mbtiPersonality}
                     </Badge>
                   )}
+                  {/* Archive icon for closed conversations */}
+                  {isClosed && (
+                    <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                      <Archive className="h-3 w-3" />
+                      Ended
+                    </span>
+                  )}
                 </div>
                 {lastMessage && (
                   <span className="text-xs text-gray-500 dim:text-gray-450 dark:text-gray-400">
@@ -115,8 +130,8 @@ export function ConversationList() {
               )}
             </button>
 
-            {/* Unread Badge */}
-            {unreadCount > 0 && (
+            {/* Unread Badge - hide for closed conversations */}
+            {!isClosed && unreadCount > 0 && (
               <Badge variant="error" size="sm">
                 {unreadCount}
               </Badge>

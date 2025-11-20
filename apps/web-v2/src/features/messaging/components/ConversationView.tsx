@@ -8,12 +8,13 @@
  * - No more infinite loops or manual useRef flags
  */
 
-import { ArrowLeft } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { ArrowLeft, Ban } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Avatar, Badge, Spinner } from '@/components/ui-next';
 import { useAuth } from '@/features/auth';
 import { useAutoMarkAsRead } from '../hooks/useAutoMarkAsRead';
+import { useEndConversation } from '../hooks/useEndConversation';
 import { useMessagingPolling } from '../hooks/useMessagingPolling';
 import { useSendMessage } from '../hooks/useSendMessage';
 import { MessageBubble } from './MessageBubble';
@@ -24,6 +25,7 @@ export function ConversationView() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const previousMessageCountRef = useRef(0);
 
   // Unified polling - automatically manages queries based on URL
   const { activeConversation, isLoading } = useMessagingPolling();
@@ -32,15 +34,65 @@ export function ConversationView() {
   useAutoMarkAsRead(conversationId);
 
   const sendMessageMutation = useSendMessage();
+  const endConversationMutation = useEndConversation();
+
+  // Hold-to-confirm state for ending conversation
+  const [endProgress, setEndProgress] = useState(0);
+  const endTimerRef = useRef<number | null>(null);
+  const endIntervalRef = useRef<number | null>(null);
 
   const otherUser = activeConversation?.otherUser;
+  const isConversationClosed = activeConversation?.status === 'closed';
 
   // Scroll to bottom when messages change
   useEffect(() => {
     if (activeConversation?.messages.length) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      // Update previous count after render
+      previousMessageCountRef.current = activeConversation.messages.length;
     }
   }, [activeConversation?.messages.length]);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      if (endTimerRef.current) clearTimeout(endTimerRef.current);
+      if (endIntervalRef.current) clearInterval(endIntervalRef.current);
+    };
+  }, []);
+
+  // Hold-to-confirm handlers for ending conversation
+  const handleEndMouseDown = () => {
+    if (endConversationMutation.isPending || !conversationId) return;
+
+    setEndProgress(0);
+    const startTime = Date.now();
+    const holdDuration = 2000; // 2 seconds
+
+    endIntervalRef.current = window.setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min((elapsed / holdDuration) * 100, 100);
+      setEndProgress(progress);
+    }, 50);
+
+    endTimerRef.current = window.setTimeout(() => {
+      if (endIntervalRef.current) clearInterval(endIntervalRef.current);
+      setEndProgress(100);
+      endConversationMutation.mutate(conversationId);
+    }, holdDuration);
+  };
+
+  const handleEndMouseUp = () => {
+    if (endTimerRef.current) {
+      clearTimeout(endTimerRef.current);
+      endTimerRef.current = null;
+    }
+    if (endIntervalRef.current) {
+      clearInterval(endIntervalRef.current);
+      endIntervalRef.current = null;
+    }
+    setEndProgress(0);
+  };
 
   const handleSendMessage = (body: string) => {
     if (!conversationId) return;
@@ -112,6 +164,43 @@ export function ConversationView() {
             </div>
           </div>
         </button>
+
+        {/* End Conversation Button - Only show for active conversations */}
+        {!isConversationClosed && (
+          <button
+            type="button"
+            onMouseDown={handleEndMouseDown}
+            onMouseUp={handleEndMouseUp}
+            onMouseLeave={handleEndMouseUp}
+            onTouchStart={handleEndMouseDown}
+            onTouchEnd={handleEndMouseUp}
+            className="relative flex h-10 w-10 items-center justify-center rounded-full bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={endConversationMutation.isPending}
+            aria-label="Hold to end conversation"
+          >
+            {/* Icon */}
+            <Ban className="h-5 w-5 text-white relative z-10" />
+            {/* Circular progress indicator */}
+            {endProgress > 0 && (
+              <svg
+                className="absolute inset-0 w-full h-full -rotate-90"
+                viewBox="0 0 36 36"
+                aria-hidden="true"
+              >
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  strokeDasharray={`${endProgress} 100`}
+                  className="text-red-900 opacity-60"
+                />
+              </svg>
+            )}
+          </button>
+        )}
       </div>
 
       {/* Messages - IMPORTANT: id="messages-container" for Intersection Observer */}
@@ -124,26 +213,55 @@ export function ConversationView() {
           </div>
         ) : (
           <>
-            {activeConversation.messages.map((message, index) => (
-              <MessageBubble
-                key={message._id || index}
-                message={message}
-                isCurrentUser={message.senderId === user?._id}
-                otherUserAvatar={otherUser?.profilePictureUrl}
-                otherUserName={otherUser?.username}
-              />
-            ))}
+            {activeConversation.messages.map((message, index) => {
+              // Only animate new messages (those added since last render)
+              const shouldAnimate = index >= previousMessageCountRef.current;
+              return (
+                <MessageBubble
+                  key={message._id || `temp-${index}`}
+                  message={message}
+                  isCurrentUser={message.senderId === user?._id}
+                  otherUserAvatar={otherUser?.profilePictureUrl}
+                  otherUserName={otherUser?.username}
+                  shouldAnimate={shouldAnimate}
+                />
+              );
+            })}
             <div ref={messagesEndRef} />
           </>
         )}
       </div>
 
-      {/* Input */}
-      <MessageInput
-        onSend={handleSendMessage}
-        disabled={sendMessageMutation.isPending}
-        placeholder="Type a message..."
-      />
+      {/* Archived Banner or Message Input */}
+      {isConversationClosed ? (
+        <div className="border-t border-gray-200 dark:border-gray-700 bg-yellow-50 dark:bg-yellow-900/20">
+          <div className="p-4 space-y-3">
+            <div className="flex items-start gap-2 text-sm text-yellow-800 dark:text-yellow-200">
+              <span className="text-lg">⚠️</span>
+              <div>
+                <p className="font-medium">This conversation has ended</p>
+                <p className="text-xs mt-1 text-yellow-700 dark:text-yellow-300">
+                  You can view the message history, but cannot send new messages. To reconnect, send
+                  a new DM request.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => otherUser?.userId && navigate(`/profile/${otherUser.userId}`)}
+              className="w-full py-2 px-4 bg-brand-primary hover:bg-brand-dark text-white rounded-lg font-medium transition-colors"
+            >
+              View Profile & Send DM Request
+            </button>
+          </div>
+        </div>
+      ) : (
+        <MessageInput
+          onSend={handleSendMessage}
+          disabled={sendMessageMutation.isPending}
+          placeholder="Type a message..."
+        />
+      )}
     </div>
   );
 }
