@@ -135,13 +135,6 @@ export function MessageInput({
           </div>
         )}
       </div>
-
-      {/* Hint text */}
-      {isFocused && (
-        <p className="text-xs text-text-tertiary px-1 mt-2">
-          Press Enter to send • Shift+Enter for new line
-        </p>
-      )}
     </div>
   );
 }
