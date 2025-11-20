@@ -174,30 +174,37 @@ export function ConversationView() {
             onMouseLeave={handleEndMouseUp}
             onTouchStart={handleEndMouseDown}
             onTouchEnd={handleEndMouseUp}
-            className="relative flex h-10 w-10 items-center justify-center rounded-full bg-red-500 hover:bg-red-600 active:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`relative flex h-10 items-center rounded-full bg-red-500 hover:bg-red-600 active:bg-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden ${
+              endProgress > 0 ? 'w-32 pl-3 pr-2 justify-end' : 'w-10 justify-center'
+            }`}
             disabled={endConversationMutation.isPending}
             aria-label="Hold to end conversation"
           >
-            {/* Icon */}
-            <Ban className="h-5 w-5 text-white relative z-10" />
-            {/* Circular progress indicator */}
+            {/* Text and Icon */}
+            <div className="flex items-center gap-2 relative z-10">
+              {endProgress > 0 && (
+                <span className="text-sm font-medium text-white whitespace-nowrap animate-in fade-in duration-150">
+                  End Convo?
+                </span>
+              )}
+              <Ban className="h-6 w-6 text-white flex-shrink-0" />
+            </div>
+            {/* Circular progress indicator - positioned to stay with icon */}
             {endProgress > 0 && (
-              <svg
-                className="absolute inset-0 w-full h-full -rotate-90"
-                viewBox="0 0 36 36"
-                aria-hidden="true"
-              >
-                <circle
-                  cx="18"
-                  cy="18"
-                  r="16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                  strokeDasharray={`${endProgress} 100`}
-                  className="text-red-900 opacity-60"
-                />
-              </svg>
+              <div className="absolute right-0 top-0 w-10 h-10">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36" aria-hidden="true">
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    strokeDasharray={`${endProgress} 100`}
+                    className="text-red-900 opacity-60"
+                  />
+                </svg>
+              </div>
             )}
           </button>
         )}
