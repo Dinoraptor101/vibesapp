@@ -54,8 +54,8 @@ export function AccountTab() {
   const [regenerateProgress, setRegenerateProgress] = useState(0);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const regenerateTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const regenerateIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const regenerateTimerRef = useRef<number | null>(null);
+  const regenerateIntervalRef = useRef<number | null>(null);
 
   // Update local state when user changes
   useEffect(() => {
@@ -412,14 +412,14 @@ export function AccountTab() {
     const startTime = Date.now();
     const holdDuration = 2000; // 2 seconds hold required
 
-    regenerateIntervalRef.current = setInterval(() => {
+    regenerateIntervalRef.current = window.setInterval(() => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min((elapsed / holdDuration) * 100, 100);
       setRegenerateProgress(progress);
     }, 50);
 
     // Trigger regeneration after hold duration
-    regenerateTimerRef.current = setTimeout(() => {
+    regenerateTimerRef.current = window.setTimeout(() => {
       if (regenerateIntervalRef.current) {
         clearInterval(regenerateIntervalRef.current);
       }

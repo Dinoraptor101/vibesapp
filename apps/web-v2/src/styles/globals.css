@@ -137,4 +137,13 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+
+  /* Respect user's motion preferences (ZEN accessibility) */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-slide-fade-in {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
