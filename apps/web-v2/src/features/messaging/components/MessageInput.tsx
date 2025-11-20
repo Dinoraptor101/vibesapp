@@ -1,25 +1,59 @@
 /**
  * MessageInput Component
  * Text input for sending messages with Enter to send
+ * Updated to match CommentInput UX with centered send button
  */
 
 import { Send } from 'lucide-react';
-import { type KeyboardEvent, useRef, useState } from 'react';
-import { Button } from '@/components/ui-next';
+import { type ChangeEvent, type KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/cn';
 
 interface MessageInputProps {
   onSend: (message: string) => void;
   disabled?: boolean;
   placeholder?: string;
+  maxLength?: number;
 }
 
 export function MessageInput({
   onSend,
   disabled = false,
   placeholder = 'Type a message...',
+  maxLength = 1000,
 }: MessageInputProps) {
   const [message, setMessage] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea based on content
+  // biome-ignore lint/correctness/useExhaustiveDependencies: message dependency is intentional for dynamic height
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      // Reset height to recalculate
+      textarea.style.height = '44px'; // Start from minHeight
+
+      // Calculate new height capped at max
+      const scrollHeight = textarea.scrollHeight;
+      const newHeight = Math.min(scrollHeight, 200);
+
+      // Only enable scrolling if content exceeds max height
+      if (scrollHeight > 200) {
+        textarea.style.overflowY = 'auto';
+        textarea.style.height = '200px';
+      } else {
+        textarea.style.overflowY = 'hidden';
+        textarea.style.height = `${newHeight}px`;
+      }
+    }
+  }, [message]);
+
+  const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    if (newValue.length <= maxLength) {
+      setMessage(newValue);
+    }
+  };
 
   const handleSend = () => {
     const trimmedMessage = message.trim();
@@ -27,52 +61,87 @@ export function MessageInput({
 
     onSend(trimmedMessage);
     setMessage('');
-
-    // Reset textarea height
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-    }
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    // Send on Enter (without Shift)
+    // Enter without Shift = Send
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
+    // Shift+Enter = New line (default behavior)
   };
 
-  const handleInput = () => {
-    // Auto-resize textarea
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
+  const handleBlur = () => {
+    setIsFocused(false);
   };
+
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
+  // Show character count only when approaching limit (within 50 chars)
+  const showCharCount = message.length > maxLength - 50;
+  const charsRemaining = maxLength - message.length;
 
   return (
-    <div className="flex items-end gap-2 border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-      <textarea
-        ref={textareaRef}
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onInput={handleInput}
-        disabled={disabled}
-        placeholder={placeholder}
-        rows={1}
-        className="max-h-32 flex-1 resize-none rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 placeholder-gray-500 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-      />
+    <div className="border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+      <div className="relative">
+        <textarea
+          ref={textareaRef}
+          value={message}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
+          placeholder={placeholder}
+          disabled={disabled}
+          rows={1}
+          className={cn(
+            'w-full px-4 py-3 pr-12 rounded-lg resize-none',
+            'bg-surface text-text-primary placeholder:text-text-tertiary',
+            'border-2 transition-colors',
+            'focus:outline-none focus:border-brand focus:bg-surface-elevated',
+            isFocused ? 'border-brand' : 'border-border hover:border-brand/50',
+            disabled && 'opacity-50 cursor-not-allowed'
+          )}
+          style={{ minHeight: '44px' }}
+        />
 
-      <Button
-        onClick={handleSend}
-        disabled={!message.trim() || disabled}
-        variant="primary"
-        size="md"
-        className="shrink-0"
-      >
-        <Send className="h-4 w-4" />
-      </Button>
+        {/* Send Button */}
+        <button
+          type="button"
+          onClick={handleSend}
+          disabled={disabled || !message.trim()}
+          className={cn(
+            'absolute top-1/2 -translate-y-1/2 right-2 p-2 rounded-lg transition-all flex items-center justify-center -mt-0.5',
+            'hover:bg-surface-tertiary',
+            message.trim() ? 'text-brand hover:scale-110' : 'text-text-tertiary cursor-not-allowed'
+          )}
+          aria-label="Send message"
+        >
+          <Send className="w-5 h-5" />
+        </button>
+
+        {/* Character count (only show when approaching limit) */}
+        {showCharCount && (
+          <div
+            className={cn(
+              'absolute bottom-2 left-3 text-xs',
+              charsRemaining < 20 ? 'text-error' : 'text-text-tertiary'
+            )}
+          >
+            {charsRemaining}
+          </div>
+        )}
+      </div>
+
+      {/* Hint text */}
+      {isFocused && (
+        <p className="text-xs text-text-tertiary px-1 mt-2">
+          Press Enter to send • Shift+Enter for new line
+        </p>
+      )}
     </div>
   );
 }

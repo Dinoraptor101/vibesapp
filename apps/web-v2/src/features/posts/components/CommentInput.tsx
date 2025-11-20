@@ -153,7 +153,7 @@ export function CommentInput({
           onClick={handleSubmit}
           disabled={disabled || !value.trim()}
           className={cn(
-            'absolute bottom-2 right-2 p-2 rounded-lg transition-all',
+            'absolute top-1/2 -translate-y-1/2 right-2 p-2 rounded-lg transition-all flex items-center justify-center -mt-0.5',
             'hover:bg-surface-tertiary',
             value.trim() ? 'text-brand hover:scale-110' : 'text-text-tertiary cursor-not-allowed'
           )}
