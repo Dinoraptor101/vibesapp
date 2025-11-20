@@ -174,13 +174,6 @@ export function CommentInput({
           </div>
         )}
       </div>
-
-      {/* Hint text */}
-      {isFocused && !replyTo && (
-        <p className="text-xs text-text-tertiary px-1">
-          Press Enter to send • Shift+Enter for new line
-        </p>
-      )}
     </div>
   );
 }
