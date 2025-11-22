@@ -91,7 +91,6 @@ export function SendDMRequestPage() {
             placeholder="Hi! I'd like to connect with you..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            maxLength={MAX_MESSAGE_LENGTH}
             rows={6}
             error={isOverLimit}
             disabled={hasSubmitted}

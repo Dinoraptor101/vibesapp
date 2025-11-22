@@ -18,7 +18,7 @@ export function ConversationList() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-12" data-testid="conversations-loading">
         <Spinner size="lg" />
       </div>
     );
@@ -26,7 +26,10 @@ export function ConversationList() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
+      <div
+        className="flex flex-col items-center justify-center gap-4 py-12 text-center"
+        data-testid="conversations-error"
+      >
         <AlertCircle className="h-12 w-12 text-red-500" />
         <p className="text-sm text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400">
           Failed to load conversations
@@ -44,7 +47,10 @@ export function ConversationList() {
 
   if (!conversations || conversations.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
+      <div
+        className="flex flex-col items-center justify-center gap-2 py-12 text-center"
+        data-testid="conversations-empty-state"
+      >
         <MessageCircle className="h-16 w-16 text-gray-300 dim:text-gray-550 dark:text-gray-600" />
         <h3 className="text-lg font-semibold text-gray-900 dim:text-gray-100 dark:text-white">
           No conversations yet
@@ -57,7 +63,7 @@ export function ConversationList() {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" data-testid="conversations-list">
       {conversations.map((conversation) => {
         const otherUser = conversation.otherUser;
         const lastMessage = conversation.lastMessage;
@@ -67,6 +73,7 @@ export function ConversationList() {
         return (
           <div
             key={conversation._id}
+            data-testid={`conversation-${conversation._id}`}
             className={`flex w-full items-center gap-3 rounded-lg border bg-white p-3 transition-all ${
               isClosed
                 ? 'opacity-60 border-gray-200 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600 dark:hover:bg-gray-750'
@@ -99,7 +106,10 @@ export function ConversationList() {
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-gray-900 dim:text-gray-100 dark:text-white">
+                  <span
+                    className="font-semibold text-gray-900 dim:text-gray-100 dark:text-white"
+                    data-testid="conversation-username"
+                  >
                     {otherUser?.username || 'Unknown'}
                   </span>
                   {otherUser?.mbtiPersonality && (
@@ -116,14 +126,20 @@ export function ConversationList() {
                   )}
                 </div>
                 {lastMessage && (
-                  <span className="text-xs text-gray-500 dim:text-gray-450 dark:text-gray-400">
+                  <span
+                    className="text-xs text-gray-500 dim:text-gray-450 dark:text-gray-400"
+                    data-testid="conversation-timestamp"
+                  >
                     {formatRelativeTime(lastMessage.timestamp)}
                   </span>
                 )}
               </div>
 
               {lastMessage && (
-                <p className="truncate text-sm text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400">
+                <p
+                  className="truncate text-sm text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400"
+                  data-testid="conversation-last-message"
+                >
                   {lastMessage.senderId === user?._id && 'You: '}
                   {lastMessage.body}
                 </p>

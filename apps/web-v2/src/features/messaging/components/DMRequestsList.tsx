@@ -14,7 +14,7 @@ export function DMRequestsList() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-12" data-testid="dm-requests-loading">
         <Spinner size="lg" />
       </div>
     );
@@ -23,7 +23,10 @@ export function DMRequestsList() {
   // Error state
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
+      <div
+        className="flex flex-col items-center justify-center gap-4 py-12 text-center"
+        data-testid="dm-requests-error"
+      >
         <AlertCircle className="h-12 w-12 text-red-500" />
         <div>
           <h3 className="text-lg font-semibold text-gray-900 dim:text-gray-100 dark:text-white">
@@ -43,7 +46,10 @@ export function DMRequestsList() {
   // Empty state
   if (!data?.requests || data.requests.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
+      <div
+        className="flex flex-col items-center justify-center gap-2 py-12 text-center"
+        data-testid="dm-requests-empty-state"
+      >
         <span className="text-6xl">📬</span>
         <h3 className="text-lg font-semibold text-gray-900 dim:text-gray-100 dark:text-white">
           No pending DM requests
@@ -57,7 +63,7 @@ export function DMRequestsList() {
 
   // Requests list
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="dm-requests-list">
       {data.requests.map((request) => (
         <DMRequestCard key={request._id} request={request} />
       ))}
