@@ -1,16 +1,22 @@
 /**
  * CreatePostForm Component
  *
- * Form for creating a new post with image upload and optional caption.
- * Silently gets user location in background (required by backend).
+ * Form for creating a new post with image upload and optional caption/article.
+ * Features:
+ * - Caption mode: Short text (≤100 chars), Enter to submit
+ * - Article mode: Long text (>100 chars), rich formatting toolbar
+ * - Auto-switch between modes based on text length
+ * - Tab indentation (desktop) and 3-space auto-indent (mobile)
  */
 
 import { AlertCircle, Loader2 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { Button, Textarea } from '@/components/ui-next';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Button } from '@/components/ui-next';
 import { uploadImage } from '../api/s3Service';
 import type { ImageFile, UploadProgress } from '../utils/imageUtils';
+import { CaptionArticleToggle, type PostMode } from './CaptionArticleToggle';
 import { ImageUploader } from './ImageUploader';
+import { RichTextToolbar } from './RichTextToolbar';
 
 interface Location {
   lat: number;
@@ -22,22 +28,19 @@ interface CreatePostFormProps {
   onSubmit: (data: { image: string; text?: string; location: Location }) => void;
   onCancel: () => void;
   isSubmitting?: boolean;
-  onArticleModeChange?: (isArticleMode: boolean) => void; // Notify parent when switching to article mode
 }
 
-const MAX_CAPTION_LENGTH = 5000;
+const MAX_TEXT_LENGTH = 5000;
+const CAPTION_THRESHOLD = 100; // Switch to article mode after 100 characters
 
-export function CreatePostForm({
-  onSubmit,
-  onCancel,
-  isSubmitting = false,
-  onArticleModeChange,
-}: CreatePostFormProps) {
+export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: CreatePostFormProps) {
   const [selectedImage, setSelectedImage] = useState<ImageFile | null>(null);
-  const [caption, setCaption] = useState('');
+  const [text, setText] = useState('');
+  const [mode, setMode] = useState<PostMode>('caption');
   const [location, setLocation] = useState<Location | null>(null);
   const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Silently get user location on mount (required by backend, but hidden from UI)
   useEffect(() => {
@@ -66,11 +69,12 @@ export function CreatePostForm({
     );
   }, []);
 
-  // Notify parent when switching between caption/article mode
+  // Auto-switch to article mode when text exceeds threshold
   useEffect(() => {
-    const isArticleMode = caption.length > 100;
-    onArticleModeChange?.(isArticleMode);
-  }, [caption.length, onArticleModeChange]);
+    if (text.length > CAPTION_THRESHOLD && mode === 'caption') {
+      setMode('article');
+    }
+  }, [text.length, mode]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -95,7 +99,7 @@ export function CreatePostForm({
         // Submit post
         onSubmit({
           image: imageKey,
-          text: caption.trim() || undefined,
+          text: text.trim() || undefined,
           location,
         });
       } catch (err) {
@@ -103,8 +107,69 @@ export function CreatePostForm({
         setUploadProgress(null);
       }
     },
-    [selectedImage, caption, location, onSubmit]
+    [selectedImage, text, location, onSubmit]
   );
+
+  /**
+   * Handle textarea key down for special behaviors
+   */
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Caption mode: Enter submits
+    if (mode === 'caption' && e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e as unknown as React.FormEvent);
+      return;
+    }
+
+    // Article mode: Tab inserts 4 spaces
+    if (mode === 'article' && e.key === 'Tab') {
+      e.preventDefault();
+      const textarea = e.currentTarget;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const value = textarea.value;
+
+      // Insert 4 spaces at cursor
+      const newValue = value.substring(0, start) + '    ' + value.substring(end);
+      setText(newValue);
+
+      // Move cursor after inserted spaces
+      setTimeout(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + 4;
+      }, 0);
+    }
+  };
+
+  /**
+   * Handle textarea change with 3-space auto-indent (mobile)
+   */
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    let newValue = e.target.value;
+
+    // Mobile 3-space auto-indent: detect 3 consecutive spaces and replace with 4
+    if (mode === 'article') {
+      const cursorPos = e.target.selectionStart;
+      const beforeCursor = newValue.substring(0, cursorPos);
+      const afterCursor = newValue.substring(cursorPos);
+
+      // Check if last 3 characters are spaces
+      if (beforeCursor.endsWith('   ')) {
+        // Replace last 3 spaces with 4 spaces
+        newValue = beforeCursor.slice(0, -3) + '    ' + afterCursor;
+        setText(newValue);
+
+        // Restore cursor position
+        setTimeout(() => {
+          if (textareaRef.current) {
+            textareaRef.current.selectionStart = textareaRef.current.selectionEnd = cursorPos + 1;
+          }
+        }, 0);
+        return;
+      }
+    }
+
+    setText(newValue);
+  };
 
   const canSubmit = selectedImage && location && !isSubmitting;
 
@@ -171,33 +236,59 @@ export function CreatePostForm({
         </div>
       </div>
 
-      {/* Caption / Article */}
-      <div>
-        <label
-          htmlFor="caption"
-          className="block text-sm font-medium text-text-primary dim:text-gray-100 mb-2"
-        >
-          <span className="transition-all duration-300">
-            {caption.length > 100 ? 'Article' : 'Caption'}
-          </span>{' '}
-          <span className="text-text-tertiary dim:text-gray-400">(Optional)</span>
-        </label>
-        <Textarea
-          id="caption"
-          value={caption}
-          onChange={(e) => setCaption(e.target.value)}
-          placeholder="Share your thoughts..."
-          maxLength={MAX_CAPTION_LENGTH}
-          rows={caption.length <= 100 ? 3 : 8}
+      {/* Caption/Article Toggle */}
+      <div className="space-y-4">
+        <CaptionArticleToggle
+          mode={mode}
+          onModeChange={setMode}
+          textLength={text.length}
           disabled={isSubmitting || uploadProgress !== null}
-          className="resize-none max-h-[50vh] overflow-y-auto transition-all duration-300"
         />
-        {/* Only show character count when approaching limit (80% = 4000 chars) */}
-        {caption.length >= MAX_CAPTION_LENGTH * 0.8 && (
-          <div className="mt-1 text-sm text-text-tertiary dim:text-gray-400 text-right animate-in fade-in duration-300">
-            {caption.length}/{MAX_CAPTION_LENGTH}
-          </div>
-        )}
+
+        {/* Article Mode: Toolbar (always visible) */}
+        {mode === 'article' && <RichTextToolbar textareaRef={textareaRef} />}
+
+        {/* Text Input */}
+        <div>
+          <label htmlFor="post-text" className="sr-only">
+            {mode === 'caption' ? 'Caption' : 'Article'} (Optional)
+          </label>
+          <textarea
+            ref={textareaRef}
+            id="post-text"
+            value={text}
+            onChange={handleTextChange}
+            onKeyDown={handleKeyDown}
+            placeholder={mode === 'caption' ? 'Share your thoughts...' : 'Write your article...'}
+            maxLength={MAX_TEXT_LENGTH}
+            rows={mode === 'caption' ? 3 : 8}
+            disabled={isSubmitting || uploadProgress !== null}
+            className="w-full px-4 py-2 rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-0 resize-none bg-surface text-text-primary placeholder:text-text-secondary dim:bg-gray-700 dim:text-gray-100 dim:placeholder:text-gray-400 border border-border focus:ring-brand focus:border-brand dim:border-gray-600 dim:focus:ring-brand/50 dim:focus:border-brand max-h-[50vh] overflow-y-auto disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label={`${mode === 'caption' ? 'Caption' : 'Article'} text input`}
+            aria-describedby={mode === 'caption' ? 'caption-hint' : 'article-hint'}
+          />
+
+          {/* Mode-specific hints */}
+          {mode === 'caption' && (
+            <p id="caption-hint" className="mt-1 text-xs text-text-tertiary dim:text-gray-400">
+              Press Enter to submit
+            </p>
+          )}
+          {mode === 'article' && (
+            <p id="article-hint" className="mt-1 text-xs text-text-tertiary dim:text-gray-400">
+              Tab for indentation, Enter for new line
+            </p>
+          )}
+
+          {/* Character counter (80% threshold) */}
+          {text.length >= MAX_TEXT_LENGTH * 0.8 && (
+            <div className="mt-1 text-sm text-text-tertiary dim:text-gray-400 text-right animate-in fade-in duration-300">
+              <span className={text.length > MAX_TEXT_LENGTH ? 'text-error font-medium' : ''}>
+                {text.length}/{MAX_TEXT_LENGTH}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Error message */}
