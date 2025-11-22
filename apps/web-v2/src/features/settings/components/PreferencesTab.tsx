@@ -50,7 +50,7 @@ const NOTIFICATION_TYPES = [
 
 export function PreferencesTab() {
   const { queueUpdate } = useAccountUpdates();
-  
+
   // Initialize proximity from localStorage, default to 100km
   const [proximityRange, setProximityRange] = useState(() => {
     const stored = localStorage.getItem('proximityRange');
