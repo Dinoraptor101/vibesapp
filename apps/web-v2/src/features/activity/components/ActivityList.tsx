@@ -5,6 +5,7 @@
  * No date grouping - just unread/read sections
  */
 
+import { Bell } from 'lucide-react';
 import { Spinner } from '@/components/ui-next';
 import type { Activity } from '../types';
 import { ActivityCard } from './ActivityCard';
@@ -51,6 +52,7 @@ export function ActivityList({
   if (!activities || activities.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4">
+        <Bell className="w-12 h-12 text-gray-400 dim:text-gray-500 dark:text-gray-600 mb-3" />
         <p className="text-gray-600 dim:text-gray-500 dark:text-gray-400 text-center">
           {emptyMessage}
         </p>
