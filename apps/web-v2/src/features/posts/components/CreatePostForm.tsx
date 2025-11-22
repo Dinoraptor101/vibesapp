@@ -16,7 +16,8 @@ import { uploadImage } from '../api/s3Service';
 import type { ImageFile, UploadProgress } from '../utils/imageUtils';
 import { CaptionArticleToggle, type PostMode } from './CaptionArticleToggle';
 import { ImageUploader } from './ImageUploader';
-import { RichTextToolbar } from './RichTextToolbar';
+import { RichTextEditor, type RichTextEditorRef } from './RichTextEditor';
+import { RichTextToolbarV2 } from './RichTextToolbarV2';
 
 interface Location {
   lat: number;
@@ -41,6 +42,7 @@ export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: Cre
   const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const richEditorRef = useRef<RichTextEditorRef>(null);
 
   // Silently get user location on mount (required by backend, but hidden from UI)
   useEffect(() => {
@@ -111,9 +113,9 @@ export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: Cre
   );
 
   /**
-   * Handle textarea key down for special behaviors
+   * Handle key down for special behaviors (works for both textarea and contentEditable)
    */
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement | Element>) => {
     // Caption mode: Enter submits
     if (mode === 'caption' && e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -121,10 +123,10 @@ export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: Cre
       return;
     }
 
-    // Article mode: Tab inserts 4 spaces
-    if (mode === 'article' && e.key === 'Tab') {
+    // Article mode: Tab inserts 4 spaces (only for textarea)
+    if (mode === 'article' && e.key === 'Tab' && 'selectionStart' in e.currentTarget) {
       e.preventDefault();
-      const textarea = e.currentTarget;
+      const textarea = e.currentTarget as HTMLTextAreaElement;
       const start = textarea.selectionStart;
       const end = textarea.selectionEnd;
       const value = textarea.value;
@@ -245,50 +247,64 @@ export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: Cre
           disabled={isSubmitting || uploadProgress !== null}
         />
 
-        {/* Article Mode: Toolbar (always visible) */}
-        {mode === 'article' && <RichTextToolbar textareaRef={textareaRef} />}
+        {/* Article Mode: Toolbar + ContentEditable */}
+        {mode === 'article' && (
+          <>
+            <RichTextToolbarV2 editorRef={richEditorRef} />
+            <div>
+              <label htmlFor="post-text" className="sr-only">
+                Article (Optional)
+              </label>
+              <RichTextEditor
+                ref={richEditorRef}
+                value={text}
+                onChange={setText}
+                placeholder="Write your article..."
+                maxLength={MAX_TEXT_LENGTH}
+                disabled={isSubmitting || uploadProgress !== null}
+                onKeyDown={handleKeyDown}
+              />
+              <p id="article-hint" className="mt-1 text-xs text-text-tertiary dim:text-gray-400">
+                Tab for indentation, Enter for new line
+              </p>
+            </div>
+          </>
+        )}
 
-        {/* Text Input */}
-        <div>
-          <label htmlFor="post-text" className="sr-only">
-            {mode === 'caption' ? 'Caption' : 'Article'} (Optional)
-          </label>
-          <textarea
-            ref={textareaRef}
-            id="post-text"
-            value={text}
-            onChange={handleTextChange}
-            onKeyDown={handleKeyDown}
-            placeholder={mode === 'caption' ? 'Share your thoughts...' : 'Write your article...'}
-            maxLength={MAX_TEXT_LENGTH}
-            rows={mode === 'caption' ? 3 : 8}
-            disabled={isSubmitting || uploadProgress !== null}
-            className="w-full px-4 py-2 rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-0 resize-none bg-surface text-text-primary placeholder:text-text-secondary dim:bg-gray-700 dim:text-gray-100 dim:placeholder:text-gray-400 border border-border focus:ring-brand focus:border-brand dim:border-gray-600 dim:focus:ring-brand/50 dim:focus:border-brand max-h-[50vh] overflow-y-auto disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label={`${mode === 'caption' ? 'Caption' : 'Article'} text input`}
-            aria-describedby={mode === 'caption' ? 'caption-hint' : 'article-hint'}
-          />
-
-          {/* Mode-specific hints */}
-          {mode === 'caption' && (
+        {/* Caption Mode: Simple Textarea */}
+        {mode === 'caption' && (
+          <div>
+            <label htmlFor="post-text" className="sr-only">
+              Caption (Optional)
+            </label>
+            <textarea
+              ref={textareaRef}
+              id="post-text"
+              value={text}
+              onChange={handleTextChange}
+              onKeyDown={handleKeyDown}
+              placeholder="Share your thoughts..."
+              maxLength={MAX_TEXT_LENGTH}
+              rows={3}
+              disabled={isSubmitting || uploadProgress !== null}
+              className="w-full px-4 py-2 rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-0 resize-none bg-surface text-text-primary placeholder:text-text-secondary dim:bg-gray-700 dim:text-gray-100 dim:placeholder:text-gray-400 border border-border focus:ring-brand focus:border-brand dim:border-gray-600 dim:focus:ring-brand/50 dim:focus:border-brand max-h-[50vh] overflow-y-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Caption text input"
+              aria-describedby="caption-hint"
+            />
             <p id="caption-hint" className="mt-1 text-xs text-text-tertiary dim:text-gray-400">
               Press Enter to submit
             </p>
-          )}
-          {mode === 'article' && (
-            <p id="article-hint" className="mt-1 text-xs text-text-tertiary dim:text-gray-400">
-              Tab for indentation, Enter for new line
-            </p>
-          )}
+          </div>
+        )}
 
-          {/* Character counter (80% threshold) */}
-          {text.length >= MAX_TEXT_LENGTH * 0.8 && (
-            <div className="mt-1 text-sm text-text-tertiary dim:text-gray-400 text-right animate-in fade-in duration-300">
-              <span className={text.length > MAX_TEXT_LENGTH ? 'text-error font-medium' : ''}>
-                {text.length}/{MAX_TEXT_LENGTH}
-              </span>
-            </div>
-          )}
-        </div>
+        {/* Character counter (80% threshold) */}
+        {text.length >= MAX_TEXT_LENGTH * 0.8 && (
+          <div className="mt-1 text-sm text-text-tertiary dim:text-gray-400 text-right animate-in fade-in duration-300">
+            <span className={text.length > MAX_TEXT_LENGTH ? 'text-error font-medium' : ''}>
+              {text.length}/{MAX_TEXT_LENGTH}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Error message */}
