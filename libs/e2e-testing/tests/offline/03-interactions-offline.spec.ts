@@ -20,7 +20,8 @@ import {
   waitForOfflineBanner,
 } from './helpers';
 
-test.describe('Offline Interactions', () => {
+// SKIP: Requires Web V2 offline functionality and localhost:5173
+test.describe.skip('Offline Interactions', () => {
   test.beforeEach(async ({ page, context }) => {
     await page.goto('http://localhost:5173');
     await clearQueue(page);

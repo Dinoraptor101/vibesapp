@@ -36,6 +36,7 @@ export function SettingsPage() {
           <div className="flex gap-0 border-b border-gray-200 dim:border-gray-600 dark:border-gray-700">
             <button
               type="button"
+              data-testid="account-section"
               onClick={() => setActiveTab('account')}
               className={`px-4 py-3 font-medium text-sm relative ${
                 activeTab === 'account'
@@ -50,6 +51,7 @@ export function SettingsPage() {
             </button>
             <button
               type="button"
+              data-testid="preferences-section"
               onClick={() => setActiveTab('preferences')}
               className={`px-4 py-3 font-medium text-sm relative ${
                 activeTab === 'preferences'
@@ -64,6 +66,7 @@ export function SettingsPage() {
             </button>
             <button
               type="button"
+              data-testid="privacy-section"
               onClick={() => setActiveTab('support')}
               className={`px-4 py-3 font-medium text-sm relative ${
                 activeTab === 'support'
@@ -81,7 +84,7 @@ export function SettingsPage() {
       </div>
 
       {/* Tab Content */}
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto" data-testid={`${activeTab}-tab-content`}>
         {activeTab === 'account' && <AccountTab />}
         {activeTab === 'preferences' && <PreferencesTab />}
         {activeTab === 'support' && <SupportTab />}

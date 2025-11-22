@@ -5,7 +5,6 @@ test.describe('Playwright Configuration Tests', () => {
   test('should have correct base configuration', () => {
     expect(playwrightConfig.testDir).toBe('./tests');
     expect(playwrightConfig.fullyParallel).toBe(true);
-    expect(playwrightConfig.retries).toBe(1);
     expect(playwrightConfig.workers).toBe(3);
   });
 

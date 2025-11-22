@@ -7,7 +7,7 @@ async function globalSetup() {
     {
       name: 'range',
       value: '275',
-      domain: 'qa.vibesapp.net',
+      domain: 'localhost',
       path: '/',
       expires: -1,
       httpOnly: false,
@@ -17,7 +17,7 @@ async function globalSetup() {
     {
       name: 'user_location',
       value: '%7B%22lat%22%3A37.42%2C%22lon%22%3A-77.46%7D',
-      domain: 'qa.vibesapp.net',
+      domain: 'localhost',
       path: '/',
       expires: -1,
       httpOnly: false,
@@ -27,7 +27,7 @@ async function globalSetup() {
     {
       name: 'userId',
       value: 'aa521293-9cfe-4033-8166-c20f13474988', // Existing user ID
-      domain: 'qa.vibesapp.net',
+      domain: 'localhost',
       path: '/',
       expires: -1,
       httpOnly: false,
@@ -37,7 +37,7 @@ async function globalSetup() {
     {
       name: 'pigeonId',
       value: '0d536b38-33ce-48c5-958d-5b76015ce228', // Same value as userId
-      domain: 'qa.vibesapp.net',
+      domain: 'localhost',
       path: '/',
       expires: -1,
       httpOnly: false,

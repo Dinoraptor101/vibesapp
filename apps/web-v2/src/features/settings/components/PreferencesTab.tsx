@@ -50,13 +50,21 @@ const NOTIFICATION_TYPES = [
 
 export function PreferencesTab() {
   const { queueUpdate } = useAccountUpdates();
-  const [proximityRange, setProximityRange] = useState(100); // Default 100km
+  
+  // Initialize proximity from localStorage, default to 100km
+  const [proximityRange, setProximityRange] = useState(() => {
+    const stored = localStorage.getItem('proximityRange');
+    return stored ? Number(stored) : 100;
+  });
 
   const { data: preferences, isLoading } = useNotificationPreferences();
   const updatePreferences = useUpdatePreferences();
 
   const handleProximityChange = (newRange: number) => {
     setProximityRange(newRange);
+    // Store in localStorage for persistence
+    localStorage.setItem('proximityRange', String(newRange));
+    // Queue update to backend (for future implementation)
     queueUpdate({ proximityRange: newRange });
   };
 
@@ -78,6 +86,7 @@ export function PreferencesTab() {
         </label>
         <select
           id="proximity"
+          data-testid="proximity-input"
           value={proximityRange}
           onChange={(e) => handleProximityChange(Number(e.target.value))}
           className="w-full px-3 py-2 border border-gray-300 dim:border-gray-500 dark:border-gray-600 rounded-lg bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-gray-100 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"

@@ -39,6 +39,7 @@ export function UserMenu() {
       <DropdownMenu.Trigger asChild>
         <button
           type="button"
+          data-testid="user-menu-button"
           className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-purple"
           aria-label="User menu"
         >
@@ -78,6 +79,7 @@ export function UserMenu() {
           <DropdownMenu.Item asChild>
             <Link
               to="/settings"
+              data-testid="settings-menu-item"
               className="flex items-center gap-3 px-3 py-2 text-sm text-text-primary rounded-md hover:bg-surface-hover cursor-pointer outline-none focus:bg-surface-hover"
             >
               <Settings className="w-4 h-4" />
@@ -87,6 +89,7 @@ export function UserMenu() {
 
           {/* Theme Toggle */}
           <DropdownMenu.Item
+            data-testid="theme-toggle-button"
             className="flex items-center gap-3 px-3 py-2 text-sm text-text-primary rounded-md hover:bg-surface-hover cursor-pointer outline-none focus:bg-surface-hover"
             onSelect={(e) => {
               e.preventDefault(); // Prevent menu from closing
