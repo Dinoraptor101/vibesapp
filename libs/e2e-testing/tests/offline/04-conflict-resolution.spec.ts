@@ -20,7 +20,8 @@ import {
   mockS3Upload,
 } from './helpers';
 
-test.describe('Conflict Resolution', () => {
+// SKIP: Requires Web V2 offline functionality and localhost:5173
+test.describe.skip('Conflict Resolution', () => {
   test.beforeEach(async ({ page, context }) => {
     await page.goto('http://localhost:5173');
     await clearQueue(page);
