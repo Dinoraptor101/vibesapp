@@ -21,6 +21,7 @@ export function MessagesPage() {
         <div className="sticky top-0 z-10 bg-background mb-6 flex border-b border-gray-200 dim:border-gray-600 dark:border-gray-700">
           <button
             type="button"
+            data-testid="conversations-tab"
             onClick={() => setActiveTab('conversations')}
             className={`flex-1 flex items-center justify-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
               activeTab === 'conversations'
@@ -32,6 +33,7 @@ export function MessagesPage() {
           </button>
           <button
             type="button"
+            data-testid="dm-requests-tab"
             onClick={() => setActiveTab('requests')}
             className={`flex-1 flex items-center justify-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
               activeTab === 'requests'
@@ -49,7 +51,7 @@ export function MessagesPage() {
         </div>
 
         {/* Tab Content */}
-        <div className="px-4 pb-8">
+        <div className="px-4 pb-8" data-testid="messages-content">
           {activeTab === 'conversations' ? <ConversationList /> : <DMRequestsList />}
         </div>
       </div>

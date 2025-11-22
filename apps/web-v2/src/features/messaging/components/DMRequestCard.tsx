@@ -39,7 +39,10 @@ export function DMRequestCard({ request }: DMRequestCardProps) {
   const isPending = acceptMutation.isPending || declineMutation.isPending;
 
   return (
-    <div className="rounded-lg border border-border bg-surface-elevated p-4">
+    <div
+      className="rounded-lg border border-border bg-surface-elevated p-4"
+      data-testid={`dm-request-${request._id}`}
+    >
       {/* Sender Info */}
       <div className="mb-3 flex items-start gap-3">
         <Avatar
@@ -47,11 +50,14 @@ export function DMRequestCard({ request }: DMRequestCardProps) {
           alt={sender.username}
           name={sender.username}
           size="md"
+          data-testid="requester-avatar"
         />
 
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-text-primary">{sender.username}</span>
+            <span className="font-semibold text-text-primary" data-testid="requester-username">
+              {sender.username}
+            </span>
             {sender.mbtiPersonality && (
               <Badge variant="brand" size="sm">
                 {sender.mbtiPersonality}
@@ -67,7 +73,7 @@ export function DMRequestCard({ request }: DMRequestCardProps) {
 
       {/* Request Message */}
       {request.message && (
-        <div className="mb-4 rounded bg-surface-hover p-3">
+        <div className="mb-4 rounded bg-surface-hover p-3" data-testid="request-message">
           <p className="whitespace-pre-wrap text-sm text-text-secondary">
             {showFullMessage ? request.message : messagePreview}
           </p>
@@ -92,6 +98,7 @@ export function DMRequestCard({ request }: DMRequestCardProps) {
           loading={acceptMutation.isPending}
           disabled={isPending}
           className="flex-1 bg-green-600 hover:bg-green-700"
+          data-testid="accept-request-button"
         >
           Accept
         </Button>
@@ -102,6 +109,7 @@ export function DMRequestCard({ request }: DMRequestCardProps) {
           loading={declineMutation.isPending}
           disabled={isPending}
           className="flex-1"
+          data-testid="decline-request-button"
         >
           Decline
         </Button>

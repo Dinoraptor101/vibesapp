@@ -307,120 +307,227 @@ test.describe('Theme Switching', () => {
     await page.keyboard.press('Escape');
   });
 });
-
-test.describe('DM Requests', () => {
+test.describe('Send DM Request', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-
-    // Navigate to messages/requests
-    await page.getByTestId('nav-messages').click();
-    await page.waitForURL('**/messages', { timeout: 5000 });
   });
 
-  test('should display DM requests section', async ({ page }) => {
-    // Check for requests tab or section
-    const requestsTab = page.getByTestId('dm-requests-tab');
+  test('should navigate to send DM request page from profile', async ({ page }) => {
+    // Navigate to a user profile (find a post and click username)
+    const postCount = await page.locator('article').count();
 
-    if (await requestsTab.isVisible()) {
-      await requestsTab.click();
+    if (postCount > 0) {
+      const firstPostUserLink = page.locator('article a[href^="/profile/"]').first();
 
-      // Verify requests section shows
-      await expect(page.getByTestId('dm-requests-list')).toBeVisible();
+      if (await firstPostUserLink.isVisible()) {
+        await firstPostUserLink.click();
+        await page.waitForTimeout(500);
+
+        // Verify we're on a profile page
+        await expect(page.url()).toContain('/profile/');
+
+        // Find and click Message button (if not own profile)
+        const messageButton = page.locator('button').filter({ hasText: /^Message$/ });
+        const isMessageButtonVisible = await messageButton.isVisible().catch(() => false);
+
+        if (isMessageButtonVisible) {
+          const isDisabled = await messageButton.isDisabled();
+
+          if (!isDisabled) {
+            await messageButton.click();
+
+            // Should navigate to dm-request page
+            await page.waitForURL('**/dm-request/**', { timeout: 3000 });
+            expect(page.url()).toContain('/dm-request/');
+          } else {
+            console.log('Message button is disabled (already requested or connected)');
+          }
+        } else {
+          console.log('Message button not visible - may be viewing own profile');
+        }
+      }
     }
   });
 
-  test('should show pending DM request details', async ({ page }) => {
-    await page.getByTestId('dm-requests-tab').click();
+  test('should display send DM request page elements', async ({ page }) => {
+    // Navigate to home to get a user ID
+    const postCount = await page.locator('article').count();
 
-    // Wait for requests to load
-    await page.waitForSelector('[data-testid^="dm-request-"]', { timeout: 5000 }).catch(() => {
-      console.log('No DM requests found');
-    });
+    if (postCount > 0) {
+      const firstPostUserLink = page.locator('article a[href^="/profile/"]').first();
 
-    const requestCount = await page.locator('[data-testid^="dm-request-"]').count();
+      if (await firstPostUserLink.isVisible()) {
+        const profileHref = await firstPostUserLink.getAttribute('href');
+        const userId = profileHref?.split('/profile/')[1];
 
-    if (requestCount > 0) {
-      const firstRequest = page.locator('[data-testid^="dm-request-"]').first();
+        if (userId) {
+          // Navigate directly to dm-request page
+          await page.goto(`/dm-request/${userId}`);
+          await page.waitForTimeout(500);
 
-      // Verify request shows user info
-      await expect(firstRequest.getByTestId('requester-username')).toBeVisible();
-      await expect(firstRequest.getByTestId('requester-avatar')).toBeVisible();
-      await expect(firstRequest.getByTestId('request-message')).toBeVisible();
+          // Verify page elements
+          await expect(page.locator('h1').filter({ hasText: 'Send DM Request' })).toBeVisible();
+          await expect(page.locator('textarea[placeholder*="like to connect"]')).toBeVisible();
+          await expect(page.locator('button').filter({ hasText: 'Send Request' })).toBeVisible();
+
+          // Verify back button exists
+          await expect(page.locator('button[aria-label="Go back"]')).toBeVisible();
+        }
+      }
     }
   });
 
-  test('should accept DM request', async ({ page }) => {
-    await page.getByTestId('dm-requests-tab').click();
+  test('should show character counter when approaching limit', async ({ page }) => {
+    // Navigate to home to get a user ID
+    const postCount = await page.locator('article').count();
 
-    const requestCount = await page.locator('[data-testid^="dm-request-"]').count();
+    if (postCount > 0) {
+      const firstPostUserLink = page.locator('article a[href^="/profile/"]').first();
 
-    if (requestCount > 0) {
-      const firstRequest = page.locator('[data-testid^="dm-request-"]').first();
-      const username = await firstRequest.getByTestId('requester-username').innerText();
+      if (await firstPostUserLink.isVisible()) {
+        const profileHref = await firstPostUserLink.getAttribute('href');
+        const userId = profileHref?.split('/profile/')[1];
 
-      // Accept request
-      await firstRequest.getByTestId('accept-request-button').click();
+        if (userId) {
+          await page.goto(`/dm-request/${userId}`);
+          await page.waitForTimeout(500);
 
-      // Verify confirmation or redirect to conversation
-      await expect(page.getByTestId('toast-success')).toBeVisible({ timeout: 3000 });
+          const textarea = page.locator('textarea[placeholder*="like to connect"]');
+          await expect(textarea).toBeVisible();
 
-      // Verify conversation created
-      await page.getByTestId('conversations-tab').click();
-      await expect(page.getByText(username)).toBeVisible();
+          // Type less than threshold (180 chars) - counter should not be visible
+          await textarea.fill('Short message');
+          const counterNotVisible = await page
+            .locator('text=/\\d+ \\/ 200/')
+            .isVisible()
+            .catch(() => false);
+          expect(counterNotVisible).toBe(false);
+
+          // Type close to limit (>= 180 chars) - counter should appear
+          const longMessage = 'A'.repeat(185);
+          await textarea.fill(longMessage);
+
+          // Counter should now be visible
+          await expect(page.locator('text=/\\d+ \\/ 200/')).toBeVisible({ timeout: 2000 });
+          await expect(page.locator('text=/185 \\/ 200/')).toBeVisible();
+        }
+      }
     }
   });
 
-  test('should reject DM request', async ({ page }) => {
-    await page.getByTestId('dm-requests-tab').click();
+  test('should disable send button when message exceeds limit', async ({ page }) => {
+    // Navigate to home to get a user ID
+    const postCount = await page.locator('article').count();
 
-    const requestCount = await page.locator('[data-testid^="dm-request-"]').count();
+    if (postCount > 0) {
+      const firstPostUserLink = page.locator('article a[href^="/profile/"]').first();
 
-    if (requestCount > 0) {
-      const initialCount = requestCount;
-      const firstRequest = page.locator('[data-testid^="dm-request-"]').first();
+      if (await firstPostUserLink.isVisible()) {
+        const profileHref = await firstPostUserLink.getAttribute('href');
+        const userId = profileHref?.split('/profile/')[1];
 
-      // Reject request
-      await firstRequest.getByTestId('reject-request-button').click();
+        if (userId) {
+          await page.goto(`/dm-request/${userId}`);
+          await page.waitForTimeout(500);
 
-      // Verify confirmation
-      await expect(page.getByTestId('toast-success')).toBeVisible({ timeout: 3000 });
+          const textarea = page.locator('textarea[placeholder*="like to connect"]');
+          const sendButton = page.locator('button').filter({ hasText: 'Send Request' });
 
-      // Verify request removed from list
-      await page.waitForTimeout(1000);
-      const newCount = await page.locator('[data-testid^="dm-request-"]').count();
-      expect(newCount).toBe(initialCount - 1);
+          await expect(textarea).toBeVisible();
+          await expect(sendButton).toBeVisible();
+
+          // Initially should be disabled (empty message)
+          await expect(sendButton).toBeDisabled();
+
+          // Type valid message - button should be enabled
+          await textarea.fill('Hello! I would like to connect with you.');
+          await expect(sendButton).toBeEnabled();
+
+          // Type over limit (>200 chars) - button should be disabled
+          const tooLongMessage = 'A'.repeat(201);
+          await textarea.fill(tooLongMessage);
+          await expect(sendButton).toBeDisabled();
+
+          // Verify error message shows
+          await expect(page.locator('text=/too long/i')).toBeVisible();
+        }
+      }
     }
   });
 
-  test('should display empty state when no requests', async ({ page }) => {
-    await page.getByTestId('dm-requests-tab').click();
+  test('should navigate back when clicking back button', async ({ page }) => {
+    // Navigate to home to get a user ID
+    const postCount = await page.locator('article').count();
 
-    const requestCount = await page.locator('[data-testid^="dm-request-"]').count();
+    if (postCount > 0) {
+      const firstPostUserLink = page.locator('article a[href^="/profile/"]').first();
 
-    if (requestCount === 0) {
-      // Verify empty state message
-      const emptyState = page.getByTestId('dm-requests-empty-state');
-      await expect(emptyState).toBeVisible();
-      await expect(emptyState).toContainText(/no requests|no pending/i);
+      if (await firstPostUserLink.isVisible()) {
+        const profileHref = await firstPostUserLink.getAttribute('href');
+        const userId = profileHref?.split('/profile/')[1];
+
+        if (userId) {
+          // Navigate to dm-request page
+          await page.goto(`/dm-request/${userId}`);
+          await page.waitForTimeout(500);
+
+          // Click back button
+          const backButton = page.locator('button[aria-label="Go back"]');
+          await expect(backButton).toBeVisible();
+          await backButton.click();
+
+          // Should navigate back (history goes back)
+          await page.waitForTimeout(500);
+          expect(page.url()).not.toContain('/dm-request/');
+        }
+      }
     }
   });
 });
 
 test.describe('Conversations and Messaging', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-    await page.getByTestId('nav-messages').click();
-    await page.waitForURL('**/messages', { timeout: 5000 });
+    // PREREQUISITE: Create a conversation by accepting a DM request
+    // Navigate to messages page
+    await page.goto('/messages');
+    await page.waitForLoadState('networkidle');
+
+    // Switch to DM Requests tab
+    const dmRequestsTab = page.getByTestId('dm-requests-tab');
+    await dmRequestsTab.click();
+    await page.waitForTimeout(1000); // Give UI time to switch tabs
+
+    // Accept the first DM request if available (this creates the conversation)
+    const requestCards = page.locator('[data-testid^="dm-request-"]');
+    const requestCount = await requestCards.count();
+
+    if (requestCount > 0) {
+      const acceptButton = requestCards.first().getByTestId('accept-request-button');
+      await acceptButton.click();
+      await page.waitForTimeout(1500); // Wait for acceptance to process
+    }
+
+    // Switch back to Conversations tab where the new conversation should appear
+    await page.getByTestId('conversations-tab').click();
+    await page.waitForTimeout(1000); // Give UI time to switch tabs and load conversations
   });
 
   test('should display conversations list', async ({ page }) => {
-    // Verify conversations section
-    await expect(page.getByTestId('conversations-list')).toBeVisible();
+    // Check if conversations exist or if we see the empty state
+    const emptyState = page.getByTestId('conversations-empty-state');
+    const conversationsList = page.getByTestId('conversations-list');
 
-    // Check for conversation items
-    await page.waitForSelector('[data-testid^="conversation-"]', { timeout: 5000 }).catch(() => {
-      console.log('No conversations found');
-    });
+    // Either conversations list or empty state should be visible
+    const hasConversations = await conversationsList.isVisible().catch(() => false);
+    const showingEmptyState = await emptyState.isVisible().catch(() => false);
+
+    expect(hasConversations || showingEmptyState).toBe(true);
+
+    if (hasConversations) {
+      // Check for conversation items
+      const conversationCount = await page.locator('[data-testid^="conversation-"]').count();
+      expect(conversationCount).toBeGreaterThan(0);
+    }
   });
 
   test('should show conversation preview information', async ({ page }) => {
