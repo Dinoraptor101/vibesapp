@@ -78,6 +78,18 @@ export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: Cre
     }
   }, [text.length, mode]);
 
+  // Handle mode change: strip HTML when switching to caption mode
+  const handleModeChange = (newMode: PostMode) => {
+    if (newMode === 'caption' && mode === 'article') {
+      // Strip HTML tags when switching from article to caption
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = text;
+      const plainText = tempDiv.innerText || tempDiv.textContent || '';
+      setText(plainText);
+    }
+    setMode(newMode);
+  };
+
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -242,7 +254,7 @@ export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: Cre
       <div className="space-y-4">
         <CaptionArticleToggle
           mode={mode}
-          onModeChange={setMode}
+          onModeChange={handleModeChange}
           textLength={text.length}
           disabled={isSubmitting || uploadProgress !== null}
         />

@@ -87,6 +87,25 @@ export const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>
       document.execCommand('insertText', false, text);
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent<Element>) => {
+      // Handle Tab key for indentation
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        // Use indent/outdent commands based on Shift key
+        if (e.shiftKey) {
+          document.execCommand('outdent', false);
+        } else {
+          document.execCommand('indent', false);
+        }
+        return;
+      }
+
+      // Call parent's onKeyDown handler if provided
+      if (onKeyDown) {
+        onKeyDown(e);
+      }
+    };
+
     const showPlaceholder = !value || value === '<br>' || value === '';
 
     return (
@@ -104,7 +123,7 @@ export const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>
           contentEditable={!disabled}
           onInput={handleInput}
           onPaste={handlePaste}
-          onKeyDown={onKeyDown}
+          onKeyDown={handleKeyDown}
           className={cn(
             'w-full px-4 py-2 rounded-lg text-sm transition-all',
             'focus:outline-none focus:ring-2 focus:ring-offset-0',
