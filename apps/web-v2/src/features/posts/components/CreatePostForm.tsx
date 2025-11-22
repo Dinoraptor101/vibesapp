@@ -12,6 +12,7 @@
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui-next';
+import { cn } from '@/lib/cn';
 import { uploadImage } from '../api/s3Service';
 import type { ImageFile, UploadProgress } from '../utils/imageUtils';
 import { CaptionArticleToggle, type PostMode } from './CaptionArticleToggle';
@@ -41,6 +42,7 @@ export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: Cre
   const [location, setLocation] = useState<Location | null>(null);
   const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showImageError, setShowImageError] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const richEditorRef = useRef<RichTextEditorRef>(null);
 
@@ -95,9 +97,10 @@ export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: Cre
       e.preventDefault();
       setError(null);
 
-      // Validation
+      // Validation: Show visual feedback for missing image
       if (!selectedImage?.compressed) {
-        setError('Please select an image');
+        setShowImageError(true);
+        setTimeout(() => setShowImageError(false), 600);
         return;
       }
 
@@ -194,7 +197,12 @@ export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: Cre
         <div className="block text-sm font-medium text-text-primary dim:text-gray-100 mb-2">
           Photo <span className="text-red-500 dim:text-red-400">*</span>
         </div>
-        <div className="relative">
+        <div
+          className={cn(
+            'relative transition-all duration-150',
+            showImageError && 'animate-shake ring-2 ring-red-500 ring-offset-2 rounded-lg'
+          )}
+        >
           <ImageUploader
             onImageSelect={setSelectedImage}
             onImageRemove={() => setSelectedImage(null)}
