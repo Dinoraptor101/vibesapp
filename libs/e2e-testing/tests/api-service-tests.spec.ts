@@ -2,11 +2,10 @@ import { test, expect } from '@playwright/test';
 
 test.describe('API Service Layer Tests', () => {
   // Mock API service class
+  // Note: In real implementation, baseURL comes from Playwright config via page.context()
   class MockApiService {
-    private static readonly baseURL = 'https://qa.vibesapp.net';
-
     static async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-      const url = `${this.baseURL}/api${endpoint}`;
+      // URL construction would use baseURL from config in real implementation
       const config: RequestInit = {
         ...options,
         headers: {
@@ -48,11 +47,11 @@ test.describe('API Service Layer Tests', () => {
   }
 
   test('should construct API URLs correctly', () => {
-    const baseURL = 'https://qa.vibesapp.net';
+    // In real implementation, baseURL comes from Playwright config
     const endpoint = '/posts';
-    const expectedURL = `${baseURL}/api${endpoint}`;
+    const apiPath = `/api${endpoint}`;
 
-    expect(expectedURL).toBe('https://qa.vibesapp.net/api/posts');
+    expect(apiPath).toBe('/api/posts');
   });
 
   test('should include required headers', async () => {
@@ -93,14 +92,18 @@ test.describe('API Service Layer Tests', () => {
 
 test.describe('Error Handling Tests', () => {
   class MockApiError extends Error {
-    constructor(public status: number, public message: string, public details?: unknown) {
+    constructor(
+      public status: number,
+      public message: string,
+      public details?: unknown
+    ) {
       super(message);
       this.name = 'ApiError';
     }
   }
 
   const handleApiError = (
-    error: unknown,
+    error: unknown
   ): {
     type: string;
     message: string;

@@ -1,11 +1,26 @@
 # E2E Test Suite Status
 
 ## Summary
-✅ **88 tests total** (89 tests defined, 1 skipped)
-⏭️ **1 test skipped** (Web V1 compatibility)
+✅ **90 tests total** (6 integration tests rewritten for Web-V2)
 🚫 **19 tests excluded** (Offline PWA features not yet implemented)
+🌍 **Environment Support:** Localhost + QA (both test Web-V2)
 
-## Latest Test Coverage (New!)
+## Latest Updates
+**Integration Tests Rewritten (Nov 2025)**
+- ✅ All 6 integration tests completely rewritten for Web-V2
+- ✅ Tests zen minimal login design and authentication flow
+- ✅ Tests settings navigation, theme toggle, and home page
+- ✅ Uses modern Playwright selectors (getByPlaceholder, getByRole, getByTestId)
+- ✅ No legacy V1 patterns or CSS class selectors
+
+**Environment Configuration (Nov 2025)**
+- ✅ Tests support both localhost and QA environments (both running Web-V2)
+- ✅ Dynamic baseURL configuration via `TEST_ENV` environment variable
+- ✅ All tests use relative URLs for portability
+- ✅ Auto-starts dev servers for localhost testing
+- ✅ Added convenient npm scripts: `test:localhost` and `test:qa`
+
+## Test Coverage (New!)
 Added comprehensive E2E tests for previously untested features:
 - ✅ **Account Settings & Preferences** (6 tests)
 - ✅ **Theme Switching** (3 tests)
@@ -52,22 +67,6 @@ To re-enable these tests:
    - Cache persistence across page reloads
 3. Start dev server: `npm run dev` (runs on `localhost:5173`)
 4. Run tests: `npm test`
-
-## Skipped Tests (Web V1 Compatibility)
-
-### `tests/end-to-end.spec.ts` (1 test)
-**Status:** Marked with `test.fixme()`  
-**Reason:** Targets Web V1 UI structure on `qa.vibesapp.net`
-
-**Web V1 selectors used:**
-- `.ql-editor` (Quill editor) → Needs replacement with RichTextEditor contentEditable
-- `.posts-grid` → Needs replacement with new feed structure
-- `.group-chat-input` → Needs update for new component structure
-
-### Re-enabling End-to-End Test
-1. Deploy Web V2 to QA environment (`qa.vibesapp.net`)
-2. Update all selectors in `end-to-end.spec.ts` to match Web V2 components
-3. Change `test.fixme()` to `test()` to re-enable
 
 ## Passing Test Categories
 
@@ -139,11 +138,13 @@ To re-enable these tests:
 - Registration form data validation
 - Post content length validation
 
-### ✅ Integration Tests (4 tests)
-- Login with existing user
-- View user profile info
-- View activities
-- User registration and login
+### ✅ Integration Tests (6 tests) - REWRITTEN FOR WEB-V2
+- Display login page with zen minimal design
+- Login with existing user credentials
+- Navigate to settings and view preferences
+- Toggle theme from light to dark
+- Display home page with search and feed
+- Navigate between pages using navigation
 
 ### ✅ User Features Tests (30 tests) - NEW!
 
@@ -191,9 +192,35 @@ To re-enable these tests:
 
 ## Test Configuration
 
+### Environment Support
+Tests support both **Localhost** and **QA** environments (both running Web-V2):
+
+**Localhost - Default:**
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:5001`
+- Auto-starts dev servers before tests
+- Best for: Development, debugging, rapid iteration
+
+**QA Environment:**
+- URL: `https://qa.vibesapp.net`
+- No local servers needed
+- Best for: Pre-production validation, regression testing
+
+**Running Tests:**
+```bash
+# Localhost (default)
+npm run test
+npm run test:localhost
+
+# QA environment
+npm run test:qa
+TEST_ENV=qa npm test
+```
+
 ### Base URL
-- **Production QA:** `https://qa.vibesapp.net`
-- **Local Development:** `http://localhost:5173` (for offline tests when re-enabled)
+- Dynamically set via `TEST_ENV` environment variable
+- Configured in `playwright.config.ts`
+- All tests use relative URLs for portability
 
 ### Browser Settings
 - **Browser:** Chromium only
@@ -210,18 +237,16 @@ To re-enable these tests:
 ## Next Steps
 
 1. **High Priority:** Run new user features tests against QA environment
-   - Verify all data-testid attributes exist in Web V2 components
-   - Update selectors as needed for Web V2 UI structure
+   - Verify all data-testid attributes exist in components
+   - Update selectors as needed for current UI structure
    - Add missing test IDs to components (settings, messaging, following)
 
-2. **High Priority:** Add unit tests for new Web V2 components
+2. **High Priority:** Add unit tests for new components
    - RichTextEditor.tsx
    - RichTextToolbarV2.tsx
    - CreatePostForm.tsx (mode switching, HTML stripping)
 
-3. **Medium Priority:** Update end-to-end.spec.ts for Web V2 when deployed to QA
-
-4. **Low Priority:** Implement offline PWA features and re-enable offline test suite
+3. **Low Priority:** Implement offline PWA features and re-enable offline test suite
 
 ## Test Execution Commands
 
@@ -243,6 +268,10 @@ npx playwright show-report
 ```
 
 ## Documentation
+- **Web-V2 Verification:** `WEB-V2-VERIFICATION.md` - Confirms all tests are Web-V2 ready
+- **Environment Setup:** `TESTING-ENVIRONMENTS.md` - Detailed guide for running tests in different environments
+- **Quick Start:** `README.md` - Getting started with e2e testing
+- **Required Test IDs:** `REQUIRED-TEST-IDS.md` - All data-testid attributes needed for tests
 - Playwright Config: `playwright.config.ts`
 - Global Setup: `global-setup.ts`
 - Offline Test Helpers: `tests/offline/helpers.ts`
