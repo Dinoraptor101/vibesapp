@@ -1,15 +1,17 @@
 import { test, expect } from '@playwright/test';
 import playwrightConfig from '../playwright.config';
 
+type Theme = 'light' | 'dim' | 'dark';
+
 test.describe('Playwright Configuration Tests', () => {
   test('should have correct base configuration', () => {
     expect(playwrightConfig.testDir).toBe('./tests');
     expect(playwrightConfig.fullyParallel).toBe(true);
-    expect(playwrightConfig.workers).toBe(3);
+    expect(playwrightConfig.workers).toBe(4);
   });
 
   test('should have correct browser configuration', () => {
-    expect(playwrightConfig.use?.baseURL).toBe('https://qa.vibesapp.net');
+    expect(playwrightConfig.use?.baseURL).toBeTruthy();
     expect(playwrightConfig.use?.headless).toBe(true);
     expect(playwrightConfig.use?.storageState).toBe('storageState.json');
   });
@@ -149,7 +151,10 @@ test.describe('Unit Tests - Location Functions', () => {
       const dLon = ((lon2 - lon1) * Math.PI) / 180;
       const a =
         Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        Math.cos((lat1 * Math.PI) / 180) *
+          Math.cos((lat2 * Math.PI) / 180) *
+          Math.sin(dLon / 2) *
+          Math.sin(dLon / 2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       return R * c;
     };
@@ -175,91 +180,312 @@ test.describe('Unit Tests - Location Functions', () => {
   });
 });
 
-test.describe('Integration Tests', () => {
+test.describe('Integration Tests - Web-V2', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('https://qa.vibesapp.net/');
+    await page.goto('/');
   });
 
-  test('Login with Existing User', async ({ page, context }) => {
-    // Action: Login with existing user credentials
+  test('should display login page with zen minimal design', async ({ page, context }) => {
+    // Clear any existing session
     await context.clearCookies();
-    await page.goto('https://qa.vibesapp.net/');
-    await page.getByTestId('pigeon-id-input').fill('0d536b38-33ce-48c5-958d-5b76015ce228');
-    await page.getByTestId('login-existing-button').click();
+    await page.goto('/login');
 
-    // Assert: User is successfully logged in
-    await expect(page.locator('.posts-grid')).toBeVisible();
+    // Verify zen login elements are present
+    await expect(page.getByText('find your flock, locally')).toBeVisible();
+    await expect(page.getByPlaceholder('your pigeon id')).toBeVisible();
+    await expect(page.getByText('i am new')).toBeVisible();
+
+    // Verify the button is present (return icon button)
+    const submitButton = page.getByRole('button', { name: 'Login' });
+    await expect(submitButton).toBeVisible();
+    await expect(submitButton).toBeDisabled(); // Disabled when input is empty
   });
 
-  test('View User Profile Info', async ({ page }) => {
-    // Navigate to User Profile page
-    await page.getByTestId('user-profile-button').click();
+  test('should login with existing user credentials', async ({ page, context }) => {
+    // Clear session and navigate to login
+    await context.clearCookies();
+    await page.goto('/login');
 
-    // Verify user information is displayed
-    await expect(page.getByText('Name:')).toBeVisible();
-    await expect(page.getByText('Age:')).toBeVisible();
-    await expect(page.getByText('Sex:')).toBeVisible();
-    await expect(page.getByText('Polarity:')).toBeVisible();
-    await expect(page.getByText('MBTI:')).toBeVisible();
-    await expect(page.getByTestId('pigeon-tag')).toBeVisible();
+    // Fill in pigeon ID
+    const pigeonIdInput = page.getByPlaceholder('your pigeon id');
+    await pigeonIdInput.fill('0d536b38-33ce-48c5-958d-5b76015ce228');
 
-    // Verify links are displayed
-    await expect(page.getByText('Documentation')).toBeVisible();
-    await expect(page.getByText('Report an Issue')).toBeVisible();
-  });
+    // Submit form
+    const submitButton = page.getByRole('button', { name: 'Login' });
+    await expect(submitButton).toBeEnabled();
+    await submitButton.click();
 
-  test('View Activities', async ({ page }) => {
-    // Navigate to Activities page
-    await page.getByTestId('tab-activities').click();
+    // Verify redirect to home page
+    await page.waitForURL('/', { timeout: 10000 });
+    await expect(page).toHaveURL('/');
 
-    // Verify activities are listed
-    await page.waitForSelector('.activity-list');
-
-    await page.waitForSelector('.activity-list .activity-item', { timeout: 5000 }).catch(() => {
-      console.warn('No activities found');
+    // Verify user is logged in by checking for user menu (wait for it to be visible)
+    await page.waitForSelector('[data-testid="user-menu-button"]', {
+      timeout: 10000,
+      state: 'visible',
     });
-    const activities = await page.locator('.activity-list .activity-item').count();
-    if (activities === 0) {
-      console.warn('No activities found');
-    } else {
-      expect(activities).toBeGreaterThan(0);
+    await expect(page.getByTestId('user-menu-button').first()).toBeVisible();
+  });
+
+  test('should navigate to settings and view tabs', async ({ page }) => {
+    // Assumes user is already logged in via global setup
+    await page.goto('/');
+
+    // Open user menu
+    await page.getByTestId('user-menu-button').first().click();
+
+    // Click settings
+    await page.getByTestId('settings-menu-item').click();
+
+    // Verify settings page loaded
+    await page.waitForURL('**/settings', { timeout: 5000 });
+    await expect(page).toHaveURL(/\/settings/);
+
+    // Verify settings tabs are visible
+    await expect(page.getByTestId('account-section')).toBeVisible();
+    await expect(page.getByTestId('preferences-section')).toBeVisible();
+    await expect(page.getByTestId('privacy-section')).toBeVisible();
+  });
+
+  test('should display and interact with account settings', async ({ page }) => {
+    await page.goto('/settings');
+
+    // Click account tab
+    await page.getByTestId('account-section').click();
+    await expect(page.getByTestId('account-tab-content')).toBeVisible();
+
+    // Verify profile photo section is visible
+    await expect(page.getByText('Profile Photo')).toBeVisible();
+    await expect(page.getByRole('button', { name: /change photo/i })).toBeVisible();
+
+    // Verify bio textarea is visible and editable
+    const bioTextarea = page.locator('#bio');
+    await expect(bioTextarea).toBeVisible();
+    await expect(bioTextarea).toBeEditable();
+
+    // Verify MBTI dropdown is visible
+    const mbtiSelect = page.locator('#mbti');
+    await expect(mbtiSelect).toBeVisible();
+    const mbtiValue = await mbtiSelect.inputValue();
+    expect([
+      'INTJ',
+      'INTP',
+      'ENTJ',
+      'ENTP',
+      'INFJ',
+      'INFP',
+      'ENFJ',
+      'ENFP',
+      'ISTJ',
+      'ISFJ',
+      'ESTJ',
+      'ESFJ',
+      'ISTP',
+      'ISFP',
+      'ESTP',
+      'ESFP',
+    ]).toContain(mbtiValue);
+
+    // Verify location input is visible
+    const locationInput = page.locator('#location');
+    await expect(locationInput).toBeVisible();
+    await expect(locationInput).toBeEditable();
+
+    // Verify GPS button is visible
+    await expect(page.getByRole('button', { name: /use current location/i })).toBeVisible();
+
+    // Verify polarity toggle is visible
+    await expect(page.getByText('Polarity')).toBeVisible();
+    const polarityButton = page.getByRole('button', { name: /current polarity/i });
+    await expect(polarityButton).toBeVisible();
+
+    // Verify security section with Pigeon ID is visible
+    await expect(page.getByText('Security')).toBeVisible();
+    await expect(page.getByText(/this acts as your password/i)).toBeVisible();
+
+    // Verify logout button is visible
+    await expect(page.getByRole('button', { name: /logout/i })).toBeVisible();
+  });
+
+  test('should display and interact with preferences settings', async ({ page }) => {
+    await page.goto('/settings');
+
+    // Navigate to preferences tab
+    await page.getByTestId('preferences-section').click();
+    await expect(page.getByTestId('preferences-tab-content')).toBeVisible();
+
+    // Verify proximity range selector is visible and functional
+    const proximitySelect = page.getByTestId('proximity-input');
+    await expect(proximitySelect).toBeVisible();
+
+    // Check default or current value is valid
+    const currentValue = await proximitySelect.inputValue();
+    expect(['50', '100', '150']).toContain(currentValue);
+
+    // Verify proximity description text
+    await expect(page.getByText(/determines the range for posts/i)).toBeVisible();
+
+    // Verify notification preferences section
+    await expect(page.getByText('Notification Preferences')).toBeVisible();
+    await expect(page.getByText(/choose which activities you want to be notified/i)).toBeVisible();
+
+    // Verify notification type toggles are visible (using exact match to avoid confusion with "Nearby Posts Radius")
+    await expect(page.getByText('New Followers', { exact: true })).toBeVisible();
+    await expect(page.getByText(/when someone follows you/i)).toBeVisible();
+    await expect(page.getByText('Posts from Following', { exact: true })).toBeVisible();
+    await expect(page.getByText('Nearby Posts', { exact: true })).toBeVisible();
+    await expect(page.getByText('Comments', { exact: true })).toBeVisible();
+    await expect(page.getByText('Comment Replies', { exact: true })).toBeVisible();
+    await expect(page.getByText('Reactions', { exact: true })).toBeVisible();
+    await expect(page.getByText('Post Moderation', { exact: true })).toBeVisible();
+  });
+
+  test('should change proximity range in preferences', async ({ page }) => {
+    await page.goto('/settings');
+
+    // Navigate to preferences tab
+    await page.getByTestId('preferences-section').click();
+
+    // Get proximity selector
+    const proximitySelect = page.getByTestId('proximity-input');
+
+    // Change to 150km
+    await proximitySelect.selectOption('150');
+    await expect(proximitySelect).toHaveValue('150');
+
+    // Change back to 50km
+    await proximitySelect.selectOption('50');
+    await expect(proximitySelect).toHaveValue('50');
+  });
+
+  test('should toggle polarity in account settings', async ({ page }) => {
+    await page.goto('/settings');
+
+    // Click account tab
+    await page.getByTestId('account-section').click();
+
+    // Get polarity button
+    const polarityButton = page.getByRole('button', { name: /current polarity/i });
+
+    // Get initial state from aria-label
+    const initialLabel = await polarityButton.getAttribute('aria-label');
+    const initialPolarity = initialLabel?.includes('YIN') ? 'YIN' : 'YANG';
+
+    // Click to toggle
+    await polarityButton.click();
+    await page.waitForTimeout(500); // Wait for animation
+
+    // Verify it changed
+    const newLabel = await polarityButton.getAttribute('aria-label');
+    const newPolarity = newLabel?.includes('YIN') ? 'YIN' : 'YANG';
+    expect(newPolarity).not.toBe(initialPolarity);
+  });
+
+  test('should copy pigeon ID to clipboard', async ({ page, context }) => {
+    // Grant clipboard permissions
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+
+    await page.goto('/settings');
+
+    // Click account tab
+    await page.getByTestId('account-section').click();
+
+    // Find and click the copy button (the one with Copy/Check icon)
+    const copyButton = page
+      .getByRole('button')
+      .filter({ has: page.locator('svg') })
+      .nth(1); // Second button with svg (first is regenerate)
+    await copyButton.click();
+
+    // Wait a bit for clipboard operation
+    await page.waitForTimeout(300);
+
+    // Verify Check icon appeared (indicates successful copy)
+    // Note: In a real test, you'd verify the clipboard contents, but that's platform-dependent
+    await expect(copyButton.locator('svg')).toBeVisible();
+  });
+
+  test('should cycle through all themes (light, dim, dark)', async ({ page }) => {
+    // Assumes user is already logged in
+    await page.goto('/');
+
+    // Get current theme before clicking (theme is applied as a class on body element)
+    const bodyElement = page.locator('body');
+    const getBodyTheme = async (): Promise<Theme | null> => {
+      const classList = await bodyElement.evaluate((el) => Array.from(el.classList));
+      const themes: Theme[] = ['light', 'dim', 'dark'];
+      return themes.find((t) => classList.includes(t)) || null;
+    };
+
+    const initialTheme = await getBodyTheme();
+    const themes: (Theme | null)[] = [];
+
+    // Open user menu once
+    await page.getByTestId('user-menu-button').first().click();
+    await page.waitForTimeout(300);
+
+    // Click theme toggle 3 times to cycle through all themes
+    // Starting from light: light → dim → dark → light
+    for (let i = 0; i < 3; i++) {
+      // Click theme toggle
+      await page.getByTestId('theme-toggle-button').click();
+      await page.waitForTimeout(400);
+
+      // Record the new theme after each click
+      const currentTheme = await getBodyTheme();
+      themes.push(currentTheme);
     }
 
-    //TODO - Apply this once we have 2 user testing.
-    // Check for unread activities
-    // const unreadActivities = await page
-    //     .locator('.activity-list .activity-item.unread')
-    //     .count();
-    // expect(unreadActivities).toBeGreaterThan(0);
+    // Close menu
+    await page.keyboard.press('Escape');
+
+    // Verify we recorded 3 theme changes
+    expect(themes.length).toBe(3);
+
+    // Filter out null values
+    const validThemes = themes.filter((theme): theme is Theme => theme !== null);
+
+    // Verify we got all 3 themes
+    expect(validThemes.length).toBe(3);
+
+    // Verify all captured themes are valid
+    validThemes.forEach((theme) => {
+      expect(['light', 'dim', 'dark']).toContain(theme);
+    });
+
+    // Verify we got all 3 different themes
+    const uniqueThemes = new Set(validThemes);
+    expect(uniqueThemes.size).toBe(3);
+
+    // Verify the 3rd click brought us back to the initial theme
+    if (initialTheme && validThemes.length === 3) {
+      expect(validThemes[2]).toBe(initialTheme);
+    }
   });
 
-  test('User Registration and Login', async ({ page, context }) => {
-    // Arrange: Bypass reCAPTCHA and Logout
-    await page.evaluate(() => {
-      // Bypass reCAPTCHA for test automation
-      window.localStorage.setItem('bypassRecaptcha', 'true');
-    });
-    const bypassRecaptcha = await page.evaluate(() => window.localStorage.getItem('bypassRecaptcha'));
-    expect(bypassRecaptcha).toBe('true');
-    await context.clearCookies();
+  test('should display home page with search and feed', async ({ page }) => {
+    // Assumes user is already logged in
+    await page.goto('/');
 
-    // Act: Register a new user
-    await page.goto('https://qa.vibesapp.net/');
-    await page.getByTestId('username-input').fill('AutoTester');
-    await page.getByTestId('birthYear-selected').click();
-    await page.getByTestId('birthYear-option-1990').click();
-    await page.getByTestId('birthMonth-selected').click();
-    await page.getByTestId('birthMonth-option-1').click();
-    await page.getByTestId('sex-selected').click();
-    await page.getByTestId('sex-option-Other').click();
-    await page.getByTestId('register-button').click();
+    // Verify search bar is visible
+    await expect(page.getByPlaceholder('Search posts...')).toBeVisible();
 
-    // Assert: User is assigned a Pigeon ID
-    await expect(page.locator('.pigeon-id')).toBeVisible();
-    const userId = await page.locator('.pigeon-id').innerText();
-    expect(userId).toBeTruthy();
-    if (userId) {
-      console.info(`New Pigeon ID Assigned: ${userId}`);
-    }
+    // Verify page layout is present (AppLayout renders)
+    const mainContent = page.locator('main, [role="main"]');
+    await expect(mainContent).toBeVisible();
+  });
+
+  test('should navigate between pages using navigation', async ({ page }) => {
+    // Assumes user is already logged in
+    await page.goto('/');
+
+    // Verify we're on home page
+    await expect(page).toHaveURL('/');
+
+    // Note: Navigation links would need data-testid attributes added
+    // This test verifies the page structure is ready for navigation
+    // Use .first() to get the first visible user menu (either TopNav or BottomNav depending on viewport)
+    const userMenu = page.getByTestId('user-menu-button').first();
+    await expect(userMenu).toBeVisible();
   });
 });

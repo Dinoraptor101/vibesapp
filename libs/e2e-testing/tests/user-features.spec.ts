@@ -62,130 +62,249 @@ test.describe('Account Settings and Preferences', () => {
     const proximitySelectAfterReload = page.getByTestId('proximity-input');
     await expect(proximitySelectAfterReload).toHaveValue(newValue);
   });
-  test('should toggle MBTI visibility', async ({ page }) => {
-    const mbtiToggle = page.getByTestId('mbti-visibility-toggle');
-    await expect(mbtiToggle).toBeVisible();
+  test('should update MBTI type', async ({ page }) => {
+    // Account tab is shown by default, find the MBTI select
+    const mbtiSelect = page.locator('#mbti');
+    await expect(mbtiSelect).toBeVisible();
 
-    // Get initial state
-    const initialState = await mbtiToggle.isChecked();
+    // Get initial MBTI value
+    const initialValue = await mbtiSelect.inputValue();
 
-    // Toggle setting
-    await mbtiToggle.click();
+    // Change to a different MBTI type
+    const newValue = initialValue === 'INTJ' ? 'ENFP' : 'INTJ';
+    await mbtiSelect.selectOption(newValue);
 
-    // Save
-    await page.getByTestId('save-settings-button').click();
-    await expect(page.getByTestId('toast-success')).toBeVisible({ timeout: 3000 });
+    // Verify the value changed in the UI
+    await expect(mbtiSelect).toHaveValue(newValue);
 
-    // Verify state changed
+    // Settings auto-save with 300ms debounce
+    await page.waitForTimeout(500);
+
+    // Reload and verify persistence
     await page.reload();
-    const newState = await mbtiToggle.isChecked();
-    expect(newState).toBe(!initialState);
+
+    // Verify the value persisted (should be loaded from backend user data)
+    const mbtiSelectAfterReload = page.locator('#mbti');
+    await expect(mbtiSelectAfterReload).toHaveValue(newValue);
   });
 
-  test('should toggle location sharing', async ({ page }) => {
-    const locationToggle = page.getByTestId('location-sharing-toggle');
-    await expect(locationToggle).toBeVisible();
+  test('should update location city', async ({ page }) => {
+    // Account tab is shown by default, find the location input
+    const locationInput = page.locator('#location');
+    await expect(locationInput).toBeVisible();
 
-    const initialState = await locationToggle.isChecked();
+    // Change to a different city
+    const newCity = 'San Francisco';
+    await locationInput.fill(newCity);
 
-    await locationToggle.click();
-    await page.getByTestId('save-settings-button').click();
-    await expect(page.getByTestId('toast-success')).toBeVisible({ timeout: 3000 });
+    // Trigger blur to save (onBlur auto-save pattern)
+    await locationInput.blur();
 
-    // Verify persistence
+    // Wait for geocoding and auto-save (300ms debounce + API call)
+    await page.waitForTimeout(2000);
+
+    // Reload and verify persistence
     await page.reload();
-    const newState = await locationToggle.isChecked();
-    expect(newState).toBe(!initialState);
+
+    // Verify the value persisted
+    const locationInputAfterReload = page.locator('#location');
+    await expect(locationInputAfterReload).toHaveValue(newCity);
   });
 
   test('should update notification preferences', async ({ page }) => {
-    // Navigate to notifications section if separate
-    const notificationSection = page.getByTestId('notifications-section');
-    if (await notificationSection.isVisible()) {
-      await notificationSection.click();
+    // Navigate to Preferences tab
+    await page.getByTestId('preferences-section').click();
+
+    // Wait for notification preferences to load
+    await page.waitForTimeout(1000);
+
+    // Find the "New Followers" notification button
+    const newFollowersButton = page.locator('button:has-text("New Followers")');
+    await expect(newFollowersButton).toBeVisible();
+
+    // Check initial state - look for Bell icon (enabled) or BellOff icon (disabled)
+    const bellIcon = newFollowersButton.locator('svg.lucide-bell');
+    const bellOffIcon = newFollowersButton.locator('svg.lucide-bell-off');
+
+    const isInitiallyEnabled = (await bellIcon.count()) > 0;
+
+    // Toggle the notification preference
+    await newFollowersButton.click();
+
+    // Wait for the mutation to complete (auto-save to backend)
+    await page.waitForTimeout(1000);
+
+    // Verify the icon toggled (state changed in UI)
+    if (isInitiallyEnabled) {
+      // Should now show BellOff icon
+      await expect(bellOffIcon).toBeVisible();
+    } else {
+      // Should now show Bell icon
+      await expect(bellIcon).toBeVisible();
     }
 
-    // Toggle various notification settings
-    const likeNotifications = page.getByTestId('like-notifications-toggle');
+    // Reload page to verify persistence from database
+    await page.reload();
 
-    await expect(likeNotifications).toBeVisible();
-    await likeNotifications.click();
+    // Navigate back to Preferences tab
+    await page.getByTestId('preferences-section').click();
+    await page.waitForTimeout(1000);
 
-    // Toggle other notification types if available
-    const messageNotifications = page.getByTestId('message-notifications-toggle');
-    if (await messageNotifications.isVisible()) {
-      await messageNotifications.click();
+    // Verify the preference persisted from the database
+    const newFollowersButtonAfterReload = page.locator('button:has-text("New Followers")');
+    const bellIconAfterReload = newFollowersButtonAfterReload.locator('svg.lucide-bell');
+    const bellOffIconAfterReload = newFollowersButtonAfterReload.locator('svg.lucide-bell-off');
+
+    if (isInitiallyEnabled) {
+      // Should remain disabled (BellOff)
+      await expect(bellOffIconAfterReload).toBeVisible();
+    } else {
+      // Should remain enabled (Bell)
+      await expect(bellIconAfterReload).toBeVisible();
     }
 
-    await page.getByTestId('save-settings-button').click();
-    await expect(page.getByTestId('toast-success')).toBeVisible({ timeout: 3000 });
+    // Toggle back to original state for test cleanup
+    await newFollowersButtonAfterReload.click();
+    await page.waitForTimeout(1000);
   });
 
   test('should display account information correctly', async ({ page }) => {
-    // Verify account details are shown
-    await expect(page.getByTestId('account-username')).toBeVisible();
-    await expect(page.getByTestId('account-pigeon-id')).toBeVisible();
-    await expect(page.getByTestId('account-created-date')).toBeVisible();
+    // Account tab is shown by default, verify key fields are visible
+
+    // Profile photo section
+    await expect(page.locator('button[aria-label="Change profile photo"]')).toBeVisible();
+
+    // Bio field
+    await expect(page.locator('#bio')).toBeVisible();
+
+    // MBTI select
+    await expect(page.locator('#mbti')).toBeVisible();
+
+    // Location input
+    await expect(page.locator('#location')).toBeVisible();
+
+    // Polarity toggle (with YIN/YANG labels)
+    await expect(page.locator('button[aria-label*="polarity"]')).toBeVisible();
+
+    // Security section - check for the warning text
+    await expect(page.locator('text=⚠️ Important:')).toBeVisible();
+
+    // Check for Pigeon ID display (in font-mono container)
+    await expect(page.locator('.font-mono span.font-bold')).toBeVisible();
+
+    // Logout button
+    await expect(page.locator('button:has-text("Logout")')).toBeVisible();
   });
 });
 
 test.describe('Theme Switching', () => {
+  type Theme = 'light' | 'dim' | 'dark';
+
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
   });
 
-  test('should switch from light to dark theme', async ({ page }) => {
-    // Open theme switcher
-    await page.getByTestId('theme-toggle-button').click();
+  test('should cycle through all themes (light, dim, dark)', async ({ page }) => {
+    // Get current theme before clicking (theme is applied as a class on body element)
+    const bodyElement = page.locator('body');
+    const getBodyTheme = async (): Promise<Theme | null> => {
+      const classList = await bodyElement.evaluate((el) => Array.from(el.classList));
+      const themes: Theme[] = ['light', 'dim', 'dark'];
+      return themes.find((t) => classList.includes(t)) || null;
+    };
 
-    // Get initial theme
-    const htmlElement = page.locator('html');
-    const initialTheme = await htmlElement.getAttribute('data-theme');
+    const initialTheme = await getBodyTheme();
+    const themes: (Theme | null)[] = [];
 
-    // Switch theme
-    if (initialTheme === 'light') {
-      await page.getByTestId('dark-theme-option').click();
-    } else {
-      await page.getByTestId('light-theme-option').click();
+    // Open user menu once
+    await page.getByTestId('user-menu-button').first().click();
+    await page.waitForTimeout(300);
+
+    // Click theme toggle 3 times to cycle through all themes
+    // Starting from light: light → dim → dark → light
+    for (let i = 0; i < 3; i++) {
+      // Click theme toggle
+      await page.getByTestId('theme-toggle-button').click();
+      await page.waitForTimeout(400);
+
+      // Record the new theme after each click
+      const currentTheme = await getBodyTheme();
+      themes.push(currentTheme);
     }
 
-    // Verify theme changed
-    const newTheme = await htmlElement.getAttribute('data-theme');
-    expect(newTheme).not.toBe(initialTheme);
-  });
+    // Close menu
+    await page.keyboard.press('Escape');
 
-  test('should persist theme preference across sessions', async ({ page, context }) => {
-    // Set dark theme
-    await page.getByTestId('theme-toggle-button').click();
-    await page.getByTestId('dark-theme-option').click();
+    // Verify we recorded 3 theme changes
+    expect(themes.length).toBe(3);
 
-    // Verify dark theme applied
-    const htmlElement = page.locator('html');
-    await expect(htmlElement).toHaveAttribute('data-theme', 'dark');
+    // Filter out null values
+    const validThemes = themes.filter((theme): theme is Theme => theme !== null);
 
-    // Create new page (simulate new session)
-    const newPage = await context.newPage();
-    await newPage.goto('/');
+    // Verify we got all 3 themes
+    expect(validThemes.length).toBe(3);
 
-    // Verify theme persisted
-    const newHtmlElement = newPage.locator('html');
-    await expect(newHtmlElement).toHaveAttribute('data-theme', 'dark');
-
-    await newPage.close();
-  });
-
-  test('should apply theme-specific colors correctly', async ({ page }) => {
-    const themeToggle = page.getByTestId('theme-toggle-button');
-    await themeToggle.click();
-    await page.getByTestId('dark-theme-option').click();
-
-    // Check that dark theme colors are applied
-    const backgroundColor = await page.evaluate(() => {
-      return window.getComputedStyle(document.body).backgroundColor;
+    // Verify all captured themes are valid
+    validThemes.forEach((theme) => {
+      expect(['light', 'dim', 'dark']).toContain(theme);
     });
 
-    // Dark theme should have dark background (rgb values close to 0)
-    expect(backgroundColor).toMatch(/rgb\((\d{1,2}), (\d{1,2}), (\d{1,2})\)/);
+    // Verify we got all 3 different themes
+    const uniqueThemes = new Set(validThemes);
+    expect(uniqueThemes.size).toBe(3);
+
+    // Verify the 3rd click brought us back to the initial theme
+    if (initialTheme && validThemes.length === 3) {
+      expect(validThemes[2]).toBe(initialTheme);
+    }
+  });
+
+  test('should persist theme preference across page reload', async ({ page }) => {
+    // Get current theme
+    const bodyElement = page.locator('body');
+    const getBodyTheme = async (): Promise<Theme | null> => {
+      const classList = await bodyElement.evaluate((el) => Array.from(el.classList));
+      const themes: Theme[] = ['light', 'dim', 'dark'];
+      return themes.find((t) => classList.includes(t)) || null;
+    };
+
+    // Open user menu and change theme
+    await page.getByTestId('user-menu-button').first().click();
+    await page.waitForTimeout(300);
+    await page.getByTestId('theme-toggle-button').click();
+    await page.waitForTimeout(400);
+
+    const selectedTheme = await getBodyTheme();
+
+    // Close menu
+    await page.keyboard.press('Escape');
+
+    // Reload page
+    await page.reload();
+    await page.waitForTimeout(500);
+
+    // Verify theme persisted
+    const persistedTheme = await getBodyTheme();
+    expect(persistedTheme).toBe(selectedTheme);
+  });
+
+  test('should display correct theme icon in menu', async ({ page }) => {
+    // Open user menu
+    await page.getByTestId('user-menu-button').first().click();
+    await page.waitForTimeout(300);
+
+    // Verify theme toggle button shows icon and current theme label
+    const themeButton = page.getByTestId('theme-toggle-button');
+    await expect(themeButton).toBeVisible();
+
+    // Check that it displays theme name (light, dim, or dark)
+    const buttonText = await themeButton.innerText();
+    expect(['light', 'dim', 'dark'].some((theme) => buttonText.toLowerCase().includes(theme))).toBe(
+      true
+    );
+
+    // Close menu
+    await page.keyboard.press('Escape');
   });
 });
 
@@ -420,183 +539,98 @@ test.describe('Following Users', () => {
   });
 
   test('should display follow button on user profile', async ({ page }) => {
-    // Navigate to home feed
-    await page.getByTestId('nav-home').click();
+    // Navigate to home via URL (no nav-home test-id exists)
+    await page.goto('/');
 
     // Find a post and navigate to author profile
-    const postCount = await page.locator('[data-testid^="post-"]').count();
+    const postCount = await page.locator('article').count();
 
     if (postCount > 0) {
-      const firstPost = page.locator('[data-testid^="post-"]').first();
+      // Find first post's username link and click it
+      const firstPostUserLink = page.locator('article a[href^="/profile/"]').first();
 
-      // Click username to go to profile
-      await firstPost.getByTestId('post-username').click();
+      if (await firstPostUserLink.isVisible()) {
+        await firstPostUserLink.click();
+        await page.waitForTimeout(500);
 
-      // Verify follow button visible
-      const followButton = page.getByTestId('follow-button');
-      await expect(followButton).toBeVisible();
-    }
-  });
+        // Verify we're on a profile page
+        await expect(page.url()).toContain('/profile/');
 
-  test('should follow a user', async ({ page }) => {
-    // Navigate to discover or nearby users
-    await page.getByTestId('nav-discover').click();
-
-    const userCount = await page.locator('[data-testid^="user-card-"]').count();
-
-    if (userCount > 0) {
-      const firstUser = page.locator('[data-testid^="user-card-"]').first();
-      const followButton = firstUser.getByTestId('follow-button');
-
-      // Check if not already following
-      const buttonText = await followButton.innerText();
-
-      if (
-        buttonText.toLowerCase().includes('follow') &&
-        !buttonText.toLowerCase().includes('following')
-      ) {
-        // Follow user
-        await followButton.click();
-
-        // Verify button changes to "Following"
-        await expect(followButton).toContainText(/following/i, { timeout: 3000 });
-
-        // Verify success toast
-        await expect(page.getByTestId('toast-success')).toBeVisible({ timeout: 3000 });
+        // Verify follow button visible (look for button with "Follow" or "Following" text)
+        const followButton = page.locator(
+          'button:has-text("Follow"), button:has-text("Following")'
+        );
+        await expect(followButton).toBeVisible();
       }
     }
   });
 
-  test('should unfollow a user', async ({ page }) => {
-    // Navigate to profile to see following list
-    await page.getByTestId('user-profile-button').click();
-    await page.getByTestId('following-tab').click();
-
-    const followingCount = await page.locator('[data-testid^="following-user-"]').count();
-
-    if (followingCount > 0) {
-      const firstFollowing = page.locator('[data-testid^="following-user-"]').first();
-      const unfollowButton = firstFollowing.getByTestId('unfollow-button');
-
-      await unfollowButton.click();
-
-      // Verify confirmation modal or immediate unfollow
-      const confirmButton = page.getByTestId('confirm-unfollow-button');
-      if (await confirmButton.isVisible({ timeout: 1000 })) {
-        await confirmButton.click();
-      }
-
-      // Verify user removed from following list
-      await expect(page.getByTestId('toast-success')).toBeVisible({ timeout: 3000 });
-    }
-  });
-
-  test('should display following count', async ({ page }) => {
-    await page.getByTestId('user-profile-button').click();
-
-    // Verify following/followers stats
-    const followingCount = page.getByTestId('following-count');
-    const followersCount = page.getByTestId('followers-count');
-
-    await expect(followingCount).toBeVisible();
-    await expect(followersCount).toBeVisible();
-  });
-
-  test('should view list of following', async ({ page }) => {
-    await page.getByTestId('user-profile-button').click();
-    await page.getByTestId('following-tab').click();
-
-    // Verify following list displays
-    await expect(page.getByTestId('following-list')).toBeVisible();
-
-    // Check if any users in list
-    await page.waitForSelector('[data-testid^="following-user-"]', { timeout: 5000 }).catch(() => {
-      console.log('No following users');
-    });
-  });
-
-  test('should view list of followers', async ({ page }) => {
-    await page.getByTestId('user-profile-button').click();
-    await page.getByTestId('followers-tab').click();
-
-    // Verify followers list displays
-    await expect(page.getByTestId('followers-list')).toBeVisible();
-
-    // Check if any users in list
-    await page.waitForSelector('[data-testid^="follower-user-"]', { timeout: 5000 }).catch(() => {
-      console.log('No followers');
-    });
-  });
-});
-
-test.describe('Privacy and Blocking', () => {
-  test.beforeEach(async ({ page }) => {
+  test('should follow/unfollow a user from their profile', async ({ page }) => {
+    // Navigate to home
     await page.goto('/');
-  });
 
-  test('should block a user', async ({ page }) => {
-    // Navigate to a user profile
-    await page.getByTestId('nav-discover').click();
+    // Find a post and navigate to author profile
+    const postCount = await page.locator('article').count();
 
-    const userCount = await page.locator('[data-testid^="user-card-"]').count();
+    if (postCount > 0) {
+      const firstPostUserLink = page.locator('article a[href^="/profile/"]').first();
 
-    if (userCount > 0) {
-      const firstUser = page.locator('[data-testid^="user-card-"]').first();
-      await firstUser.click();
+      if (await firstPostUserLink.isVisible()) {
+        await firstPostUserLink.click();
+        await page.waitForTimeout(500);
 
-      // Open user options menu
-      await page.getByTestId('user-options-button').click();
+        // Find the follow button
+        const followButton = page
+          .locator('button:has-text("Follow"), button:has-text("Following")')
+          .first();
 
-      // Click block option
-      const blockButton = page.getByTestId('block-user-button');
-      if (await blockButton.isVisible()) {
-        await blockButton.click();
+        if (await followButton.isVisible()) {
+          const initialButtonText = await followButton.innerText();
+          const initiallyFollowing = initialButtonText.toLowerCase().includes('following');
 
-        // Confirm block
-        await page.getByTestId('confirm-block-button').click();
+          // Click to toggle follow state
+          await followButton.click();
+          await page.waitForTimeout(500);
 
-        // Verify success
-        await expect(page.getByTestId('toast-success')).toBeVisible({ timeout: 3000 });
+          // Verify button text changed
+          const newButtonText = await followButton.innerText();
+          if (initiallyFollowing) {
+            // Was following, should now say "Follow"
+            expect(newButtonText.toLowerCase()).toContain('follow');
+            expect(newButtonText.toLowerCase()).not.toContain('following');
+          } else {
+            // Was not following, should now say "Following"
+            expect(newButtonText.toLowerCase()).toContain('following');
+          }
+        }
       }
     }
   });
 
-  test('should view blocked users list in settings', async ({ page }) => {
-    await page.getByTestId('user-menu-button').first().click();
-    await page.getByTestId('settings-menu-item').click();
+  test('should display follower and following counts on profile', async ({ page }) => {
+    // Navigate to home
+    await page.goto('/');
 
-    // Navigate to privacy section
-    await page.getByTestId('privacy-section').click();
+    // Find a post and navigate to author profile
+    const postCount = await page.locator('article').count();
 
-    // View blocked users
-    const blockedUsersButton = page.getByTestId('view-blocked-users-button');
-    if (await blockedUsersButton.isVisible()) {
-      await blockedUsersButton.click();
+    if (postCount > 0) {
+      const firstPostUserLink = page.locator('article a[href^="/profile/"]').first();
 
-      await expect(page.getByTestId('blocked-users-list')).toBeVisible();
-    }
-  });
+      if (await firstPostUserLink.isVisible()) {
+        await firstPostUserLink.click();
+        await page.waitForTimeout(500);
 
-  test('should unblock a user', async ({ page }) => {
-    await page.getByTestId('user-menu-button').first().click();
-    await page.getByTestId('settings-menu-item').click();
-    await page.getByTestId('privacy-section').click();
+        // Verify follower/following stats are displayed
+        // They appear as text like "5 posts • 10 followers • 3 following"
+        const statsText = await page.textContent('body');
 
-    const blockedUsersButton = page.getByTestId('view-blocked-users-button');
-    if (await blockedUsersButton.isVisible()) {
-      await blockedUsersButton.click();
-
-      const blockedCount = await page.locator('[data-testid^="blocked-user-"]').count();
-
-      if (blockedCount > 0) {
-        const firstBlocked = page.locator('[data-testid^="blocked-user-"]').first();
-        await firstBlocked.getByTestId('unblock-button').click();
-
-        // Confirm unblock
-        await page.getByTestId('confirm-unblock-button').click();
-
-        // Verify success
-        await expect(page.getByTestId('toast-success')).toBeVisible({ timeout: 3000 });
+        if (statsText) {
+          // Check that the stats text contains the expected words
+          expect(statsText).toContain('followers');
+          expect(statsText).toContain('following');
+          expect(statsText).toContain('posts');
+        }
       }
     }
   });

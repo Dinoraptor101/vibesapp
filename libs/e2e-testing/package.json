@@ -4,7 +4,11 @@
   "main": "index.js",
   "scripts": {
     "test": "npx playwright test",
-    "test-headed": "xvfb-run npx playwright test --headed"
+    "test:localhost": "npx playwright test",
+    "test:qa": "TEST_ENV=qa npx playwright test",
+    "test-headed": "xvfb-run npx playwright test --headed",
+    "test:localhost:headed": "npx playwright test --headed",
+    "test:qa:headed": "TEST_ENV=qa npx playwright test --headed"
   },
   "keywords": [],
   "author": "",
