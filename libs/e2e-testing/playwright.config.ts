@@ -20,8 +20,8 @@ export default defineConfig({
       slowMo: 500, // Add slowMo to launch options
     },
   },
-  retries: 0, // Disable retries in debug mode
-  workers: 4, // Number of parallel worker processes
+  retries: 1, // Retry failed tests once
+  workers: 3, // Number of parallel worker processes
   projects: [
     {
       name: 'chromium',
