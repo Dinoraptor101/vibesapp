@@ -171,6 +171,49 @@ This ensures AI agents can pick up exactly where you left off!
 
 ---
 
+## 📋 Future Enhancements & Technical Debt
+
+> Items added: November 23, 2025
+
+### 1. Settings Support for Offline Mode
+- **Type:** Tech Debt
+- **Status:** ⏸️ Not started
+- **Impact:** Medium
+- **Description:** Settings page does not currently support offline mode. Users should be able to view and potentially queue settings changes when offline. Changes should sync when connection is restored.
+- **Files to modify:**
+  - `apps/web-v2/src/pages/SettingsPage.tsx`
+  - Offline queue system
+
+### 2. Connecting Indicator Not Visible in Mobile Viewport
+- **Type:** Bug
+- **Status:** ⏸️ Not started
+- **Impact:** Medium
+- **Description:** The connecting indicator for offline mode does not appear in mobile viewport. This is a responsive display issue causing users to not know when the app is reconnecting.
+- **Files to modify:**
+  - Offline indicator component CSS/responsive styles
+
+### 3. Import Silent reCaptcha from Web-V1
+- **Type:** TODO
+- **Status:** ⏸️ Not started
+- **Impact:** High (Security)
+- **Description:** Import the silent reCaptcha implementation from Web-V1 for login and signup flows. This prevents bot signups without user friction. Currently implemented in Web-V1, needs to be ported to Web-V2.
+- **Files to modify:**
+  - `apps/web-v2/src/features/auth/components/LoginForm.tsx`
+  - `apps/web-v2/src/features/auth/components/SignupWizard.tsx`
+  - Backend auth endpoints (if needed)
+
+### 4. User Self-Delete Account Mechanism
+- **Type:** TODO
+- **Status:** ⏸️ Not started
+- **Impact:** Medium (Privacy/Compliance)
+- **Description:** Implement UI and backend logic for users to delete their own accounts. Should include confirmation dialog and proper data cleanup (soft delete).
+- **Files to modify:**
+  - `apps/web-v2/src/pages/SettingsPage.tsx` - Add delete account button in Account tab
+  - `apps/api/src/controllers/user.js` - Add deleteOwnAccount endpoint
+  - Confirmation modal component
+
+---
+
 ## 📊 Session Log
 
 ### Session 1 - November 4, 2025
