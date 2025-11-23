@@ -8,6 +8,7 @@ export interface ImageFile {
   file: File;
   preview: string; // Object URL for preview
   compressed?: Blob;
+  blurPlaceholder?: string; // Base64 blur placeholder for progressive loading
 }
 
 export interface UploadProgress {
@@ -49,7 +50,7 @@ export async function compressImage(
   file: File,
   maxWidth = 1920,
   maxHeight = 1920,
-  quality = 0.85
+  quality = 0.8
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new Image();

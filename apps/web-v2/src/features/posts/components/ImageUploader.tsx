@@ -8,6 +8,7 @@
 import { Image as ImageIcon, Loader2, Upload, X } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { Button } from '@/components/ui-next';
+import { generateBlurPlaceholder } from '@/lib/imageUtils';
 import {
   validateImageFile,
   compressImage,
@@ -47,15 +48,19 @@ export function ImageUploader({
       // Create preview
       const preview = createImagePreview(file);
 
-      // Compress image
+      // Compress image and generate blur placeholder in parallel
       setIsCompressing(true);
       try {
-        const compressed = await compressImage(file);
+        const [compressed, blurPlaceholder] = await Promise.all([
+          compressImage(file),
+          generateBlurPlaceholder(file),
+        ]);
 
         onImageSelect({
           file,
           preview,
           compressed,
+          blurPlaceholder,
         });
       } catch {
         setError('Failed to process image');

@@ -38,6 +38,7 @@ export interface Post {
   _id: string;
   text?: string; // Optional caption
   image: string; // Required - S3 URL
+  blurPlaceholder?: string; // Base64 blur placeholder for progressive loading
   user: PostUser;
   replyTo?: string; // Post ID if this is a reply/comment (legacy - for post-to-post replies)
   commentOn?: string; // Post ID if this is a comment on a post
@@ -69,6 +70,7 @@ export interface PostWithStats extends Post {
 export interface CreatePostPayload {
   text?: string;
   image: string; // S3 URL after upload
+  blurPlaceholder?: string; // Base64 blur placeholder for progressive loading
   location: {
     lat: number;
     lon: number;

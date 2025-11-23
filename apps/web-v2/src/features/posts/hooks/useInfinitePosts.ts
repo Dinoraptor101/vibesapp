@@ -60,7 +60,7 @@ export function useInfinitePosts({
     },
     initialPageParam: 1,
     enabled,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 10, // 10 minutes - posts rarely change
     gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
   });
 

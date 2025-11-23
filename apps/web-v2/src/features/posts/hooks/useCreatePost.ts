@@ -12,6 +12,7 @@ import type { CreatePostPayload, Post } from '../types';
 interface CreatePostVariables {
   image: string; // S3 key
   text?: string;
+  blurPlaceholder?: string; // Base64 blur placeholder
   location: {
     lat: number;
     lon: number;
@@ -31,6 +32,7 @@ export function useCreatePost() {
       const payload: CreatePostPayload = {
         image: variables.image,
         text: variables.text,
+        blurPlaceholder: variables.blurPlaceholder,
         location: variables.location,
       };
 

@@ -5,6 +5,7 @@
  */
 
 import { Heart, MessageCircle, Reply, UserPlus, ImageIcon, MapPin, EyeOff } from 'lucide-react';
+import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Avatar } from '@/components/ui-next';
 import { formatRelativeTime } from '@/lib/utils';
@@ -124,7 +125,7 @@ function getNavigationPath(activity: Activity): string | null {
   }
 }
 
-export function ActivityCard({ activity, onMarkAsRead }: ActivityCardProps) {
+function ActivityCardComponent({ activity, onMarkAsRead }: ActivityCardProps) {
   const navigate = useNavigate();
   const icon = getActivityIcon(activity.type);
   const message = getActivityMessage(activity);
@@ -214,3 +215,9 @@ export function ActivityCard({ activity, onMarkAsRead }: ActivityCardProps) {
     </button>
   );
 }
+
+const ActivityCardMemoized = memo(ActivityCardComponent, (prev, next) => {
+  return prev.activity._id === next.activity._id && prev.activity.isRead === next.activity.isRead;
+});
+
+export { ActivityCardMemoized as ActivityCard };

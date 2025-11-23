@@ -20,6 +20,7 @@ export function CreatePostPage() {
   const handleSubmit = async (data: {
     image: string;
     text?: string;
+    blurPlaceholder?: string;
     location: { lat: number; lon: number };
   }) => {
     try {
