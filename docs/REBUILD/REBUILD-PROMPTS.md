@@ -176,41 +176,61 @@ This ensures AI agents can pick up exactly where you left off!
 > Items added: November 23, 2025
 
 ### 1. Settings Support for Offline Mode
-- **Type:** Tech Debt
+- **Type:** Enhancement
 - **Status:** ⏸️ Not started
 - **Impact:** Medium
-- **Description:** Settings page does not currently support offline mode. Users should be able to view and potentially queue settings changes when offline. Changes should sync when connection is restored.
+- **Description:** Settings page needs offline functionality with caching and read-only mode (similar to post feed and conversation page patterns). Users should be able to view their cached settings when offline. Form inputs should be disabled with clear messaging when offline. Settings changes should be queued and synced when connection is restored.
+- **Implementation Notes:**
+  - Cache settings data in React Query with staleTime
+  - Detect online/offline state and disable form inputs accordingly
+  - Show read-only banner when offline (consistent with other pages)
+  - Queue mutations when offline, sync on reconnection
+  - Follow existing patterns from PostsFeed and ConversationView
 - **Files to modify:**
-  - `apps/web-v2/src/pages/SettingsPage.tsx`
-  - Offline queue system
+  - `apps/web-v2/src/pages/SettingsPage.tsx` - Add offline detection and read-only mode
+  - `apps/web-v2/src/features/settings/hooks/useSettings.ts` - Implement caching strategy
+  - Offline queue system integration
 
-### 2. Connecting Indicator Not Visible in Mobile Viewport
-- **Type:** Bug
+### 2. Implement reCaptcha v3 for Auth Flows
+- **Type:** Security Enhancement
 - **Status:** ⏸️ Not started
-- **Impact:** Medium
-- **Description:** The connecting indicator for offline mode does not appear in mobile viewport. This is a responsive display issue causing users to not know when the app is reconnecting.
+- **Impact:** High (Security - Bot Prevention)
+- **Description:** Implement Google reCaptcha v3 (silent, no user interaction) for login and signup flows. Backend already has reCaptcha v3 implementation. Frontend needs to integrate reCaptcha token generation and pass tokens to backend for verification. This prevents bot signups and login attempts without adding user friction.
+- **Implementation Notes:**
+  - Backend already implements reCaptcha v3 verification
+  - Frontend must load reCaptcha script and generate tokens
+  - Token should be included in login/signup API requests
+  - No visible captcha challenge (v3 is invisible/background)
+  - Backend validates token and returns error if score is too low
 - **Files to modify:**
-  - Offline indicator component CSS/responsive styles
+  - `apps/web-v2/src/features/auth/components/LoginForm.tsx` - Add reCaptcha token generation on submit
+  - `apps/web-v2/src/features/auth/components/SignupWizard.tsx` - Add reCaptcha token generation on final step
+  - `apps/web-v2/src/features/auth/services/authApi.ts` - Include recaptchaToken in request payloads
+  - `apps/web-v2/index.html` - Add reCaptcha v3 script tag
+  - Environment variables - Add VITE_RECAPTCHA_SITE_KEY
 
-### 3. Import Silent reCaptcha from Web-V1
-- **Type:** TODO
+### 3. User Self-Delete Account Mechanism
+- **Type:** Feature (Privacy/Compliance)
 - **Status:** ⏸️ Not started
-- **Impact:** High (Security)
-- **Description:** Import the silent reCaptcha implementation from Web-V1 for login and signup flows. This prevents bot signups without user friction. Currently implemented in Web-V1, needs to be ported to Web-V2.
+- **Impact:** Medium (GDPR/Privacy Compliance)
+- **Description:** Implement user-initiated account deletion feature. Users should be able to permanently delete their own accounts from Settings page. Must include strong confirmation flow to prevent accidental deletion. Backend should perform soft delete (mark account as deleted, hide data) rather than hard delete for audit/compliance purposes.
+- **Implementation Requirements:**
+  - **UI:** "Delete Account" button in Settings → Account tab (destructive variant)
+  - **Confirmation Flow:** Two-step confirmation
+    - Step 1: Dialog explaining consequences ("This action cannot be undone")
+    - Step 2: Type confirmation text (e.g., "DELETE MY ACCOUNT") to enable final button
+  - **Backend:** Soft delete implementation
+    - Set `user.isDeleted = true` and `user.deletedAt = Date.now()`
+    - Hide all user posts, comments, and profile data
+    - Preserve data for 30 days before hard deletion (compliance)
+    - End all active conversations
+  - **Post-deletion:** Auto-logout and redirect to goodbye page
 - **Files to modify:**
-  - `apps/web-v2/src/features/auth/components/LoginForm.tsx`
-  - `apps/web-v2/src/features/auth/components/SignupWizard.tsx`
-  - Backend auth endpoints (if needed)
-
-### 4. User Self-Delete Account Mechanism
-- **Type:** TODO
-- **Status:** ⏸️ Not started
-- **Impact:** Medium (Privacy/Compliance)
-- **Description:** Implement UI and backend logic for users to delete their own accounts. Should include confirmation dialog and proper data cleanup (soft delete).
-- **Files to modify:**
-  - `apps/web-v2/src/pages/SettingsPage.tsx` - Add delete account button in Account tab
-  - `apps/api/src/controllers/user.js` - Add deleteOwnAccount endpoint
-  - Confirmation modal component
+  - `apps/web-v2/src/pages/SettingsPage.tsx` - Add delete account section
+  - `apps/web-v2/src/features/auth/components/DeleteAccountDialog.tsx` - New confirmation dialog
+  - `apps/api/src/controllers/user.js` - Add `deleteOwnAccount` endpoint (POST /api/users/me/delete)
+  - `apps/api/src/models/User.js` - Add isDeleted and deletedAt fields
+  - `apps/api/src/middleware/authenticate.js` - Block deleted users from authentication
 
 ---
 
