@@ -107,29 +107,12 @@
 
 ### 📋 Future Enhancements & Technical Debt (November 23, 2025)
 
-#### 1. Settings Support for Offline Mode
-- **Status:** ⏸️ Not started
-- **Type:** Tech Debt
-- **Impact:** Medium
-- **Description:** Settings page does not currently support offline mode. Users should be able to view and potentially queue settings changes when offline.
+> **Note:** Detailed implementation specifications for future enhancements are tracked in **REBUILD-PROMPTS.md** (Future Enhancements section, lines 175-235).
 
-#### 2. Connecting Indicator Not Visible in Mobile Viewport
-- **Status:** ⏸️ Not started
-- **Type:** Bug
-- **Impact:** Medium
-- **Description:** The connecting indicator for offline mode does not appear in mobile viewport. Responsive display issue.
-
-#### 3. Import Silent reCaptcha from Web-V1
-- **Status:** ⏸️ Not started
-- **Type:** TODO
-- **Impact:** High (Security)
-- **Description:** Import the silent reCaptcha implementation from Web-V1 for login and signup flows to prevent bot signups.
-
-#### 4. User Self-Delete Account Mechanism
-- **Status:** ⏸️ Not started
-- **Type:** TODO
-- **Impact:** Medium (Privacy/Compliance)
-- **Description:** Implement UI and backend logic for users to delete their own accounts with confirmation dialog and proper data cleanup (soft delete).
+#### Quick Reference:
+1. **Settings Offline Mode** - Add caching and read-only mode when offline
+2. **reCaptcha v3 Integration** - Frontend integration for auth flows (backend ready)
+3. **User Self-Delete** - GDPR-compliant account deletion with 30-day grace period
 
 ---
 
