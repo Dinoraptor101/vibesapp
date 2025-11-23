@@ -7,6 +7,7 @@
 
 import { X, Send } from 'lucide-react';
 import { type ChangeEvent, type KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { cn } from '@/lib/cn';
 
 interface CommentInputProps {
@@ -33,6 +34,7 @@ export function CommentInput({
 }: CommentInputProps) {
   const [value, setValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const { isOnline } = useNetworkStatus();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-focus when in reply mode
@@ -73,6 +75,7 @@ export function CommentInput({
   };
 
   const handleSubmit = () => {
+    if (!isOnline) return; // Prevent submission when offline
     const trimmedValue = value.trim();
     if (!trimmedValue || disabled) return;
 
@@ -133,8 +136,8 @@ export function CommentInput({
           onKeyDown={handleKeyDown}
           onBlur={handleBlur}
           onFocus={handleFocus}
-          placeholder={placeholder}
-          disabled={disabled}
+          placeholder={!isOnline ? 'Connect to internet to comment...' : placeholder}
+          disabled={disabled || !isOnline}
           rows={1}
           className={cn(
             'w-full px-4 py-3 pr-12 rounded-lg resize-none',
@@ -151,13 +154,14 @@ export function CommentInput({
         <button
           type="button"
           onClick={handleSubmit}
-          disabled={disabled || !value.trim()}
+          disabled={disabled || !isOnline || !value.trim()}
           className={cn(
             'absolute top-1/2 -translate-y-1/2 right-2 p-2 rounded-lg transition-all flex items-center justify-center -mt-0.5',
             'hover:bg-surface-tertiary',
             value.trim() ? 'text-brand hover:scale-110' : 'text-text-tertiary cursor-not-allowed'
           )}
           aria-label="Send comment"
+          title={!isOnline ? 'Connect to internet to comment' : undefined}
         >
           <Send className="w-5 h-5" />
         </button>

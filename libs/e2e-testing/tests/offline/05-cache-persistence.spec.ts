@@ -30,7 +30,7 @@ test.describe.skip('Cache Persistence', () => {
     await page.waitForURL('http://localhost:5173/', { timeout: 10000 });
   });
 
-  test('should persist posts cache across page reload', async ({ page, context }) => {
+  test.skip('should persist posts cache across page reload', async ({ page, context }) => {
     // Load posts while online
     await page.waitForSelector('[data-testid="post-card"]', { timeout: 10000 });
     const onlinePostCount = await page.locator('[data-testid="post-card"]').count();
@@ -59,7 +59,7 @@ test.describe.skip('Cache Persistence', () => {
     await expect(cacheIndicator).toBeVisible();
   });
 
-  test('should persist queue across page reload', async ({ page, context }) => {
+  test.skip('should persist queue across page reload', async ({ page, context }) => {
     await goOffline(context);
 
     // Heart 3 posts
@@ -88,7 +88,7 @@ test.describe.skip('Cache Persistence', () => {
     await expect(heartButtons.nth(2)).toHaveClass(/filled|active/);
   });
 
-  test('should hydrate cache on startup and show loading skeleton', async ({ page, context }) => {
+  test.skip('should hydrate cache on startup and show loading skeleton', async ({ page, context }) => {
     // Go offline before reload
     await goOffline(context);
 
@@ -110,7 +110,7 @@ test.describe.skip('Cache Persistence', () => {
     await expect(page.locator('[data-testid="offline-banner"]')).toBeVisible();
   });
 
-  test('should sync queue automatically after reconnect and reload', async ({ page, context }) => {
+  test.skip('should sync queue automatically after reconnect and reload', async ({ page, context }) => {
     await goOffline(context);
 
     // Heart 2 posts
@@ -140,7 +140,7 @@ test.describe.skip('Cache Persistence', () => {
     await expect(toast).toContainText(/synced|success/i);
   });
 
-  test('should evict old cache when storage limit reached', async ({ page, context }) => {
+  test.skip('should evict old cache when storage limit reached', async ({ page, context }) => {
     // This test would require filling IndexedDB to near capacity
     // Skipping implementation for now, but structure provided
     // TODO: Implement cache eviction test

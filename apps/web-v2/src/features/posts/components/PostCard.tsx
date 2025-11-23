@@ -9,9 +9,11 @@
  */
 
 import { MessageSquare, Heart, Flag } from 'lucide-react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui-next';
 import { useAuth } from '@/features/auth';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { formatRelativeTime, stripHtml } from '@/lib/utils';
 import type { Post } from '../types';
 import { UserBadge } from './UserBadge';
@@ -26,6 +28,10 @@ interface PostCardProps {
 
 export function PostCard({ post, onLike, onReport, hideCaption = false }: PostCardProps) {
   const { user: currentUser } = useAuth();
+  const { isOnline } = useNetworkStatus();
+
+  // Track if this specific post's like is being processed
+  const [isLiking, setIsLiking] = useState(false);
 
   // Calculate stats from reactions
   const likes = post.reactions.filter((r) => r.type === 'like').length;
@@ -55,7 +61,14 @@ export function PostCard({ post, onLike, onReport, hideCaption = false }: PostCa
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!isOnline || isLiking || !canReport) return; // Prevent action when offline, already processing, or own post
+
+    setIsLiking(true);
     onLike?.(post._id);
+
+    // Reset after a short delay to allow the mutation to complete
+    // The mutation itself prevents duplicates, this is just UI feedback
+    setTimeout(() => setIsLiking(false), 500);
   };
 
   const handleReport = (e: React.MouseEvent) => {
@@ -72,89 +85,119 @@ export function PostCard({ post, onLike, onReport, hideCaption = false }: PostCa
   return (
     <Card noPadding className="min-w-[280px]">
       {/* Image with Caption Overlay - Full width, edge-to-edge */}
-      <Link to={`/post/${post._id}`} className="block">
-        <div className="relative aspect-square bg-surface-alt overflow-hidden">
-          <img
-            src={imageUrl}
-            alt={post.text || 'Post image'}
-            className="w-full h-full object-cover"
-            loading="lazy"
-            onError={(e) => {
-              console.error('Image failed to load:', imageUrl);
-              e.currentTarget.src = import.meta.env.VITE_PLACEHOLDER_IMAGE_URL || '';
-            }}
-          />
+      {isOnline ? (
+        <Link to={`/post/${post._id}`} className="block">
+          <div className="relative aspect-square bg-surface-alt overflow-hidden">
+            <img
+              src={imageUrl}
+              alt={post.text || 'Post image'}
+              className="w-full h-full object-cover"
+              loading="lazy"
+              onError={(e) => {
+                console.error('Image failed to load:', imageUrl);
+                e.currentTarget.src = import.meta.env.VITE_PLACEHOLDER_IMAGE_URL || '';
+              }}
+            />
 
-          {/* Caption Overlay - Only shown if caption exists and not hidden */}
-          {post.text && !hideCaption && (
-            <div className="absolute bottom-0 left-0 right-0 px-4 py-3 bg-gradient-to-t from-black/75 via-black/50 to-transparent">
-              <p className="text-white text-sm font-medium leading-snug line-clamp-2">
-                {stripHtml(post.text)}
-              </p>
-            </div>
-          )}
+            {/* Caption Overlay - Only shown if caption exists and not hidden */}
+            {post.text && !hideCaption && (
+              <div className="absolute bottom-0 left-0 right-0 px-4 py-3 bg-gradient-to-t from-black/75 via-black/50 to-transparent">
+                <p className="text-white text-sm font-medium leading-snug line-clamp-2">
+                  {stripHtml(post.text)}
+                </p>
+              </div>
+            )}
+          </div>
+        </Link>
+      ) : (
+        <div className="block">
+          <div className="relative aspect-square bg-surface-alt overflow-hidden">
+            <img
+              src={imageUrl}
+              alt={post.text || 'Post image'}
+              className="w-full h-full object-cover"
+              loading="lazy"
+              onError={(e) => {
+                console.error('Image failed to load:', imageUrl);
+                e.currentTarget.src = import.meta.env.VITE_PLACEHOLDER_IMAGE_URL || '';
+              }}
+            />
+
+            {/* Caption Overlay - Only shown if caption exists and not hidden */}
+            {post.text && !hideCaption && (
+              <div className="absolute bottom-0 left-0 right-0 px-4 py-3 bg-gradient-to-t from-black/75 via-black/50 to-transparent">
+                <p className="text-white text-sm font-medium leading-snug line-clamp-2">
+                  {stripHtml(post.text)}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
-      </Link>
+      )}
 
       {/* Footer with user info and actions - Fixed position */}
       <div className="p-3">
         {/* Username (left) + Timestamp (right) */}
         <div className="flex items-center justify-between gap-2">
-          <UserBadge user={post.user} size="sm" clickable={true} />
+          <UserBadge user={post.user} size="sm" clickable={isOnline} />
           <span className="text-xs text-text-tertiary flex-shrink-0 max-w-[60px] truncate">
             {formatRelativeTime(new Date(post.createdAt))}
           </span>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-4 mt-3">
-          {/* Like (Heart) */}
-          <button
-            type="button"
-            onClick={handleLike}
-            disabled={!canReport}
-            className={`flex items-center gap-1.5 transition-colors duration-200 group ${
-              !canReport
-                ? 'opacity-50 cursor-not-allowed'
-                : userHasLiked
-                  ? 'text-vibe-positive'
-                  : 'text-text-secondary hover:text-vibe-positive'
-            }`}
-            aria-label={
-              !canReport
-                ? 'Cannot like your own post'
-                : `${userHasLiked ? 'Unlike' : 'Like'} post (${likes} likes)`
-            }
-          >
-            <Heart
-              className={`w-5 h-5 transition-transform duration-200 ${
-                userHasLiked ? 'fill-current' : ''
-              }`}
-            />
-            <span className="text-sm font-medium">{likes}</span>
-          </button>
+        {/* Actions - Only shown when online */}
+        {isOnline && (
+          <div className="flex items-center gap-4 mt-3">
+            {/* Like (Heart) */}
+            {canReport && (
+              <button
+                type="button"
+                onClick={handleLike}
+                disabled={isLiking}
+                className={`flex items-center gap-1.5 transition-colors duration-200 group ${
+                  isLiking
+                    ? 'opacity-50 cursor-not-allowed'
+                    : userHasLiked
+                      ? 'text-vibe-positive'
+                      : 'text-text-secondary hover:text-vibe-positive'
+                }`}
+                aria-label={
+                  isLiking
+                    ? 'Processing...'
+                    : `${userHasLiked ? 'Unlike' : 'Like'} post (${likes} likes)`
+                }
+              >
+                <Heart
+                  className={`w-5 h-5 transition-transform duration-200 ${
+                    userHasLiked ? 'fill-current' : ''
+                  } ${isLiking ? 'animate-pulse' : ''}`}
+                />
+                <span className="text-sm font-medium">{likes}</span>
+              </button>
+            )}
 
-          {/* Comment - navigates to post detail */}
-          <Link
-            to={`/post/${post._id}`}
-            className="flex items-center gap-1.5 text-text-secondary hover:text-brand-purple transition-colors duration-200 group"
-            aria-label="View comments"
-          >
-            <MessageSquare className="w-5 h-5 transition-transform duration-200" />
-          </Link>
-
-          {/* Report (only if not author) */}
-          {canReport && (
-            <button
-              type="button"
-              onClick={handleReport}
-              className="flex items-center gap-1.5 text-text-secondary hover:text-warning transition-colors duration-200 group ml-auto"
-              aria-label="Report post"
+            {/* Comment - navigates to post detail */}
+            <Link
+              to={`/post/${post._id}`}
+              className="flex items-center gap-1.5 text-text-secondary hover:text-brand-purple transition-colors duration-200 group"
+              aria-label="View comments"
             >
-              <Flag className="w-4 h-4 transition-transform duration-200" />
-            </button>
-          )}
-        </div>
+              <MessageSquare className="w-5 h-5 transition-transform duration-200" />
+            </Link>
+
+            {/* Report (only if not author) */}
+            {canReport && (
+              <button
+                type="button"
+                onClick={handleReport}
+                className="flex items-center gap-1.5 text-text-secondary hover:text-warning transition-colors duration-200 group ml-auto"
+                aria-label="Report post"
+              >
+                <Flag className="w-4 h-4 transition-transform duration-200" />
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Hidden indicator */}
         {post.isHidden && (

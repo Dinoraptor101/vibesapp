@@ -1,14 +1,13 @@
 /**
- * useCreateComment Hook - Offline Enabled
+ * useCreateComment Hook
  *
- * Mutation for creating comments with offline support and optimistic updates.
+ * Mutation for creating comments with optimistic updates.
  * Auto-invalidates post comment count and adds to cache.
  */
 
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { InfiniteData } from '@tanstack/react-query';
 import { useAuth } from '@/features/auth';
-import { useOfflineMutation } from '@/hooks/useOfflineMutation';
 import { createComment, type CreateCommentPayload } from '../api/commentService';
 import type { Post, PostsResponse } from '../types';
 
@@ -16,8 +15,7 @@ export function useCreateComment(postId: string) {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  return useOfflineMutation({
-    action: 'create_comment',
+  return useMutation({
     mutationFn: ({ text, replyToCommentId }: { text: string; replyToCommentId?: string }) => {
       const payload: CreateCommentPayload = {
         text,
@@ -36,7 +34,7 @@ export function useCreateComment(postId: string) {
 
       return createComment(payload);
     },
-    optimisticUpdate: ({ text, replyToCommentId }) => {
+    onMutate: ({ text, replyToCommentId }) => {
       // Create optimistic comment
       const tempComment: Post = {
         _id: `temp-${Date.now()}`,

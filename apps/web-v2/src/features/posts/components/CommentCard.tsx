@@ -82,7 +82,7 @@ export function CommentCard({ comment, onHeart, onReply, className }: CommentCar
             {formatRelativeTime(new Date(comment.createdAt))}
           </span>
 
-          {/* Syncing Badge for offline comments */}
+          {/* Syncing Badge for optimistic comments */}
           {comment._id.startsWith('temp-') && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-hover text-text-tertiary text-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
