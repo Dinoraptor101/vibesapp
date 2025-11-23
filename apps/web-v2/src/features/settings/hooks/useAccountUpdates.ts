@@ -11,6 +11,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useRef, useCallback, useEffect } from 'react';
 import { useAuth } from '@/features/auth/context/useAuth';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import api from '@/lib/api';
 
 interface AccountUpdate {
@@ -29,6 +30,7 @@ interface QueueOptions {
 
 export function useAccountUpdates() {
   const { user, refreshUser } = useAuth();
+  const { isOnline } = useNetworkStatus();
   const queryClient = useQueryClient();
   const updateQueue = useRef<AccountUpdate>({});
   const callbacksRef = useRef<QueueOptions>({});
@@ -39,6 +41,12 @@ export function useAccountUpdates() {
    */
   const queueUpdate = useCallback(
     (changes: AccountUpdate, options?: QueueOptions) => {
+      // Prevent queueing when offline
+      if (!isOnline) {
+        console.log('Offline: Settings changes blocked');
+        return;
+      }
+
       // Add changes to queue
       updateQueue.current = {
         ...updateQueue.current,
@@ -90,7 +98,7 @@ export function useAccountUpdates() {
         }
       }, 300);
     },
-    [user, refreshUser, queryClient]
+    [user, refreshUser, queryClient, isOnline]
   );
 
   /**

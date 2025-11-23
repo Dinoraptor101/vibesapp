@@ -134,11 +134,11 @@
    - [X] Assign responsibilities
 
 3. **🚀 Setup New Project**
-   - [ ] Create `apps/web-v2` directory
-   - [ ] Initialize Vite + React + TypeScript
-   - [ ] Configure Tailwind CSS
-   - [ ] Set up basic folder structure
-   - [ ] Configure ESLint/Biome for new project
+   - [x] Create `apps/web-v2` directory
+   - [x] Initialize Vite + React + TypeScript
+   - [x] Configure Tailwind CSS
+   - [x] Set up basic folder structure
+   - [x] Configure ESLint/Biome for new project
 
 ---
 

@@ -8,6 +8,7 @@ import { authApi } from '@/features/auth/services/authApi';
 import { uploadImage } from '@/features/posts/api/s3Service';
 import { compressImage } from '@/features/posts/utils/imageUtils';
 import { useLocationGPS } from '@/hooks/useLocationGPS';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { getCookie, setCookie } from '@/lib/api';
 import { getAvatarUrl } from '@/lib/avatarUtils';
 import { useAccountUpdates } from '../hooks/useAccountUpdates';
@@ -36,6 +37,7 @@ export function AccountTab() {
   const navigate = useNavigate();
   const { queueUpdate } = useAccountUpdates();
   const { isGettingLocation, getGPSLocation } = useLocationGPS();
+  const { isOnline } = useNetworkStatus();
 
   // Form state (editable)
   const [bio, setBio] = useState(user?.bio || '');
@@ -101,6 +103,7 @@ export function AccountTab() {
   // GPS handler
   // GPS handler with auto-save
   const handleGPSClick = async () => {
+    if (!isOnline) return; // Prevent action when offline
     const result = await getGPSLocation();
     if (result) {
       const newCoords = { lat: result.lat, lon: result.lon };
@@ -146,6 +149,7 @@ export function AccountTab() {
 
   // Location auto-save (onBlur pattern with geocoding)
   const handleLocationBlur = async () => {
+    if (!isOnline) return; // Prevent action when offline
     const trimmedCity = locationCity.trim();
     const currentCity = user?.location?.city || '';
 
@@ -244,6 +248,7 @@ export function AccountTab() {
 
   // Polarity toggle handler
   const handlePolarityToggle = () => {
+    if (!isOnline) return; // Prevent action when offline
     const previousPolarity = polarity;
     const newPolarity = polarity === 'YIN' ? 'YANG' : 'YIN';
     setPolarity(newPolarity);
@@ -261,6 +266,7 @@ export function AccountTab() {
 
   // Bio auto-save (onBlur pattern)
   const handleBioBlur = () => {
+    if (!isOnline) return; // Prevent action when offline
     const trimmedBio = bio.trim();
     const currentUserBio = user?.bio || '';
 
@@ -283,6 +289,7 @@ export function AccountTab() {
 
   // MBTI auto-save (onChange immediate - polarity pattern)
   const handleMbtiChange = (newMbti: string) => {
+    if (!isOnline) return; // Prevent action when offline
     const previousMbti = mbti;
     setMbti(newMbti);
     queueUpdate(
@@ -304,6 +311,7 @@ export function AccountTab() {
   };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isOnline) return; // Prevent action when offline
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -379,6 +387,7 @@ export function AccountTab() {
 
   // Regenerate Pigeon ID (with press-and-hold safety)
   const handleRegeneratePigeonId = async () => {
+    if (!isOnline) return; // Prevent action when offline
     if (!user?.userId) {
       console.error('User ID not found');
       return;
@@ -470,7 +479,8 @@ export function AccountTab() {
           <button
             type="button"
             onClick={handleAvatarClick}
-            className="cursor-pointer hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-brand-500 rounded-full"
+            disabled={!isOnline}
+            className="cursor-pointer hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-brand-500 rounded-full disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:opacity-50"
             aria-label="Change profile photo"
           >
             <Avatar
@@ -482,7 +492,7 @@ export function AccountTab() {
           </button>
           <Button
             onClick={handleAvatarClick}
-            disabled={uploadingAvatar}
+            disabled={!isOnline || uploadingAvatar}
             variant="secondary"
             size="sm"
           >
@@ -523,7 +533,8 @@ export function AccountTab() {
           onBlur={handleBioBlur}
           maxLength={200}
           rows={3}
-          className="w-full px-3 py-2 border border-gray-300 dim:border-gray-500 dark:border-gray-600 rounded-lg bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-gray-100 dark:text-gray-100 placeholder-gray-500 dim:placeholder-gray-450 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"
+          disabled={!isOnline}
+          className="w-full px-3 py-2 border border-gray-300 dim:border-gray-500 dark:border-gray-600 rounded-lg bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-gray-100 dark:text-gray-100 placeholder-gray-500 dim:placeholder-gray-450 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none disabled:opacity-50 disabled:cursor-not-allowed"
           placeholder="Tell others about yourself..."
         />
         {bio.length >= 180 && (
@@ -545,7 +556,8 @@ export function AccountTab() {
           id="mbti"
           value={mbti}
           onChange={(e) => handleMbtiChange(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 dim:border-gray-500 dark:border-gray-600 rounded-lg bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-gray-100 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+          disabled={!isOnline}
+          className="w-full px-3 py-2 border border-gray-300 dim:border-gray-500 dark:border-gray-600 rounded-lg bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-gray-100 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {MBTI_TYPES.map((type) => (
             <option key={type} value={type}>
@@ -572,12 +584,12 @@ export function AccountTab() {
             onKeyDown={handleCityInputKeyDown}
             onBlur={handleLocationBlur}
             placeholder="Enter city name"
-            className="flex-1 px-3 py-2 border border-gray-300 dim:border-gray-500 dark:border-gray-600 rounded-lg bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-gray-100 dark:text-gray-100 placeholder-gray-500 dim:placeholder-gray-450 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-            disabled={isGettingLocation}
+            className="flex-1 px-3 py-2 border border-gray-300 dim:border-gray-500 dark:border-gray-600 rounded-lg bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-gray-100 dark:text-gray-100 placeholder-gray-500 dim:placeholder-gray-450 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!isOnline || isGettingLocation}
           />
           <Button
             onClick={handleGPSClick}
-            disabled={isGettingLocation}
+            disabled={!isOnline || isGettingLocation}
             variant="secondary"
             size="sm"
             aria-label="Use current location"
@@ -606,7 +618,8 @@ export function AccountTab() {
           <button
             type="button"
             onClick={handlePolarityToggle}
-            className="relative inline-flex h-14 w-28 items-center rounded-full bg-gray-100 dim:bg-gray-700 dark:bg-gray-800 ring-2 ring-gray-300 dim:ring-gray-500 dark:ring-gray-600 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-purple focus:ring-offset-2"
+            disabled={!isOnline}
+            className="relative inline-flex h-14 w-28 items-center rounded-full bg-gray-100 dim:bg-gray-700 dark:bg-gray-800 ring-2 ring-gray-300 dim:ring-gray-500 dark:ring-gray-600 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label={`Current polarity: ${polarity}`}
           >
             <span
@@ -643,7 +656,7 @@ export function AccountTab() {
               onMouseLeave={handleRegenerateMouseUp}
               onTouchStart={handleRegenerateMouseDown}
               onTouchEnd={handleRegenerateMouseUp}
-              disabled={isRegeneratingPigeonId}
+              disabled={!isOnline || isRegeneratingPigeonId}
               className="relative shrink-0 rounded-md p-2 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               title="Hold for 2 seconds to regenerate Pigeon ID"
             >
