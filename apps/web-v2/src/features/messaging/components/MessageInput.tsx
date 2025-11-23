@@ -6,6 +6,7 @@
 
 import { Send } from 'lucide-react';
 import { type ChangeEvent, type KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { cn } from '@/lib/cn';
 
 interface MessageInputProps {
@@ -23,6 +24,7 @@ export function MessageInput({
 }: MessageInputProps) {
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const { isOnline } = useNetworkStatus();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea based on content
@@ -56,6 +58,7 @@ export function MessageInput({
   };
 
   const handleSend = () => {
+    if (!isOnline) return; // Prevent sending when offline
     const trimmedMessage = message.trim();
     if (!trimmedMessage || disabled) return;
 
@@ -94,8 +97,8 @@ export function MessageInput({
           onKeyDown={handleKeyDown}
           onBlur={handleBlur}
           onFocus={handleFocus}
-          placeholder={placeholder}
-          disabled={disabled}
+          placeholder={!isOnline ? 'Connect to internet to send messages...' : placeholder}
+          disabled={disabled || !isOnline}
           rows={1}
           className={cn(
             'w-full px-4 py-3 pr-12 rounded-lg resize-none',
@@ -112,13 +115,14 @@ export function MessageInput({
         <button
           type="button"
           onClick={handleSend}
-          disabled={disabled || !message.trim()}
+          disabled={disabled || !isOnline || !message.trim()}
           className={cn(
             'absolute top-1/2 -translate-y-1/2 right-2 p-2 rounded-lg transition-all flex items-center justify-center -mt-0.5',
             'hover:bg-surface-tertiary',
             message.trim() ? 'text-brand hover:scale-110' : 'text-text-tertiary cursor-not-allowed'
           )}
           aria-label="Send message"
+          title={!isOnline ? 'Connect to internet to send messages' : undefined}
         >
           <Send className="w-5 h-5" />
         </button>

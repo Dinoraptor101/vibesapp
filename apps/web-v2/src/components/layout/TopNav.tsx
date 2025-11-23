@@ -29,13 +29,16 @@ export function TopNav() {
 
   return (
     <nav className="hidden md:flex items-center justify-between px-6 py-3 bg-surface-elevated/95 backdrop-blur-md border-b border-border sticky top-0 z-40">
-      {/* Left: Logo */}
-      <Link to="/" className="flex items-center gap-2 group">
-        <div className="text-2xl font-bold text-brand-purple group-hover:scale-110 transition-transform">
-          🕊️
-        </div>
-        <span className="text-xl font-bold text-text-primary hidden lg:inline">VibesApp</span>
-      </Link>
+      {/* Left: Logo + Offline Indicator */}
+      <div className="flex items-center gap-3">
+        <Link to="/" className="flex items-center gap-2 group">
+          <div className="text-2xl font-bold text-brand-purple group-hover:scale-110 transition-transform">
+            🕊️
+          </div>
+          <span className="text-xl font-bold text-text-primary hidden lg:inline">VibesApp</span>
+        </Link>
+        <OfflineIndicator />
+      </div>
 
       {/* Center: Nav Links */}
       <div className="flex items-center gap-1">
@@ -102,9 +105,6 @@ export function TopNav() {
 
       {/* Right: Create Post + User Menu */}
       <div className="flex items-center gap-3">
-        {/* Offline Indicator */}
-        <OfflineIndicator />
-
         {/* Create Post Button */}
         <Button
           variant="primary"

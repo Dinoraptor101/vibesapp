@@ -1,13 +1,42 @@
 # Offline Mode Strategy
 
 **Created:** November 5, 2025  
-**Updated:** November 18, 2025  
-**Status:** 🚧 In Progress - Test-Driven Development  
-**Approach:** TDD with Comprehensive E2E Test Suite
+**Updated:** November 23, 2025  
+**Status:** ⚠️ Abandoned - Simplified to Caching Only  
+**Approach:** Simplified to React Query caching without full offline support
 
 ---
 
-## 🧪 Test-Driven Development Approach
+## ⚠️ IMPORTANT: APPROACH CHANGED (November 23, 2025)
+
+The full offline mode with queue-and-sync functionality was **abandoned** due to implementation complexity causing issues. The application has been **reverted to a simpler caching-focused approach**:
+
+### New Simplified Approach:
+
+**✅ What We Keep:**
+- React Query caching (already excellent for offline viewing)
+- Network status indicator (`useNetworkStatus` + `OfflineIndicator`)
+- Graceful degradation when offline
+
+**❌ What We Removed:**
+- IndexedDB offline queue system
+- Auto-sync on reconnect
+- Optimistic mutations when offline
+- `useOfflineMutation` wrapper
+- Queue processing logic
+
+**Current Behavior:**
+- **When Online:** Everything works normally with React Query caching
+- **When Offline:** 
+  - Show cached data with grey wifi icon
+  - Mutations fail gracefully (React Query handles errors)
+  - Simple tooltip: "You're offline. Viewing cached content only."
+
+This gives 90% of the benefit (viewing cached content) with 10% of the complexity.
+
+---
+
+## 🧪 Test-Driven Development Approach (ARCHIVED)
 
 ### Why TDD for Offline Features?
 

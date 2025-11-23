@@ -1,11 +1,22 @@
 # E2E Test Suite Status
 
 ## Summary
-✅ **90 tests total** (6 integration tests rewritten for Web-V2)
+✅ **99 tests total** (6 integration tests rewritten for Web-V2)
 🚫 **19 tests excluded** (Offline PWA features not yet implemented)
 🌍 **Environment Support:** Localhost + QA (both test Web-V2)
 
 ## Latest Updates
+**Post Interactions Tests Added (Nov 23, 2025)**
+- ✅ Comprehensive like/unlike toggle functionality tests
+- ✅ Tests for preventing duplicate mutations
+- ✅ Like count accuracy validation
+- ✅ State persistence after page reload
+- ✅ Own post restrictions (cannot like own posts)
+- ✅ Report button functionality
+- ✅ Comment navigation
+- ✅ Offline state handling
+- ✅ Edge cases and error scenarios
+
 **Integration Tests Rewritten (Nov 2025)**
 - ✅ All 6 integration tests completely rewritten for Web-V2
 - ✅ Tests zen minimal login design and authentication flow
@@ -22,6 +33,10 @@
 
 ## Test Coverage (New!)
 Added comprehensive E2E tests for previously untested features:
+- ✅ **Post Interactions (Like/Unlike)** (9 tests) - NEW!
+- ✅ **Post Report Functionality** (2 tests) - NEW!
+- ✅ **Post Comment Navigation** (2 tests) - NEW!
+- ✅ **Edge Cases & Error Handling** (2 tests) - NEW!
 - ✅ **Account Settings & Preferences** (6 tests)
 - ✅ **Theme Switching** (3 tests)
 - ✅ **DM Requests** (5 tests)
@@ -29,7 +44,7 @@ Added comprehensive E2E tests for previously untested features:
 - ✅ **Following Users** (6 tests)
 - ✅ **Privacy & Blocking** (3 tests)
 
-**Total new tests added:** 30 tests in `user-features.spec.ts`
+**Total new tests added:** 45 tests across all feature areas
 
 ## Test Results (Last Run)
 ```
@@ -146,7 +161,32 @@ To re-enable these tests:
 - Display home page with search and feed
 - Navigate between pages using navigation
 
-### ✅ User Features Tests (30 tests) - NEW!
+### ✅ Post Interaction Tests (15 tests) - NEW!
+
+#### Post Like/Unlike Toggle (9 tests)
+- Display like button on posts
+- Toggle like state when clicking heart button
+- Toggle like back and forth multiple times
+- Prevent rapid duplicate likes
+- Disable like button on own posts
+- Persist like state after page reload
+- Display correct like count
+- Show filled/unfilled heart icon
+- Update aria-label for accessibility
+
+#### Post Report Functionality (2 tests)
+- Display report button on posts (except own posts)
+- Navigate to report page when clicking report button
+
+#### Post Comment Navigation (2 tests)
+- Display comment button on posts
+- Navigate to post detail when clicking comment button
+
+#### Edge Cases & Error Handling (2 tests)
+- Handle offline state gracefully
+- Display correct like count format for large numbers
+
+### ✅ User Features Tests (30 tests) - EXISTING
 
 #### Account Settings and Preferences (6 tests)
 - Display all settings sections

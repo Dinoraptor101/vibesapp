@@ -34,7 +34,7 @@ test.describe.skip('Conflict Resolution', () => {
     await mockS3Upload(page);
   });
 
-  test('should cancel create when post deleted before sync', async ({ page, context }) => {
+  test.skip('should cancel create when post deleted before sync', async ({ page, context }) => {
     await goOffline(context);
 
     // Create post
@@ -77,7 +77,7 @@ test.describe.skip('Conflict Resolution', () => {
     expect(finalQueue.length).toBe(0);
   });
 
-  test('should optimize heart/unheart to final state', async ({ page, context }) => {
+  test.skip('should optimize heart/unheart to final state', async ({ page, context }) => {
     await goOffline(context);
 
     const heartButton = page.locator('[data-testid="heart-button"]').first();
@@ -110,7 +110,7 @@ test.describe.skip('Conflict Resolution', () => {
     await expect(heartButton).not.toHaveClass(/filled|active/);
   });
 
-  test('should batch settings changes to final values', async ({ page, context }) => {
+  test.skip('should batch settings changes to final values', async ({ page, context }) => {
     await goOffline(context);
 
     // Navigate to settings
@@ -147,7 +147,7 @@ test.describe.skip('Conflict Resolution', () => {
     await expect(proximityInput).toHaveValue('25');
   });
 
-  test('should handle comment on deleted post gracefully', async ({ page, context }) => {
+  test.skip('should handle comment on deleted post gracefully', async ({ page, context }) => {
     await goOffline(context);
 
     // Open post detail

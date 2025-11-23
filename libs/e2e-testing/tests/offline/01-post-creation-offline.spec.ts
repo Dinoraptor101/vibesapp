@@ -46,7 +46,7 @@ test.describe.skip('Offline Post Creation', () => {
     await mockS3Upload(page);
   });
 
-  test('should create post offline and sync when reconnected', async ({ page, context }) => {
+  test.skip('should create post offline and sync when reconnected', async ({ page, context }) => {
     // Go offline
     await goOffline(context);
     await waitForOfflineBanner(page);
@@ -111,7 +111,7 @@ test.describe.skip('Offline Post Creation', () => {
     expect(finalQueue.length).toBe(0);
   });
 
-  test('should handle S3 upload failure with retry', async ({ page, context }) => {
+  test.skip('should handle S3 upload failure with retry', async ({ page, context }) => {
     // Go offline
     await goOffline(context);
 
@@ -157,7 +157,7 @@ test.describe.skip('Offline Post Creation', () => {
     expect(queue.length).toBe(0);
   });
 
-  test('should compress large images before storing', async ({ page, context }) => {
+  test.skip('should compress large images before storing', async ({ page, context }) => {
     await goOffline(context);
 
     // Create large image (>5MB simulated)

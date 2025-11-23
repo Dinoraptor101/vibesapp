@@ -45,7 +45,7 @@ test.describe.skip('Offline Messaging', () => {
     await page.waitForURL('**/messages/**', { timeout: 5000 });
   });
 
-  test('should send messages offline with optimistic UI', async ({ page, context }) => {
+  test.skip('should send messages offline with optimistic UI', async ({ page, context }) => {
     // Go offline
     await goOffline(context);
     await waitForOfflineBanner(page);
@@ -85,7 +85,7 @@ test.describe.skip('Offline Messaging', () => {
     await expect(sentIndicator).toBeVisible();
   });
 
-  test('should read cached conversations offline', async ({ page, context }) => {
+  test.skip('should read cached conversations offline', async ({ page, context }) => {
     // Load conversation while online (to populate cache)
     await page.waitForSelector('[data-testid="message-bubble"]', { timeout: 5000 });
     const messageCount = await page.locator('[data-testid="message-bubble"]').count();
@@ -109,7 +109,7 @@ test.describe.skip('Offline Messaging', () => {
     await expect(cacheIndicator).toBeVisible();
   });
 
-  test('should queue multiple messages in correct order', async ({ page, context }) => {
+  test.skip('should queue multiple messages in correct order', async ({ page, context }) => {
     await goOffline(context);
 
     // Send 3 messages

@@ -35,7 +35,7 @@ test.describe.skip('Offline Interactions', () => {
     await page.waitForSelector('[data-testid="post-card"]', { timeout: 10000 });
   });
 
-  test('should heart multiple posts offline and sync', async ({ page, context }) => {
+  test.skip('should heart multiple posts offline and sync', async ({ page, context }) => {
     // Go offline
     await goOffline(context);
     await waitForOfflineBanner(page);
@@ -72,7 +72,7 @@ test.describe.skip('Offline Interactions', () => {
     expect(finalQueue.length).toBe(0);
   });
 
-  test('should comment on posts offline with optimistic UI', async ({ page, context }) => {
+  test.skip('should comment on posts offline with optimistic UI', async ({ page, context }) => {
     // Go offline
     await goOffline(context);
 
@@ -107,7 +107,7 @@ test.describe.skip('Offline Interactions', () => {
     await expect(pendingBadge).not.toBeVisible();
   });
 
-  test('should batch sync multiple interaction types', async ({ page, context }) => {
+  test.skip('should batch sync multiple interaction types', async ({ page, context }) => {
     await goOffline(context);
 
     // Heart 2 posts
@@ -146,7 +146,7 @@ test.describe.skip('Offline Interactions', () => {
     await expect(toast).toContainText(/synced|success/i);
   });
 
-  test('should handle heart/unheart toggle while offline', async ({ page, context }) => {
+  test.skip('should handle heart/unheart toggle while offline', async ({ page, context }) => {
     await goOffline(context);
 
     const heartButton = page.locator('[data-testid="heart-button"]').first();
