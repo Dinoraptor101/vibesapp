@@ -305,9 +305,17 @@ test.describe('Post Like/Unlike Toggle', () => {
     const initialAriaLabel = await heartButton.getAttribute('aria-label');
     const initialIsLiked = initialAriaLabel?.toLowerCase().includes('unlike');
 
-    // Toggle like state
+    // Toggle like state and wait for API response
+    const likeResponsePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes('/api/') &&
+        (response.url().includes('/like') || response.url().includes('/unlike')) &&
+        (response.status() === 200 || response.status() === 201),
+      { timeout: 5000 }
+    );
+
     await heartButton.click();
-    await page.waitForTimeout(600);
+    await likeResponsePromise;
 
     // Navigate to post detail page
     await page.goto(postUrl);
