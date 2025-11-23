@@ -16,8 +16,6 @@ export function SettingsPage() {
   return (
     <AppLayout>
       <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <h1 className="text-3xl font-bold text-text-primary mb-6">Settings</h1>
-
         {/* Tabs */}
         <div className="mb-6">
           <div className="flex gap-0 border-b border-gray-200 dim:border-gray-600 dark:border-gray-700">
