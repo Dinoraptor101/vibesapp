@@ -17,7 +17,7 @@ export function useComments(postId: string) {
       return lastPage.pagination.hasMore ? lastPage.pagination.page + 1 : undefined;
     },
     initialPageParam: 1,
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes - comments don't change frequently
     gcTime: 10 * 60 * 1000, // 10 minutes
     enabled: !!postId, // Only fetch if postId exists
   });

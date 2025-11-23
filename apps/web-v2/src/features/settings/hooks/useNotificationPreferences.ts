@@ -48,6 +48,6 @@ export function useNotificationPreferences() {
       );
     },
     enabled: !!user?.userId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 15 * 60 * 1000, // 15 minutes - settings rarely change
   });
 }

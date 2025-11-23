@@ -27,7 +27,12 @@ interface Location {
 }
 
 interface CreatePostFormProps {
-  onSubmit: (data: { image: string; text?: string; location: Location }) => void;
+  onSubmit: (data: {
+    image: string;
+    text?: string;
+    blurPlaceholder?: string;
+    location: Location;
+  }) => void;
   onCancel: () => void;
   isSubmitting?: boolean;
 }
@@ -113,10 +118,11 @@ export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: Cre
         // Upload image to S3
         const imageKey = await uploadImage(selectedImage.compressed, setUploadProgress);
 
-        // Submit post
+        // Submit post with blur placeholder
         onSubmit({
           image: imageKey,
           text: text.trim() || undefined,
+          blurPlaceholder: selectedImage.blurPlaceholder,
           location,
         });
       } catch (err) {

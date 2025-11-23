@@ -9,7 +9,7 @@
  */
 
 import { MessageSquare, Heart, Flag } from 'lucide-react';
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui-next';
 import { useAuth } from '@/features/auth';
@@ -26,12 +26,14 @@ interface PostCardProps {
   hideCaption?: boolean; // Hide caption overlay when showing full caption section in detail view
 }
 
-export function PostCard({ post, onLike, onReport, hideCaption = false }: PostCardProps) {
+function PostCardComponent({ post, onLike, onReport, hideCaption = false }: PostCardProps) {
   const { user: currentUser } = useAuth();
   const { isOnline } = useNetworkStatus();
 
   // Track if this specific post's like is being processed
   const [isLiking, setIsLiking] = useState(false);
+  // Track image load state for progressive loading
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Calculate stats from reactions
   const likes = post.reactions.filter((r) => r.type === 'like').length;
@@ -88,14 +90,29 @@ export function PostCard({ post, onLike, onReport, hideCaption = false }: PostCa
       {isOnline ? (
         <Link to={`/post/${post._id}`} className="block">
           <div className="relative aspect-square bg-surface-alt overflow-hidden">
+            {/* Blur placeholder - shown while loading */}
+            {!imageLoaded && post.blurPlaceholder && (
+              <img
+                src={post.blurPlaceholder}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover blur-xl scale-110"
+                aria-hidden="true"
+              />
+            )}
+
+            {/* Actual image */}
             <img
               src={imageUrl}
               alt={post.text || 'Post image'}
-              className="w-full h-full object-cover"
+              className={`w-full h-full object-cover transition-opacity duration-300 ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
               loading="lazy"
+              onLoad={() => setImageLoaded(true)}
               onError={(e) => {
                 console.error('Image failed to load:', imageUrl);
                 e.currentTarget.src = import.meta.env.VITE_PLACEHOLDER_IMAGE_URL || '';
+                setImageLoaded(true);
               }}
             />
 
@@ -112,14 +129,29 @@ export function PostCard({ post, onLike, onReport, hideCaption = false }: PostCa
       ) : (
         <div className="block">
           <div className="relative aspect-square bg-surface-alt overflow-hidden">
+            {/* Blur placeholder - shown while loading */}
+            {!imageLoaded && post.blurPlaceholder && (
+              <img
+                src={post.blurPlaceholder}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover blur-xl scale-110"
+                aria-hidden="true"
+              />
+            )}
+
+            {/* Actual image */}
             <img
               src={imageUrl}
               alt={post.text || 'Post image'}
-              className="w-full h-full object-cover"
+              className={`w-full h-full object-cover transition-opacity duration-300 ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
               loading="lazy"
+              onLoad={() => setImageLoaded(true)}
               onError={(e) => {
                 console.error('Image failed to load:', imageUrl);
                 e.currentTarget.src = import.meta.env.VITE_PLACEHOLDER_IMAGE_URL || '';
+                setImageLoaded(true);
               }}
             />
 
@@ -211,3 +243,15 @@ export function PostCard({ post, onLike, onReport, hideCaption = false }: PostCa
     </Card>
   );
 }
+
+const PostCardMemoized = memo(PostCardComponent, (prev, next) => {
+  // Only re-render if post data actually changed
+  return (
+    prev.post._id === next.post._id &&
+    prev.post.reactions.length === next.post.reactions.length &&
+    prev.post.isHidden === next.post.isHidden &&
+    prev.post.text === next.post.text
+  );
+});
+
+export { PostCardMemoized as PostCard };

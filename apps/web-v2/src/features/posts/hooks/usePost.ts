@@ -33,7 +33,7 @@ export function usePost(postId: string): UsePostReturn {
     queryKey: ['post', postId],
     queryFn: () => getPostById(postId, user?._id || ''),
     enabled: !!postId && !!user,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 10, // 10 minutes - individual post data is stable
   });
 
   return {

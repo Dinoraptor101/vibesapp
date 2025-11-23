@@ -5,6 +5,7 @@
  */
 
 import { Heart, MessageCircle } from 'lucide-react';
+import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Avatar } from '@/components/ui-next/Avatar';
 import { useAuth } from '@/features/auth';
@@ -20,7 +21,7 @@ interface CommentCardProps {
   className?: string;
 }
 
-export function CommentCard({ comment, onHeart, onReply, className }: CommentCardProps) {
+function CommentCardComponent({ comment, onHeart, onReply, className }: CommentCardProps) {
   const { user: currentUser } = useAuth();
   const navigate = useNavigate();
 
@@ -152,3 +153,12 @@ export function CommentCard({ comment, onHeart, onReply, className }: CommentCar
     </div>
   );
 }
+
+const CommentCardMemoized = memo(CommentCardComponent, (prev, next) => {
+  return (
+    prev.comment._id === next.comment._id &&
+    prev.comment.reactions.length === next.comment.reactions.length
+  );
+});
+
+export { CommentCardMemoized as CommentCard };

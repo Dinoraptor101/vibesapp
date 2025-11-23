@@ -2,9 +2,8 @@
  * SettingsPage - User settings with tabs for Account, Preferences, and Support
  */
 
-import { ChevronLeft } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { AppLayout } from '@/components/layout';
 import { AccountTab } from '@/features/settings/components/AccountTab';
 import { PreferencesTab } from '@/features/settings/components/PreferencesTab';
 import { SupportTab } from '@/features/settings/components/SupportTab';
@@ -12,27 +11,15 @@ import { SupportTab } from '@/features/settings/components/SupportTab';
 type Tab = 'account' | 'preferences' | 'support';
 
 export function SettingsPage() {
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('account');
 
   return (
-    <div className="min-h-screen bg-gray-50 dim:bg-gray-800 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-white dim:bg-gray-700 dark:bg-gray-800 border-b border-gray-200 dim:border-gray-600 dark:border-gray-700 sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="p-2 hover:bg-gray-100 dim:hover:bg-gray-600 dark:hover:bg-gray-700 rounded-full transition-colors"
-            aria-label="Go back"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <h1 className="text-xl font-semibold">Settings</h1>
-        </div>
+    <AppLayout>
+      <div className="container mx-auto px-4 py-8 max-w-2xl">
+        <h1 className="text-3xl font-bold text-text-primary mb-6">Settings</h1>
 
         {/* Tabs */}
-        <div className="max-w-2xl mx-auto px-4">
+        <div className="mb-6">
           <div className="flex gap-0 border-b border-gray-200 dim:border-gray-600 dark:border-gray-700">
             <button
               type="button"
@@ -81,14 +68,14 @@ export function SettingsPage() {
             </button>
           </div>
         </div>
-      </div>
 
-      {/* Tab Content */}
-      <div className="max-w-2xl mx-auto" data-testid={`${activeTab}-tab-content`}>
-        {activeTab === 'account' && <AccountTab />}
-        {activeTab === 'preferences' && <PreferencesTab />}
-        {activeTab === 'support' && <SupportTab />}
+        {/* Tab Content */}
+        <div data-testid={`${activeTab}-tab-content`}>
+          {activeTab === 'account' && <AccountTab />}
+          {activeTab === 'preferences' && <PreferencesTab />}
+          {activeTab === 'support' && <SupportTab />}
+        </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }
