@@ -1,5 +1,6 @@
 import { Bell, BellOff } from 'lucide-react';
 import { useState } from 'react';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { useAccountUpdates } from '../hooks/useAccountUpdates';
 import { useNotificationPreferences } from '../hooks/useNotificationPreferences';
 import { useUpdatePreferences } from '../hooks/useUpdatePreferences';
@@ -49,6 +50,7 @@ const NOTIFICATION_TYPES = [
 ];
 
 export function PreferencesTab() {
+  const { isOnline } = useNetworkStatus();
   const { queueUpdate } = useAccountUpdates();
 
   // Initialize proximity from localStorage, default to 100km
@@ -61,6 +63,7 @@ export function PreferencesTab() {
   const updatePreferences = useUpdatePreferences();
 
   const handleProximityChange = (newRange: number) => {
+    if (!isOnline) return; // Prevent action when offline
     setProximityRange(newRange);
     // Store in localStorage for persistence
     localStorage.setItem('proximityRange', String(newRange));
@@ -69,7 +72,7 @@ export function PreferencesTab() {
   };
 
   const handleToggleNotification = (key: string) => {
-    if (!preferences) return;
+    if (!isOnline || !preferences) return; // Prevent action when offline
 
     const newValue = !preferences[key as keyof typeof preferences];
     updatePreferences.mutate({ [key]: newValue });
@@ -89,7 +92,8 @@ export function PreferencesTab() {
           data-testid="proximity-input"
           value={proximityRange}
           onChange={(e) => handleProximityChange(Number(e.target.value))}
-          className="w-full px-3 py-2 border border-gray-300 dim:border-gray-500 dark:border-gray-600 rounded-lg bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-gray-100 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+          disabled={!isOnline}
+          className="w-full px-3 py-2 border border-gray-300 dim:border-gray-500 dark:border-gray-600 rounded-lg bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-gray-100 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {PROXIMITY_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
@@ -133,7 +137,8 @@ export function PreferencesTab() {
                   key={type.key}
                   type="button"
                   onClick={() => handleToggleNotification(type.key)}
-                  className="w-full flex items-center justify-between p-4 rounded-lg border border-gray-200 dim:border-gray-600 dark:border-gray-700 hover:bg-gray-50 dim:hover:bg-gray-750 dark:hover:bg-gray-800 transition-colors"
+                  disabled={!isOnline}
+                  className="w-full flex items-center justify-between p-4 rounded-lg border border-gray-200 dim:border-gray-600 dark:border-gray-700 hover:bg-gray-50 dim:hover:bg-gray-750 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <div className="flex-1 text-left">
                     <div className="font-medium text-gray-900 dim:text-gray-100 dark:text-gray-100">
