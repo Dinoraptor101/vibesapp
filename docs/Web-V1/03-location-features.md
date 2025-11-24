@@ -1,6 +1,6 @@
 # Location Features
 
-VibesApp's location-based functionality is central to creating authentic local communities while maintaining user privacy. The platform uses geographic proximity to determine interaction relevance and community boundaries.
+VibesApp's location-based functionality enables users to discover content and connect with people in their geographic area. The platform uses user-set proximity preferences to filter content while maintaining privacy controls.
 
 ## Core Location Mechanics
 

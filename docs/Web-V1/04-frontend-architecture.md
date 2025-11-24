@@ -6,17 +6,18 @@ The VibesApp frontend is a modern React application built with TypeScript, focus
 
 ### Core Technologies
 
-- **React 18** - Modern component-based UI framework
+- **React 19** - Modern component-based UI framework
 - **TypeScript** - Type safety and enhanced developer experience
 - **React Router** - Client-side routing and navigation
 - **React Query** - Server state management and caching
-- **CSS3** - Custom styling with theme support
+- **Zustand** - Client state management
+- **Tailwind CSS** - Utility-first CSS framework
 
 ### Build & Development Tools
 
-- **Create React App** - Project bootstrapping and build configuration
-- **Webpack** - Module bundling and asset optimization
-- **Biome** - Code formatting and linting
+- **Vite** - Fast build tool and development server
+- **ESLint** - Code linting and error detection
+- **Biome** - Code formatting
 - **Playwright** - End-to-end testing
 
 ### Deployment & Hosting
