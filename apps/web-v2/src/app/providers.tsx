@@ -8,6 +8,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import type React from 'react';
 import { Toaster } from 'sonner';
 import { AdminAuthProvider } from '@/features/admin';
+import { ReCaptchaProvider } from '@/lib/recaptcha';
 import { ThemeProvider } from '@/lib/theme';
 
 // Create a client
@@ -29,11 +30,13 @@ export function Providers({ children }: ProvidersProps): JSX.Element {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <AdminAuthProvider>
-          <Toaster position="top-right" richColors />
-          {children}
-          {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
-        </AdminAuthProvider>
+        <ReCaptchaProvider>
+          <AdminAuthProvider>
+            <Toaster position="top-right" richColors />
+            {children}
+            {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+          </AdminAuthProvider>
+        </ReCaptchaProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

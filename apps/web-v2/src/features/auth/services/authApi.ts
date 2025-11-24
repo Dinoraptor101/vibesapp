@@ -40,6 +40,7 @@ interface SignupData {
   mbtiPersonality: string;
   profilePictureUrl?: string;
   bio?: string;
+  recaptchaToken?: string; // reCAPTCHA v3 token
 }
 
 interface SignupResponse extends LoginResponse {
@@ -84,9 +85,14 @@ export const authApi = {
 
   /**
    * Login with Pigeon ID (password)
+   * @param pigeonId - The user's Pigeon ID
+   * @param recaptchaToken - Optional reCAPTCHA v3 token for bot protection
    */
-  async login(pigeonId: string): Promise<User> {
-    const response = await apiClient.get<LoginResponse>(`/api/users/login/${pigeonId}`);
+  async login(pigeonId: string, recaptchaToken?: string): Promise<User> {
+    const response = await apiClient.post<LoginResponse>('/api/users/login', {
+      pigeonId,
+      recaptchaToken,
+    });
     return transformUserData(response);
   },
 

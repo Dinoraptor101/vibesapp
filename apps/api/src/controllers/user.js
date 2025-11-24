@@ -4,6 +4,7 @@ const Follow = require('../models/Follow');
 const { createActivity } = require('./activityNew');
 const karma = require('./karma');
 const UserHandler = require('../handlers/UserHandler');
+const { verifyRecaptcha } = require('../utils/recaptcha');
 
 // Pigeon ID generation utilities
 const adjectives = [
@@ -144,6 +145,7 @@ const createUser = async (req, res) => {
     pigeonId,
     profilePictureUrl,
     bio,
+    recaptchaToken,
   } = req.body;
 
   // Log the received data
@@ -159,6 +161,16 @@ const createUser = async (req, res) => {
     profilePictureUrl,
     bio,
   });
+
+  // Verify reCAPTCHA token
+  const recaptchaResult = await verifyRecaptcha(recaptchaToken, 'signup');
+  if (!recaptchaResult.success) {
+    console.error('reCAPTCHA verification failed:', recaptchaResult.error);
+    return res.status(403).json({
+      message: 'reCAPTCHA verification failed',
+      error: recaptchaResult.error,
+    });
+  }
 
   // Check for missing required fields
   if (
@@ -225,12 +237,30 @@ const createUser = async (req, res) => {
 };
 
 // Controller function to login with a Pigeon ID
+// Supports both GET (legacy) and POST (with reCAPTCHA) methods
 const login = async (req, res) => {
   console.log('Logging in with Pigeon ID...');
-  const pigeonId = req.params.pigeonId;
+
+  // Support both GET params and POST body
+  const pigeonId = req.params.pigeonId || req.body.pigeonId;
+  const recaptchaToken = req.body.recaptchaToken;
+
   if (!pigeonId) {
     console.error('pigeonId is required');
     return res.status(400).json({ message: 'pigeonId is required' });
+  }
+
+  // Verify reCAPTCHA token (only for POST requests)
+  // verifyRecaptcha will handle the case where ENABLE_RECAPTCHA=false
+  if (req.method === 'POST') {
+    const recaptchaResult = await verifyRecaptcha(recaptchaToken, 'login');
+    if (!recaptchaResult.success) {
+      console.error('reCAPTCHA verification failed:', recaptchaResult.error);
+      return res.status(403).json({
+        message: 'reCAPTCHA verification failed',
+        error: recaptchaResult.error,
+      });
+    }
   }
 
   try {

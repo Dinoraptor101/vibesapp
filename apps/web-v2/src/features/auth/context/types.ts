@@ -8,7 +8,7 @@ import { createContext } from 'react';
 import type { AuthState } from '@/types';
 
 export interface AuthContextType extends AuthState {
-  login: (pigeonId: string) => Promise<void>;
+  login: (pigeonId: string, recaptchaToken?: string) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
