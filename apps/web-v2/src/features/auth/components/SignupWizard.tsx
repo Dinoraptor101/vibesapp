@@ -1,5 +1,6 @@
 import { Check, Copy, RotateCcw } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useNavigate } from 'react-router-dom';
 import { Button, Input, Textarea } from '@/components/ui-next';
 import { useAuth } from '@/features/auth';
@@ -10,6 +11,8 @@ import { authApi } from '../services/authApi';
 import { LocationStep } from './LocationStep';
 import { MBTISelector } from './MBTISelector';
 import './LoginForm.css'; // Import shake animation
+
+const RECAPTCHA_ENABLED = import.meta.env.VITE_ENABLE_RECAPTCHA === 'true';
 
 interface SignupData {
   pigeonId: string;
@@ -39,6 +42,21 @@ export function SignupWizard() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { executeRecaptcha } = useGoogleReCaptcha();
+
+  // reCAPTCHA verification helper
+  const handleRecaptchaVerify = useCallback(async () => {
+    if (!RECAPTCHA_ENABLED || !executeRecaptcha) {
+      return undefined;
+    }
+    try {
+      const token = await executeRecaptcha('signup');
+      return token;
+    } catch (error) {
+      console.error('reCAPTCHA verification failed:', error);
+      return undefined;
+    }
+  }, [executeRecaptcha]);
 
   // Clear any existing auth data when starting signup
   useEffect(() => {
@@ -256,6 +274,9 @@ export function SignupWizard() {
         throw new Error('Location is required');
       }
 
+      // Get reCAPTCHA token if enabled
+      const recaptchaToken = await handleRecaptchaVerify();
+
       // Call backend API to create user
       console.log('Signup data being sent:', {
         pigeonId: signupData.pigeonId,
@@ -288,6 +309,7 @@ export function SignupWizard() {
         mbtiPersonality: signupData.mbtiPersonality,
         profilePictureUrl: signupData.profilePictureUrl,
         bio: signupData.bio || undefined,
+        recaptchaToken, // Include reCAPTCHA token
       });
 
       console.log('Signup successful, using Pigeon ID from cookie for login');

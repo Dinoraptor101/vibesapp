@@ -35,7 +35,7 @@ export default defineConfig({
     : [
         {
           command: 'cd ../../apps/api && npm run dev',
-          url: 'http://localhost:5001/health',
+          url: 'http://localhost:5001/api/health',
           timeout: 120000,
           reuseExistingServer: !process.env.CI,
         },

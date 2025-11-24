@@ -6,10 +6,13 @@ const { authenticate } = require('../middleware/authenticate');
 // GET endpoint to generate a unique Pigeon ID
 router.get('/generate-pigeon-id', userController.generateUniquePigeonId);
 
-// POST endpoint to create a new user
+// POST endpoint to create a new user (with reCAPTCHA)
 router.post('/create', userController.createUser);
 
-// GET endpoint to login with a Pigeon ID
+// POST endpoint to login with a Pigeon ID (with reCAPTCHA)
+router.post('/login', userController.login);
+
+// GET endpoint to login with a Pigeon ID (legacy - no reCAPTCHA)
 router.get('/login/:pigeonId', userController.login);
 
 // GET endpoint to retrieve user's posts

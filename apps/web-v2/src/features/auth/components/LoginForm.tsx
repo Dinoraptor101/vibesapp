@@ -2,15 +2,19 @@
  * LoginForm Component
  *
  * Zen minimal login - poetic tagline, single input, clean design.
+ * Includes invisible reCAPTCHA v3 for bot protection.
  */
 
 import { CircleSlash, CornerDownLeft } from 'lucide-react';
-import { type FormEvent, useEffect, useState } from 'react';
+import { type FormEvent, useCallback, useEffect, useState } from 'react';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui-next';
 import { useAuth } from '@/features/auth/context/useAuth';
 import { deleteCookie } from '@/lib';
 import './LoginForm.css';
+
+const RECAPTCHA_ENABLED = import.meta.env.VITE_ENABLE_RECAPTCHA === 'true';
 
 export function LoginForm() {
   const [pigeonId, setPigeonId] = useState('');
@@ -19,12 +23,26 @@ export function LoginForm() {
   const [isShaking, setIsShaking] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   // Clear any stale cookies when landing on login page
   useEffect(() => {
     deleteCookie('pigeonId');
     deleteCookie('userId');
   }, []);
+
+  const handleRecaptchaVerify = useCallback(async () => {
+    if (!RECAPTCHA_ENABLED || !executeRecaptcha) {
+      return undefined;
+    }
+    try {
+      const token = await executeRecaptcha('login');
+      return token;
+    } catch (error) {
+      console.error('reCAPTCHA verification failed:', error);
+      return undefined;
+    }
+  }, [executeRecaptcha]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -43,7 +61,10 @@ export function LoginForm() {
     setIsLoading(true);
 
     try {
-      await login(pigeonId.trim());
+      // Get reCAPTCHA token if enabled
+      const recaptchaToken = await handleRecaptchaVerify();
+
+      await login(pigeonId.trim(), recaptchaToken);
       navigate('/');
     } catch {
       // Animate error feedback (logging handled by AuthContext)

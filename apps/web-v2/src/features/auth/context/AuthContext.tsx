@@ -47,12 +47,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /**
    * Login with Pigeon ID
+   * @param pigeonId - The user's Pigeon ID (password)
+   * @param recaptchaToken - Optional reCAPTCHA v3 token for bot protection
    */
   const login = useCallback(
-    async (pigeonId: string) => {
+    async (pigeonId: string, recaptchaToken?: string) => {
       try {
         setIsLoading(true);
-        const userData = await authApi.login(pigeonId);
+        const userData = await authApi.login(pigeonId, recaptchaToken);
 
         // Store credentials in cookies
         setCookie('pigeonId', pigeonId, 30); // 30 days
