@@ -5,14 +5,14 @@
   --light-bg: #f8f8f8;
   --light-bg-elevated: #ffffff;
   --light-text: #000000;
-  --light-text-muted: rgba(0, 0, 0, 0.6);
+  --light-text-muted: #595959;
   --light-border: #e0e0e0;
 
   /* Dim Theme Variables */
   --dim-bg: #333333;
   --dim-bg-elevated: #424242;
   --dim-text: #ffffff;
-  --dim-text-muted: rgba(255, 255, 255, 0.7);
+  --dim-text-muted: #dcdcdc;
   --dim-border: #555555;
 
   /* Dark Theme Variables */

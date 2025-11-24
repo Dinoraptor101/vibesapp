@@ -17,7 +17,7 @@
     --surface-hover: rgba(0, 0, 0, 0.05);
     --text-primary: #000000;
     --text-secondary: rgba(0, 0, 0, 0.7);
-    --text-tertiary: rgba(0, 0, 0, 0.5);
+    --text-tertiary: #595959;
     --border: #e0e0e0;
     --background: #f8f8f8;
     --foreground: #000000;
@@ -51,7 +51,7 @@
     --surface-hover: rgba(255, 255, 255, 0.1);
     --text-primary: #ffffff;
     --text-secondary: rgba(255, 255, 255, 0.8);
-    --text-tertiary: rgba(255, 255, 255, 0.6);
+    --text-tertiary: #dcdcdc;
     --border: #555555;
     --background: #333333;
     --foreground: #ffffff;
