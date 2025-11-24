@@ -14,7 +14,11 @@ import { getAvatarUrl } from '@/lib/avatarUtils';
 import type { Theme } from '@/lib/theme';
 import { useTheme } from '@/lib/useTheme';
 
-export function UserMenu() {
+interface UserMenuProps {
+  isActive?: boolean;
+}
+
+export function UserMenu({ isActive = false }: UserMenuProps) {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
@@ -40,7 +44,11 @@ export function UserMenu() {
         <button
           type="button"
           data-testid="user-menu-button"
-          className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-purple"
+          className={`rounded-full focus:outline-none transition-all ${
+            isActive
+              ? 'ring-2 ring-brand-purple'
+              : 'focus-visible:ring-2 focus-visible:ring-brand-purple'
+          }`}
           aria-label="User menu"
         >
           <Avatar
