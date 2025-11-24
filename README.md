@@ -48,13 +48,19 @@ This starts both the frontend (localhost:5173) and backend (localhost:5001) in d
 ## 📦 Applications
 
 ### Web App (`apps/web-v2`)
-- **Technology**: React 18 + TypeScript
-- **Styling**: Tailwind CSS with custom design tokens
-- **State Management**: Zustand + React Query
+- **Technology**: React 19 + TypeScript 5.9
+- **Styling**: Tailwind CSS 3.4 with custom design tokens and theme system
+- **State Management**: Zustand + React Query 5
+- **UI Library**: Radix UI primitives, Lucide React icons
 - **Build Tool**: Vite
 - **Linting**: ESLint + TypeScript ESLint
 - **Formatting**: Biome
-- **Testing**: Vitest + React Testing Library
+- **Testing**: Vitest + React Testing Library + Playwright
+- **Architecture**: Feature-based organization with 7 modules (auth, posts, messaging, profile, settings, activity, admin)
+
+**Key Features**: Auto-save forms, optimistic updates, location-based feeds, PWA support, offline graceful degradation
+
+📖 [Detailed Architecture & Features](docs/Web-v2/01-current-architecture.md) | [UX Design Philosophy](docs/Web-v2/06-ux-design.md)
 
 ```bash
 # Development
@@ -104,6 +110,8 @@ import { UserEndpoints, AuthEndpoints } from '@vibesapp/contracts';
 
 ### `@vibesapp/e2e-testing`
 End-to-end testing suite using Playwright for comprehensive application testing.
+
+📖 [E2E Testing Documentation](libs/e2e-testing/README.md)
 
 ## 🔧 Development with NX
 
@@ -188,19 +196,35 @@ MongoDB Atlas provides the production database with connection pooling and monit
 
 Comprehensive documentation is available in the [`docs/`](docs/) directory:
 
-- [Project Overview](docs/01-project-overview.md)
-- [Vibes System](docs/02-vibes-system.md)
-- [Location Features](docs/03-location-features.md)
-- [Frontend Architecture](docs/04-frontend-architecture.md)
-- [Backend Architecture](docs/05-backend-architecture.md)
-- [API Integration](docs/06-api-integration.md)
-- [Development Workflow](docs/07-development-workflow.md)
-- [Component Guide](docs/08-component-guide.md)
-- [Testing Strategy](docs/09-testing-strategy.md)
-- [User Journey](docs/10-user-journey.md)
-- [Feature Documentation](docs/11-feature-documentation.md)
-- [ESLint Coding Standards](docs/12-eslint-coding-standards.md)
-- [**Production Deployment**](docs/13-production-deployment.md) ⚠️ **Critical for V2 Release**
+### Web V2 Project Documentation
+Complete technical and design documentation for the current React frontend rebuild:
+
+- **[Web V2 Documentation Index](docs/Web-v2/README.md)** - Start here
+  - [Current Architecture](docs/Web-v2/01-current-architecture.md) - Tech stack, patterns, performance
+  - [Implemented Features](docs/Web-v2/02-implemented-features.md) - All 25+ features documented
+  - [Development Timeline](docs/Web-v2/03-development-timeline.md) - 8-phase rebuild history
+  - [Design System](docs/Web-v2/04-design-system.md) - Colors, typography, components
+  - [Testing Strategy](docs/Web-v2/05-testing-strategy.md) - Unit, component, and E2E testing
+  - [UX Design & ZEN Principles](docs/Web-v2/06-ux-design.md) - Design philosophy and patterns
+
+### Legacy Documentation (Web V1)
+Original documentation preserved for reference:
+- [Project Overview](docs/Web-V1/01-project-overview.md)
+- [Vibes System](docs/Web-V1/02-vibes-system.md)
+- [Location Features](docs/Web-V1/03-location-features.md)
+- [Frontend Architecture](docs/Web-V1/04-frontend-architecture.md)
+- [Backend Architecture](docs/Web-V1/05-backend-architecture.md)
+- [API Integration](docs/Web-V1/06-api-integration.md)
+- [Development Workflow](docs/Web-V1/07-development-workflow.md)
+- [Component Guide](docs/Web-V1/08-component-guide.md)
+- [Testing Strategy](docs/Web-V1/09-testing-strategy.md)
+- [User Journey](docs/Web-V1/10-user-journey.md)
+- [Feature Documentation](docs/Web-V1/11-feature-documentation.md)
+- [ESLint Coding Standards](docs/Web-V1/12-eslint-coding-standards.md)
+
+### Configuration & Tools
+- [Code Quality & Linting](./LINTING.md)
+- [**Production Deployment**](docs/Web-v2/) - See Web V2 documentation ⚠️ **Critical for V2 Release**
 
 ## 🤝 Contributing
 
