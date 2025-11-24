@@ -17,8 +17,15 @@ import {
   useMarkAsRead,
   useMarkAllAsRead,
 } from '@/features/activity/hooks/useActivities';
+import { useActivitySSE } from '@/features/activity/hooks/useActivitySSE';
+import { useAuth } from '@/features/auth';
 
 export function ActivityPage() {
+  const { user } = useAuth();
+
+  // SSE real-time updates for activities
+  useActivitySSE(user?._id);
+
   // Fetch all activities (no tabs, no category filter)
   const { data: activities = [], isLoading, error } = useActivities('all');
 

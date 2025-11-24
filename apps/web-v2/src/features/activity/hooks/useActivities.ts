@@ -9,6 +9,8 @@ import { useAuth } from '@/features/auth';
 import { activityService } from '../api/activityService';
 import type { Activity, ActivityCategory } from '../types';
 
+const USE_SSE = import.meta.env.VITE_USE_SSE === 'true';
+
 /**
  * Helper function to categorize activities
  */
@@ -51,7 +53,7 @@ export function useActivities(category?: ActivityCategory) {
       return activities;
     },
     enabled: !!user?._id,
-    refetchInterval: 30000, // Poll every 30 seconds
+    refetchInterval: USE_SSE ? false : 30000, // Poll every 30 seconds
     refetchIntervalInBackground: false, // Stop polling when tab hidden
     staleTime: 60000, // 1 minute - activities can wait for background refresh
     retry: 1, // Only retry once on failure
@@ -76,7 +78,7 @@ export function useUnreadCounts() {
       return activityService.getUnreadCounts(user._id);
     },
     enabled: !!user?._id,
-    refetchInterval: 30000, // Poll every 30 seconds
+    refetchInterval: USE_SSE ? false : 30000, // Poll every 30 seconds
     refetchIntervalInBackground: false, // Stop polling when tab hidden
     staleTime: 60000, // 1 minute - activities can wait for background refresh
     retry: 1,
@@ -98,7 +100,7 @@ export function useHasUnread() {
       return activityService.hasUnreadActivities(user._id);
     },
     enabled: !!user?._id,
-    refetchInterval: 30000,
+    refetchInterval: USE_SSE ? false : 30000,
     refetchIntervalInBackground: false, // Stop polling when tab hidden
     staleTime: 60000, // 1 minute - activities can wait for background refresh
     retry: 1,

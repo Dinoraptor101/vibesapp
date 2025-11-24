@@ -282,7 +282,6 @@ test.describe('Post Like/Unlike Toggle', () => {
     await expect(posts.first()).toBeVisible({ timeout: 10000 });
 
     // Find a likeable post (not own post, has like button visible)
-    let heartButton = null;
     let postUrl = '';
     const postCount = await posts.count();
 
@@ -297,21 +296,35 @@ test.describe('Post Like/Unlike Toggle', () => {
         const postLink = post.locator('a[href^="/post/"]').first();
         const href = await postLink.getAttribute('href');
         if (href) {
+          // Record initial like state WHILE on feed page (but don't use it - just for reference)
+          // We'll compare states on the detail page instead for cleaner isolation
+
           postUrl = href;
-          heartButton = button;
           break;
         }
       }
     }
 
-    if (!heartButton || !postUrl) {
+    if (!postUrl) {
       test.skip(true, 'No likeable posts found with valid URL');
       return;
     }
 
-    // Get initial state
-    const initialAriaLabel = await heartButton.getAttribute('aria-label');
-    const initialIsLiked = initialAriaLabel?.toLowerCase().includes('unlike');
+    // Navigate to post detail page FIRST (before any interaction)
+    await page.goto(postUrl);
+    await page.waitForLoadState('networkidle');
+
+    // Find the heart button on detail page (more specific selector)
+    // Use data-testid if available, otherwise use position-based selector
+    const detailPost = page.locator('article').first();
+    const detailHeartButton = detailPost.locator(
+      'button[aria-label*="Like"], button[aria-label*="Unlike"]'
+    );
+    await expect(detailHeartButton).toBeVisible({ timeout: 5000 });
+
+    // Get the current state on detail page
+    const detailAriaLabel = await detailHeartButton.getAttribute('aria-label');
+    const stateBeforeToggle = detailAriaLabel?.toLowerCase().includes('unlike') ?? false;
 
     // Toggle like state and wait for API response
     const likeResponsePromise = page.waitForResponse(
@@ -322,29 +335,33 @@ test.describe('Post Like/Unlike Toggle', () => {
       { timeout: 5000 }
     );
 
-    await heartButton.click();
-    await likeResponsePromise;
+    await detailHeartButton.click();
+    const likeResponse = await likeResponsePromise;
 
-    // Navigate to post detail page
-    await page.goto(postUrl);
-    await page.waitForLoadState('networkidle');
+    // Verify the API response was successful
+    expect(likeResponse.status()).toBeGreaterThanOrEqual(200);
+    expect(likeResponse.status()).toBeLessThan(300);
 
-    // Reload the page
+    // Wait for optimistic update to settle
+    await page.waitForTimeout(500);
+
+    // Reload the page to verify persistence from server
     await page.reload();
     await page.waitForLoadState('networkidle');
 
-    // Find the heart button on detail page
-    const detailHeartButton = page
-      .locator('button[aria-label*="Like"], button[aria-label*="Unlike"]')
-      .first();
-    await expect(detailHeartButton).toBeVisible();
+    // Find the heart button again on reloaded page (fresh reference)
+    const reloadedPost = page.locator('article').first();
+    const reloadedHeartButton = reloadedPost.locator(
+      'button[aria-label*="Like"], button[aria-label*="Unlike"]'
+    );
+    await expect(reloadedHeartButton).toBeVisible({ timeout: 5000 });
 
-    // Verify state persisted (toggled from initial)
-    const newAriaLabel = await detailHeartButton.getAttribute('aria-label');
-    const newIsLiked = newAriaLabel?.toLowerCase().includes('unlike');
+    // Verify state persisted (toggled from what it was before click)
+    const reloadedAriaLabel = await reloadedHeartButton.getAttribute('aria-label');
+    const stateAfterReload = reloadedAriaLabel?.toLowerCase().includes('unlike') ?? false;
 
-    // State should be opposite of initial (we toggled it)
-    expect(newIsLiked).toBe(!initialIsLiked);
+    // State should be opposite of what it was before we clicked
+    expect(stateAfterReload).toBe(!stateBeforeToggle);
   });
 });
 

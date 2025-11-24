@@ -34,6 +34,8 @@ function PostCardComponent({ post, onLike, onReport, hideCaption = false }: Post
   const [isLiking, setIsLiking] = useState(false);
   // Track image load state for progressive loading
   const [imageLoaded, setImageLoaded] = useState(false);
+  // Track if image error fallback was already attempted (prevents infinite loop)
+  const [imageFailed, setImageFailed] = useState(false);
 
   // Calculate stats from reactions
   const likes = post.reactions.filter((r) => r.type === 'like').length;
@@ -109,9 +111,9 @@ function PostCardComponent({ post, onLike, onReport, hideCaption = false }: Post
               }`}
               loading="lazy"
               onLoad={() => setImageLoaded(true)}
-              onError={(e) => {
-                console.error('Image failed to load:', imageUrl);
-                e.currentTarget.src = import.meta.env.VITE_PLACEHOLDER_IMAGE_URL || '';
+              onError={() => {
+                if (imageFailed) return; // Prevent infinite loop
+                setImageFailed(true);
                 setImageLoaded(true);
               }}
             />
@@ -148,9 +150,9 @@ function PostCardComponent({ post, onLike, onReport, hideCaption = false }: Post
               }`}
               loading="lazy"
               onLoad={() => setImageLoaded(true)}
-              onError={(e) => {
-                console.error('Image failed to load:', imageUrl);
-                e.currentTarget.src = import.meta.env.VITE_PLACEHOLDER_IMAGE_URL || '';
+              onError={() => {
+                if (imageFailed) return; // Prevent infinite loop
+                setImageFailed(true);
                 setImageLoaded(true);
               }}
             />

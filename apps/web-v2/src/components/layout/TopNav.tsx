@@ -10,11 +10,17 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { OfflineIndicator } from '@/components/shared/OfflineIndicator';
 import { Button } from '@/components/ui-next';
 import { useUnreadCounts } from '@/features/activity';
+import { useActivitySSE } from '@/features/activity/hooks/useActivitySSE';
+import { useAuth } from '@/features/auth';
 import { UserMenu } from './UserMenu';
 
 export function TopNav() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // SSE real-time updates for activity counts
+  useActivitySSE(user?._id);
 
   // Fetch real unread counts from Activity API
   // Note: This is safe to call even when not logged in because the query

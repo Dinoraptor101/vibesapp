@@ -1,6 +1,7 @@
 const DMRequest = require('../models/DMRequest');
 const User = require('../models/User');
 const Conversation = require('../models/Conversation');
+const sseManager = require('../handlers/sseManager');
 
 // Send a DM request
 const sendDMRequest = async (req, res) => {
@@ -65,6 +66,14 @@ const sendDMRequest = async (req, res) => {
       status: dmRequest.status,
       _id: dmRequest._id,
     });
+
+    // Broadcast DM request update to recipient via SSE
+    sseManager.broadcast(recipientId, 'dm-request-update', {
+      requestId: dmRequest._id.toString(),
+      status: 'pending',
+      sender: senderId,
+    });
+
     res.status(201).json(dmRequest);
   } catch (error) {
     console.error('Error sending DM request:', error);
@@ -150,6 +159,17 @@ const acceptDMRequest = async (req, res) => {
     });
 
     console.log('DM request accepted and conversation created');
+
+    // Broadcast DM request update to both users via SSE
+    sseManager.broadcast(dmRequest.sender, 'dm-request-update', {
+      requestId: dmRequest._id.toString(),
+      status: 'accepted',
+    });
+    sseManager.broadcast(dmRequest.recipient, 'dm-request-update', {
+      requestId: dmRequest._id.toString(),
+      status: 'accepted',
+    });
+
     res.status(200).json({ dmRequest, conversation });
   } catch (error) {
     console.error('Error accepting DM request:', error);
@@ -185,6 +205,13 @@ const declineDMRequest = async (req, res) => {
     await DMRequest.findByIdAndDelete(requestId);
 
     console.log('DM request declined and deleted');
+
+    // Broadcast DM request update to sender via SSE
+    sseManager.broadcast(dmRequest.sender, 'dm-request-update', {
+      requestId: dmRequest._id.toString(),
+      status: 'declined',
+    });
+
     res.status(200).json({ message: 'Request declined' });
   } catch (error) {
     console.error('Error declining DM request:', error);
