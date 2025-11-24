@@ -60,10 +60,16 @@ export function BottomNav() {
         <button
           type="button"
           onClick={() => navigate('/create-post')}
-          className="flex flex-col items-center gap-1 px-4 py-2 min-w-[64px]"
+          className="flex items-center justify-center min-w-[64px]"
           aria-label="Create post"
         >
-          <div className="bg-notification hover:bg-notification-hover text-white rounded-full p-3 shadow-lg hover:scale-110 transition-transform">
+          <div
+            className={`text-white rounded-full p-3 shadow-lg hover:scale-110 transition-transform ${
+              isActive('/create-post')
+                ? 'bg-brand-purple hover:bg-brand-purple-hover'
+                : 'bg-notification hover:bg-notification-hover'
+            }`}
+          >
             <Plus className="w-6 h-6" strokeWidth={2.5} />
           </div>
         </button>
@@ -94,7 +100,7 @@ export function BottomNav() {
 
         {/* User Menu */}
         <div className="flex flex-col items-center gap-1 px-4 py-2 min-w-[64px]">
-          <UserMenu />
+          <UserMenu isActive={isActive('/settings')} />
         </div>
       </div>
     </nav>

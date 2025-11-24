@@ -107,18 +107,21 @@ export function TopNav() {
       <div className="flex items-center gap-3">
         {/* Create Post Button */}
         <Button
-          variant="primary"
           size="md"
           leftIcon={<Plus className="w-5 h-5" />}
           onClick={() => navigate('/create-post')}
           aria-label="Create post"
-          className="bg-notification hover:bg-notification-hover"
+          className={`!text-white focus-visible:ring-2 focus-visible:ring-offset-2 ${
+            isActive('/create-post')
+              ? '!bg-brand-purple hover:!bg-brand-purple-hover focus-visible:ring-brand-purple'
+              : '!bg-notification hover:!bg-notification-hover focus-visible:ring-notification'
+          }`}
         >
           <span className="hidden lg:inline">Post</span>
         </Button>
 
         {/* User Menu */}
-        <UserMenu />
+        <UserMenu isActive={isActive('/settings')} />
       </div>
     </nav>
   );
