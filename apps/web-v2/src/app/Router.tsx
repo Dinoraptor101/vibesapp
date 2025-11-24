@@ -4,10 +4,6 @@
  */
 
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { ButtonExamplesPage } from '@/app/pages/ButtonExamplesPage';
-import { CardExamplesPage } from '@/app/pages/CardExamplesPage';
-import { DialogExamplesPage } from '@/app/pages/DialogExamplesPage';
-import { InputExamplesPage } from '@/app/pages/InputExamplesPage';
 import {
   AdminDashboardPage,
   AdminLoginPage,
@@ -18,13 +14,8 @@ import {
 } from '@/features/admin';
 import { AuthProvider, LoginPage, ProtectedRoute, SignupPage } from '@/features/auth';
 import { ActivityPage } from '@/pages/ActivityPage';
-import { AuthTest } from '@/pages/AuthTest';
 import { ConversationPage } from '@/pages/ConversationPage';
 import { CreatePostPage } from '@/pages/CreatePostPage';
-import AvatarExamplesPage from '@/pages/examples/AvatarExamplesPage';
-import BadgeExamplesPage from '@/pages/examples/BadgeExamplesPage';
-import LoadingExamplesPage from '@/pages/examples/LoadingExamplesPage';
-import PostsExamplePage from '@/pages/examples/PostsExamplePage';
 import { HomePage } from '@/pages/HomePage';
 import { MessagesPage } from '@/pages/MessagesPage';
 import { PostDetailPage } from '@/pages/PostDetailPage';
@@ -134,19 +125,6 @@ export function Router() {
               </ProtectedRoute>
             }
           />
-
-          {/* Auth Testing */}
-          <Route path="/test/auth" element={<AuthTest />} />
-
-          {/* Component Examples */}
-          <Route path="/examples/button" element={<ButtonExamplesPage />} />
-          <Route path="/examples/input" element={<InputExamplesPage />} />
-          <Route path="/examples/card" element={<CardExamplesPage />} />
-          <Route path="/examples/dialog" element={<DialogExamplesPage />} />
-          <Route path="/examples/avatar" element={<AvatarExamplesPage />} />
-          <Route path="/examples/badge" element={<BadgeExamplesPage />} />
-          <Route path="/examples/loading" element={<LoadingExamplesPage />} />
-          <Route path="/examples/posts" element={<PostsExamplePage />} />
 
           {/* Admin routes */}
           <Route path="/admin/login" element={<AdminLoginPage />} />
