@@ -1,5 +1,6 @@
 const Activity = require('../models/Activity');
 const User = require('../models/User');
+const sseManager = require('../handlers/sseManager');
 
 /**
  * Get activities for a user
@@ -136,6 +137,22 @@ const createActivity = async ({ recipientId, type, actor, target }) => {
       recipientId,
       actorId: actor.userId,
     });
+
+    // Broadcast activity update via SSE
+    sseManager.broadcast(recipientId, 'activity-update', {
+      type,
+      activity: activity.toObject(),
+    });
+
+    // Get and broadcast updated unread count
+    const unreadCount = await Activity.countDocuments({
+      recipientId,
+      isRead: false,
+    });
+    sseManager.broadcast(recipientId, 'unread-count-update', {
+      counts: { unreadCount },
+    });
+
     return activity;
   } catch (error) {
     console.error('❌ Error creating activity:', error);

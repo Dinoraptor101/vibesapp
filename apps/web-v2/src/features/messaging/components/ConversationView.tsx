@@ -16,6 +16,7 @@ import { useAuth } from '@/features/auth';
 import { useAutoMarkAsRead } from '../hooks/useAutoMarkAsRead';
 import { useEndConversation } from '../hooks/useEndConversation';
 import { useMessagingPolling } from '../hooks/useMessagingPolling';
+import { useMessagingSSE } from '../hooks/useMessagingSSE';
 import { useSendMessage } from '../hooks/useSendMessage';
 import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
@@ -26,6 +27,9 @@ export function ConversationView() {
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const previousMessageCountRef = useRef(0);
+
+  // SSE real-time updates for messaging
+  useMessagingSSE(user?._id);
 
   // Unified polling - automatically manages queries based on URL
   const { activeConversation, isLoading } = useMessagingPolling();

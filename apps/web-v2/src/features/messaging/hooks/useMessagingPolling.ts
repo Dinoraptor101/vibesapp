@@ -4,6 +4,8 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
 import { getConversation, getConversations } from '../api/dmService';
 
+const USE_SSE = import.meta.env.VITE_USE_SSE === 'true';
+
 /**
  * Unified messaging polling hook
  * Manages polling for both conversations list and active conversation
@@ -15,6 +17,7 @@ import { getConversation, getConversations } from '../api/dmService';
  * - 30s polling for conversations list
  * - 6x slower polling when tab hidden (battery friendly)
  * - Reduces server load by 6x vs 5s interval
+ * - SSE mode: Polling disabled when USE_SSE=true
  */
 export function useMessagingPolling() {
   const { user } = useAuth();
@@ -42,7 +45,7 @@ export function useMessagingPolling() {
       return getConversations(user._id);
     },
     enabled: !!user?._id,
-    refetchInterval: isVisible ? 30000 : 180000, // 30s visible, 180s hidden
+    refetchInterval: USE_SSE ? false : isVisible ? 30000 : 180000, // 30s visible, 180s hidden
     staleTime: 20000,
     refetchIntervalInBackground: false, // Stop polling when tab hidden
   });
@@ -57,7 +60,7 @@ export function useMessagingPolling() {
       return getConversation(activeConversationId);
     },
     enabled: !!activeConversationId,
-    refetchInterval: isVisible ? 30000 : 180000, // 30s visible, 180s hidden (was 5s/30s)
+    refetchInterval: USE_SSE ? false : isVisible ? 30000 : 180000, // 30s visible, 180s hidden (was 5s/30s)
     staleTime: 20000,
     refetchIntervalInBackground: false,
   });

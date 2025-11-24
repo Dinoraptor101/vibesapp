@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Conversation = require('../models/Conversation');
 const karma = require('./karma');
+const sseManager = require('../handlers/sseManager');
 
 /**
  * Lazy migration utility - ensures conversation has cursor-based read tracking
@@ -452,6 +453,20 @@ exports.sendDMMessage = async (req, res) => {
 
     // Return the new message with its generated ID
     const savedMessage = conversation.messages[conversation.messages.length - 1];
+
+    // Broadcast new message to recipient via SSE
+    const recipientId =
+      conversation.user1Id === currentUserId ? conversation.user2Id : conversation.user1Id;
+    sseManager.broadcast(recipientId, 'new-message', {
+      conversationId: conversation._id.toString(),
+      message: {
+        _id: savedMessage._id,
+        senderId: savedMessage.senderId,
+        body: savedMessage.body,
+        timestamp: savedMessage.timestamp,
+        readBy: savedMessage.readBy,
+      },
+    });
     res.status(201).json({
       _id: savedMessage._id,
       senderId: savedMessage.senderId,
@@ -509,6 +524,14 @@ exports.markMessagesAsRead = async (req, res) => {
       console.log(
         `[Cursor Update] User ${currentUserId} read up to message ${lastMessage._id} in conversation ${conversationId}`
       );
+
+      // Broadcast read status to the other user via SSE
+      const otherUserId =
+        conversation.user1Id === currentUserId ? conversation.user2Id : conversation.user1Id;
+      sseManager.broadcast(otherUserId, 'read-status', {
+        conversationId: conversation._id.toString(),
+        readAt: new Date(),
+      });
 
       return res.json({
         success: true,
