@@ -11,9 +11,10 @@ import { getConversation, getConversations } from '../api/dmService';
  *
  * Features:
  * - Auto-detects active conversation from URL
- * - 5s polling for active conversation (real-time feel)
+ * - 30s polling for active conversation (optimized for scale)
  * - 30s polling for conversations list
  * - 6x slower polling when tab hidden (battery friendly)
+ * - Reduces server load by 6x vs 5s interval
  */
 export function useMessagingPolling() {
   const { user } = useAuth();
@@ -46,7 +47,9 @@ export function useMessagingPolling() {
     refetchIntervalInBackground: false, // Stop polling when tab hidden
   });
 
-  // Active conversation polling (5s, 30s when hidden)
+  // Active conversation polling (30s, 180s when hidden)
+  // Changed from 5s to 30s to improve scalability (6x load reduction)
+  // See docs/Web-v2/SCALING/01-API-POLLING-CAPACITY.md for details
   const conversationQuery = useQuery({
     queryKey: ['conversation', activeConversationId],
     queryFn: () => {
@@ -54,8 +57,8 @@ export function useMessagingPolling() {
       return getConversation(activeConversationId);
     },
     enabled: !!activeConversationId,
-    refetchInterval: isVisible ? 5000 : 30000, // 5s visible, 30s hidden
-    staleTime: 2000,
+    refetchInterval: isVisible ? 30000 : 180000, // 30s visible, 180s hidden (was 5s/30s)
+    staleTime: 20000,
     refetchIntervalInBackground: false,
   });
 
