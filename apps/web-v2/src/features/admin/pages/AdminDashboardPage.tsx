@@ -84,13 +84,18 @@ export function AdminDashboardPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <h1 className="text-3xl font-bold text-gray-900" data-testid="admin-dashboard-title">
+          Dashboard
+        </h1>
         <p className="mt-2 text-gray-600">Overview of VibesApp metrics and activity</p>
       </div>
 
       {/* Loading State */}
       {isLoading && (
-        <div className="rounded-lg border border-gray-200 bg-white p-12 text-center">
+        <div
+          className="rounded-lg border border-gray-200 bg-white p-12 text-center"
+          data-testid="admin-dashboard-loading"
+        >
           <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-primary-600 border-t-transparent" />
           <p className="mt-4 text-gray-500">Loading dashboard...</p>
         </div>
@@ -110,7 +115,10 @@ export function AdminDashboardPage() {
       {!isLoading && !error && metrics && (
         <>
           {/* Overview Metrics */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div
+            className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4"
+            data-testid="admin-metrics-container"
+          >
             <MetricCard
               title="Active Users"
               value={metrics.activeUsers.thisWeek}

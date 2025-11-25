@@ -153,6 +153,7 @@ export function UsersPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              data-testid="users-search-input"
             />
           </div>
 
@@ -162,6 +163,7 @@ export function UsersPage() {
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value as 'all' | 'active' | 'banned')}
               className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              data-testid="users-filter-select"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
@@ -217,18 +219,25 @@ export function UsersPage() {
       </div>
 
       {/* User List */}
-      {isLoading && <p className="text-center text-gray-500">Loading users...</p>}
+      {isLoading && (
+        <p className="text-center text-gray-500" data-testid="users-loading">
+          Loading users...
+        </p>
+      )}
 
       {error && <p className="text-center text-error-600">{error}</p>}
 
       {!isLoading && !error && users.length === 0 && (
-        <div className="rounded-lg border border-gray-200 bg-white p-12 text-center">
+        <div
+          className="rounded-lg border border-gray-200 bg-white p-12 text-center"
+          data-testid="users-empty-state"
+        >
           <p className="text-gray-500">No users found</p>
         </div>
       )}
 
       {!isLoading && !error && users.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-4" data-testid="users-list">
           {users.map((user) => (
             <UserCard
               key={user.userId}
@@ -245,16 +254,17 @@ export function UsersPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-2" data-testid="pagination-controls">
           <Button
             variant="outline"
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
+            data-testid="pagination-prev"
           >
             Previous
           </Button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" data-testid="pagination-info">
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               const pageNum = currentPage <= 3 ? i + 1 : currentPage + i - 2;
               if (pageNum > totalPages) return null;
@@ -275,6 +285,7 @@ export function UsersPage() {
             variant="outline"
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
+            data-testid="pagination-next"
           >
             Next
           </Button>

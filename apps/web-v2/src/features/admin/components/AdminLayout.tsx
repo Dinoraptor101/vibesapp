@@ -24,7 +24,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="min-h-screen bg-surface-1">
       {/* Header */}
-      <header className="bg-surface-elevated/95 backdrop-blur-md border-b border-border sticky top-0 z-50">
+      <header
+        className="bg-surface-elevated/95 backdrop-blur-md border-b border-border sticky top-0 z-50"
+        data-testid="admin-header"
+      >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo/Title */}
@@ -60,9 +63,12 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   }`
                 }
                 title="Dashboard"
+                data-testid="admin-nav-dashboard"
               >
                 <LayoutDashboard className="w-5 h-5 md:hidden" />
-                <span className="hidden md:inline">Dashboard</span>
+                <span className="hidden md:inline" data-testid="admin-nav-dashboard-text">
+                  Dashboard
+                </span>
               </NavLink>
               <NavLink
                 to="/admin/flagged"
@@ -74,9 +80,12 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   }`
                 }
                 title="Flagged Posts"
+                data-testid="admin-nav-flagged-posts"
               >
                 <Flag className="w-5 h-5 md:hidden" />
-                <span className="hidden md:inline">Flagged Posts</span>
+                <span className="hidden md:inline" data-testid="admin-nav-flagged-posts-text">
+                  Flagged Posts
+                </span>
               </NavLink>
               <NavLink
                 to="/admin/users"
@@ -88,9 +97,12 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   }`
                 }
                 title="Users"
+                data-testid="admin-nav-users"
               >
                 <Users className="w-5 h-5 md:hidden" />
-                <span className="hidden md:inline">Users</span>
+                <span className="hidden md:inline" data-testid="admin-nav-users-text">
+                  Users
+                </span>
               </NavLink>
               <NavLink
                 to="/admin/settings"
@@ -102,9 +114,12 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   }`
                 }
                 title="Settings"
+                data-testid="admin-nav-settings"
               >
                 <Settings className="w-5 h-5 md:hidden" />
-                <span className="hidden md:inline">Settings</span>
+                <span className="hidden md:inline" data-testid="admin-nav-settings-text">
+                  Settings
+                </span>
               </NavLink>
             </nav>
 
