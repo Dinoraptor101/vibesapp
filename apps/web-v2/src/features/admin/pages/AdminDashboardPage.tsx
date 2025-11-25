@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '@/lib/api';
 import { Button } from '../../../components/ui/button';
-import { Card, CardContent, CardHeader } from '../../../components/ui/card';
+import { Card, CardContent } from '../../../components/ui/card';
 import { ActivityChart } from '../components/ActivityChart';
 import { MetricCard } from '../components/MetricCard';
 
@@ -42,6 +42,22 @@ interface ActivityDataPoint {
   posts: number;
   reports: number;
   autoHidden: number;
+}
+
+// Skeleton component for loading state
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-4 animate-pulse">
+      {/* Metric cards skeleton */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-20 bg-surface-2 rounded-lg" />
+        ))}
+      </div>
+      {/* Activity chart skeleton */}
+      <div className="h-52 bg-surface-2 rounded-lg" />
+    </div>
+  );
 }
 
 export function AdminDashboardPage() {
@@ -81,25 +97,19 @@ export function AdminDashboardPage() {
   }, [fetchDashboardData]);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-4">
+      {/* Header - Compact */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900" data-testid="admin-dashboard-title">
+        <h1 className="text-2xl font-bold text-text-primary" data-testid="admin-dashboard-title">
           Dashboard
         </h1>
-        <p className="mt-2 text-gray-600">Overview of VibesApp metrics and activity</p>
+        <p className="mt-1 text-sm text-text-secondary">
+          Overview of VibesApp metrics and activity
+        </p>
       </div>
 
-      {/* Loading State */}
-      {isLoading && (
-        <div
-          className="rounded-lg border border-gray-200 bg-white p-12 text-center"
-          data-testid="admin-dashboard-loading"
-        >
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-primary-600 border-t-transparent" />
-          <p className="mt-4 text-gray-500">Loading dashboard...</p>
-        </div>
-      )}
+      {/* Loading State - Skeleton */}
+      {isLoading && <DashboardSkeleton />}
 
       {/* Error State */}
       {error && (
@@ -114,15 +124,50 @@ export function AdminDashboardPage() {
       {/* Dashboard Content */}
       {!isLoading && !error && metrics && (
         <>
-          {/* Overview Metrics */}
-          <div
-            className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4"
-            data-testid="admin-metrics-container"
-          >
+          {/* Urgent Actions - Compact */}
+          {(metrics.urgent.autoHiddenLastHour > 0 || metrics.urgent.unreviewedFlagged > 0) && (
+            <Card className="border-warning-200 bg-warning-50">
+              <CardContent className="p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl flex-shrink-0">🚨</span>
+                    <div className="flex items-center gap-4">
+                      {metrics.urgent.autoHiddenLastHour > 0 && (
+                        <div>
+                          <span className="text-sm font-medium text-text-primary">
+                            {metrics.urgent.autoHiddenLastHour} posts auto-hidden
+                          </span>
+                          <p className="text-xs text-text-secondary">Exceeded dislike threshold</p>
+                        </div>
+                      )}
+                      {metrics.urgent.unreviewedFlagged > 0 && (
+                        <div>
+                          <span className="text-sm font-medium text-text-primary">
+                            {metrics.urgent.unreviewedFlagged} flagged posts pending
+                          </span>
+                          <p className="text-xs text-text-secondary">
+                            Posts with reports pending review
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <Link to="/admin/flagged">
+                    <Button variant="destructive" size="sm">
+                      Review
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Overview Metrics - Single Row */}
+          <div className="grid grid-cols-4 gap-4" data-testid="admin-metrics-container">
             <MetricCard
               title="Active Users"
               value={metrics.activeUsers.thisWeek}
-              subtitle={`${metrics.activeUsers.total} total users`}
+              subtitle={`${metrics.activeUsers.total} total`}
               variant="success"
               icon="👥"
             />
@@ -149,61 +194,13 @@ export function AdminDashboardPage() {
               icon="⚠️"
             />
             <MetricCard
-              title="Auto-Hidden Posts"
+              title="Auto-Hidden"
               value={metrics.autoHidden.total}
-              subtitle={`${metrics.autoHidden.lastHour} in last hour`}
+              subtitle={`${metrics.autoHidden.lastHour} last hour`}
               variant="error"
               icon="🚫"
             />
           </div>
-
-          {/* Urgent Actions */}
-          {(metrics.urgent.autoHiddenLastHour > 0 || metrics.urgent.unreviewedFlagged > 0) && (
-            <Card className="border-warning-200 bg-warning-50">
-              <CardHeader>
-                <h2 className="text-lg font-semibold text-gray-900">🚨 Urgent Actions Required</h2>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {metrics.urgent.autoHiddenLastHour > 0 && (
-                    <div className="flex items-center justify-between rounded-lg border border-warning-200 bg-white p-4">
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {metrics.urgent.autoHiddenLastHour} posts auto-hidden in the last hour
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Posts exceeded the dislike threshold and were automatically hidden
-                        </p>
-                      </div>
-                      <Link to="/admin/flagged">
-                        <Button variant="destructive" size="sm">
-                          Review Now
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
-
-                  {metrics.urgent.unreviewedFlagged > 0 && (
-                    <div className="flex items-center justify-between rounded-lg border border-warning-200 bg-white p-4">
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {metrics.urgent.unreviewedFlagged} flagged posts awaiting review
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Posts with dislikes that haven't been reviewed yet
-                        </p>
-                      </div>
-                      <Link to="/admin/flagged">
-                        <Button variant="destructive" size="sm">
-                          Review Now
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           {/* Activity Chart */}
           <ActivityChart data={activityData} />

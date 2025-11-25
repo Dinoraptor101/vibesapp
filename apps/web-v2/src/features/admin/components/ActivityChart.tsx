@@ -37,27 +37,25 @@ export function ActivityChart({ data }: ActivityChartProps) {
 
   return (
     <Card data-testid="admin-activity-chart">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">Activity (Last 7 Days)</h3>
-          <div className="flex gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-primary-500" />
-              <span className="text-gray-600">Posts</span>
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-base font-semibold text-text-primary">Activity (Last 7 Days)</h3>
+          <div className="flex gap-3 text-xs">
+            <div className="flex items-center gap-1.5">
+              <div className="h-2.5 w-2.5 rounded-full bg-primary-500" />
+              <span className="text-text-secondary">Posts</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-warning-500" />
-              <span className="text-gray-600">Reports</span>
+            <div className="flex items-center gap-1.5">
+              <div className="h-2.5 w-2.5 rounded-full bg-warning-500" />
+              <span className="text-text-secondary">Reports</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-error-500" />
-              <span className="text-gray-600">Auto-hidden</span>
+            <div className="flex items-center gap-1.5">
+              <div className="h-2.5 w-2.5 rounded-full bg-error-500" />
+              <span className="text-text-secondary">Auto-hidden</span>
             </div>
           </div>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="relative h-64">
+        <div className="relative h-44">
           {/* Simple bar chart */}
           <div className="flex h-full items-end justify-around gap-2">
             {data.map((point) => {
@@ -102,23 +100,23 @@ export function ActivityChart({ data }: ActivityChartProps) {
           </div>
         </div>
 
-        {/* Summary stats */}
-        <div className="mt-6 grid grid-cols-3 gap-4 border-t border-gray-200 pt-4">
+        {/* Summary stats - Compact */}
+        <div className="mt-4 grid grid-cols-3 gap-3 border-t border-border pt-3">
           <div className="text-center">
-            <p className="text-sm text-gray-500">Total Posts</p>
-            <Badge variant="default" size="md" className="mt-1">
+            <p className="text-xs text-text-secondary">Total Posts</p>
+            <Badge variant="default" size="sm" className="mt-1">
               {data.reduce((sum, d) => sum + d.posts, 0)}
             </Badge>
           </div>
           <div className="text-center">
-            <p className="text-sm text-gray-500">Total Reports</p>
-            <Badge variant="warning" size="md" className="mt-1">
+            <p className="text-xs text-text-secondary">Total Reports</p>
+            <Badge variant="warning" size="sm" className="mt-1">
               {data.reduce((sum, d) => sum + d.reports, 0)}
             </Badge>
           </div>
           <div className="text-center">
-            <p className="text-sm text-gray-500">Auto-hidden</p>
-            <Badge variant="error" size="md" className="mt-1">
+            <p className="text-xs text-text-secondary">Auto-hidden</p>
+            <Badge variant="error" size="sm" className="mt-1">
               {data.reduce((sum, d) => sum + d.autoHidden, 0)}
             </Badge>
           </div>
