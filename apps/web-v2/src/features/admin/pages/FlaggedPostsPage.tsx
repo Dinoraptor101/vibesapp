@@ -1,7 +1,10 @@
+import { CheckCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import api from '@/lib/api';
 import type { FlaggedPost } from '@/types';
 import { FlaggedPostCard } from '../components/FlaggedPostCard';
@@ -9,8 +12,34 @@ import { FlaggedPostCard } from '../components/FlaggedPostCard';
 type FilterType = 'all' | 'auto-hidden' | 'under-review';
 type SortType = 'most-reports' | 'recent' | 'oldest';
 
+function FlaggedPostsSkeleton() {
+  return (
+    <div className="space-y-4 animate-pulse">
+      {[1, 2, 3].map((i) => (
+        <Card key={i}>
+          <CardContent className="p-3">
+            <div className="flex gap-4">
+              <div className="w-32 h-32 bg-surface-2 rounded-lg flex-shrink-0" />
+              <div className="flex-1 space-y-3">
+                <div className="h-5 bg-surface-2 rounded w-1/3" />
+                <div className="h-4 bg-surface-2 rounded w-1/2" />
+                <div className="h-4 bg-surface-2 rounded w-2/3" />
+                <div className="flex gap-2 mt-4">
+                  <div className="h-8 bg-surface-2 rounded w-24" />
+                  <div className="h-8 bg-surface-2 rounded w-24" />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
 export function FlaggedPostsPage() {
   const navigate = useNavigate();
+  const { isOnline } = useNetworkStatus();
   const [posts, setPosts] = useState<FlaggedPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>('all');
@@ -18,13 +47,48 @@ export function FlaggedPostsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedPosts, setSelectedPosts] = useState<Set<string>>(new Set());
+  const [counts, setCounts] = useState({ all: 0, autoHidden: 0, underReview: 0 });
+  const [postsCount, setPostsCount] = useState(0);
+
+  // Fetch counts for all filter categories (independent of current filter)
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        // Fetch counts for each filter type
+        const [allResponse, autoHiddenResponse, underReviewResponse] = await Promise.all([
+          api.get('/admin/reported-posts', { filter: 'all', limit: 1 }) as Promise<{
+            pagination: { total: number };
+          }>,
+          api.get('/admin/reported-posts', { filter: 'auto-hidden', limit: 1 }) as Promise<{
+            pagination: { total: number };
+          }>,
+          api.get('/admin/reported-posts', { filter: 'under-review', limit: 1 }) as Promise<{
+            pagination: { total: number };
+          }>,
+        ]);
+
+        setCounts({
+          all: allResponse.pagination.total,
+          autoHidden: autoHiddenResponse.pagination.total,
+          underReview: underReviewResponse.pagination.total,
+        });
+      } catch (error) {
+        console.error('Error fetching counts:', error);
+      }
+    };
+
+    fetchCounts();
+  }, [postsCount]); // Refetch counts when posts are added/removed
 
   useEffect(() => {
     const fetchPosts = async () => {
       setLoading(true);
       try {
         const response = (await api.get('/admin/reported-posts', {
-          params: { filter, sort, page, limit: 20 },
+          filter,
+          sort,
+          page,
+          limit: 20,
         })) as {
           success: boolean;
           posts: FlaggedPost[];
@@ -72,6 +136,7 @@ export function FlaggedPostsPage() {
         newSet.delete(postId);
         return newSet;
       });
+      setPostsCount((prev) => prev + 1); // Trigger count refresh
     } catch (error) {
       console.error('Error deleting post:', error);
     }
@@ -86,6 +151,7 @@ export function FlaggedPostsPage() {
         newSet.delete(postId);
         return newSet;
       });
+      setPostsCount((prev) => prev + 1); // Trigger count refresh
     } catch (error) {
       console.error('Error dismissing reports:', error);
     }
@@ -106,6 +172,7 @@ export function FlaggedPostsPage() {
       });
       setPosts(posts.filter((p) => !selectedPosts.has(p._id)));
       setSelectedPosts(new Set());
+      setPostsCount((prev) => prev + 1); // Trigger count refresh
     } catch (error) {
       console.error('Error bulk deleting posts:', error);
     }
@@ -115,12 +182,8 @@ export function FlaggedPostsPage() {
     navigate(`/admin/flagged/${post._id}`, { state: { post } });
   };
 
-  const allCount = posts.length;
-  const autoHiddenCount = posts.filter((p) => p.isHidden).length;
-  const underReviewCount = posts.filter((p) => !p.isHidden && (p.reportCount || 0) > 0).length;
-
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-4">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold" data-testid="flagged-posts-title">
@@ -143,7 +206,7 @@ export function FlaggedPostsPage() {
             }}
             data-testid="filter-option-all"
           >
-            All ({allCount})
+            All ({counts.all})
           </Button>
           <Button
             variant={filter === 'auto-hidden' ? 'primary' : 'ghost'}
@@ -154,7 +217,7 @@ export function FlaggedPostsPage() {
             }}
             data-testid="filter-option-auto-hidden"
           >
-            Auto-Hidden ({autoHiddenCount})
+            Auto-Hidden ({counts.autoHidden})
           </Button>
           <Button
             variant={filter === 'under-review' ? 'primary' : 'ghost'}
@@ -165,7 +228,7 @@ export function FlaggedPostsPage() {
             }}
             data-testid="filter-option-under-review"
           >
-            Under Review ({underReviewCount})
+            Under Review ({counts.underReview})
           </Button>
         </div>
 
@@ -193,54 +256,49 @@ export function FlaggedPostsPage() {
         </div>
       </div>
 
-      {/* Bulk actions */}
-      {selectedPosts.size > 0 && (
-        <div
-          className="flex items-center gap-4 p-4 bg-bg-secondary rounded-lg"
-          data-testid="bulk-action-bar"
-        >
-          <Badge variant="brand" size="md" data-testid="selection-count">
-            {selectedPosts.size} selected
-          </Badge>
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={handleBulkDelete}
-            data-testid="bulk-delete-button"
-          >
-            Delete Selected Posts
-          </Button>
-          <Button size="sm" variant="ghost" onClick={() => setSelectedPosts(new Set())}>
-            Clear Selection
-          </Button>
-        </div>
-      )}
-
       {/* Posts list */}
       <div className="space-y-4" data-testid="flagged-posts-list">
         {loading ? (
-          <div
-            className="text-center py-12 text-text-secondary"
-            data-testid="flagged-posts-loading"
-          >
-            Loading flagged posts...
-          </div>
+          <FlaggedPostsSkeleton />
         ) : posts.length === 0 ? (
-          <div className="text-center py-12 text-text-secondary" data-testid="flagged-posts-empty">
-            No flagged posts found
+          <div className="text-center py-12" data-testid="flagged-posts-empty">
+            <CheckCircle className="mx-auto mb-4 w-12 h-12 text-positive-500" />
+            <h3 className="text-lg font-medium mb-2">All clear!</h3>
+            <p className="text-text-secondary">No flagged posts to review right now</p>
           </div>
         ) : (
           <>
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={selectedPosts.size === posts.length && posts.length > 0}
-                onChange={handleSelectAll}
-                className="h-4 w-4 cursor-pointer rounded border-border bg-bg focus:ring-2 focus:ring-brand-primary"
-                aria-label="Select all posts"
-                data-testid="select-all-checkbox"
-              />
-              <span className="text-sm text-text-secondary">Select All</span>
+            {/* Select All + Bulk Actions - Single Row */}
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={selectedPosts.size === posts.length && posts.length > 0}
+                  onChange={handleSelectAll}
+                  className="h-4 w-4 cursor-pointer rounded border-border bg-bg focus:ring-2 focus:ring-brand-primary"
+                  aria-label="Select all posts"
+                  data-testid="select-all-checkbox"
+                />
+                <span className="text-sm text-text-secondary">Select All</span>
+              </div>
+
+              {/* Bulk actions - only show when posts are selected */}
+              {selectedPosts.size > 0 && (
+                <>
+                  <Badge variant="brand" size="md" data-testid="selection-count">
+                    {selectedPosts.size} selected
+                  </Badge>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={handleBulkDelete}
+                    disabled={!isOnline}
+                    data-testid="bulk-delete-button"
+                  >
+                    Delete Selected
+                  </Button>
+                </>
+              )}
             </div>
 
             {posts.map((post) => (
@@ -252,6 +310,7 @@ export function FlaggedPostsPage() {
                 onViewDetails={handleViewDetails}
                 onDelete={handleDeletePost}
                 onDismiss={handleDismissReports}
+                isOnline={isOnline}
               />
             ))}
           </>

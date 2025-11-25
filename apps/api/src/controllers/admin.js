@@ -748,42 +748,54 @@ const getReportedPosts = async (req, res) => {
     const { filter = 'all', sort = 'most-reports', page = 1, limit = 20 } = req.query;
     const skip = (page - 1) * limit;
 
-    // Build query based on filter
-    const query = { 'reports.0': { $exists: true } }; // Has at least 1 report
+    // Build match query based on filter
+    const matchQuery = { 'reports.0': { $exists: true } }; // Has at least 1 report
 
     if (filter === 'auto-hidden') {
-      query.isHidden = true;
-      query.hiddenBy = 'auto';
+      matchQuery.isHidden = true;
+      matchQuery.hiddenBy = 'auto';
     } else if (filter === 'admin-hidden') {
-      query.isHidden = true;
-      query.hiddenBy = 'admin';
+      matchQuery.isHidden = true;
+      matchQuery.hiddenBy = 'admin';
     } else if (filter === 'under-review') {
-      query.isHidden = false; // Not hidden yet but has reports
+      matchQuery.isHidden = false; // Not hidden yet but has reports
     }
+    // 'all' filter: just needs reports (no additional constraints)
 
-    // Build sort
-    const sortQuery = {};
+    console.log('[getReportedPosts] Filter:', filter, 'Match Query:', JSON.stringify(matchQuery));
+
+    // Build sort query
+    let sortStage = {};
     if (sort === 'most-reports') {
-      // We'll add report count in the aggregation
-      sortQuery.reportCount = -1;
+      sortStage = { reportCount: -1, createdAt: -1 }; // Secondary sort by date
     } else if (sort === 'recent') {
-      sortQuery.createdAt = -1;
+      sortStage = { createdAt: -1 };
     } else if (sort === 'oldest') {
-      sortQuery.createdAt = 1;
+      sortStage = { createdAt: 1 };
     }
 
-    // Use aggregation to add reportCount field
+    // Use aggregation to add reportCount field and sort properly
     const posts = await Post.aggregate([
-      { $match: query },
+      { $match: matchQuery },
       {
         $addFields: {
           reportCount: { $size: '$reports' },
         },
       },
-      { $sort: sortQuery },
+      { $sort: sortStage },
       { $skip: skip },
       { $limit: parseInt(limit) },
     ]);
+
+    console.log(
+      `[getReportedPosts] Found ${posts.length} posts. Sample data:`,
+      posts.slice(0, 2).map((p) => ({
+        id: p._id,
+        reportCount: p.reportCount,
+        isHidden: p.isHidden,
+        hiddenBy: p.hiddenBy,
+      }))
+    );
 
     // Get reporters for each post
     const postsWithReporters = await Promise.all(
@@ -807,7 +819,7 @@ const getReportedPosts = async (req, res) => {
       })
     );
 
-    const total = await Post.countDocuments(query);
+    const total = await Post.countDocuments(matchQuery);
 
     res.status(200).json({
       success: true,
