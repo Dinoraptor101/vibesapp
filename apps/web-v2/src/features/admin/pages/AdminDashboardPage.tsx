@@ -6,7 +6,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '@/lib/api';
-import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent, CardHeader } from '../../../components/ui/card';
 import { ActivityChart } from '../components/ActivityChart';
@@ -200,57 +199,6 @@ export function AdminDashboardPage() {
 
           {/* Activity Chart */}
           <ActivityChart data={activityData} />
-
-          {/* Quick Links */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            <Link to="/admin/flagged">
-              <Card className="cursor-pointer transition-all hover:shadow-lg">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">Flagged Posts</h3>
-                      <p className="mt-1 text-sm text-gray-600">
-                        Review and moderate flagged content
-                      </p>
-                    </div>
-                    <Badge variant="warning" size="md">
-                      {metrics.reports.today}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link to="/admin/users">
-              <Card className="cursor-pointer transition-all hover:shadow-lg">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">User Management</h3>
-                      <p className="mt-1 text-sm text-gray-600">Manage users and permissions</p>
-                    </div>
-                    <Badge variant="default" size="md">
-                      {metrics.activeUsers.total}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link to="/admin/settings">
-              <Card className="cursor-pointer transition-all hover:shadow-lg">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">Settings</h3>
-                      <p className="mt-1 text-sm text-gray-600">Configure admin preferences</p>
-                    </div>
-                    <span className="text-2xl">⚙️</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          </div>
         </>
       )}
     </div>

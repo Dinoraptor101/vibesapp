@@ -2,6 +2,7 @@ const Post = require('../models/Post');
 const User = require('../models/User');
 const { S3 } = require('@aws-sdk/client-s3');
 const crypto = require('node:crypto');
+const { verifyRecaptcha } = require('../utils/recaptcha');
 
 // Initialize S3 with correct AWS configuration
 const s3 = new S3({
@@ -14,9 +15,19 @@ const s3 = new S3({
 
 // Admin login
 const adminLogin = async (req, res) => {
-  const { password } = req.body;
+  const { password, recaptchaToken } = req.body;
 
   try {
+    // Verify reCAPTCHA first (if enabled)
+    const recaptchaResult = await verifyRecaptcha(recaptchaToken, 'admin_login');
+    if (!recaptchaResult.success) {
+      console.log('[Admin Login] FAILED - reCAPTCHA verification failed:', recaptchaResult.error);
+      return res.status(403).json({
+        success: false,
+        message: recaptchaResult.error || 'reCAPTCHA verification failed',
+      });
+    }
+
     // Check if password matches admin password from environment
     const adminPassword = process.env.ADMIN_PASSWORD || 'vibes_admin_2025';
 
@@ -138,7 +149,7 @@ const getFlaggedPosts = async (req, res) => {
   }
 };
 
-// Dismiss reports for a post (clear dislike reactions)
+// Dismiss reports for a post (clear reports and unhide)
 const dismissReports = async (req, res) => {
   const { postId } = req.params;
 
@@ -148,10 +159,18 @@ const dismissReports = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Post not found' });
     }
 
-    // Remove dislike reactions
+    // Clear community reports (Phase 3.4)
+    post.reports = [];
+    post.hiddenForUsers = [];
+
+    // Legacy: Remove dislike reactions (old system)
     post.reactions = post.reactions.filter((r) => r.type !== 'dislike');
     post.proximal_dislikes = 0;
+
+    // Unhide the post
     post.isHidden = false;
+    post.hiddenAt = null;
+    post.hiddenBy = null;
 
     await post.save();
 

@@ -14,7 +14,7 @@ interface AdminAuthState {
 }
 
 interface AdminAuthContextValue extends AdminAuthState {
-  login: (password: string) => Promise<void>;
+  login: (password: string, recaptchaToken?: string) => Promise<void>;
   logout: () => void;
   checkSession: () => boolean;
 }
@@ -94,7 +94,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     return () => clearTimeout(timer);
   }, [state.sessionExpiry, logout]);
 
-  const login = async (password: string): Promise<void> => {
+  const login = async (password: string, recaptchaToken?: string): Promise<void> => {
     // Call backend API to verify password
     try {
       // Verify admin credentials with backend
@@ -109,7 +109,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ password, recaptchaToken }),
       });
 
       if (!response.ok) {

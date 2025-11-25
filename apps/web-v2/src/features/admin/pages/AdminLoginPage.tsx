@@ -1,12 +1,16 @@
 /**
  * Admin Login Page
  * Password-only authentication for admin access
+ * Includes invisible reCAPTCHA v3 for bot protection.
  */
 
 import type { FormEvent } from 'react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../hooks/useAdminAuth';
+
+const RECAPTCHA_ENABLED = import.meta.env.VITE_ENABLE_RECAPTCHA === 'true';
 
 export function AdminLoginPage() {
   const [password, setPassword] = useState('');
@@ -14,6 +18,20 @@ export function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAdminAuth();
   const navigate = useNavigate();
+  const { executeRecaptcha } = useGoogleReCaptcha();
+
+  const handleRecaptchaVerify = useCallback(async () => {
+    if (!RECAPTCHA_ENABLED || !executeRecaptcha) {
+      return undefined;
+    }
+    try {
+      const token = await executeRecaptcha('admin_login');
+      return token;
+    } catch (error) {
+      console.error('reCAPTCHA verification failed:', error);
+      return undefined;
+    }
+  }, [executeRecaptcha]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -27,7 +45,10 @@ export function AdminLoginPage() {
     setIsLoading(true);
 
     try {
-      await login(password);
+      // Get reCAPTCHA token if enabled
+      const recaptchaToken = await handleRecaptchaVerify();
+
+      await login(password, recaptchaToken);
       // Redirect to admin dashboard on success
       navigate('/admin/dashboard');
     } catch (err) {

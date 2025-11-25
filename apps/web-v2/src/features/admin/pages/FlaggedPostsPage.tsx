@@ -23,7 +23,7 @@ export function FlaggedPostsPage() {
     const fetchPosts = async () => {
       setLoading(true);
       try {
-        const response = (await api.get('/admin/flagged-posts', {
+        const response = (await api.get('/admin/reported-posts', {
           params: { filter, sort, page, limit: 20 },
         })) as {
           success: boolean;
@@ -117,7 +117,7 @@ export function FlaggedPostsPage() {
 
   const allCount = posts.length;
   const autoHiddenCount = posts.filter((p) => p.isHidden).length;
-  const underReviewCount = posts.filter((p) => !p.isHidden && p.dislikeCount > 0).length;
+  const underReviewCount = posts.filter((p) => !p.isHidden && (p.reportCount || 0) > 0).length;
 
   return (
     <div className="p-6 space-y-6">
