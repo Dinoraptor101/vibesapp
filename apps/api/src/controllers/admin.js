@@ -21,11 +21,14 @@ const adminLogin = async (req, res) => {
     const adminPassword = process.env.ADMIN_PASSWORD || 'vibes_admin_2025';
 
     if (password !== adminPassword) {
+      console.log('[Admin Login] FAILED - Password mismatch');
       return res.status(401).json({
         success: false,
         message: 'Invalid password',
       });
     }
+
+    console.log('[Admin Login] SUCCESS');
 
     // Generate a simple session token (in production, use JWT)
     const token = crypto.randomBytes(32).toString('hex');

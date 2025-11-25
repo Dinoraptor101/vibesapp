@@ -59,7 +59,7 @@ export function AdminLoginPage() {
               </label>
               <input
                 id="admin-password"
-                type="password"
+                type="text"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 bg-surface-1 border border-border rounded-lg 

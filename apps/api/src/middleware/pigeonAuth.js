@@ -1,13 +1,8 @@
 const User = require('../models/User');
+const excludedRoutes = require('./excludedRoutes');
 
 module.exports = async (req, res, next) => {
   // The following routes can be used without Pigeon ID validation
-  const excludedRoutes = [
-    '/api/issues/createIssue',
-    '/api/recaptcha',
-    '/api/users/create',
-    '/api/users/login',
-  ];
   if (excludedRoutes.some((route) => req.path.startsWith(route))) {
     // console.log(`Excluding route from Pigeon ID validation: ${req.path}`);
     return next();
