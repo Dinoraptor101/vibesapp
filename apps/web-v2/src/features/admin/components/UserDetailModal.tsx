@@ -55,14 +55,9 @@ export function UserDetailModal({
 
   if (!user) return null;
 
-  // Calculate polarity
-  const polarityPercent = user.masculineFeminineScale
-    ? Math.round((user.masculineFeminineScale + 50) * 100) / 100
-    : 50;
-  const polarityLabel =
-    polarityPercent > 50
-      ? `${polarityPercent}% Yang (Masculine)`
-      : `${100 - polarityPercent}% Yin (Feminine)`;
+  // Simple polarity label - it's a toggle, not a ratio
+  // masculineFeminineScale > 0 means Yang, <= 0 means Yin
+  const polarityLabel = (user.masculineFeminineScale ?? 0) > 0 ? '☀️ Yang' : '🌙 Yin';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

@@ -15,4 +15,6 @@ export { AdminLoginPage } from './pages/AdminLoginPage';
 export { AdminSettingsPage } from './pages/AdminSettingsPage';
 export { FlaggedPostDetailPage } from './pages/FlaggedPostDetailPage';
 export { FlaggedPostsPage } from './pages/FlaggedPostsPage';
+export { UserDetailPage } from './pages/UserDetailPage';
+export { UserPostsPage } from './pages/UserPostsPage';
 export { UsersPage } from './pages/UsersPage';

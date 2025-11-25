@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '@/lib/api';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import type { AdminUser } from '../../../types';
-import { RegeneratePasswordModal } from '../components/RegeneratePasswordModal';
 import { UserCard } from '../components/UserCard';
-import { UserDetailModal } from '../components/UserDetailModal';
 
 export function UsersPage() {
+  const navigate = useNavigate();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,15 +25,6 @@ export function UsersPage() {
   // Selection
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
-
-  // Modal
-  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Password modal
-  const [regeneratedPassword, setRegeneratedPassword] = useState<string | null>(null);
-  const [passwordUser, setPasswordUser] = useState<string>('');
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
   const mbtiTypes = [
     'INTJ',
@@ -95,8 +86,11 @@ export function UsersPage() {
   }, [fetchUsers]);
 
   const handleViewDetails = (user: AdminUser) => {
-    setSelectedUser(user);
-    setIsModalOpen(true);
+    navigate(`/admin/users/${user.userId}`, { state: { user } });
+  };
+
+  const handleViewPosts = (user: AdminUser) => {
+    navigate(`/admin/users/${user.userId}/posts`, { state: { user } });
   };
 
   const handleToggleBan = async (userId: string) => {
@@ -106,62 +100,6 @@ export function UsersPage() {
     } catch (err) {
       console.error('Error toggling ban:', err);
       alert('Failed to toggle ban status');
-    }
-  };
-
-  const handleRegeneratePassword = async (userId: string) => {
-    try {
-      const response = (await api.post(`/admin/users/${userId}/regenerate-password`)) as {
-        success: boolean;
-        newPassword: string;
-        user: {
-          userId: string;
-          userName: string;
-        };
-      };
-
-      setRegeneratedPassword(response.newPassword);
-      setPasswordUser(response.user.userName);
-      setIsPasswordModalOpen(true);
-    } catch (err) {
-      console.error('Error regenerating password:', err);
-      alert('Failed to regenerate password');
-    }
-  };
-
-  const handleDeleteUser = async (userId: string) => {
-    if (
-      !confirm('Are you sure you want to delete this user? This action marks the user as deleted.')
-    ) {
-      return;
-    }
-
-    try {
-      await api.delete(`/admin/users/${userId}`);
-      await fetchUsers();
-      setIsModalOpen(false);
-    } catch (err) {
-      console.error('Error deleting user:', err);
-      alert('Failed to delete user');
-    }
-  };
-
-  const handleDeleteAllPosts = async (userId: string) => {
-    if (
-      !confirm(
-        'Are you sure you want to delete ALL posts from this user? This action cannot be undone.'
-      )
-    ) {
-      return;
-    }
-
-    try {
-      await api.delete(`/admin/users/${userId}/posts`);
-      await fetchUsers();
-      alert('All posts deleted successfully');
-    } catch (err) {
-      console.error('Error deleting posts:', err);
-      alert('Failed to delete posts');
     }
   };
 
@@ -296,7 +234,7 @@ export function UsersPage() {
               key={user.userId}
               user={user}
               onViewDetails={handleViewDetails}
-              onViewPosts={handleViewDetails}
+              onViewPosts={handleViewPosts}
               onToggleBan={handleToggleBan}
               isSelected={selectedUserIds.includes(user.userId)}
               onSelect={handleSelectUser}
@@ -342,29 +280,6 @@ export function UsersPage() {
           </Button>
         </div>
       )}
-
-      {/* User Detail Modal */}
-      <UserDetailModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        user={selectedUser}
-        onBanToggle={handleToggleBan}
-        onRegeneratePassword={handleRegeneratePassword}
-        onDeleteUser={handleDeleteUser}
-        onDeleteAllPosts={handleDeleteAllPosts}
-      />
-
-      {/* Regenerate Password Modal */}
-      <RegeneratePasswordModal
-        isOpen={isPasswordModalOpen}
-        onClose={() => {
-          setIsPasswordModalOpen(false);
-          setRegeneratedPassword(null);
-          setPasswordUser('');
-        }}
-        password={regeneratedPassword}
-        userName={passwordUser}
-      />
     </div>
   );
 }
