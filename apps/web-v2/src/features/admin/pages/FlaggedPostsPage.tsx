@@ -123,7 +123,9 @@ export function FlaggedPostsPage() {
     <div className="p-6 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">🚩 Flagged Posts</h1>
+        <h1 className="text-2xl font-bold" data-testid="flagged-posts-title">
+          🚩 Flagged Posts
+        </h1>
         <p className="text-text-secondary mt-1">
           Review and manage posts reported by the community
         </p>
@@ -131,7 +133,7 @@ export function FlaggedPostsPage() {
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-4">
-        <div className="flex gap-2">
+        <div className="flex gap-2" data-testid="filter-dropdown">
           <Button
             variant={filter === 'all' ? 'primary' : 'ghost'}
             size="sm"
@@ -139,6 +141,7 @@ export function FlaggedPostsPage() {
               setFilter('all');
               setPage(1);
             }}
+            data-testid="filter-option-all"
           >
             All ({allCount})
           </Button>
@@ -149,6 +152,7 @@ export function FlaggedPostsPage() {
               setFilter('auto-hidden');
               setPage(1);
             }}
+            data-testid="filter-option-auto-hidden"
           >
             Auto-Hidden ({autoHiddenCount})
           </Button>
@@ -159,6 +163,7 @@ export function FlaggedPostsPage() {
               setFilter('under-review');
               setPage(1);
             }}
+            data-testid="filter-option-under-review"
           >
             Under Review ({underReviewCount})
           </Button>
@@ -173,21 +178,36 @@ export function FlaggedPostsPage() {
               setPage(1);
             }}
             className="px-3 py-1.5 rounded-lg border border-border bg-bg text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
+            data-testid="sort-dropdown"
           >
-            <option value="most-reports">Most Reports</option>
-            <option value="recent">Most Recent</option>
-            <option value="oldest">Oldest First</option>
+            <option value="most-reports" data-testid="sort-option-most-reports">
+              Most Reports
+            </option>
+            <option value="recent" data-testid="sort-option-most-recent">
+              Most Recent
+            </option>
+            <option value="oldest" data-testid="sort-option-oldest-first">
+              Oldest First
+            </option>
           </select>
         </div>
       </div>
 
       {/* Bulk actions */}
       {selectedPosts.size > 0 && (
-        <div className="flex items-center gap-4 p-4 bg-bg-secondary rounded-lg">
-          <Badge variant="brand" size="md">
+        <div
+          className="flex items-center gap-4 p-4 bg-bg-secondary rounded-lg"
+          data-testid="bulk-action-bar"
+        >
+          <Badge variant="brand" size="md" data-testid="selection-count">
             {selectedPosts.size} selected
           </Badge>
-          <Button size="sm" variant="destructive" onClick={handleBulkDelete}>
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={handleBulkDelete}
+            data-testid="bulk-delete-button"
+          >
             Delete Selected Posts
           </Button>
           <Button size="sm" variant="ghost" onClick={() => setSelectedPosts(new Set())}>
@@ -197,11 +217,18 @@ export function FlaggedPostsPage() {
       )}
 
       {/* Posts list */}
-      <div className="space-y-4">
+      <div className="space-y-4" data-testid="flagged-posts-list">
         {loading ? (
-          <div className="text-center py-12 text-text-secondary">Loading flagged posts...</div>
+          <div
+            className="text-center py-12 text-text-secondary"
+            data-testid="flagged-posts-loading"
+          >
+            Loading flagged posts...
+          </div>
         ) : posts.length === 0 ? (
-          <div className="text-center py-12 text-text-secondary">No flagged posts found</div>
+          <div className="text-center py-12 text-text-secondary" data-testid="flagged-posts-empty">
+            No flagged posts found
+          </div>
         ) : (
           <>
             <div className="flex items-center gap-2">
@@ -211,6 +238,7 @@ export function FlaggedPostsPage() {
                 onChange={handleSelectAll}
                 className="h-4 w-4 cursor-pointer rounded border-border bg-bg focus:ring-2 focus:ring-brand-primary"
                 aria-label="Select all posts"
+                data-testid="select-all-checkbox"
               />
               <span className="text-sm text-text-secondary">Select All</span>
             </div>

@@ -170,13 +170,18 @@ export function UserDetailPage() {
   return (
     <div className="max-w-6xl mx-auto p-4">
       {/* Back button */}
-      <Button variant="ghost" onClick={() => navigate('/admin/users')} className="mb-4">
+      <Button
+        variant="ghost"
+        onClick={() => navigate('/admin/users')}
+        className="mb-4"
+        data-testid="back-to-users"
+      >
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back to Users
       </Button>
 
       {/* User Profile Card */}
-      <Card className="mb-6">
+      <Card className="mb-6" data-testid="user-detail-header">
         <CardContent className="p-6 bg-white dim:bg-gray-800 dark:bg-gray-900">
           <div className="flex items-start gap-6">
             {/* Avatar */}
@@ -195,7 +200,10 @@ export function UserDetailPage() {
             {/* User Info */}
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold text-gray-900 dim:text-gray-100 dark:text-gray-100">
+                <h1
+                  className="text-2xl font-bold text-gray-900 dim:text-gray-100 dark:text-gray-100"
+                  data-testid="user-detail-username"
+                >
                   {user.userName}
                 </h1>
                 {user.isOnline && (
@@ -213,7 +221,7 @@ export function UserDetailPage() {
                   {polarityLabel}
                 </Badge>
                 {user.isBanned && (
-                  <Badge variant="error" size="md">
+                  <Badge variant="error" size="md" data-testid="user-banned-badge">
                     BANNED {user.bannedAt && `since ${formatRelativeTime(user.bannedAt)}`}
                   </Badge>
                 )}
@@ -226,7 +234,10 @@ export function UserDetailPage() {
               )}
 
               {/* User Stats Grid */}
-              <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+              <div
+                className="mt-4 grid grid-cols-2 gap-4 text-sm"
+                data-testid="user-activity-summary"
+              >
                 <div>
                   <span className="text-gray-500 dim:text-gray-400 dark:text-gray-400">
                     User ID:
@@ -239,7 +250,10 @@ export function UserDetailPage() {
                   <span className="text-gray-500 dim:text-gray-400 dark:text-gray-400">
                     Pigeon ID:
                   </span>
-                  <span className="ml-2 font-mono text-gray-900 dim:text-gray-100 dark:text-gray-100">
+                  <span
+                    className="ml-2 font-mono text-gray-900 dim:text-gray-100 dark:text-gray-100"
+                    data-testid="user-detail-pigeon-id"
+                  >
                     {user.pigeonId}
                   </span>
                 </div>
@@ -290,10 +304,18 @@ export function UserDetailPage() {
             Actions
           </h2>
           <div className="flex flex-wrap gap-3">
-            <Button variant={user.isBanned ? 'outline' : 'destructive'} onClick={handleToggleBan}>
+            <Button
+              variant={user.isBanned ? 'outline' : 'destructive'}
+              onClick={handleToggleBan}
+              data-testid="toggle-ban-button"
+            >
               {user.isBanned ? 'Unban User' : 'Ban User'}
             </Button>
-            <Button variant="outline" onClick={handleRegeneratePassword}>
+            <Button
+              variant="outline"
+              onClick={handleRegeneratePassword}
+              data-testid="regenerate-password-button"
+            >
               Regenerate Password
             </Button>
             <Button
@@ -302,10 +324,18 @@ export function UserDetailPage() {
             >
               View All Posts
             </Button>
-            <Button variant="destructive" onClick={handleDeleteAllPosts}>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAllPosts}
+              data-testid="delete-all-posts-button"
+            >
               Delete All Posts
             </Button>
-            <Button variant="ghost" onClick={handleDeleteUser}>
+            <Button
+              variant="ghost"
+              onClick={handleDeleteUser}
+              data-testid="soft-delete-user-button"
+            >
               Delete User
             </Button>
           </div>
@@ -314,7 +344,10 @@ export function UserDetailPage() {
 
       {/* Recent Posts Section */}
       <Card>
-        <CardContent className="p-4 bg-white dim:bg-gray-800 dark:bg-gray-900">
+        <CardContent
+          className="p-4 bg-white dim:bg-gray-800 dark:bg-gray-900"
+          data-testid="user-posts-section"
+        >
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
               Recent Posts ({userPosts.length})

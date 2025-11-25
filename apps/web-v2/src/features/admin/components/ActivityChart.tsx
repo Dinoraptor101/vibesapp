@@ -15,7 +15,7 @@ interface ActivityChartProps {
 export function ActivityChart({ data }: ActivityChartProps) {
   if (!data || data.length === 0) {
     return (
-      <Card>
+      <Card data-testid="admin-activity-chart">
         <CardHeader>
           <h3 className="text-lg font-semibold text-gray-900">Activity (Last 7 Days)</h3>
         </CardHeader>
@@ -36,7 +36,7 @@ export function ActivityChart({ data }: ActivityChartProps) {
   };
 
   return (
-    <Card>
+    <Card data-testid="admin-activity-chart">
       <CardHeader>
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900">Activity (Last 7 Days)</h3>

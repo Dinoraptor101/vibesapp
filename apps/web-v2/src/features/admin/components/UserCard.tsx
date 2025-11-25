@@ -26,7 +26,7 @@ export function UserCard({
   const polarityLabel = (user.masculineFeminineScale ?? 0) > 0 ? '☀️ Yang' : '🌙 Yin';
 
   return (
-    <Card className="relative">
+    <Card className="relative" data-testid={`user-card-${user.userId}`}>
       {onSelect && (
         <div className="absolute top-4 left-4 z-10">
           <input
@@ -66,7 +66,15 @@ export function UserCard({
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
-                <h3 className="truncate text-lg font-semibold text-gray-900">{user.userName}</h3>
+                <h3
+                  className="truncate text-lg font-semibold text-gray-900"
+                  data-testid="user-username"
+                >
+                  {user.userName}
+                </h3>
+                <p className="text-xs text-gray-500 font-mono" data-testid="user-pigeon-id">
+                  {user.pigeonId}
+                </p>
 
                 <div className="mt-1 flex flex-wrap items-center gap-2">
                   {user.mbtiPersonality && (
@@ -78,7 +86,7 @@ export function UserCard({
                     {polarityLabel}
                   </Badge>
                   {user.isBanned && (
-                    <Badge variant="error" size="sm">
+                    <Badge variant="error" size="sm" data-testid="user-banned-badge">
                       BANNED
                     </Badge>
                   )}
@@ -108,7 +116,12 @@ export function UserCard({
 
             {/* Actions */}
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button variant="primary" size="sm" onClick={() => onViewDetails(user)}>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => onViewDetails(user)}
+                data-testid="view-user-details-button"
+              >
                 View Details
               </Button>
               {onViewPosts && (
@@ -120,6 +133,8 @@ export function UserCard({
                 variant={user.isBanned ? 'outline' : 'destructive'}
                 size="sm"
                 onClick={() => onToggleBan(user.userId)}
+                data-testid="toggle-ban-button"
+                data-banned={user.isBanned}
               >
                 {user.isBanned ? 'Unban' : 'Ban User'}
               </Button>

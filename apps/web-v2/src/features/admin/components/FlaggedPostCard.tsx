@@ -42,22 +42,27 @@ export function FlaggedPostCard({
     : `${import.meta.env.VITE_CDN_URL}/${post.image}`;
 
   return (
-    <Card className={selected ? 'ring-2 ring-brand-primary' : ''}>
+    <Card
+      className={selected ? 'ring-2 ring-brand-primary' : ''}
+      data-testid={`flagged-post-card-${post._id}`}
+    >
       <CardContent className="p-4">
         <div className="flex gap-4">
           {/* Thumbnail */}
-          <div className="relative flex-shrink-0">
+          <div className="relative flex-shrink-0" data-testid="post-thumbnail">
             <input
               type="checkbox"
               checked={selected}
               onChange={() => onSelect(post._id)}
               className="absolute top-2 left-2 z-10 h-4 w-4 cursor-pointer rounded border-border bg-bg focus:ring-2 focus:ring-brand-primary"
               aria-label={`Select post by ${post.user.userName}`}
+              data-testid="post-checkbox"
             />
             <button
               type="button"
               onClick={() => onViewDetails(post)}
               className="focus:outline-none focus:ring-2 focus:ring-brand-primary rounded-lg"
+              data-testid="post-detail-link"
             >
               <img
                 src={imageUrl}
@@ -89,13 +94,21 @@ export function FlaggedPostCard({
                     : 'Unknown'}
                 </div>
               </div>
-              <Badge variant={post.isHidden ? 'error' : 'warning'} size="md">
+              <Badge
+                variant={post.isHidden ? 'error' : 'warning'}
+                size="md"
+                data-testid="report-count-badge"
+              >
                 🚩 {post.reportCount || 0} {(post.reportCount || 0) === 1 ? 'report' : 'reports'}
               </Badge>
             </div>
 
             {/* Caption */}
-            {post.text && <p className="text-sm line-clamp-2 text-text-secondary">"{post.text}"</p>}
+            {post.text && (
+              <p className="text-sm line-clamp-2 text-text-secondary" data-testid="post-caption">
+                "{post.text}"
+              </p>
+            )}
 
             {/* Status indicator */}
             {post.isHidden && (
@@ -106,7 +119,7 @@ export function FlaggedPostCard({
 
             {/* Report breakdown by reason */}
             {post.reportsByReason && Object.keys(post.reportsByReason).length > 0 && (
-              <div className="flex flex-wrap gap-1 text-xs">
+              <div className="flex flex-wrap gap-1 text-xs" data-testid="report-breakdown">
                 {Object.entries(post.reportsByReason).map(([reason, count]) => (
                   <Badge key={reason} variant="outline" size="sm">
                     {reason.replace('_', ' ')}: {count}
@@ -128,10 +141,24 @@ export function FlaggedPostCard({
               <Button size="sm" variant="outline" onClick={() => onViewDetails(post)}>
                 View Full Post
               </Button>
-              <Button size="sm" variant="destructive" onClick={handleDelete} loading={isDeleting}>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={handleDelete}
+                loading={isDeleting}
+                data-testid="delete-post-button"
+                aria-label="Delete post"
+              >
                 Delete Post
               </Button>
-              <Button size="sm" variant="secondary" onClick={handleDismiss} loading={isDismissing}>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={handleDismiss}
+                loading={isDismissing}
+                data-testid="dismiss-reports-button"
+                aria-label="Dismiss reports"
+              >
                 Dismiss Reports
               </Button>
             </div>
