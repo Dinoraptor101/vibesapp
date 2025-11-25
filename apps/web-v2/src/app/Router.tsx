@@ -3,14 +3,17 @@
  * Defines all routes and navigation structure
  */
 
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import {
   AdminDashboardPage,
+  AdminLayout,
   AdminLoginPage,
   AdminSettingsPage,
   FlaggedPostDetailPage,
   FlaggedPostsPage,
   ProtectedAdminRoute,
+  UserDetailPage,
+  UserPostsPage,
   UsersPage,
 } from '@/features/admin';
 import { AuthProvider, LoginPage, ProtectedRoute, SignupPage } from '@/features/auth';
@@ -24,6 +27,20 @@ import { ProfilePage } from '@/pages/ProfilePage';
 import { ReportPostPage } from '@/pages/ReportPostPage';
 import { SendDMRequestPage } from '@/pages/SendDMRequestPage';
 import { SettingsPage } from '@/pages/SettingsPage';
+
+/**
+ * Admin Layout Wrapper with Outlet for nested routes
+ * Keeps the header persistent across admin page navigation
+ */
+function AdminLayoutWithOutlet() {
+  return (
+    <ProtectedAdminRoute>
+      <AdminLayout>
+        <Outlet />
+      </AdminLayout>
+    </ProtectedAdminRoute>
+  );
+}
 
 function NotFoundPage() {
   return (
@@ -128,48 +145,17 @@ export function Router() {
           />
 
           {/* Admin routes */}
-          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="/admin/login" element={<AdminLoginPage />} />
-          <Route
-            path="/admin/dashboard"
-            element={
-              <ProtectedAdminRoute>
-                <AdminDashboardPage />
-              </ProtectedAdminRoute>
-            }
-          />
-          <Route
-            path="/admin/flagged"
-            element={
-              <ProtectedAdminRoute>
-                <FlaggedPostsPage />
-              </ProtectedAdminRoute>
-            }
-          />
-          <Route
-            path="/admin/flagged/:postId"
-            element={
-              <ProtectedAdminRoute>
-                <FlaggedPostDetailPage />
-              </ProtectedAdminRoute>
-            }
-          />
-          <Route
-            path="/admin/users"
-            element={
-              <ProtectedAdminRoute>
-                <UsersPage />
-              </ProtectedAdminRoute>
-            }
-          />
-          <Route
-            path="/admin/settings"
-            element={
-              <ProtectedAdminRoute>
-                <AdminSettingsPage />
-              </ProtectedAdminRoute>
-            }
-          />
+          <Route path="/admin" element={<AdminLayoutWithOutlet />}>
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboardPage />} />
+            <Route path="flagged" element={<FlaggedPostsPage />} />
+            <Route path="flagged/:postId" element={<FlaggedPostDetailPage />} />
+            <Route path="users" element={<UsersPage />} />
+            <Route path="users/:userId" element={<UserDetailPage />} />
+            <Route path="users/:userId/posts" element={<UserPostsPage />} />
+            <Route path="settings" element={<AdminSettingsPage />} />
+          </Route>
 
           {/* Catch-all for 404 */}
           <Route path="*" element={<NotFoundPage />} />
