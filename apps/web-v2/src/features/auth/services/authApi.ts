@@ -79,7 +79,7 @@ export const authApi = {
    * Generate a unique Pigeon ID from the backend
    */
   async generatePigeonId(): Promise<string> {
-    const response = await apiClient.get<{ pigeonId: string }>('/api/users/generate-pigeon-id');
+    const response = await apiClient.get<{ pigeonId: string }>('/users/generate-pigeon-id');
     return response.pigeonId;
   },
 
@@ -89,7 +89,7 @@ export const authApi = {
    * @param recaptchaToken - Optional reCAPTCHA v3 token for bot protection
    */
   async login(pigeonId: string, recaptchaToken?: string): Promise<User> {
-    const response = await apiClient.post<LoginResponse>('/api/users/login', {
+    const response = await apiClient.post<LoginResponse>('/users/login', {
       pigeonId,
       recaptchaToken,
     });
@@ -100,7 +100,7 @@ export const authApi = {
    * Create new user account
    */
   async signup(data: SignupData): Promise<{ user: User; pigeonId: string }> {
-    const response = await apiClient.post<SignupResponse>('/api/users/create', data);
+    const response = await apiClient.post<SignupResponse>('/users/create', data);
     return {
       user: transformUserData(response),
       pigeonId: response.pigeonId,
@@ -111,7 +111,7 @@ export const authApi = {
    * Get current user data by userId
    */
   async getCurrentUser(userId: string): Promise<User> {
-    const response = await apiClient.get<LoginResponse>(`/api/users/${userId}`);
+    const response = await apiClient.get<LoginResponse>(`/users/${userId}`);
     return transformUserData(response);
   },
 
@@ -131,7 +131,7 @@ export const authApi = {
       };
     }>
   ): Promise<User> {
-    const response = await apiClient.put<LoginResponse>(`/api/users/${userId}`, data);
+    const response = await apiClient.put<LoginResponse>(`/users/${userId}`, data);
     return transformUserData(response);
   },
 
@@ -140,7 +140,7 @@ export const authApi = {
    */
   async regeneratePigeonId(userId: string): Promise<string> {
     const response = await apiClient.put<{ message: string; pigeonId: string }>(
-      `/api/users/${userId}/regenerate-pigeon-id`
+      `/users/${userId}/regenerate-pigeon-id`
     );
     return response.pigeonId;
   },

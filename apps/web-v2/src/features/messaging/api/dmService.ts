@@ -60,70 +60,70 @@ export interface SendMessagePayload {
  * Check if user can send DM request to recipient
  */
 export const checkDMRequestStatus = async (recipientId: string): Promise<DMRequestStatus> => {
-  return await apiClient.get<DMRequestStatus>(`/api/dm-requests/status/${recipientId}`);
+  return await apiClient.get<DMRequestStatus>(`/dm-requests/status/${recipientId}`);
 };
 
 /**
  * Send a DM request to a user
  */
 export const sendDMRequest = async (payload: SendDMRequestPayload): Promise<DMRequest> => {
-  return await apiClient.post<DMRequest>('/api/dm-requests', payload);
+  return await apiClient.post<DMRequest>('/dm-requests', payload);
 };
 
 /**
  * Get all DM requests for current user
  */
 export const getDMRequests = async (): Promise<DMRequest[]> => {
-  return await apiClient.get<DMRequest[]>('/api/dm-requests');
+  return await apiClient.get<DMRequest[]>('/dm-requests');
 };
 
 /**
  * Accept a DM request (creates conversation)
  */
 export const acceptDMRequest = async (requestId: string): Promise<void> => {
-  await apiClient.post(`/api/dm-requests/${requestId}/accept`);
+  await apiClient.post(`/dm-requests/${requestId}/accept`);
 };
 
 /**
  * Decline a DM request (sets 24h cooldown)
  */
 export const declineDMRequest = async (requestId: string): Promise<void> => {
-  await apiClient.post(`/api/dm-requests/${requestId}/decline`);
+  await apiClient.post(`/dm-requests/${requestId}/decline`);
 };
 
 /**
  * Get all conversations for current user
  */
 export const getConversations = async (userId: string): Promise<Conversation[]> => {
-  return await apiClient.get<Conversation[]>(`/api/dm/conversations/${userId}`);
+  return await apiClient.get<Conversation[]>(`/dm/conversations/${userId}`);
 };
 
 /**
  * Get a specific conversation by ID
  */
 export const getConversation = async (conversationId: string): Promise<Conversation> => {
-  return await apiClient.get<Conversation>(`/api/dm/conversation/${conversationId}`);
+  return await apiClient.get<Conversation>(`/dm/conversation/${conversationId}`);
 };
 
 /**
  * Send a message in a conversation
  */
 export const sendMessage = async (payload: SendMessagePayload): Promise<Message> => {
-  return await apiClient.post<Message>('/api/dm/message', payload);
+  return await apiClient.post<Message>('/dm/message', payload);
 };
 
 /**
  * Mark messages as read in a conversation
  */
 export const markMessagesAsRead = async (conversationId: string): Promise<void> => {
-  await apiClient.post(`/api/dm/conversation/${conversationId}/markAsRead`);
+  await apiClient.post(`/dm/conversation/${conversationId}/markAsRead`);
 };
 
 /**
  * Close a conversation
  */
 export const closeConversation = async (conversationId: string): Promise<void> => {
-  await apiClient.post(`/api/dm/conversation/${conversationId}/close`);
+  await apiClient.post(`/dm/conversation/${conversationId}/close`);
 };
 
 /**
@@ -136,7 +136,7 @@ export const getConversationStatus = async (
   return await apiClient.get<{
     status: string;
     conversationId?: string;
-  }>('/api/dm/status', {
+  }>('/dm/status', {
     params: { userId1, userId2 },
   });
 };

@@ -71,7 +71,7 @@ export async function getActivities(userId: string): Promise<Activity[]> {
     console.warn('getActivities called with invalid userId:', userId);
     return [];
   }
-  const response = await apiClient.get<BackendActivity[]>(`/api/activities/${userId}`);
+  const response = await apiClient.get<BackendActivity[]>(`/activities/${userId}`);
   return response.map(transformActivity);
 }
 
@@ -115,21 +115,21 @@ export async function getUnreadCounts(userId: string) {
  * Mark a single activity as read
  */
 export async function markAsRead(activityId: string): Promise<void> {
-  await apiClient.patch(`/api/activities/${activityId}/read`);
+  await apiClient.patch(`/activities/${activityId}/read`);
 }
 
 /**
  * Mark all activities as read
  */
 export async function markAllAsRead(userId: string): Promise<void> {
-  await apiClient.patch(`/api/activities/${userId}/read-all`);
+  await apiClient.patch(`/activities/${userId}/read-all`);
 }
 
 /**
  * Check if user has unread activities
  */
 export async function hasUnreadActivities(userId: string): Promise<boolean> {
-  const response = await apiClient.get<{ hasUnread: boolean }>(`/api/activities/unread/${userId}`);
+  const response = await apiClient.get<{ hasUnread: boolean }>(`/activities/unread/${userId}`);
   return response.hasUnread;
 }
 

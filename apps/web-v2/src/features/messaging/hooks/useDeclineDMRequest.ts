@@ -16,9 +16,7 @@ export function useDeclineDMRequest() {
 
   return useMutation({
     mutationFn: async (requestId: string) => {
-      const data = await api.post<DeclineDMRequestResponse>(
-        `/api/dm-requests/${requestId}/decline`
-      );
+      const data = await api.post<DeclineDMRequestResponse>(`/dm-requests/${requestId}/decline`);
       return data;
     },
     onSuccess: () => {

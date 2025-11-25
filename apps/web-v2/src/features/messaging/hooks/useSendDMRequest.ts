@@ -18,7 +18,7 @@ export function useSendDMRequest() {
   return useMutation({
     mutationFn: async ({ userId, message }: SendDMRequestParams) => {
       const payload: SendDMRequestPayload = message ? { message } : {};
-      const data = await api.post<DMRequest>(`/api/dm-requests/${userId}`, payload);
+      const data = await api.post<DMRequest>(`/dm-requests/${userId}`, payload);
       return data;
     },
     onSuccess: (_data, variables) => {

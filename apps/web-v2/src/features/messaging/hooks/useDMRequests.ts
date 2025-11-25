@@ -12,7 +12,7 @@ export function useDMRequests() {
     queryKey: ['dm-requests'],
     queryFn: async () => {
       // Backend returns plain array of requests
-      const requests = await api.get<DMRequest[]>('/api/dm-requests');
+      const requests = await api.get<DMRequest[]>('/dm-requests');
       // Transform to match component expectations
       return {
         requests,

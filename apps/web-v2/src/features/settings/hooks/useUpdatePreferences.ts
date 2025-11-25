@@ -19,7 +19,7 @@ export function useUpdatePreferences() {
         throw new Error('User not authenticated');
       }
 
-      await api.patch(`/api/users/${user.userId}/notification-preferences`, preferences);
+      await api.patch(`/users/${user.userId}/notification-preferences`, preferences);
     },
     onSuccess: () => {
       // Invalidate queries to refetch fresh data

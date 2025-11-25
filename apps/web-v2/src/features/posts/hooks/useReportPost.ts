@@ -41,7 +41,7 @@ export function useReportPost() {
         : { lat: 0, lon: 0 };
 
       // Backend expects: { userId, reason, location: { lat, lon } }
-      const response = await api.post<ReportPostResponse>(`/api/posts/${postId}/report`, {
+      const response = await api.post<ReportPostResponse>(`/posts/${postId}/report`, {
         userId: user._id,
         reason,
         location,
