@@ -426,6 +426,17 @@ const confirmed = window.confirm(
 - [ ] Disable actions when offline
 - [ ] Improve empty state ("All clear!")
 
+### ✅ FlaggedPostsPage (Completed)
+- [x] Added skeleton loading screens (replaces spinner)
+- [x] Improved empty state with CheckCircle icon and positive messaging
+- [x] Added offline handling - bulk delete and action buttons disabled when offline
+- [x] Reduced page spacing from `space-y-6` to `space-y-4`
+- [x] Reduced card padding from `p-4` to `p-3`
+- [x] **Fixed filtering logic** - Auto-hidden and Under-review filters now work correctly
+- [x] **Fixed sorting** - Most reports, Recent, and Oldest sorting now functions properly
+- [x] **Optimized bulk actions UI** - Moved to horizontal layout next to "Select All" (saves vertical space)
+- [x] Shortened button text: "Delete Selected" instead of "Delete Selected Posts"
+
 ### 🔲 UsersPage
 - [ ] Skeleton loading states
 - [ ] Disable ban/actions when offline
@@ -434,6 +445,15 @@ const confirmed = window.confirm(
 ### 🔲 FlaggedPostCard
 - [ ] Simplify to one way to view details
 - [ ] Ensure touch-friendly action buttons
+
+### ✅ FlaggedPostCard (Completed)
+- [x] Removed "View Full Post" button - thumbnail is the only way to view details (ZEN: one action, one way)
+- [x] Added `hover-lift` animation to entire card
+- [x] Increased action buttons from `size="sm"` to `size="md"` (44px touch targets)
+- [x] Added offline handling - Delete and Dismiss buttons disabled when offline
+- [x] Reduced padding from `p-4` to `p-3`
+- [x] Reduced metadata text from `text-sm` to `text-xs`
+- [x] Added aria-label to thumbnail button for accessibility
 
 ### 🔲 UserCard
 - [ ] Ensure touch-friendly action buttons

@@ -12,9 +12,17 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CommentList, useComments } from '@/features/posts';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import api from '@/lib/api';
 import { formatRelativeTime } from '@/lib/utils';
 import type { FlaggedPost } from '@/types';
+
+// Strip HTML tags from text
+function stripHtml(html: string): string {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
+}
 
 /**
  * Comments section that only renders if there are comments
@@ -49,6 +57,7 @@ export function FlaggedPostDetailPage() {
   const { postId } = useParams<{ postId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
+  const { isOnline } = useNetworkStatus();
 
   // Get post from route state (passed from FlaggedPostsPage)
   const postFromState = (location.state as { post?: FlaggedPost })?.post;
@@ -195,7 +204,7 @@ export function FlaggedPostDetailPage() {
           </div>
 
           {/* Post Info */}
-          <div className="p-6 space-y-4 bg-white dim:bg-gray-800 dark:bg-gray-900">
+          <div className="p-4 space-y-4 bg-white dim:bg-gray-800 dark:bg-gray-900">
             {/* User info and stats */}
             <div className="flex items-center justify-between">
               <div>
@@ -217,7 +226,7 @@ export function FlaggedPostDetailPage() {
             {post.text && (
               <div className="p-4 bg-gray-50 dim:bg-gray-700 dark:bg-gray-800 rounded-lg border border-gray-200 dim:border-gray-600 dark:border-gray-700">
                 <p className="text-base text-gray-900 dim:text-gray-100 dark:text-gray-100">
-                  {post.text}
+                  {stripHtml(post.text)}
                 </p>
               </div>
             )}
@@ -296,11 +305,21 @@ export function FlaggedPostDetailPage() {
             Back
           </Button>
           {post.reporters && post.reporters.length > 0 && (
-            <Button variant="outline" onClick={handleDismiss} loading={isDismissing}>
+            <Button
+              variant="outline"
+              onClick={handleDismiss}
+              loading={isDismissing}
+              disabled={!isOnline}
+            >
               Dismiss Reports
             </Button>
           )}
-          <Button variant="destructive" onClick={handleDelete} loading={isDeleting}>
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+            loading={isDeleting}
+            disabled={!isOnline}
+          >
             Delete Post
           </Button>
         </div>
