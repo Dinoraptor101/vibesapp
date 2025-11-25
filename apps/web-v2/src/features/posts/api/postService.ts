@@ -49,7 +49,7 @@ export async function fetchPosts(
   params.append('page', page.toString());
   params.append('limit', limit.toString());
 
-  const response = await apiClient.get<ApiPostsResponse>(`/api/posts?${params.toString()}`);
+  const response = await apiClient.get<ApiPostsResponse>(`/posts?${params.toString()}`);
 
   // Transform to match our PostsResponse interface
   return {
@@ -68,7 +68,7 @@ export async function fetchPosts(
  */
 export async function getPostById(postId: string, userId: string): Promise<Post> {
   const params = new URLSearchParams({ userId });
-  const response = await apiClient.get<PostResponse>(`/api/posts/${postId}?${params.toString()}`);
+  const response = await apiClient.get<PostResponse>(`/posts/${postId}?${params.toString()}`);
   return response.post;
 }
 
@@ -76,7 +76,7 @@ export async function getPostById(postId: string, userId: string): Promise<Post>
  * Create a new post
  */
 export async function createPost(data: CreatePostPayload): Promise<Post> {
-  const response = await apiClient.post<PostResponse>('/api/posts/create', data);
+  const response = await apiClient.post<PostResponse>('/posts/create', data);
   return response.post;
 }
 
@@ -85,7 +85,7 @@ export async function createPost(data: CreatePostPayload): Promise<Post> {
  */
 export async function toggleLikePost(postId: string): Promise<ReactionResponse> {
   // Simply POST to the like endpoint - backend will toggle like/unlike automatically
-  const response = await apiClient.post<ReactionResponse>(`/api/posts/${postId}/like`, {});
+  const response = await apiClient.post<ReactionResponse>(`/posts/${postId}/like`, {});
   return response;
 }
 
@@ -93,7 +93,7 @@ export async function toggleLikePost(postId: string): Promise<ReactionResponse> 
  * Delete a post
  */
 export async function deletePost(postId: string): Promise<void> {
-  await apiClient.delete(`/api/posts/${postId}`);
+  await apiClient.delete(`/posts/${postId}`);
 }
 
 /**
@@ -112,7 +112,7 @@ export async function getNearbyPosts(
     limit: limit.toString(),
   });
 
-  const response = await apiClient.get<ApiPostsResponse>(`/api/posts/nearby?${params.toString()}`);
+  const response = await apiClient.get<ApiPostsResponse>(`/posts/nearby?${params.toString()}`);
 
   return response.posts;
 }
@@ -127,7 +127,7 @@ export async function getUserPosts(userId: string, page = 1, limit = 20): Promis
     limit: limit.toString(),
   });
 
-  const response = await apiClient.get<ApiPostsResponse>(`/api/posts?${params.toString()}`);
+  const response = await apiClient.get<ApiPostsResponse>(`/posts?${params.toString()}`);
 
   // Transform to match our PostsResponse interface
   return {
@@ -155,7 +155,7 @@ export async function getPostsByMBTI(
     limit: limit.toString(),
   });
 
-  const response = await apiClient.get<ApiPostsResponse>(`/api/posts?${params.toString()}`);
+  const response = await apiClient.get<ApiPostsResponse>(`/posts?${params.toString()}`);
 
   // Transform to match our PostsResponse interface
   return {
@@ -189,7 +189,7 @@ export async function searchPosts(query: string, page = 1, limit = 20): Promise<
       totalPages: number;
       hasMore: boolean;
     };
-  }>(`/api/posts/search?${params.toString()}`);
+  }>(`/posts/search?${params.toString()}`);
 
   // Transform to match our PostsResponse interface
   return {

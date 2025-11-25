@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
 import type { FlaggedPost } from '@/types';
 import { FlaggedPostCard } from '../components/FlaggedPostCard';
-import { PostDetailModal } from '../components/PostDetailModal';
 
 type FilterType = 'all' | 'auto-hidden' | 'under-review';
 type SortType = 'most-reports' | 'recent' | 'oldest';
 
 export function FlaggedPostsPage() {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<FlaggedPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>('all');
@@ -17,8 +18,6 @@ export function FlaggedPostsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedPosts, setSelectedPosts] = useState<Set<string>>(new Set());
-  const [selectedPost, setSelectedPost] = useState<FlaggedPost | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -113,8 +112,7 @@ export function FlaggedPostsPage() {
   };
 
   const handleViewDetails = (post: FlaggedPost) => {
-    setSelectedPost(post);
-    setIsModalOpen(true);
+    navigate(`/admin/flagged/${post._id}`, { state: { post } });
   };
 
   const allCount = posts.length;
@@ -256,18 +254,6 @@ export function FlaggedPostsPage() {
           </Button>
         </div>
       )}
-
-      {/* Post detail modal */}
-      <PostDetailModal
-        post={selectedPost}
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedPost(null);
-        }}
-        onDelete={handleDeletePost}
-        onDismiss={handleDismissReports}
-      />
     </div>
   );
 }

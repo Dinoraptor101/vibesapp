@@ -33,7 +33,7 @@ export async function getComments(
     totalPages: number;
     totalPosts: number;
     hasMore: boolean;
-  }>(`/api/comments/${postId}?page=${page}&limit=${limit}`);
+  }>(`/comments/${postId}?page=${page}&limit=${limit}`);
 
   // Transform to PostsResponse format
   return {
@@ -52,7 +52,7 @@ export async function getComments(
  * Creates a comment using the dedicated comment endpoint
  */
 export async function createComment(payload: CreateCommentPayload): Promise<Post> {
-  const response = await apiClient.post<{ post: Post }>('/api/comments', payload);
+  const response = await apiClient.post<{ post: Post }>('/comments', payload);
   return response.post;
 }
 
@@ -61,7 +61,7 @@ export async function createComment(payload: CreateCommentPayload): Promise<Post
  * Same as deleting a post
  */
 export async function deleteComment(commentId: string): Promise<void> {
-  await apiClient.delete(`/api/posts/${commentId}`);
+  await apiClient.delete(`/posts/${commentId}`);
 }
 
 /**
@@ -69,7 +69,7 @@ export async function deleteComment(commentId: string): Promise<void> {
  * Same as reacting to a post
  */
 export async function heartComment(commentId: string, isHearted: boolean): Promise<Post> {
-  const response = await apiClient.post<{ post: Post }>(`/api/posts/${commentId}/react`, {
+  const response = await apiClient.post<{ post: Post }>(`/posts/${commentId}/react`, {
     type: isHearted ? null : 'like', // Toggle heart
   });
   return response.post;

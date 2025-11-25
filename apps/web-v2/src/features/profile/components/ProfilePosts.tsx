@@ -36,7 +36,7 @@ export function ProfilePosts({ userId }: ProfilePostsProps) {
   } = useInfiniteQuery({
     queryKey: ['profile-posts', userId],
     queryFn: async ({ pageParam = 1 }) => {
-      const response = await api.get<PostsResponse>('/api/posts', {
+      const response = await api.get<PostsResponse>('/posts', {
         userId,
         page: pageParam,
         limit: 12,

@@ -17,7 +17,7 @@ export function LoginPage() {
 
   useEffect(() => {
     // Check backend health on mount
-    fetch(`${API_URL}/api/health`, { method: 'GET' })
+    fetch(`${API_URL}/health`, { method: 'GET' })
       .then((res) => setBackendOnline(res.ok))
       .catch(() => setBackendOnline(false));
   }, []);

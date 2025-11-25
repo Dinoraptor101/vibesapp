@@ -16,7 +16,7 @@ interface S3PresignedUrlResponse {
  * Get presigned URL from backend
  */
 export async function getPresignedUrl(): Promise<S3PresignedUrlResponse> {
-  const response = await apiClient.get<S3PresignedUrlResponse>('/api/s3/s3Url');
+  const response = await apiClient.get<S3PresignedUrlResponse>('/s3/s3Url');
   return response;
 }
 

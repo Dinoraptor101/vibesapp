@@ -8,6 +8,7 @@ import {
   AdminDashboardPage,
   AdminLoginPage,
   AdminSettingsPage,
+  FlaggedPostDetailPage,
   FlaggedPostsPage,
   ProtectedAdminRoute,
   UsersPage,
@@ -142,6 +143,14 @@ export function Router() {
             element={
               <ProtectedAdminRoute>
                 <FlaggedPostsPage />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/flagged/:postId"
+            element={
+              <ProtectedAdminRoute>
+                <FlaggedPostDetailPage />
               </ProtectedAdminRoute>
             }
           />

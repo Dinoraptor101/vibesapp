@@ -75,7 +75,7 @@ export function useAccountUpdates() {
 
         try {
           // Send batch update to API
-          await api.patch(`/api/users/${user?._id}`, updates);
+          await api.patch(`/users/${user?._id}`, updates);
 
           // Refresh user data silently
           await refreshUser();
@@ -119,7 +119,7 @@ export function useAccountUpdates() {
 
         // Send immediately (async, fire-and-forget since component is unmounting)
         api
-          .patch(`/api/users/${user?._id}`, updates)
+          .patch(`/users/${user?._id}`, updates)
           .then(() => {
             callbacks.onSuccess?.();
           })

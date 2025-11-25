@@ -32,7 +32,7 @@ export function useNotificationPreferences() {
         throw new Error('User not authenticated');
       }
 
-      const response = await api.get<UserResponse>(`/api/users/${user.userId}`);
+      const response = await api.get<UserResponse>(`/users/${user.userId}`);
 
       // Return preferences with defaults if not set
       return (
