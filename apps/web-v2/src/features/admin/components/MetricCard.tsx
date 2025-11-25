@@ -34,16 +34,16 @@ export function MetricCard({
   const cardTestId = testId || `metric-card-${title.toLowerCase().replace(/\s+/g, '-')}`;
 
   return (
-    <Card data-testid={cardTestId}>
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <p className="text-sm font-medium text-gray-500" data-testid="metric-card-title">
+    <Card data-testid={cardTestId} className="hover-lift">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-medium text-text-secondary" data-testid="metric-card-title">
               {title}
             </p>
-            <div className="mt-2 flex items-baseline gap-2">
+            <div className="mt-1 flex items-baseline gap-2">
               <h3
-                className={`text-3xl font-bold ${variantColors[variant]}`}
+                className={`text-2xl font-bold ${variantColors[variant]}`}
                 data-testid="metric-card-value"
               >
                 {value.toLocaleString()}
@@ -59,12 +59,19 @@ export function MetricCard({
               )}
             </div>
             {subtitle && (
-              <p className="mt-1 text-sm text-gray-600" data-testid="metric-card-subtitle">
+              <p
+                className="mt-0.5 text-xs text-text-tertiary truncate"
+                data-testid="metric-card-subtitle"
+              >
                 {subtitle}
               </p>
             )}
           </div>
-          {icon && <div className={`text-3xl ${variantColors[variant]} opacity-50`}>{icon}</div>}
+          {icon && (
+            <div className={`text-2xl ${variantColors[variant]} opacity-40 flex-shrink-0`}>
+              {icon}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
