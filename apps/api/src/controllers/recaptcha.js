@@ -23,7 +23,7 @@ exports.verifyToken = async (req, res) => {
     console.log('Verifying recaptcha token...');
     const response = await axios.post(`https://www.google.com/recaptcha/api/siteverify`, null, {
       params: {
-        secret: process.env.REACT_APP_RECAPTCHA_SECRET,
+        secret: process.env.RECAPTCHA_SECRET,
         response: token,
       },
       timeout: 5000,
