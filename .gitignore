@@ -29,13 +29,15 @@ libs/*/dist/
 libs/*/build/
 
 # ===== Environment Files =====
-# Local environment files (keep root .env for shared config)
-.env
+# Local environment files
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+
+# App-specific environment files (keep .env.example for templates)
 apps/*/.env
+apps/*/.env.local
 
 # ===== Testing =====
 # Test results and reports

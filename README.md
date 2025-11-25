@@ -39,6 +39,10 @@ cd vibesapp
 # Install dependencies
 npm install
 
+# Setup environment variables
+# Create .env files in each app directory with required values
+# See Environment Configuration section below for required variables
+
 # Start development servers
 npm run dev
 ```
@@ -144,12 +148,28 @@ nx graph                       # View project dependency graph
 
 ### Environment Configuration
 
-The monorepo uses a unified environment system with sections for each app:
+The monorepo uses app-specific environment files:
 
+**Backend** (`apps/api/.env`):
 ```bash
-# Root .env contains all configuration
-# Sections are clearly marked for each application
-cp .env.example .env
+NODE_ENV=development
+PORT=5001
+MONGO_URI=your_mongodb_connection_string
+AWS_ACCESS_KEY_ID=your_aws_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret
+API_KEY=your_api_key
+RECAPTCHA_SECRET=your_recaptcha_secret
+ENABLE_RECAPTCHA=false
+```
+
+**Frontend** (`apps/web-v2/.env`):
+```bash
+VITE_API_URL=http://localhost:5001
+VITE_BACKEND_API_KEY=your_api_key
+VITE_CDN_URL=your_cloudfront_url
+VITE_RECAPTCHA_SITE_KEY=your_recaptcha_site_key
+VITE_USE_SSE=false
+VITE_DEBUG=true
 ```
 
 ### Code Quality & Linting

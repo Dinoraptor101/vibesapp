@@ -7,7 +7,7 @@
 
 const axios = require('axios');
 
-const RECAPTCHA_SECRET = process.env.REACT_APP_RECAPTCHA_SECRET;
+const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET;
 const RECAPTCHA_ENABLED = process.env.ENABLE_RECAPTCHA === 'true';
 const SCORE_THRESHOLD = 0.5; // Default threshold for bot detection
 

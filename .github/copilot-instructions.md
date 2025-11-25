@@ -133,10 +133,9 @@ nx affected:test             # Test only affected projects
 ```
 
 ### Environment Variables
-- **Root .env**: Contains all configuration with clearly marked sections
-- **Frontend vars**: Prefixed with `REACT_APP_`
-- **Backend vars**: Direct environment variable access
-- **Shared config**: App metadata and common settings
+- **App-Specific .env**: Each app has its own `.env` file in `apps/api/.env` and `apps/web-v2/.env`
+- **Frontend vars**: Prefixed with `VITE_` for Vite build system
+- **Backend vars**: Direct environment variable access (no prefix required)
 
 ### Deployment Architecture
 - **Frontend**: Heroku static hosting with build pipeline
