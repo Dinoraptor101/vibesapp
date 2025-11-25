@@ -104,7 +104,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         throw new Error('VITE_API_URL environment variable is required');
       }
 
-      const response = await fetch(`${apiBaseURL}/api/admin/verify`, {
+      const response = await fetch(`${apiBaseURL}/api/admin/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

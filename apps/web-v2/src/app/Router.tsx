@@ -3,7 +3,7 @@
  * Defines all routes and navigation structure
  */
 
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import {
   AdminDashboardPage,
   AdminLoginPage,
@@ -127,6 +127,7 @@ export function Router() {
           />
 
           {/* Admin routes */}
+          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route
             path="/admin/dashboard"
