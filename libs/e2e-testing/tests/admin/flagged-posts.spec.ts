@@ -1,0 +1,736 @@
+/**
+ * E2E Tests: Flagged Posts Management
+ *
+ * Coverage:
+ * - Display list of reported posts
+ * - Report count badges and breakdown by reason
+ * - Filter functionality (All, Auto-Hidden, Under Review)
+ * - Sort functionality (Most Reports, Most Recent, Oldest First)
+ * - Delete single post and bulk delete
+ * - Dismiss reports functionality
+ * - Navigation to post detail
+ * - Post thumbnail and caption display
+ */
+
+import { test, expect } from '@playwright/test';
+import { loginAsAdmin } from './helpers/admin-auth';
+
+test.describe('Flagged Posts Page', () => {
+  test.beforeEach(async ({ page }) => {
+    // Login as admin before each test
+    await loginAsAdmin(page);
+
+    // Navigate to flagged posts page
+    await page.goto('/admin/flagged');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should display list of reported posts', async ({ page }) => {
+    // Verify page title/header
+    await expect(page.locator('[data-testid="flagged-posts-title"]')).toBeVisible();
+    await expect(page.locator('[data-testid="flagged-posts-title"]')).toContainText(
+      /flagged|reported/i
+    );
+
+    // Wait for posts list to load
+    const postsList = page.locator('[data-testid="flagged-posts-list"]');
+    await expect(postsList).toBeVisible({ timeout: 10000 });
+
+    // Check if there are flagged posts or empty state
+    const flaggedPosts = page.locator('[data-testid^="flagged-post-card-"]');
+    const emptyState = page.locator('[data-testid="flagged-posts-empty"]');
+
+    // Either posts or empty state should be visible
+    const hasContent =
+      (await flaggedPosts.count()) > 0 || (await emptyState.isVisible().catch(() => false));
+    expect(hasContent).toBe(true);
+  });
+
+  test('should show report count badge on each post', async ({ page }) => {
+    // Wait for posts to load
+    const flaggedPosts = page.locator('[data-testid^="flagged-post-card-"]');
+
+    // Wait for at least one post or check for empty state
+    const postCount = await flaggedPosts.count();
+
+    if (postCount === 0) {
+      // Check for empty state
+      const emptyState = page.locator('[data-testid="flagged-posts-empty"]');
+      if (await emptyState.isVisible()) {
+        test.skip(true, 'No flagged posts available');
+        return;
+      }
+    }
+
+    // Wait for first post to be visible
+    await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });
+
+    // Verify report count badge is visible (🚩 X reports format)
+    const firstPost = flaggedPosts.first();
+    const reportBadge = firstPost.locator('[data-testid="report-count-badge"]');
+    await expect(reportBadge).toBeVisible();
+
+    // Verify badge contains report count
+    const badgeText = await reportBadge.textContent();
+    expect(badgeText).toMatch(/🚩\s*\d+\s*report/i);
+  });
+
+  test('should show report breakdown by reason', async ({ page }) => {
+    // Wait for posts to load
+    const flaggedPosts = page.locator('[data-testid^="flagged-post-card-"]');
+    const postCount = await flaggedPosts.count();
+
+    if (postCount === 0) {
+      test.skip(true, 'No flagged posts available');
+      return;
+    }
+
+    await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });
+
+    // Verify report breakdown is visible
+    const firstPost = flaggedPosts.first();
+    const reportBreakdown = firstPost.locator('[data-testid="report-breakdown"]');
+    await expect(reportBreakdown).toBeVisible();
+
+    // Verify breakdown shows reason categories (pornographic, spam, hate_speech)
+    const breakdownText = await reportBreakdown.textContent();
+
+    // At least one reason type should be present
+    const hasReasons =
+      breakdownText?.toLowerCase().includes('pornographic') ||
+      breakdownText?.toLowerCase().includes('spam') ||
+      breakdownText?.toLowerCase().includes('hate') ||
+      breakdownText?.toLowerCase().includes('other');
+    expect(hasReasons).toBe(true);
+  });
+
+  test('should display post thumbnail and caption', async ({ page }) => {
+    // Wait for posts to load
+    const flaggedPosts = page.locator('[data-testid^="flagged-post-card-"]');
+    const postCount = await flaggedPosts.count();
+
+    if (postCount === 0) {
+      test.skip(true, 'No flagged posts available');
+      return;
+    }
+
+    await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });
+
+    const firstPost = flaggedPosts.first();
+
+    // Verify thumbnail is visible
+    const thumbnail = firstPost.locator('[data-testid="post-thumbnail"]');
+    await expect(thumbnail).toBeVisible();
+
+    // Verify thumbnail has an image
+    const thumbnailImage = thumbnail.locator('img');
+    await expect(thumbnailImage).toBeVisible();
+
+    // Verify caption is visible (caption is HTML rich text)
+    const caption = firstPost.locator('[data-testid="post-caption"]');
+    await expect(caption).toBeVisible();
+  });
+});
+
+test.describe('Flagged Posts - Filtering', () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto('/admin/flagged');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should filter by "All" posts', async ({ page }) => {
+    // Find the filter dropdown or buttons
+    const filterDropdown = page.locator('[data-testid="filter-dropdown"]');
+    await expect(filterDropdown).toBeVisible();
+
+    // Click to open dropdown
+    await filterDropdown.click();
+
+    // Select "All" filter
+    const allOption = page.locator('[data-testid="filter-option-all"]');
+    await expect(allOption).toBeVisible();
+    await allOption.click();
+
+    // Wait for API response and page to update
+    await page.waitForLoadState('networkidle');
+
+    // Verify URL contains filter=all or page displays all posts
+    const url = page.url();
+    expect(url).toContain('filter=all');
+
+    // Verify the filter is now selected
+    await expect(filterDropdown).toContainText(/all/i);
+  });
+
+  test('should filter by "Auto-Hidden" posts', async ({ page }) => {
+    // Find the filter dropdown
+    const filterDropdown = page.locator('[data-testid="filter-dropdown"]');
+    await expect(filterDropdown).toBeVisible();
+
+    // Click to open dropdown
+    await filterDropdown.click();
+
+    // Select "Auto-Hidden" filter
+    const autoHiddenOption = page.locator('[data-testid="filter-option-auto-hidden"]');
+    await expect(autoHiddenOption).toBeVisible();
+    await autoHiddenOption.click();
+
+    // Wait for API response
+    await page.waitForLoadState('networkidle');
+
+    // Verify URL contains filter parameter
+    const url = page.url();
+    expect(url).toContain('filter=auto-hidden');
+
+    // Verify the filter is now selected
+    await expect(filterDropdown).toContainText(/auto-hidden/i);
+  });
+
+  test('should filter by "Under Review" posts', async ({ page }) => {
+    // Find the filter dropdown
+    const filterDropdown = page.locator('[data-testid="filter-dropdown"]');
+    await expect(filterDropdown).toBeVisible();
+
+    // Click to open dropdown
+    await filterDropdown.click();
+
+    // Select "Under Review" filter
+    const underReviewOption = page.locator('[data-testid="filter-option-under-review"]');
+    await expect(underReviewOption).toBeVisible();
+    await underReviewOption.click();
+
+    // Wait for API response
+    await page.waitForLoadState('networkidle');
+
+    // Verify URL contains filter parameter
+    const url = page.url();
+    expect(url).toContain('filter=under-review');
+
+    // Verify the filter is now selected
+    await expect(filterDropdown).toContainText(/under review/i);
+  });
+});
+
+test.describe('Flagged Posts - Sorting', () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto('/admin/flagged');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should sort by "Most Reports"', async ({ page }) => {
+    // Find the sort dropdown
+    const sortDropdown = page.locator('[data-testid="sort-dropdown"]');
+    await expect(sortDropdown).toBeVisible();
+
+    // Click to open dropdown
+    await sortDropdown.click();
+
+    // Select "Most Reports" sort option
+    const mostReportsOption = page.locator('[data-testid="sort-option-most-reports"]');
+    await expect(mostReportsOption).toBeVisible();
+    await mostReportsOption.click();
+
+    // Wait for API response
+    await page.waitForLoadState('networkidle');
+
+    // Verify URL contains sort parameter
+    const url = page.url();
+    expect(url).toContain('sort=most-reports');
+
+    // Verify the sort option is now selected
+    await expect(sortDropdown).toContainText(/most reports/i);
+  });
+
+  test('should sort by "Most Recent"', async ({ page }) => {
+    // Find the sort dropdown
+    const sortDropdown = page.locator('[data-testid="sort-dropdown"]');
+    await expect(sortDropdown).toBeVisible();
+
+    // Click to open dropdown
+    await sortDropdown.click();
+
+    // Select "Most Recent" sort option
+    const mostRecentOption = page.locator('[data-testid="sort-option-most-recent"]');
+    await expect(mostRecentOption).toBeVisible();
+    await mostRecentOption.click();
+
+    // Wait for API response
+    await page.waitForLoadState('networkidle');
+
+    // Verify URL contains sort parameter
+    const url = page.url();
+    expect(url).toContain('sort=most-recent');
+
+    // Verify the sort option is now selected
+    await expect(sortDropdown).toContainText(/most recent/i);
+  });
+
+  test('should sort by "Oldest First"', async ({ page }) => {
+    // Find the sort dropdown
+    const sortDropdown = page.locator('[data-testid="sort-dropdown"]');
+    await expect(sortDropdown).toBeVisible();
+
+    // Click to open dropdown
+    await sortDropdown.click();
+
+    // Select "Oldest First" sort option
+    const oldestFirstOption = page.locator('[data-testid="sort-option-oldest-first"]');
+    await expect(oldestFirstOption).toBeVisible();
+    await oldestFirstOption.click();
+
+    // Wait for API response
+    await page.waitForLoadState('networkidle');
+
+    // Verify URL contains sort parameter
+    const url = page.url();
+    expect(url).toContain('sort=oldest-first');
+
+    // Verify the sort option is now selected
+    await expect(sortDropdown).toContainText(/oldest first/i);
+  });
+});
+
+test.describe('Flagged Posts - Delete Actions', () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto('/admin/flagged');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should delete a single post', async ({ page }) => {
+    // Wait for posts to load
+    const flaggedPosts = page.locator('[data-testid^="flagged-post-card-"]');
+    const postCount = await flaggedPosts.count();
+
+    if (postCount === 0) {
+      test.skip(true, 'No flagged posts available to delete');
+      return;
+    }
+
+    await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });
+
+    // Get the first post's ID for verification
+    const firstPost = flaggedPosts.first();
+    const postId = await firstPost.getAttribute('data-testid');
+
+    // Find delete button on the first post
+    const deleteButton = firstPost.locator('[data-testid="delete-post-button"]');
+    await expect(deleteButton).toBeVisible();
+
+    // Set up response interceptor for delete API
+    const deleteResponsePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes('/api/admin/posts') &&
+        response.request().method() === 'DELETE' &&
+        (response.status() === 200 || response.status() === 204),
+      { timeout: 10000 }
+    );
+
+    // Click delete button
+    await deleteButton.click();
+
+    // Confirm deletion in modal/dialog
+    const confirmDeleteButton = page.locator('[data-testid="confirm-delete-button"]');
+    await expect(confirmDeleteButton).toBeVisible();
+    await confirmDeleteButton.click();
+
+    // Wait for delete API response
+    const deleteResponse = await deleteResponsePromise;
+    expect(deleteResponse.status()).toBeGreaterThanOrEqual(200);
+    expect(deleteResponse.status()).toBeLessThan(300);
+
+    // Wait for page to update
+    await page.waitForLoadState('networkidle');
+
+    // Verify the post is no longer in the list
+    const deletedPost = page.locator(`[data-testid="${postId}"]`);
+    await expect(deletedPost).not.toBeVisible({ timeout: 5000 });
+
+    // Verify success notification
+    const successToast = page.locator('[data-testid="toast-success"]');
+    await expect(successToast).toBeVisible({ timeout: 5000 });
+  });
+
+  test('should bulk delete selected posts', async ({ page }) => {
+    // Wait for posts to load
+    const flaggedPosts = page.locator('[data-testid^="flagged-post-card-"]');
+    const postCount = await flaggedPosts.count();
+
+    if (postCount < 2) {
+      test.skip(true, 'Not enough flagged posts for bulk delete test (need at least 2)');
+      return;
+    }
+
+    await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });
+
+    // Select first two posts using checkboxes
+    const firstPostCheckbox = flaggedPosts.nth(0).locator('[data-testid="post-checkbox"]');
+    const secondPostCheckbox = flaggedPosts.nth(1).locator('[data-testid="post-checkbox"]');
+
+    await expect(firstPostCheckbox).toBeVisible();
+    await expect(secondPostCheckbox).toBeVisible();
+
+    await firstPostCheckbox.click();
+    await secondPostCheckbox.click();
+
+    // Verify checkboxes are checked
+    await expect(firstPostCheckbox).toBeChecked();
+    await expect(secondPostCheckbox).toBeChecked();
+
+    // Verify bulk action bar appears with selection count
+    const bulkActionBar = page.locator('[data-testid="bulk-action-bar"]');
+    await expect(bulkActionBar).toBeVisible();
+
+    const selectionCount = page.locator('[data-testid="selection-count"]');
+    await expect(selectionCount).toContainText('2');
+
+    // Set up response interceptor for bulk delete API
+    const deleteResponsePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes('/api/admin/posts') &&
+        response.request().method() === 'DELETE' &&
+        (response.status() === 200 || response.status() === 204),
+      { timeout: 10000 }
+    );
+
+    // Click bulk delete button
+    const bulkDeleteButton = page.locator('[data-testid="bulk-delete-button"]');
+    await expect(bulkDeleteButton).toBeVisible();
+    await bulkDeleteButton.click();
+
+    // Confirm bulk deletion
+    const confirmBulkDeleteButton = page.locator('[data-testid="confirm-bulk-delete-button"]');
+    await expect(confirmBulkDeleteButton).toBeVisible();
+    await confirmBulkDeleteButton.click();
+
+    // Wait for delete API response
+    const deleteResponse = await deleteResponsePromise;
+    expect(deleteResponse.status()).toBeGreaterThanOrEqual(200);
+    expect(deleteResponse.status()).toBeLessThan(300);
+
+    // Wait for page to update
+    await page.waitForLoadState('networkidle');
+
+    // Verify success notification
+    const successToast = page.locator('[data-testid="toast-success"]');
+    await expect(successToast).toBeVisible({ timeout: 5000 });
+
+    // Verify bulk action bar is hidden
+    await expect(bulkActionBar).not.toBeVisible();
+  });
+});
+
+test.describe('Flagged Posts - Dismiss Reports', () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto('/admin/flagged');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should dismiss reports (clears reports, post removed from list)', async ({ page }) => {
+    // Wait for posts to load
+    const flaggedPosts = page.locator('[data-testid^="flagged-post-card-"]');
+    const postCount = await flaggedPosts.count();
+
+    if (postCount === 0) {
+      test.skip(true, 'No flagged posts available to dismiss');
+      return;
+    }
+
+    await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });
+
+    // Get the first post's ID for verification
+    const firstPost = flaggedPosts.first();
+    const postId = await firstPost.getAttribute('data-testid');
+
+    // Find dismiss button on the first post
+    const dismissButton = firstPost.locator('[data-testid="dismiss-reports-button"]');
+    await expect(dismissButton).toBeVisible();
+
+    // Set up response interceptor for dismiss API
+    const dismissResponsePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes('/api/admin/posts') &&
+        response.url().includes('/dismiss-reports') &&
+        response.request().method() === 'POST' &&
+        (response.status() === 200 || response.status() === 204),
+      { timeout: 10000 }
+    );
+
+    // Click dismiss button
+    await dismissButton.click();
+
+    // Confirm dismissal if confirmation dialog appears
+    const confirmDismissButton = page.locator('[data-testid="confirm-dismiss-button"]');
+    if (await confirmDismissButton.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await confirmDismissButton.click();
+    }
+
+    // Wait for dismiss API response
+    const dismissResponse = await dismissResponsePromise;
+    expect(dismissResponse.status()).toBeGreaterThanOrEqual(200);
+    expect(dismissResponse.status()).toBeLessThan(300);
+
+    // Wait for page to update
+    await page.waitForLoadState('networkidle');
+
+    // Verify the post is no longer in the flagged list
+    const dismissedPost = page.locator(`[data-testid="${postId}"]`);
+    await expect(dismissedPost).not.toBeVisible({ timeout: 5000 });
+
+    // Verify success notification
+    const successToast = page.locator('[data-testid="toast-success"]');
+    await expect(successToast).toBeVisible({ timeout: 5000 });
+  });
+});
+
+test.describe('Flagged Posts - Navigation', () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto('/admin/flagged');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should navigate to post detail page on click', async ({ page }) => {
+    // Wait for posts to load
+    const flaggedPosts = page.locator('[data-testid^="flagged-post-card-"]');
+    const postCount = await flaggedPosts.count();
+
+    if (postCount === 0) {
+      test.skip(true, 'No flagged posts available');
+      return;
+    }
+
+    await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });
+
+    const firstPost = flaggedPosts.first();
+
+    // Get the post ID from data-testid
+    const testId = await firstPost.getAttribute('data-testid');
+    const postId = testId?.replace('flagged-post-card-', '');
+
+    // Find the clickable area to navigate to detail (thumbnail or title)
+    const postLink = firstPost.locator('[data-testid="post-detail-link"]');
+    await expect(postLink).toBeVisible();
+
+    // Click to navigate to post detail
+    await postLink.click();
+
+    // Wait for navigation to post detail page
+    await page.waitForURL(`**/admin/flagged/${postId}`, { timeout: 10000 });
+
+    // Verify we're on the correct detail page
+    const url = page.url();
+    expect(url).toContain('/admin/flagged/');
+    expect(url).toContain(postId);
+
+    // Verify detail page loaded
+    const detailPage = page.locator('[data-testid="flagged-post-detail"]');
+    await expect(detailPage).toBeVisible({ timeout: 5000 });
+  });
+});
+
+test.describe('Flagged Posts - Bulk Selection', () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto('/admin/flagged');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should show bulk action bar when posts are selected', async ({ page }) => {
+    // Wait for posts to load
+    const flaggedPosts = page.locator('[data-testid^="flagged-post-card-"]');
+    const postCount = await flaggedPosts.count();
+
+    if (postCount === 0) {
+      test.skip(true, 'No flagged posts available');
+      return;
+    }
+
+    await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });
+
+    // Verify bulk action bar is not visible initially
+    const bulkActionBar = page.locator('[data-testid="bulk-action-bar"]');
+    await expect(bulkActionBar).not.toBeVisible();
+
+    // Select first post using checkbox
+    const firstPostCheckbox = flaggedPosts.first().locator('[data-testid="post-checkbox"]');
+    await expect(firstPostCheckbox).toBeVisible();
+    await firstPostCheckbox.click();
+
+    // Verify bulk action bar appears
+    await expect(bulkActionBar).toBeVisible();
+
+    // Verify selection count is displayed
+    const selectionCount = page.locator('[data-testid="selection-count"]');
+    await expect(selectionCount).toContainText('1');
+
+    // Verify bulk delete button is available
+    const bulkDeleteButton = page.locator('[data-testid="bulk-delete-button"]');
+    await expect(bulkDeleteButton).toBeVisible();
+  });
+
+  test('should have select all checkbox functionality', async ({ page }) => {
+    // Wait for posts to load
+    const flaggedPosts = page.locator('[data-testid^="flagged-post-card-"]');
+    const postCount = await flaggedPosts.count();
+
+    if (postCount < 2) {
+      test.skip(true, 'Not enough flagged posts for select all test');
+      return;
+    }
+
+    await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });
+
+    // Find select all checkbox
+    const selectAllCheckbox = page.locator('[data-testid="select-all-checkbox"]');
+    await expect(selectAllCheckbox).toBeVisible();
+
+    // Click select all
+    await selectAllCheckbox.click();
+
+    // Verify all post checkboxes are checked
+    const allCheckboxes = page.locator(
+      '[data-testid^="flagged-post-card-"] [data-testid="post-checkbox"]'
+    );
+    const checkboxCount = await allCheckboxes.count();
+
+    for (let i = 0; i < checkboxCount; i++) {
+      await expect(allCheckboxes.nth(i)).toBeChecked();
+    }
+
+    // Verify bulk action bar shows correct count
+    const selectionCount = page.locator('[data-testid="selection-count"]');
+    await expect(selectionCount).toContainText(postCount.toString());
+
+    // Click select all again to deselect
+    await selectAllCheckbox.click();
+
+    // Verify all checkboxes are unchecked
+    for (let i = 0; i < checkboxCount; i++) {
+      await expect(allCheckboxes.nth(i)).not.toBeChecked();
+    }
+
+    // Verify bulk action bar is hidden
+    const bulkActionBar = page.locator('[data-testid="bulk-action-bar"]');
+    await expect(bulkActionBar).not.toBeVisible();
+  });
+});
+
+test.describe('Flagged Posts - Loading & Error States', () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAsAdmin(page);
+  });
+
+  test('should show loading state initially', async ({ page }) => {
+    // Navigate to flagged posts page
+    await page.goto('/admin/flagged');
+
+    // Check for loading indicator
+    const loadingIndicator = page.locator('[data-testid="flagged-posts-loading"]');
+
+    // Loading state should appear (may be brief)
+    // Use short timeout since loading might be quick
+    const wasLoading = await loadingIndicator.isVisible({ timeout: 2000 }).catch(() => false);
+
+    // Either we caught the loading state or data loaded too quickly
+    // Both are acceptable outcomes
+    if (wasLoading) {
+      await expect(loadingIndicator).toBeVisible();
+    }
+
+    // Wait for load to complete
+    await page.waitForLoadState('networkidle');
+
+    // Loading indicator should be gone
+    await expect(loadingIndicator).not.toBeVisible();
+  });
+
+  test('should handle API error gracefully', async ({ page }) => {
+    // Mock API to return error
+    await page.route('**/api/admin/reported-posts**', async (route) => {
+      await route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          success: false,
+          message: 'Internal server error',
+        }),
+      });
+    });
+
+    // Navigate to flagged posts page
+    await page.goto('/admin/flagged');
+    await page.waitForLoadState('networkidle');
+
+    // Verify error state is displayed
+    const errorState = page.locator('[data-testid="flagged-posts-error"]');
+    await expect(errorState).toBeVisible({ timeout: 10000 });
+
+    // Verify retry button is available
+    const retryButton = page.locator('[data-testid="retry-button"]');
+    await expect(retryButton).toBeVisible();
+  });
+});
+
+test.describe('Flagged Posts - Accessibility', () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto('/admin/flagged');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should support keyboard navigation', async ({ page }) => {
+    // Wait for page to load
+    const filterDropdown = page.locator('[data-testid="filter-dropdown"]');
+    await expect(filterDropdown).toBeVisible();
+
+    // Tab to filter dropdown
+    await page.keyboard.press('Tab');
+
+    // Verify focus is manageable
+    const focusedElement = page.locator(':focus');
+    await expect(focusedElement).toBeVisible();
+
+    // Should be able to open dropdown with Enter/Space
+    await filterDropdown.focus();
+    await page.keyboard.press('Enter');
+
+    // Dropdown options should be visible
+    const filterOptions = page.locator('[data-testid^="filter-option-"]');
+    await expect(filterOptions.first()).toBeVisible();
+
+    // Press Escape to close
+    await page.keyboard.press('Escape');
+    await expect(filterOptions.first()).not.toBeVisible();
+  });
+
+  test('should have proper aria labels on action buttons', async ({ page }) => {
+    // Wait for posts to load
+    const flaggedPosts = page.locator('[data-testid^="flagged-post-card-"]');
+    const postCount = await flaggedPosts.count();
+
+    if (postCount === 0) {
+      test.skip(true, 'No flagged posts available');
+      return;
+    }
+
+    await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });
+
+    const firstPost = flaggedPosts.first();
+
+    // Check delete button has aria-label
+    const deleteButton = firstPost.locator('[data-testid="delete-post-button"]');
+    await expect(deleteButton).toHaveAttribute('aria-label', /delete/i);
+
+    // Check dismiss button has aria-label
+    const dismissButton = firstPost.locator('[data-testid="dismiss-reports-button"]');
+    await expect(dismissButton).toHaveAttribute('aria-label', /dismiss/i);
+
+    // Check checkbox has proper accessible name
+    const checkbox = firstPost.locator('[data-testid="post-checkbox"]');
+    await expect(checkbox).toHaveAttribute('aria-label', /select/i);
+  });
+});

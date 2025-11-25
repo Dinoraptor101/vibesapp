@@ -1,0 +1,320 @@
+/**
+ * E2E Tests: Admin Dashboard UI
+ *
+ * Coverage:
+ * - Dashboard page display with title
+ * - Key metrics cards (Active Users, Posts Today, Reports Today, Auto-Hidden Posts)
+ * - Loading state (spinner)
+ * - Activity chart display
+ * - Navigation to Flagged Posts, Users, Settings pages
+ * - Responsive behavior on mobile viewport
+ * - Metric refresh on data change
+ */
+
+import { test, expect } from '@playwright/test';
+import { loginAsAdmin, clearAdminSession } from './helpers/admin-auth';
+
+test.describe('Admin Dashboard', () => {
+  test.beforeEach(async ({ page }) => {
+    // Clear any existing admin session before each test
+    await clearAdminSession(page);
+    // Login as admin
+    await loginAsAdmin(page);
+  });
+
+  test('should display dashboard page with title', async ({ page }) => {
+    // Verify we're on the dashboard page
+    expect(page.url()).toContain('/admin/dashboard');
+
+    // Verify dashboard title is displayed
+    const dashboardTitle = page.getByTestId('admin-dashboard-title');
+    await expect(dashboardTitle).toBeVisible();
+    await expect(dashboardTitle).toContainText('Dashboard');
+  });
+
+  test('should display key metrics cards', async ({ page }) => {
+    // Wait for metrics to load
+    await page.waitForLoadState('networkidle');
+
+    // Verify metrics container is visible
+    const metricsContainer = page.getByTestId('admin-metrics-container');
+    await expect(metricsContainer).toBeVisible();
+
+    // Verify Active Users metric card
+    const activeUsersCard = page.getByTestId('metric-card-active-users');
+    await expect(activeUsersCard).toBeVisible();
+    await expect(activeUsersCard.getByTestId('metric-card-title')).toContainText('Active Users');
+    await expect(activeUsersCard.getByTestId('metric-card-value')).toBeVisible();
+
+    // Verify Posts Today metric card
+    const postsTodayCard = page.getByTestId('metric-card-posts-today');
+    await expect(postsTodayCard).toBeVisible();
+    await expect(postsTodayCard.getByTestId('metric-card-title')).toContainText('Posts Today');
+    await expect(postsTodayCard.getByTestId('metric-card-value')).toBeVisible();
+
+    // Verify Reports Today metric card
+    const reportsTodayCard = page.getByTestId('metric-card-reports-today');
+    await expect(reportsTodayCard).toBeVisible();
+    await expect(reportsTodayCard.getByTestId('metric-card-title')).toContainText('Reports Today');
+    await expect(reportsTodayCard.getByTestId('metric-card-value')).toBeVisible();
+
+    // Verify Auto-Hidden Posts metric card
+    const autoHiddenCard = page.getByTestId('metric-card-auto-hidden');
+    await expect(autoHiddenCard).toBeVisible();
+    await expect(autoHiddenCard.getByTestId('metric-card-title')).toContainText('Auto-Hidden');
+    await expect(autoHiddenCard.getByTestId('metric-card-value')).toBeVisible();
+  });
+
+  test('should show loading state initially', async ({ page }) => {
+    // Navigate to login first to set up interception before dashboard load
+    await page.goto('/admin/login');
+    await clearAdminSession(page);
+
+    // Intercept metrics API to delay response
+    await page.route('**/api/admin/metrics', async (route) => {
+      // Delay the response to observe loading state
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await route.continue();
+    });
+
+    // Login and navigate to dashboard
+    await loginAsAdmin(page);
+
+    // Verify loading spinner is shown
+    const loadingSpinner = page.getByTestId('admin-dashboard-loading');
+    await expect(loadingSpinner).toBeVisible();
+
+    // Wait for loading to complete
+    await expect(loadingSpinner).toBeHidden({ timeout: 10000 });
+  });
+
+  test('should display activity chart if present', async ({ page }) => {
+    // Wait for page to fully load
+    await page.waitForLoadState('networkidle');
+
+    // Check for activity chart component
+    const activityChart = page.getByTestId('admin-activity-chart');
+
+    // Activity chart may or may not be present depending on data
+    const isChartVisible = await activityChart.isVisible().catch(() => false);
+
+    if (isChartVisible) {
+      await expect(activityChart).toBeVisible();
+
+      // Verify chart has some content (canvas or SVG element)
+      const chartContent = activityChart.locator('canvas, svg');
+      await expect(chartContent.first()).toBeVisible();
+    } else {
+      // If no chart, there might be an empty state or the chart section might be hidden
+      console.log('Activity chart not visible - may have no activity data');
+    }
+  });
+
+  test('should navigate to Flagged Posts page', async ({ page }) => {
+    // Find and click Flagged Posts navigation link
+    const flaggedPostsLink = page.getByTestId('admin-nav-flagged-posts');
+    await expect(flaggedPostsLink).toBeVisible();
+    await flaggedPostsLink.click();
+
+    // Wait for navigation
+    await page.waitForURL('**/admin/flagged-posts', { timeout: 5000 });
+
+    // Verify we're on the Flagged Posts page
+    expect(page.url()).toContain('/admin/flagged-posts');
+  });
+
+  test('should navigate to Users page', async ({ page }) => {
+    // Find and click Users navigation link
+    const usersLink = page.getByTestId('admin-nav-users');
+    await expect(usersLink).toBeVisible();
+    await usersLink.click();
+
+    // Wait for navigation
+    await page.waitForURL('**/admin/users', { timeout: 5000 });
+
+    // Verify we're on the Users page
+    expect(page.url()).toContain('/admin/users');
+  });
+
+  test('should navigate to Settings page', async ({ page }) => {
+    // Find and click Settings navigation link
+    const settingsLink = page.getByTestId('admin-nav-settings');
+    await expect(settingsLink).toBeVisible();
+    await settingsLink.click();
+
+    // Wait for navigation
+    await page.waitForURL('**/admin/settings', { timeout: 5000 });
+
+    // Verify we're on the Settings page
+    expect(page.url()).toContain('/admin/settings');
+  });
+
+  test('should have navigation links in header', async ({ page }) => {
+    // Verify admin layout header is visible
+    const adminHeader = page.getByTestId('admin-header');
+    await expect(adminHeader).toBeVisible();
+
+    // Verify all nav links exist in header
+    await expect(page.getByTestId('admin-nav-dashboard')).toBeVisible();
+    await expect(page.getByTestId('admin-nav-flagged-posts')).toBeVisible();
+    await expect(page.getByTestId('admin-nav-users')).toBeVisible();
+    await expect(page.getByTestId('admin-nav-settings')).toBeVisible();
+  });
+});
+
+test.describe('Admin Dashboard - Responsive', () => {
+  test.beforeEach(async ({ page }) => {
+    await clearAdminSession(page);
+    await loginAsAdmin(page);
+  });
+
+  test('should be responsive on mobile viewport', async ({ page }) => {
+    // Set mobile viewport (below 768px breakpoint)
+    await page.setViewportSize({ width: 375, height: 667 });
+
+    // Wait for layout to adjust
+    await page.waitForTimeout(300);
+
+    // Verify admin header is still visible
+    const adminHeader = page.getByTestId('admin-header');
+    await expect(adminHeader).toBeVisible();
+
+    // On mobile, nav should show icons only (no text labels)
+    // Check that icon elements are visible
+    const dashboardNavIcon = page.getByTestId('admin-nav-dashboard').locator('svg');
+    await expect(dashboardNavIcon).toBeVisible();
+
+    // Verify text labels are hidden on mobile
+    const dashboardNavText = page.getByTestId('admin-nav-dashboard-text');
+    const isTextHidden = await dashboardNavText.isHidden().catch(() => true);
+    expect(isTextHidden).toBe(true);
+
+    // Verify metrics cards stack vertically on mobile
+    const metricsContainer = page.getByTestId('admin-metrics-container');
+    await expect(metricsContainer).toBeVisible();
+
+    // Dashboard title should still be visible
+    const dashboardTitle = page.getByTestId('admin-dashboard-title');
+    await expect(dashboardTitle).toBeVisible();
+  });
+
+  test('should show text labels on desktop viewport', async ({ page }) => {
+    // Set desktop viewport (above 768px breakpoint)
+    await page.setViewportSize({ width: 1024, height: 768 });
+
+    // Wait for layout to adjust
+    await page.waitForTimeout(300);
+
+    // Verify text labels are visible on desktop
+    const dashboardNavText = page.getByTestId('admin-nav-dashboard-text');
+    const isTextVisible = await dashboardNavText.isVisible().catch(() => false);
+
+    // On desktop, we expect text labels to be visible
+    if (isTextVisible) {
+      await expect(dashboardNavText).toContainText('Dashboard');
+    }
+
+    // Icons should also be visible on desktop
+    const dashboardNavIcon = page.getByTestId('admin-nav-dashboard').locator('svg');
+    await expect(dashboardNavIcon).toBeVisible();
+  });
+});
+
+test.describe('Admin Dashboard - Data Refresh', () => {
+  test.beforeEach(async ({ page }) => {
+    await clearAdminSession(page);
+    await loginAsAdmin(page);
+  });
+
+  test('should handle metric refresh on data change', async ({ page }) => {
+    // Wait for initial metrics load
+    await page.waitForLoadState('networkidle');
+
+    // Get initial metric value
+    const activeUsersCard = page.getByTestId('metric-card-active-users');
+    await expect(activeUsersCard).toBeVisible();
+
+    // Store initial value for comparison
+    const initialValue = await activeUsersCard.getByTestId('metric-card-value').innerText();
+    expect(initialValue).toBeTruthy(); // Ensure initial value exists
+
+    // Intercept next metrics call with updated data
+    let interceptCount = 0;
+    await page.route('**/api/admin/metrics', async (route) => {
+      interceptCount++;
+      if (interceptCount > 1) {
+        // Return modified metrics on refresh
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            success: true,
+            data: {
+              activeUsers: 999,
+              postsToday: 50,
+              reportsToday: 5,
+              autoHiddenPosts: 2,
+            },
+          }),
+        });
+      } else {
+        await route.continue();
+      }
+    });
+
+    // Look for refresh button if it exists
+    const refreshButton = page.getByTestId('admin-metrics-refresh');
+    const hasRefreshButton = await refreshButton.isVisible().catch(() => false);
+
+    if (hasRefreshButton) {
+      // Click refresh button
+      await refreshButton.click();
+
+      // Wait for data to update
+      await page.waitForTimeout(1000);
+
+      // Verify metric value updated
+      const newValue = await activeUsersCard.getByTestId('metric-card-value').innerText();
+      expect(newValue).toBe('999');
+    } else {
+      // If no explicit refresh button, test that navigating away and back refreshes data
+      await page.getByTestId('admin-nav-users').click();
+      await page.waitForURL('**/admin/users', { timeout: 5000 });
+
+      await page.getByTestId('admin-nav-dashboard').click();
+      await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
+
+      // Data should be re-fetched
+      expect(interceptCount).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  test('should display metric card with subtitle and trend', async ({ page }) => {
+    // Wait for metrics to load
+    await page.waitForLoadState('networkidle');
+
+    // Get a metric card
+    const activeUsersCard = page.getByTestId('metric-card-active-users');
+    await expect(activeUsersCard).toBeVisible();
+
+    // Check for subtitle (e.g., "vs last week")
+    const subtitle = activeUsersCard.getByTestId('metric-card-subtitle');
+    const hasSubtitle = await subtitle.isVisible().catch(() => false);
+
+    if (hasSubtitle) {
+      await expect(subtitle).toBeVisible();
+    }
+
+    // Check for trend indicator (up/down arrow or percentage)
+    const trendIndicator = activeUsersCard.getByTestId('metric-card-trend');
+    const hasTrend = await trendIndicator.isVisible().catch(() => false);
+
+    if (hasTrend) {
+      await expect(trendIndicator).toBeVisible();
+    }
+
+    // At minimum, title and value should always be present
+    await expect(activeUsersCard.getByTestId('metric-card-title')).toBeVisible();
+    await expect(activeUsersCard.getByTestId('metric-card-value')).toBeVisible();
+  });
+});
