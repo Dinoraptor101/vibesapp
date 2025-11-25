@@ -234,9 +234,13 @@ const getPosts = async (req, res) => {
 
   //Subliminal Function: Update Daily Reward (if applicable)
   const pigeonId = req.headers['x-pigeon-id'];
+  let currentUserId = null;
   if (pigeonId) {
     const user = await User.findOne({ pigeonId });
-    await UserHandler.updateLastActiveAndGrantDailyReward(user);
+    if (user) {
+      currentUserId = user.userId;
+      await UserHandler.updateLastActiveAndGrantDailyReward(user);
+    }
   }
 
   // Parse query parameters with defaults
@@ -259,6 +263,11 @@ const getPosts = async (req, res) => {
   try {
     // Build query filter
     const query = { isHidden: false };
+
+    // Exclude posts that the current user has reported (hidden for them)
+    if (currentUserId) {
+      query.hiddenForUsers = { $ne: currentUserId };
+    }
 
     // Filter by user if provided
     if (userId) {
@@ -704,6 +713,14 @@ const reportPost = async (req, res) => {
       location,
       timestamp: new Date(),
     });
+
+    // Hide post from this reporter immediately
+    if (!post.hiddenForUsers) {
+      post.hiddenForUsers = [];
+    }
+    if (!post.hiddenForUsers.includes(userId)) {
+      post.hiddenForUsers.push(userId);
+    }
 
     // Calculate nearby reports (within 50 miles of post location)
     const nearbyReports = post.reports.filter((report) => {

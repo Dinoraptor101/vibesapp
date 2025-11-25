@@ -90,7 +90,7 @@ export function FlaggedPostCard({
                 </div>
               </div>
               <Badge variant={post.isHidden ? 'error' : 'warning'} size="md">
-                👎 {post.dislikeCount} {post.dislikeCount === 1 ? 'dislike' : 'dislikes'}
+                🚩 {post.reportCount || 0} {(post.reportCount || 0) === 1 ? 'report' : 'reports'}
               </Badge>
             </div>
 
@@ -100,7 +100,18 @@ export function FlaggedPostCard({
             {/* Status indicator */}
             {post.isHidden && (
               <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
-                ⚠️ Auto-hidden ({post.dislikeCount} dislikes from unique users)
+                ⚠️ Auto-hidden ({post.reportCount || 0} reports from unique users)
+              </div>
+            )}
+
+            {/* Report breakdown by reason */}
+            {post.reportsByReason && Object.keys(post.reportsByReason).length > 0 && (
+              <div className="flex flex-wrap gap-1 text-xs">
+                {Object.entries(post.reportsByReason).map(([reason, count]) => (
+                  <Badge key={reason} variant="outline" size="sm">
+                    {reason.replace('_', ' ')}: {count}
+                  </Badge>
+                ))}
               </div>
             )}
 

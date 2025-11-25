@@ -3,6 +3,7 @@
  * Common layout for all admin pages with header and navigation
  */
 
+import { Flag, LayoutDashboard, LogOut, Settings, Users } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../hooks/useAdminAuth';
@@ -23,7 +24,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="min-h-screen bg-surface-1">
       {/* Header */}
-      <header className="bg-surface-2 border-b border-border sticky top-0 z-50">
+      <header className="bg-surface-elevated/95 backdrop-blur-md border-b border-border sticky top-0 z-50">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo/Title */}
@@ -48,54 +49,62 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             </div>
 
             {/* Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="flex items-center gap-1">
               <NavLink
                 to="/admin/dashboard"
                 className={({ isActive }) =>
-                  `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-brand-purple text-white'
                       : 'text-text-secondary hover:text-text-primary hover:bg-surface-3'
                   }`
                 }
+                title="Dashboard"
               >
-                Dashboard
+                <LayoutDashboard className="w-5 h-5 md:hidden" />
+                <span className="hidden md:inline">Dashboard</span>
               </NavLink>
               <NavLink
                 to="/admin/flagged"
                 className={({ isActive }) =>
-                  `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-brand-purple text-white'
                       : 'text-text-secondary hover:text-text-primary hover:bg-surface-3'
                   }`
                 }
+                title="Flagged Posts"
               >
-                Flagged Posts
+                <Flag className="w-5 h-5 md:hidden" />
+                <span className="hidden md:inline">Flagged Posts</span>
               </NavLink>
               <NavLink
                 to="/admin/users"
                 className={({ isActive }) =>
-                  `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-brand-purple text-white'
                       : 'text-text-secondary hover:text-text-primary hover:bg-surface-3'
                   }`
                 }
+                title="Users"
               >
-                Users
+                <Users className="w-5 h-5 md:hidden" />
+                <span className="hidden md:inline">Users</span>
               </NavLink>
               <NavLink
                 to="/admin/settings"
                 className={({ isActive }) =>
-                  `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-brand-purple text-white'
                       : 'text-text-secondary hover:text-text-primary hover:bg-surface-3'
                   }`
                 }
+                title="Settings"
               >
-                Settings
+                <Settings className="w-5 h-5 md:hidden" />
+                <span className="hidden md:inline">Settings</span>
               </NavLink>
             </nav>
 
@@ -103,25 +112,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <button
               type="button"
               onClick={handleLogout}
-              className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-vibe-negative-light 
+              className="px-3 py-2 text-sm font-medium text-text-secondary hover:text-vibe-negative-light 
                        hover:bg-surface-3 rounded-lg transition-colors
                        flex items-center gap-2"
+              title="Logout"
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
-              </svg>
-              Logout
+              <LogOut className="w-5 h-5" />
+              <span className="hidden md:inline">Logout</span>
             </button>
           </div>
         </div>

@@ -166,12 +166,21 @@ export interface FlaggedPost {
     userId: string;
     type: string;
   }>;
+  reports?: Array<{
+    userId: string;
+    reason: string;
+    timestamp: string;
+  }>;
   proximal_likes: number;
   proximal_dislikes: number;
   proximal_users: number;
   isHidden: boolean;
+  hiddenBy?: 'auto' | 'admin' | null;
+  hiddenAt?: string;
   createdAt: string;
-  dislikeCount: number;
+  dislikeCount?: number; // Legacy - dislike system
+  reportCount?: number; // Phase 3.4 - community reports
+  reportsByReason?: Record<string, number>; // Phase 3.4 - breakdown by reason
   reporters: Array<{
     userId: string;
     userName: string;

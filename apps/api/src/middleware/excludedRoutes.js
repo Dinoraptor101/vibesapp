@@ -3,7 +3,7 @@
  * Used by both apiKey and pigeonAuth middleware
  */
 module.exports = [
-  '/api/admin/login',
+  '/api/admin', // All admin routes use admin token auth instead
   '/api/users/create',
   '/api/users/login',
   '/api/recaptcha',

@@ -127,6 +127,10 @@ const postSchema = new mongoose.Schema({
   },
   reactions: [ReactionSchema],
   reports: [ReportSchema], // Phase 3.4: Community moderation
+  hiddenForUsers: {
+    type: [String], // Array of userIds who reported this post (post is hidden from them)
+    default: [],
+  },
   proximal_dislikes: {
     type: Number,
     default: 0,
