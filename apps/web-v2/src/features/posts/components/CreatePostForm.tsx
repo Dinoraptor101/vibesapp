@@ -39,6 +39,7 @@ interface CreatePostFormProps {
 
 const MAX_TEXT_LENGTH = 5000;
 const CAPTION_THRESHOLD = 100; // Switch to article mode after 100 characters
+const NEWLINE_THRESHOLD = 3; // Switch to article mode after 3 newlines
 
 export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: CreatePostFormProps) {
   const [selectedImage, setSelectedImage] = useState<ImageFile | null>(null);
@@ -78,12 +79,15 @@ export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: Cre
     );
   }, []);
 
-  // Auto-switch to article mode when text exceeds threshold
+  // Auto-switch to article mode when text exceeds threshold (chars or newlines)
   useEffect(() => {
-    if (text.length > CAPTION_THRESHOLD && mode === 'caption') {
-      setMode('article');
+    if (mode === 'caption') {
+      const newlineCount = (text.match(/\n/g) || []).length;
+      if (text.length > CAPTION_THRESHOLD || newlineCount >= NEWLINE_THRESHOLD) {
+        setMode('article');
+      }
     }
-  }, [text.length, mode]);
+  }, [text, mode]);
 
   // Handle mode change: strip HTML when switching to caption mode
   const handleModeChange = (newMode: PostMode) => {
@@ -289,6 +293,7 @@ export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: Cre
                 maxLength={MAX_TEXT_LENGTH}
                 disabled={isSubmitting || uploadProgress !== null}
                 onKeyDown={handleKeyDown}
+                className="min-h-[6rem]"
               />
               <p id="article-hint" className="mt-1 text-xs text-text-tertiary dim:text-gray-400">
                 Tab for indentation, Enter for new line
@@ -311,15 +316,11 @@ export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: Cre
               onKeyDown={handleKeyDown}
               placeholder="Share your thoughts..."
               maxLength={MAX_TEXT_LENGTH}
-              rows={3}
+              rows={1}
               disabled={isSubmitting || uploadProgress !== null}
               className="w-full px-4 py-2 rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-0 resize-none bg-surface text-text-primary placeholder:text-text-secondary dim:bg-gray-700 dim:text-gray-100 dim:placeholder:text-gray-400 border border-border focus:ring-brand focus:border-brand dim:border-gray-600 dim:focus:ring-brand/50 dim:focus:border-brand max-h-[50vh] overflow-y-auto disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Caption text input"
-              aria-describedby="caption-hint"
             />
-            <p id="caption-hint" className="mt-1 text-xs text-text-tertiary dim:text-gray-400">
-              Press Enter to submit
-            </p>
           </div>
         )}
 
