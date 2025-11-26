@@ -242,17 +242,23 @@ Note: Theme is stored on `<html>` element as `data-theme` attribute
 
 ```typescript
 // Users Page
-'users-list'                  // Container for users list
+'users-table'                 // Main users table container (NEW)
 'users-search-input'          // Search users by username
 'users-filter-select'         // Filter dropdown (all, active, banned)
 'users-loading'               // Loading state indicator
 'users-empty-state'           // Empty state when no users match
+'select-all-checkbox'         // Select all users checkbox (table header)
+'sort-userName'               // Sort by username button (NEW)
+'sort-mbtiPersonality'        // Sort by MBTI button (NEW)
+'sort-masculineFeminineScale' // Sort by polarity button (NEW)
+'sort-isBanned'               // Sort by status button (NEW)
+'sort-postCount'              // Sort by post count button (NEW)
 
-// User Card/Row
-'user-card-{userId}'          // Individual user card (dynamic)
-'user-row-{userId}'           // Individual user row (dynamic)
-'user-username'               // User username display
-'user-pigeon-id'              // User pigeon ID display
+// User Card/Row (Table Layout)
+'user-row-{userId}'           // Individual user table row (dynamic)
+'user-username'               // User username display (clickable - view details)
+'user-post-count'             // Post count (clickable - view posts) (NEW)
+'online-indicator'            // Online status indicator (NEW)
 'user-banned-badge'           // Badge indicating user is banned
 'toggle-ban-button'           // Toggle ban on/off button
 'regenerate-password-button'  // Regenerate user password button

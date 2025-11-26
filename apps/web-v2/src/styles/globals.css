@@ -123,7 +123,7 @@
   .hover-lift {
     @apply transition-transform duration-200 ease-out;
   }
-  
+
   .hover-lift:hover {
     @apply -translate-y-0.5;
   }

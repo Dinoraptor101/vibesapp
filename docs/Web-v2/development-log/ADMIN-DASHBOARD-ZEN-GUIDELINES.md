@@ -31,7 +31,8 @@ The Admin Dashboard is a separate administrative interface for managing VibesApp
 | `MetricCard` | `components/MetricCard.tsx` | Dashboard stat cards with trends |
 | `ActivityChart` | `components/ActivityChart.tsx` | 7-day activity bar chart |
 | `FlaggedPostCard` | `components/FlaggedPostCard.tsx` | Flagged post list item |
-| `UserCard` | `components/UserCard.tsx` | User list item with actions |
+| `UserCard` | `components/UserCard.tsx` | User list item with actions (DEPRECATED - use UsersTable) |
+| `UsersTable` | `components/UsersTable.tsx` | Dense table layout for user management (NEW) |
 | `PostDetailModal` | `components/PostDetailModal.tsx` | Full post view modal |
 | `RegeneratePasswordModal` | `components/RegeneratePasswordModal.tsx` | Password reset for users |
 | `ProtectedAdminRoute` | `components/ProtectedAdminRoute.tsx` | Auth guard for admin routes |
@@ -442,6 +443,36 @@ const confirmed = window.confirm(
 - [ ] Disable ban/actions when offline
 - [ ] Improve search input (debounce, clear button)
 
+### ✅ UsersPage (Completed)
+- [x] Converted from card-based layout to dense table layout
+- [x] Added sorting functionality (all columns sortable: Username, MBTI, Polarity, Status, Posts)
+- [x] Default sort: Username A-Z
+- [x] Increased pagination from 50 to 100 users per page
+- [x] Replaced "Loading users..." text with Loader2 spinner
+- [x] Added offline handling - ban buttons disabled when offline
+- [x] Reduced page spacing from `space-y-6` to `space-y-4`
+- [x] Optimized bulk actions bar - horizontal layout with p-3 padding
+- [x] **Table columns**: Checkbox, Online, Avatar, Username, MBTI, Polarity, Status, Posts, Ban
+- [x] **One Action, One Way**: Username click → View Details, Post count click → View Posts
+- [x] **Mobile optimization**: Only show Username, Posts, Ban columns (< 768px)
+- [x] **Online indicator**: Green dot before username on mobile, dedicated column on desktop
+- [x] **Row height**: ~56px per user (vs ~200px card) = 3x more users visible
+- [x] Added hover-lift animation to table rows
+- [x] Touch-optimized: Ban buttons 44px height (size="sm")
+- [x] Added sorting indicators (arrow icons) with active state highlight
+
+### 🔲 UsersTable Component (NEW)
+- [x] Created new `UsersTable.tsx` component with table layout
+- [x] Responsive design: Hide Avatar, MBTI, Polarity, Status on mobile
+- [x] Sortable column headers with visual indicators
+- [x] Checkbox selection in first column
+- [x] Online status indicator (green dot)
+- [x] Clickable username → View Details
+- [x] Clickable post count → View Posts
+- [x] Ban/Unban button in last column
+- [x] Added all required test IDs for E2E tests
+- [x] Hover effects and accessibility support
+
 ### 🔲 FlaggedPostCard
 - [ ] Simplify to one way to view details
 - [ ] Ensure touch-friendly action buttons
@@ -459,6 +490,8 @@ const confirmed = window.confirm(
 - [ ] Ensure touch-friendly action buttons
 - [ ] Add hover lift animation
 
+**Note**: UserCard component is now DEPRECATED in favor of UsersTable for the main Users Management page. It may still be used in other contexts (e.g., UserDetailPage).
+
 ---
 
 ## File Locations
@@ -468,10 +501,11 @@ apps/web-v2/src/features/admin/
 ├── index.ts
 ├── components/
 │   ├── AdminLayout.tsx
-│   ├── MetricCard.tsx
-│   ├── ActivityChart.tsx
-│   ├── FlaggedPostCard.tsx
-│   ├── UserCard.tsx
+│   ├── MetricCard.tsx           ✅ Updated
+│   ├── ActivityChart.tsx        ✅ Updated
+│   ├── FlaggedPostCard.tsx      ✅ Updated
+│   ├── UserCard.tsx             ⚠️  Deprecated (use UsersTable)
+│   ├── UsersTable.tsx           ✅ NEW - Dense table layout
 │   ├── PostDetailModal.tsx
 │   ├── RegeneratePasswordModal.tsx
 │   └── ProtectedAdminRoute.tsx
@@ -484,10 +518,10 @@ apps/web-v2/src/features/admin/
 │   └── useUserActions.ts
 └── pages/
     ├── AdminLoginPage.tsx        ✅ Updated
-    ├── AdminDashboardPage.tsx
-    ├── FlaggedPostsPage.tsx
+    ├── AdminDashboardPage.tsx    ✅ Updated
+    ├── FlaggedPostsPage.tsx      ✅ Updated
     ├── FlaggedPostDetailPage.tsx
-    ├── UsersPage.tsx
+    ├── UsersPage.tsx             ✅ Updated - Table layout
     ├── UserDetailPage.tsx
     ├── UserPostsPage.tsx
     └── AdminSettingsPage.tsx
