@@ -46,9 +46,11 @@ export function FlaggedPostCard({
     setIsDismissing(false);
   };
 
-  const imageUrl = post.image.startsWith('http')
-    ? post.image
-    : `${import.meta.env.VITE_CDN_URL}/${post.image}`;
+  const imageUrl = post.image
+    ? post.image.startsWith('http')
+      ? post.image
+      : `${import.meta.env.VITE_CDN_URL}/${post.image}`
+    : '';
 
   return (
     <Card
@@ -74,11 +76,17 @@ export function FlaggedPostCard({
               aria-label={`View details for post by ${post.user.userName}`}
               data-testid="post-detail-link"
             >
-              <img
-                src={imageUrl}
-                alt={`Post by ${post.user.userName}`}
-                className="w-32 h-32 object-cover rounded-lg hover:opacity-80 transition-opacity"
-              />
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt={`Post by ${post.user.userName}`}
+                  className="w-32 h-32 object-cover rounded-lg hover:opacity-80 transition-opacity"
+                />
+              ) : (
+                <div className="w-32 h-32 bg-surface-2 rounded-lg flex items-center justify-center text-text-secondary">
+                  No image
+                </div>
+              )}
             </button>
             {post.isHidden && (
               <Badge variant="error" size="sm" className="absolute bottom-2 left-2">

@@ -8,10 +8,10 @@
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { PigeonIdRegenerator } from '@/components/PigeonIdRegenerator';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { PigeonIdRegenerator } from '@/components/PigeonIdRegenerator';
 import api from '@/lib/api';
 import { formatRelativeTime } from '@/lib/utils';
 import type { AdminUser, FlaggedPost } from '@/types';

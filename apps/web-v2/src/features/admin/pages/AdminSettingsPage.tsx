@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent, CardHeader } from '../../../components/ui/card';
-import api from '../../../lib/api';
+import api, { type ApiResponse } from '../../../lib/api';
 
 export function AdminSettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -24,9 +24,12 @@ export function AdminSettingsPage() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await api.get('/admin/settings');
-        if (response.data.success && response.data.data) {
-          const { reportThreshold: threshold, notificationEmail: email } = response.data.data;
+        const response =
+          await api.get<ApiResponse<{ reportThreshold: number; notificationEmail: string }>>(
+            '/admin/settings'
+          );
+        if (response.data && response.success) {
+          const { reportThreshold: threshold, notificationEmail: email } = response.data;
           setReportThreshold(String(threshold || 3));
           setNotificationEmail(email || '');
         }
@@ -60,15 +63,17 @@ export function AdminSettingsPage() {
     setSaveMessage(null);
 
     try {
-      const response = await api.put('/admin/settings', {
+      const response = await api.put<
+        ApiResponse<{ reportThreshold: number; notificationEmail: string }>
+      >('/admin/settings', {
         ...(newPassword && { currentPassword, newPassword }),
         reportThreshold: Number(reportThreshold),
         notificationEmail: notificationEmail || undefined,
       });
 
       // Update local state with saved values from response
-      if (response.data.success && response.data.data) {
-        const { reportThreshold: threshold, notificationEmail: email } = response.data.data;
+      if (response.data && response.success) {
+        const { reportThreshold: threshold, notificationEmail: email } = response.data;
         setReportThreshold(String(threshold || 3));
         setNotificationEmail(email || '');
       }

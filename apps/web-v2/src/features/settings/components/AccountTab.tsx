@@ -1,9 +1,9 @@
 import { Camera, Loader2, LogOut, MapPin } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { PigeonIdRegenerator } from '@/components/PigeonIdRegenerator';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { PigeonIdRegenerator } from '@/components/PigeonIdRegenerator';
 import { useAuth } from '@/features/auth/context/useAuth';
 import { uploadImage } from '@/features/posts/api/s3Service';
 import { compressImage } from '@/features/posts/utils/imageUtils';
