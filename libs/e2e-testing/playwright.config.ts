@@ -20,7 +20,7 @@ export default defineConfig({
       slowMo: 500, // Add slowMo to launch options
     },
   },
-  retries: 1, // Retry failed tests once
+  retries: 0, // Retry failed tests once (set to 0 for debugging)
   workers: 3, // Number of parallel worker processes
   projects: [
     {
