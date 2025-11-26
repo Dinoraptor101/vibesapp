@@ -80,34 +80,27 @@ test.describe('Admin Dashboard', () => {
     // Login and navigate to dashboard
     await loginAsAdmin(page);
 
-    // Verify loading spinner is shown
-    const loadingSpinner = page.getByTestId('admin-dashboard-loading');
-    await expect(loadingSpinner).toBeVisible();
+    // Verify skeleton loading state is shown (uses .animate-pulse class)
+    const skeleton = page.locator('.animate-pulse');
+    await expect(skeleton.first()).toBeVisible();
 
-    // Wait for loading to complete
-    await expect(loadingSpinner).toBeHidden({ timeout: 10000 });
+    // Wait for loading to complete - skeleton should be hidden
+    await expect(skeleton.first()).toBeHidden({ timeout: 10000 });
   });
 
   test('should display activity chart if present', async ({ page }) => {
     // Wait for page to fully load
     await page.waitForLoadState('networkidle');
 
-    // Check for activity chart component
+    // Check for activity chart component (always present with test ID)
     const activityChart = page.getByTestId('admin-activity-chart');
+    await expect(activityChart).toBeVisible();
 
-    // Activity chart may or may not be present depending on data
-    const isChartVisible = await activityChart.isVisible().catch(() => false);
+    // Verify chart has title/header
+    await expect(activityChart.getByText('Activity (Last 7 Days)')).toBeVisible();
 
-    if (isChartVisible) {
-      await expect(activityChart).toBeVisible();
-
-      // Verify chart has some content (canvas or SVG element)
-      const chartContent = activityChart.locator('canvas, svg');
-      await expect(chartContent.first()).toBeVisible();
-    } else {
-      // If no chart, there might be an empty state or the chart section might be hidden
-      console.log('Activity chart not visible - may have no activity data');
-    }
+    // Chart content will show either data visualization or "No data available" message
+    // Both are valid states, so we just verify the component is rendered
   });
 
   test('should navigate to Flagged Posts page', async ({ page }) => {
@@ -116,11 +109,11 @@ test.describe('Admin Dashboard', () => {
     await expect(flaggedPostsLink).toBeVisible();
     await flaggedPostsLink.click();
 
-    // Wait for navigation
-    await page.waitForURL('**/admin/flagged-posts', { timeout: 5000 });
+    // Wait for navigation (URL is /admin/flagged not /admin/flagged-posts)
+    await page.waitForURL('**/admin/flagged', { timeout: 5000 });
 
     // Verify we're on the Flagged Posts page
-    expect(page.url()).toContain('/admin/flagged-posts');
+    expect(page.url()).toContain('/admin/flagged');
   });
 
   test('should navigate to Users page', async ({ page }) => {
@@ -180,9 +173,9 @@ test.describe('Admin Dashboard - Responsive', () => {
     await expect(adminHeader).toBeVisible();
 
     // On mobile, nav should show icons only (no text labels)
-    // Check that icon elements are visible
+    // Check that icon elements are visible (use .first() for strict mode)
     const dashboardNavIcon = page.getByTestId('admin-nav-dashboard').locator('svg');
-    await expect(dashboardNavIcon).toBeVisible();
+    await expect(dashboardNavIcon.first()).toBeVisible();
 
     // Verify text labels are hidden on mobile
     const dashboardNavText = page.getByTestId('admin-nav-dashboard-text');
@@ -205,18 +198,14 @@ test.describe('Admin Dashboard - Responsive', () => {
     // Wait for layout to adjust
     await page.waitForTimeout(300);
 
-    // Verify text labels are visible on desktop
+    // On desktop (md and above), text labels should be visible
     const dashboardNavText = page.getByTestId('admin-nav-dashboard-text');
-    const isTextVisible = await dashboardNavText.isVisible().catch(() => false);
+    await expect(dashboardNavText).toBeVisible();
+    await expect(dashboardNavText).toContainText('Dashboard');
 
-    // On desktop, we expect text labels to be visible
-    if (isTextVisible) {
-      await expect(dashboardNavText).toContainText('Dashboard');
-    }
-
-    // Icons should also be visible on desktop
+    // Icons should be hidden on desktop (md:hidden class)
     const dashboardNavIcon = page.getByTestId('admin-nav-dashboard').locator('svg');
-    await expect(dashboardNavIcon).toBeVisible();
+    await expect(dashboardNavIcon.first()).toBeHidden();
   });
 });
 

@@ -96,7 +96,7 @@ export function AdminLoginPage() {
         </div>
 
         {/* Login Form - ZEN: Combined input + button, shake on error */}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} data-testid="admin-login-form">
           <div className="flex items-center gap-0">
             <input
               id="admin-password"
@@ -105,7 +105,7 @@ export function AdminLoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
               autoComplete="current-password"
-              placeholder="admin password"
+              placeholder="Enter password"
               className={`flex-1 h-12 px-4 bg-surface-2 border border-border rounded-l-lg 
                          text-text-primary placeholder:text-text-tertiary
                          focus:outline-none focus:ring-2 focus:ring-brand-purple/50 

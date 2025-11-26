@@ -22,6 +22,6 @@ router.delete('/:postId', deletePost);
 router.post('/:id/like', likePost);
 router.post('/:id/react', reactToPost); // Toggle like/unlike
 router.delete('/:id/reaction', unlikePost); // Unlike a post
-router.post('/:id/report', reportPost); // Phase 3.4
+router.post('/:id/report', pigeonAuth, reportPost); // Phase 3.4
 
 module.exports = router;

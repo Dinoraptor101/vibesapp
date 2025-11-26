@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const { S3 } = require('@aws-sdk/client-s3');
 const Post = require('../models/Post');
 const User = require('../models/User');
+const Settings = require('../models/Settings');
 const Follow = require('../models/Follow');
 const { createReplyActivity } = require('./activity');
 const ReactionActivity = require('../models/ReactionActivity');
@@ -736,8 +737,12 @@ const reportPost = async (req, res) => {
     let isHidden = false;
     let message = 'Report submitted successfully';
 
-    // Auto-hide if 3+ nearby reports
-    if (nearbyReports.length >= 3 && !post.isHidden) {
+    // Get auto-hide threshold from settings
+    const settings = await Settings.getSettings();
+    const autoHideThreshold = settings.reportThreshold || 3;
+
+    // Auto-hide if threshold nearby reports reached
+    if (nearbyReports.length >= autoHideThreshold && !post.isHidden) {
       post.isHidden = true;
       post.hiddenAt = new Date();
       post.hiddenBy = 'auto';

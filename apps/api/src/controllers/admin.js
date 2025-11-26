@@ -1,5 +1,6 @@
 const Post = require('../models/Post');
 const User = require('../models/User');
+const Settings = require('../models/Settings');
 const { S3 } = require('@aws-sdk/client-s3');
 const crypto = require('node:crypto');
 const { verifyRecaptcha } = require('../utils/recaptcha');
@@ -784,6 +785,29 @@ const deletePosts = async (req, res) => {
   }
 };
 
+// Get admin settings
+const getSettings = async (req, res) => {
+  try {
+    const settings = await Settings.getSettings();
+
+    res.status(200).json({
+      success: true,
+      data: {
+        reportThreshold: settings.reportThreshold,
+        notificationEmail: settings.notificationEmail,
+        updatedAt: settings.updatedAt,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching admin settings:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching settings',
+      error: error.message,
+    });
+  }
+};
+
 // Update admin settings
 const updateSettings = async (req, res) => {
   try {
@@ -808,25 +832,26 @@ const updateSettings = async (req, res) => {
       );
     }
 
-    // Update report threshold (would be stored in database in production)
+    // Update settings in database
+    const updates = {};
     if (reportThreshold !== undefined) {
-      // In production, store this in a settings collection
-      console.log(`Report threshold updated to: ${reportThreshold}`);
+      updates.reportThreshold = reportThreshold;
+    }
+    if (notificationEmail !== undefined) {
+      updates.notificationEmail = notificationEmail;
     }
 
-    // Update notification email (would be stored in database in production)
-    if (notificationEmail !== undefined) {
-      // In production, store this in a settings collection
-      console.log(`Notification email updated to: ${notificationEmail}`);
-    }
+    const settings = await Settings.updateSettings(updates);
+    console.log('Admin settings updated:', updates);
 
     res.status(200).json({
       success: true,
       message: 'Settings updated successfully',
       data: {
-        reportThreshold: reportThreshold || 3,
-        notificationEmail: notificationEmail || 'admin@vibesapp.com',
+        reportThreshold: settings.reportThreshold,
+        notificationEmail: settings.notificationEmail,
         passwordChanged: !!(currentPassword && newPassword),
+        updatedAt: settings.updatedAt,
       },
     });
   } catch (error) {
@@ -1057,6 +1082,7 @@ module.exports = {
   bulkDeleteUserPosts,
   getDashboardMetrics,
   getActivityData,
+  getSettings,
   updateSettings,
   getReportedPosts, // Phase 3.4
   restorePost, // Phase 3.4

@@ -3,12 +3,13 @@
  * Configure admin preferences and system settings
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent, CardHeader } from '../../../components/ui/card';
 import api from '../../../lib/api';
 
 export function AdminSettingsPage() {
+  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
@@ -18,6 +19,27 @@ export function AdminSettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [reportThreshold, setReportThreshold] = useState('3');
   const [notificationEmail, setNotificationEmail] = useState('');
+
+  // Fetch current settings on mount
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await api.get('/admin/settings');
+        if (response.data.success && response.data.data) {
+          const { reportThreshold: threshold, notificationEmail: email } = response.data.data;
+          setReportThreshold(String(threshold || 3));
+          setNotificationEmail(email || '');
+        }
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+        setSaveMessage('Failed to load settings');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSettings();
+  }, []);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,11 +60,18 @@ export function AdminSettingsPage() {
     setSaveMessage(null);
 
     try {
-      await api.put('/admin/settings', {
+      const response = await api.put('/admin/settings', {
         ...(newPassword && { currentPassword, newPassword }),
         reportThreshold: Number(reportThreshold),
         notificationEmail: notificationEmail || undefined,
       });
+
+      // Update local state with saved values from response
+      if (response.data.success && response.data.data) {
+        const { reportThreshold: threshold, notificationEmail: email } = response.data.data;
+        setReportThreshold(String(threshold || 3));
+        setNotificationEmail(email || '');
+      }
 
       setSaveMessage('Settings saved successfully!');
       setCurrentPassword('');
@@ -55,6 +84,21 @@ export function AdminSettingsPage() {
       setIsSaving(false);
     }
   };
+
+  // Show loading state while fetching settings
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+          <p className="mt-2 text-gray-600">Configure admin preferences and system settings</p>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <div className="text-gray-600">Loading settings...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -137,7 +181,8 @@ export function AdminSettingsPage() {
                 className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
               <p className="mt-1 text-sm text-gray-500">
-                Number of dislikes before a post is automatically hidden (default: 3)
+                Number of nearby reports (within 50 miles) before a post is automatically hidden
+                (default: 3)
               </p>
             </div>
           </CardContent>

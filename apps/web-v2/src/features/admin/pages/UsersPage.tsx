@@ -254,19 +254,21 @@ export function UsersPage() {
       )}
 
       {!isLoading && !error && users.length > 0 && (
-        <UsersTable
-          users={users}
-          selectedUserIds={selectedUserIds}
-          onSelectUser={handleSelectUser}
-          onSelectAll={handleSelectAll}
-          onViewDetails={handleViewDetails}
-          onViewPosts={handleViewPosts}
-          onToggleBan={handleToggleBan}
-          isOnline={isOnline}
-          sortField={sortField}
-          sortDirection={sortDirection}
-          onSort={handleSort}
-        />
+        <div data-testid="users-list">
+          <UsersTable
+            users={users}
+            selectedUserIds={selectedUserIds}
+            onSelectUser={handleSelectUser}
+            onSelectAll={handleSelectAll}
+            onViewDetails={handleViewDetails}
+            onViewPosts={handleViewPosts}
+            onToggleBan={handleToggleBan}
+            isOnline={isOnline}
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSort={handleSort}
+          />
+        </div>
       )}
 
       {/* Pagination */}
