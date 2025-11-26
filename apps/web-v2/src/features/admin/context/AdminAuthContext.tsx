@@ -75,6 +75,17 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  // Listen for unauthorized events from API client
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      console.log('[AdminAuth] Received unauthorized event - logging out');
+      logout();
+    };
+
+    window.addEventListener('admin:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('admin:unauthorized', handleUnauthorized);
+  }, [logout]);
+
   // Auto-logout when session expires
   useEffect(() => {
     if (!state.sessionExpiry) return;

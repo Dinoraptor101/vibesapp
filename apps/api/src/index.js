@@ -17,7 +17,7 @@ const corsOptions = {
     'https://dinoraptor101.github.io', // Failover production
   ],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'x-pigeon-id'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'x-pigeon-id', 'x-admin-token'],
   optionsSuccessStatus: 200,
 };
 

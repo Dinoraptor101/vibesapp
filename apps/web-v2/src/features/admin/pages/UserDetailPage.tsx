@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { PigeonIdRegenerator } from '@/components/PigeonIdRegenerator';
 import api from '@/lib/api';
 import { formatRelativeTime } from '@/lib/utils';
@@ -28,7 +28,6 @@ export function UserDetailPage() {
   const [userPosts, setUserPosts] = useState<FlaggedPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showRegenerateSection, setShowRegenerateSection] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -279,20 +278,13 @@ export function UserDetailPage() {
           <h2 className="text-lg font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100 mb-4">
             Actions
           </h2>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 mb-6">
             <Button
               variant={user.isBanned ? 'outline' : 'destructive'}
               onClick={handleToggleBan}
               data-testid="toggle-ban-button"
             >
               {user.isBanned ? 'Unban User' : 'Ban User'}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setShowRegenerateSection(!showRegenerateSection)}
-              data-testid="regenerate-password-button"
-            >
-              {showRegenerateSection ? 'Hide Password Section' : 'Regenerate Password'}
             </Button>
             <Button
               variant="outline"
@@ -314,6 +306,22 @@ export function UserDetailPage() {
             >
               Delete User
             </Button>
+          </div>
+
+          {/* Password Regeneration */}
+          <div>
+            <h3 className="text-md font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100 mb-3">
+              Regenerate Password
+            </h3>
+            <PigeonIdRegenerator
+              userId={user.userId}
+              userName={user.userName}
+              context="admin"
+              isOnline={true}
+              onSuccess={() => {
+                console.log('Password regenerated for user:', user.userName);
+              }}
+            />
           </div>
         </CardContent>
       </Card>
@@ -406,28 +414,6 @@ export function UserDetailPage() {
           )}
         </CardContent>
       </Card>
-
-      {/* Password Regeneration Section */}
-      {showRegenerateSection && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Regenerate Password</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PigeonIdRegenerator
-              userId={user.userId}
-              userName={user.userName}
-              context="admin"
-              isOnline={true}
-              onSuccess={() => {
-                console.log('Password regenerated for user:', user.userName);
-                // Optionally auto-hide after successful regeneration
-                setTimeout(() => setShowRegenerateSection(false), 5000);
-              }}
-            />
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

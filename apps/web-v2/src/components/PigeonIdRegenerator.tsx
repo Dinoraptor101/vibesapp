@@ -49,6 +49,9 @@ export function PigeonIdRegenerator({
       if (storedPigeonId) {
         setPigeonId(storedPigeonId);
       }
+    } else {
+      // Admin context: show placeholder until regenerated
+      setPigeonId('');
     }
   }, [context]);
 
@@ -199,8 +202,10 @@ export function PigeonIdRegenerator({
           )}
         </button>
         <div className="flex flex-1 items-center justify-between rounded-md bg-white dim:bg-gray-700 dark:bg-gray-800 p-3 font-mono text-sm sm:text-base">
-          <span className="font-bold text-gray-900 dim:text-gray-100 dark:text-gray-100 truncate mr-2">
-            {pigeonId || 'Loading...'}
+          <span
+            className={`truncate mr-2 ${pigeonId ? 'font-bold text-gray-900 dim:text-gray-100 dark:text-gray-100' : 'text-gray-400 dim:text-gray-500 dark:text-gray-500'}`}
+          >
+            {pigeonId || (context === 'admin' ? 'Regenerate to view new password' : 'Loading...')}
           </span>
           <Button
             variant="ghost"
