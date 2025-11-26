@@ -2,18 +2,21 @@
  * User Posts Page
  *
  * Displays all posts from a specific user in admin context.
- * Follows Zen principles - no modals, full page experience.
+ * Follows Zen principles and Web-V2 design patterns with PostsGrid.
  */
 
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui-next';
+import { PostCard } from '@/features/posts/components/PostCard';
+import type { Post } from '@/features/posts/types';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import api from '@/lib/api';
 import { formatRelativeTime } from '@/lib/utils';
-import type { AdminUser, FlaggedPost } from '@/types';
+import type { AdminUser } from '@/types';
 
 export function UserPostsPage() {
   const { userId } = useParams<{ userId: string }>();
@@ -24,9 +27,11 @@ export function UserPostsPage() {
   const userFromState = (location.state as { user?: AdminUser })?.user;
 
   const [user, setUser] = useState<AdminUser | null>(userFromState || null);
-  const [posts, setPosts] = useState<FlaggedPost[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
+  const { isOnline } = useNetworkStatus();
 
   useEffect(() => {
     const fetchUserPosts = async () => {
@@ -36,9 +41,9 @@ export function UserPostsPage() {
       setError(null);
 
       try {
-        const response = (await api.get(`/admin/users/${userId}/posts`)) as {
+        const response = (await api.get(`/admin/users/${userId}/posts?limit=10000`)) as {
           success: boolean;
-          posts: FlaggedPost[];
+          posts: Post[];
           user?: AdminUser;
         };
 
@@ -60,16 +65,19 @@ export function UserPostsPage() {
   }, [userId, userFromState]);
 
   const handleDeletePost = async (postId: string) => {
+    if (!isOnline) return;
+    if (!confirm('Delete this post? This action cannot be undone.')) return;
+
+    setDeletingPostId(postId);
     try {
       await api.delete('/admin/posts', { data: { postHexes: [postId] } });
       setPosts(posts.filter((p) => p._id !== postId));
     } catch (err) {
       console.error('Error deleting post:', err);
+      alert('Failed to delete post');
+    } finally {
+      setDeletingPostId(null);
     }
-  };
-
-  const handleViewPost = (post: FlaggedPost) => {
-    navigate(`/admin/flagged/${post._id}`, { state: { post } });
   };
 
   if (isLoading) {
@@ -121,7 +129,7 @@ export function UserPostsPage() {
 
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 dim:text-gray-100 dark:text-gray-100">
-                  Posts by @{user.userName}
+                  {user.userName}
                 </h1>
                 <div className="mt-1 flex items-center gap-2">
                   {user.mbtiPersonality && (
@@ -141,7 +149,11 @@ export function UserPostsPage() {
               </div>
 
               <div className="ml-auto text-right text-sm text-gray-600 dim:text-gray-400 dark:text-gray-400">
-                <p>{posts.length} posts</p>
+                <p>
+                  {posts.filter((p) => p.image).length} posts
+                  {posts.filter((p) => !p.image).length > 0 &&
+                    ` (${posts.filter((p) => !p.image).length} comments)`}
+                </p>
                 <p>Joined {formatRelativeTime(user.createdAt)}</p>
               </div>
             </div>
@@ -156,7 +168,9 @@ export function UserPostsPage() {
             User Posts
           </h1>
           <p className="text-gray-600 dim:text-gray-400 dark:text-gray-400">
-            {posts.length} posts found
+            {posts.filter((p) => p.image).length} posts
+            {posts.filter((p) => !p.image).length > 0 &&
+              ` (${posts.filter((p) => !p.image).length} comments)`}
           </p>
         </div>
       )}
@@ -172,73 +186,45 @@ export function UserPostsPage() {
         </Card>
       )}
 
-      {/* Posts Grid */}
+      {/* Posts Grid with Admin Actions */}
       {posts.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {posts.map((post) => {
-            const imageUrl = post.image.startsWith('http')
-              ? post.image
-              : `${import.meta.env.VITE_CDN_URL}/${post.image}`;
-
-            return (
-              <Card
-                key={post._id}
-                className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={() => handleViewPost(post)}
-              >
-                <div className="relative aspect-square">
-                  <img
-                    src={imageUrl}
-                    alt={post.text || 'Post'}
-                    className="h-full w-full object-cover"
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {posts
+            .filter((post) => post.image) // Only show posts with images (not comments)
+            .map((post) => (
+              <div key={post._id} className="relative group">
+                {/* Post Card - Click to view in admin detail */}
+                <button
+                  type="button"
+                  onClick={() => navigate(`/admin/flagged/${post._id}`)}
+                  className="w-full text-left cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand rounded-lg block"
+                >
+                  <PostCard
+                    post={post}
+                    onLike={() => {}} // Admin doesn't like posts
+                    onReport={() => {}} // Admin doesn't report posts
                   />
+                </button>
 
-                  {/* Status Badge */}
-                  {post.isHidden && (
-                    <Badge variant="error" size="sm" className="absolute top-2 right-2">
-                      HIDDEN
-                    </Badge>
-                  )}
-
-                  {/* Overlay with stats */}
-                  <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/70 to-transparent p-3 opacity-0 hover:opacity-100 transition-opacity">
-                    {post.text && (
-                      <p className="line-clamp-2 text-sm text-white mb-2">{post.text}</p>
-                    )}
-                    <div className="flex items-center justify-between text-xs text-white/80">
-                      <div className="flex items-center gap-2">
-                        <span>👍 {post.proximal_likes || 0}</span>
-                        {(post.proximal_dislikes || 0) > 0 && (
-                          <span className="text-red-300">👎 {post.proximal_dislikes}</span>
-                        )}
-                      </div>
-                      <span>{formatRelativeTime(new Date(post.createdAt))}</span>
-                    </div>
-                  </div>
+                {/* Admin Delete Button - Overlays on hover */}
+                <div className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDeletePost(post._id);
+                    }}
+                    disabled={!isOnline || deletingPostId === post._id}
+                    loading={deletingPostId === post._id}
+                    className="shadow-lg min-h-[44px]"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
-
-                {/* Post Footer */}
-                <CardContent className="p-3 bg-white dim:bg-gray-800 dark:bg-gray-900">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 dim:text-gray-400 dark:text-gray-400">
-                      {formatRelativeTime(new Date(post.createdAt))}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeletePost(post._id);
-                      }}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+              </div>
+            ))}
         </div>
       )}
     </div>

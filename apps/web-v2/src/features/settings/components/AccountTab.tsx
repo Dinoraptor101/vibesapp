@@ -1,15 +1,14 @@
-import { Camera, Check, Copy, Loader2, LogOut, MapPin, RotateCcw } from 'lucide-react';
+import { Camera, Loader2, LogOut, MapPin } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { PigeonIdRegenerator } from '@/components/PigeonIdRegenerator';
 import { useAuth } from '@/features/auth/context/useAuth';
-import { authApi } from '@/features/auth/services/authApi';
 import { uploadImage } from '@/features/posts/api/s3Service';
 import { compressImage } from '@/features/posts/utils/imageUtils';
 import { useLocationGPS } from '@/hooks/useLocationGPS';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
-import { getCookie, setCookie } from '@/lib/api';
 import { getAvatarUrl } from '@/lib/avatarUtils';
 import { useAccountUpdates } from '../hooks/useAccountUpdates';
 
@@ -50,14 +49,8 @@ export function AccountTab() {
 
   // UI state
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [copiedPigeonId, setCopiedPigeonId] = useState(false);
-  const [pigeonId, setPigeonId] = useState('');
-  const [isRegeneratingPigeonId, setIsRegeneratingPigeonId] = useState(false);
-  const [regenerateProgress, setRegenerateProgress] = useState(0);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const regenerateTimerRef = useRef<number | null>(null);
-  const regenerateIntervalRef = useRef<number | null>(null);
 
   // Update local state when user changes
   useEffect(() => {
@@ -69,12 +62,6 @@ export function AccountTab() {
       setBio(userBio);
       setMbti(userMbti);
       setPolarity(userPolarity);
-
-      // Load Pigeon ID from cookie (SECURITY: Never from API)
-      const storedPigeonId = getCookie('pigeonId');
-      if (storedPigeonId) {
-        setPigeonId(storedPigeonId);
-      }
 
       // Initialize location display (city only for now until backend supports state/country)
       if (user.location) {
@@ -370,98 +357,6 @@ export function AccountTab() {
     }
   };
 
-  // Copy Pigeon ID
-  const handleCopyPigeonId = async () => {
-    if (pigeonId) {
-      try {
-        await navigator.clipboard.writeText(pigeonId);
-        setCopiedPigeonId(true);
-        setTimeout(() => setCopiedPigeonId(false), 2000);
-        // ZEN: Silent success, no toast (user sees it was copied via icon change)
-        console.log('Pigeon ID copied to clipboard');
-      } catch (error) {
-        console.error('Failed to copy Pigeon ID:', error);
-      }
-    }
-  };
-
-  // Regenerate Pigeon ID (with press-and-hold safety)
-  const handleRegeneratePigeonId = async () => {
-    if (!isOnline) return; // Prevent action when offline
-    if (!user?.userId) {
-      console.error('User ID not found');
-      return;
-    }
-
-    setIsRegeneratingPigeonId(true);
-
-    try {
-      // Call backend to regenerate Pigeon ID in the database
-      const newPigeonId = await authApi.regeneratePigeonId(user.userId);
-
-      // Update cookie with the new Pigeon ID
-      setCookie('pigeonId', newPigeonId, 365);
-      setPigeonId(newPigeonId);
-
-      console.log('Pigeon ID regenerated successfully');
-    } catch (error) {
-      console.error('Failed to regenerate Pigeon ID:', error);
-    } finally {
-      setIsRegeneratingPigeonId(false);
-      setRegenerateProgress(0);
-    }
-  };
-
-  // Press and hold handlers for regenerate button
-  const handleRegenerateMouseDown = () => {
-    if (isRegeneratingPigeonId) return;
-
-    // Start progress animation
-    setRegenerateProgress(0);
-    const startTime = Date.now();
-    const holdDuration = 2000; // 2 seconds hold required
-
-    regenerateIntervalRef.current = window.setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min((elapsed / holdDuration) * 100, 100);
-      setRegenerateProgress(progress);
-    }, 50);
-
-    // Trigger regeneration after hold duration
-    regenerateTimerRef.current = window.setTimeout(() => {
-      if (regenerateIntervalRef.current) {
-        clearInterval(regenerateIntervalRef.current);
-      }
-      setRegenerateProgress(100);
-      handleRegeneratePigeonId();
-    }, holdDuration);
-  };
-
-  const handleRegenerateMouseUp = () => {
-    // Cancel if not held long enough
-    if (regenerateTimerRef.current) {
-      clearTimeout(regenerateTimerRef.current);
-      regenerateTimerRef.current = null;
-    }
-    if (regenerateIntervalRef.current) {
-      clearInterval(regenerateIntervalRef.current);
-      regenerateIntervalRef.current = null;
-    }
-    setRegenerateProgress(0);
-  };
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (regenerateTimerRef.current) {
-        clearTimeout(regenerateTimerRef.current);
-      }
-      if (regenerateIntervalRef.current) {
-        clearInterval(regenerateIntervalRef.current);
-      }
-    };
-  }, []);
-
   // Logout handler
   const handleLogout = () => {
     logout();
@@ -647,74 +542,14 @@ export function AccountTab() {
           Security
         </h3>
 
-        <div className="rounded-lg border-2 border-brand-purple bg-brand-purple/5 p-4">
-          <div className="mb-4 flex items-center gap-2">
-            <button
-              type="button"
-              onMouseDown={handleRegenerateMouseDown}
-              onMouseUp={handleRegenerateMouseUp}
-              onMouseLeave={handleRegenerateMouseUp}
-              onTouchStart={handleRegenerateMouseDown}
-              onTouchEnd={handleRegenerateMouseUp}
-              disabled={!isOnline || isRegeneratingPigeonId}
-              className="relative shrink-0 rounded-md p-2 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              title="Hold for 2 seconds to regenerate Pigeon ID"
-            >
-              {isRegeneratingPigeonId ? (
-                <Loader2 className="h-4 w-4 animate-spin text-brand-purple" />
-              ) : (
-                <>
-                  <RotateCcw className="h-4 w-4 text-brand-purple relative z-10" />
-                  {regenerateProgress > 0 && (
-                    <svg
-                      className="absolute inset-0 w-full h-full -rotate-90"
-                      viewBox="0 0 36 36"
-                      aria-hidden="true"
-                    >
-                      <circle
-                        cx="18"
-                        cy="18"
-                        r="16"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                        strokeDasharray={`${regenerateProgress} 100`}
-                        className="text-brand-purple opacity-30"
-                      />
-                    </svg>
-                  )}
-                </>
-              )}
-            </button>
-            <div className="flex flex-1 items-center justify-between rounded-md bg-white dim:bg-gray-700 dark:bg-gray-800 p-3 font-mono text-sm sm:text-base">
-              <span className="font-bold text-gray-900 dim:text-gray-100 dark:text-gray-100 truncate mr-2">
-                {pigeonId || 'Loading...'}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopyPigeonId}
-                className="shrink-0"
-                disabled={!pigeonId}
-              >
-                {copiedPigeonId ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
-
-          <div className="space-y-2 text-sm">
-            <p className="font-semibold text-yellow-800 dim:text-yellow-300 dark:text-yellow-200">
-              ⚠️ Important:
-            </p>
-            <ul className="list-inside list-disc space-y-1 text-gray-700 dim:text-gray-300 dark:text-gray-400">
-              <li>This acts as your password across all devices</li>
-              <li>Never share! - it gives full access to your account</li>
-              <li className="font-bold text-red-600 dark:text-red-400">
-                Regenerating will log you out from all other devices
-              </li>
-            </ul>
-          </div>
-        </div>
+        {user && (
+          <PigeonIdRegenerator
+            userId={user.userId}
+            userName={user.username}
+            context="user"
+            isOnline={isOnline}
+          />
+        )}
       </div>
 
       {/* Divider */}

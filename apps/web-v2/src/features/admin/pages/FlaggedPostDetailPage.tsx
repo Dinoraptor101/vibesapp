@@ -2,56 +2,28 @@
  * Flagged Post Detail Page
  *
  * Displays a flagged post with full details and admin actions.
- * Follows Zen principles - no modals, full page experience.
+ * Follows ZEN principles:
+ * - Modern PostCard design (matches production)
+ * - Read-only comment list for context
+ * - Compact admin intel panel with hover effects
+ * - Offline-ready with proper handling
+ * - Touch-optimized (44px minimum targets)
+ * - Reduced spacing (space-y-3) and padding (p-3)
+ * - Compact text sizes (text-xs, text-base)
  */
 
-import { ArrowLeft, Loader2, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, MessageCircle, AlertTriangle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { CommentList, useComments } from '@/features/posts';
+import { Button } from '@/components/ui-next';
+import { Card } from '@/components/ui-next';
+import { CommentList, PostCard } from '@/features/posts';
+import type { Post } from '@/features/posts/types';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import api from '@/lib/api';
-import { formatRelativeTime } from '@/lib/utils';
+import { stripHtml } from '@/lib/utils';
 import type { FlaggedPost } from '@/types';
-
-// Strip HTML tags from text
-function stripHtml(html: string): string {
-  const tmp = document.createElement('div');
-  tmp.innerHTML = html;
-  return tmp.textContent || tmp.innerText || '';
-}
-
-/**
- * Comments section that only renders if there are comments
- */
-function CommentsSection({ postId }: { postId: string }) {
-  const { data, isLoading } = useComments(postId);
-
-  // Get comment count from all pages
-  const commentCount = data?.pages.reduce((total, page) => total + page.posts.length, 0) ?? 0;
-
-  // Don't show anything if loading or no comments
-  if (isLoading || commentCount === 0) {
-    return null;
-  }
-
-  return (
-    <Card>
-      <CardContent className="p-4 bg-white dim:bg-gray-800 dark:bg-gray-900">
-        <div className="flex items-center gap-2 mb-4">
-          <MessageCircle className="w-5 h-5 text-gray-600 dim:text-gray-400 dark:text-gray-400" />
-          <h3 className="font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
-            Comments ({commentCount})
-          </h3>
-        </div>
-        <CommentList postId={postId} />
-      </CardContent>
-    </Card>
-  );
-}
 
 export function FlaggedPostDetailPage() {
   const { postId } = useParams<{ postId: string }>();
@@ -125,7 +97,12 @@ export function FlaggedPostDetailPage() {
   }, [postId, postFromState]);
 
   const handleDelete = async () => {
-    if (!post) return;
+    if (!post || !isOnline) return;
+
+    const confirmed = window.confirm(
+      'This will permanently delete this post. This cannot be undone.'
+    );
+    if (!confirmed) return;
 
     setIsDeleting(true);
     try {
@@ -139,7 +116,7 @@ export function FlaggedPostDetailPage() {
   };
 
   const handleDismiss = async () => {
-    if (!post) return;
+    if (!post || !isOnline) return;
 
     setIsDismissing(true);
     try {
@@ -162,167 +139,146 @@ export function FlaggedPostDetailPage() {
 
   if (error || !post) {
     return (
-      <div className="max-w-4xl mx-auto p-4">
+      <div className="max-w-2xl mx-auto p-4">
         <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
         </Button>
         <div className="text-center py-12">
+          <AlertTriangle className="mx-auto mb-4 w-12 h-12 text-warning" />
           <p className="text-text-secondary">{error || 'Post not found'}</p>
         </div>
       </div>
     );
   }
 
-  const imageUrl = post.image.startsWith('http')
-    ? post.image
-    : `${import.meta.env.VITE_CDN_URL}/${post.image}`;
+  // Convert FlaggedPost to Post type for PostCard compatibility
+  const postForCard = post as unknown as Post;
+
+  // Determine caption length for display logic
+  const captionLength = post.text ? stripHtml(post.text).length : 0;
+  const showFullCaptionSection = captionLength > 100;
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
+    <div className="max-w-2xl mx-auto p-4 space-y-3">
       {/* Back button */}
-      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
+      <Button variant="ghost" onClick={() => navigate(-1)}>
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back
       </Button>
 
-      {/* Post Card - Similar to PostDetailPage */}
-      <Card className="overflow-hidden">
-        <CardContent className="p-0">
-          {/* Image */}
-          <div className="relative">
-            <img
-              src={imageUrl}
-              alt={`Post by ${post.user.userName}`}
-              className="w-full max-h-[600px] object-contain bg-black"
-            />
-            {post.isHidden && (
-              <Badge variant="error" size="lg" className="absolute top-4 left-4">
-                🚨 Auto-hidden
-              </Badge>
-            )}
-          </div>
-
-          {/* Post Info */}
-          <div className="p-4 space-y-4 bg-white dim:bg-gray-800 dark:bg-gray-900">
-            {/* User info and stats */}
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
-                    @{post.user.userName}
-                  </span>
-                  <Badge variant={post.isHidden ? 'error' : 'warning'} size="md">
-                    👎 {post.dislikeCount} {post.dislikeCount === 1 ? 'dislike' : 'dislikes'}
-                  </Badge>
+      {/* Admin Intel Section */}
+      <Card className="hover-lift">
+        <div className="p-3">
+          <div className="flex items-start justify-between gap-3">
+            {/* Left side - Reporters and Metadata in columns */}
+            <div className="flex gap-4 flex-1">
+              {/* Reporters */}
+              {post.reporters && post.reporters.length > 0 && (
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-xs font-medium text-text-tertiary mb-1.5 uppercase tracking-wide">
+                    Reporters ({post.reporters.length})
+                  </h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    {post.reporters.map((reporter) => (
+                      <Badge key={reporter.userId} variant="default" size="sm">
+                        @{reporter.userName}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
-                <div className="text-sm text-gray-600 dim:text-gray-400 dark:text-gray-400">
-                  Posted {formatRelativeTime(new Date(post.createdAt))}
+              )}
+
+              {/* Metadata */}
+              <div className="flex-shrink-0">
+                <h3 className="text-xs font-medium text-text-tertiary mb-1.5 uppercase tracking-wide">
+                  Metadata
+                </h3>
+                <div className="space-y-0.5 text-xs text-text-secondary">
+                  <div className="flex items-center gap-1">
+                    <span className="font-medium text-text-tertiary">Post:</span>
+                    <button
+                      type="button"
+                      className="text-xs bg-surface-secondary px-1.5 py-0.5 rounded cursor-pointer hover:bg-surface-tertiary font-mono"
+                      onClick={() => navigator.clipboard.writeText(post._id)}
+                      title="Click to copy full ID"
+                    >
+                      {post._id.slice(-8)}
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="font-medium text-text-tertiary">User:</span>
+                    <button
+                      type="button"
+                      className="text-xs bg-surface-secondary px-1.5 py-0.5 rounded cursor-pointer hover:bg-surface-tertiary font-mono"
+                      onClick={() => navigator.clipboard.writeText(post.user.userId)}
+                      title="Click to copy full ID"
+                    >
+                      {post.user.userId.slice(-8)}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Caption */}
-            {post.text && (
-              <div className="p-4 bg-gray-50 dim:bg-gray-700 dark:bg-gray-800 rounded-lg border border-gray-200 dim:border-gray-600 dark:border-gray-700">
-                <p className="text-base text-gray-900 dim:text-gray-100 dark:text-gray-100">
-                  {stripHtml(post.text)}
-                </p>
-              </div>
-            )}
-
-            {/* Location */}
-            {post.user.location && (
-              <div className="text-sm text-gray-600 dim:text-gray-400 dark:text-gray-400">
-                📍 Location: {post.user.location.lat.toFixed(4)},{' '}
-                {post.user.location.lon.toFixed(4)}
-              </div>
-            )}
+            {/* Right side - Actions */}
+            <div className="flex gap-2 flex-shrink-0">
+              {post.reporters && post.reporters.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDismiss}
+                  loading={isDismissing}
+                  disabled={!isOnline}
+                  className="min-h-[44px]"
+                >
+                  Dismiss
+                </Button>
+              )}
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDelete}
+                loading={isDeleting}
+                disabled={!isOnline}
+                className="min-h-[44px]"
+              >
+                Delete
+              </Button>
+            </div>
           </div>
-        </CardContent>
+        </div>
       </Card>
 
-      {/* Admin Info Section */}
-      <div className="mt-6 space-y-4">
-        {/* Status Card - Only show if post is hidden */}
-        {post.isHidden && (
-          <Card>
-            <CardContent className="p-4 bg-white dim:bg-gray-800 dark:bg-gray-900">
-              <h3 className="font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100 mb-2">
-                Status
-              </h3>
-              <p className="text-red-600 dim:text-red-400 dark:text-red-400">
-                ⚠️ This post has been hidden
-              </p>
-            </CardContent>
-          </Card>
-        )}
+      {/* Post Display - Using modern PostCard component */}
+      <PostCard post={postForCard} hideCaption={showFullCaptionSection} />
 
-        {/* Reporters Card - Only show if there are reporters */}
-        {post.reporters && post.reporters.length > 0 && (
-          <Card>
-            <CardContent className="p-4 bg-white dim:bg-gray-800 dark:bg-gray-900">
-              <h3 className="font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100 mb-2">
-                Reporters ({post.reporters.length})
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {post.reporters.map((reporter) => (
-                  <Badge key={reporter.userId} variant="default" size="sm">
-                    @{reporter.userName}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Metadata Card */}
+      {/* Full Caption Section - Only shown when caption exceeds 100 chars */}
+      {showFullCaptionSection && (
         <Card>
-          <CardContent className="p-4 bg-white dim:bg-gray-800 dark:bg-gray-900">
-            <h3 className="font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100 mb-2">
-              Post Metadata
-            </h3>
-            <div className="space-y-1 text-sm text-gray-700 dim:text-gray-300 dark:text-gray-300">
-              <div>
-                <span className="font-medium">Post ID:</span> {post._id}
-              </div>
-              <div>
-                <span className="font-medium">User ID:</span> {post.user.userId}
-              </div>
-              <div>
-                <span className="font-medium">Likes:</span> ❤️ {post.proximal_likes || 0}
-              </div>
-            </div>
-          </CardContent>
+          <div className="p-3">
+            <div
+              className="text-text-primary text-sm leading-relaxed prose prose-sm max-w-none
+                prose-headings:text-text-primary
+                prose-p:text-text-primary
+                prose-strong:text-text-primary
+                prose-a:text-brand hover:prose-a:text-brand-600"
+              dangerouslySetInnerHTML={{ __html: post.text || '' }}
+            />
+          </div>
         </Card>
+      )}
 
-        {/* Comments Section - Only shown if there are comments */}
-        <CommentsSection postId={post._id} />
-
-        {/* Action Buttons */}
-        <div className="flex gap-3 pt-4">
-          <Button variant="secondary" onClick={() => navigate(-1)}>
-            Back
-          </Button>
-          {post.reporters && post.reporters.length > 0 && (
-            <Button
-              variant="outline"
-              onClick={handleDismiss}
-              loading={isDismissing}
-              disabled={!isOnline}
-            >
-              Dismiss Reports
-            </Button>
-          )}
-          <Button
-            variant="destructive"
-            onClick={handleDelete}
-            loading={isDeleting}
-            disabled={!isOnline}
-          >
-            Delete Post
-          </Button>
+      {/* Comments Section - Read-only for context */}
+      <div id="comments-section" className="space-y-3">
+        <div className="flex items-center gap-2 px-1">
+          <MessageCircle className="w-4 h-4 text-text-tertiary" />
+          <h2 className="text-base font-semibold text-text-primary">Comments</h2>
+          <span className="text-xs text-text-tertiary">(Read-only)</span>
         </div>
+
+        {/* Comment List - No input, just display */}
+        <CommentList postId={post._id} />
       </div>
     </div>
   );

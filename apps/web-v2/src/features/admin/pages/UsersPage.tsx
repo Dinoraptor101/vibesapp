@@ -1,13 +1,16 @@
+import { Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import api from '@/lib/api';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import type { AdminUser } from '../../../types';
-import { UserCard } from '../components/UserCard';
+import { UsersTable } from '../components/UsersTable';
 
 export function UsersPage() {
   const navigate = useNavigate();
+  const { isOnline } = useNetworkStatus();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +27,10 @@ export function UsersPage() {
 
   // Selection
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
-  const [selectAll, setSelectAll] = useState(false);
+
+  // Sorting
+  const [sortField, setSortField] = useState<string | null>('userName');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const mbtiTypes = [
     'INTJ',
@@ -56,7 +62,7 @@ export function UsersPage() {
         mbti: filterMBTI,
         location: '',
         page: currentPage,
-        limit: 50,
+        limit: 100,
       })) as {
         success: boolean;
         users: AdminUser[];
@@ -72,7 +78,6 @@ export function UsersPage() {
       setTotalPages(response.pagination.pages);
       setTotalUsers(response.pagination.total);
       setSelectedUserIds([]);
-      setSelectAll(false);
     } catch (err) {
       console.error('Error fetching users:', err);
       setError('Failed to load users');
@@ -109,13 +114,21 @@ export function UsersPage() {
     );
   };
 
-  const handleSelectAll = () => {
-    if (selectAll) {
-      setSelectedUserIds([]);
-    } else {
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
       setSelectedUserIds(users.map((u) => u.userId));
+    } else {
+      setSelectedUserIds([]);
     }
-    setSelectAll(!selectAll);
+  };
+
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
   };
 
   const handleBulkBan = async () => {
@@ -190,42 +203,46 @@ export function UsersPage() {
       </div>
 
       {/* Stats and Bulk Actions */}
-      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={selectAll}
-              onChange={handleSelectAll}
-              className="h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-            />
-            <span className="text-sm text-gray-600">
-              {selectedUserIds.length > 0 ? `${selectedUserIds.length} selected` : 'Select all'}
-            </span>
-          </div>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white p-3">
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-600">
+            {selectedUserIds.length > 0
+              ? `${selectedUserIds.length} selected`
+              : `${totalUsers} total users`}
+          </span>
 
           {selectedUserIds.length > 0 && (
-            <Button variant="destructive" size="sm" onClick={handleBulkBan}>
+            <Button variant="destructive" size="sm" onClick={handleBulkBan} disabled={!isOnline}>
               Ban Selected
             </Button>
           )}
         </div>
 
-        <div className="flex items-center gap-4 text-sm text-gray-600">
-          <Badge variant="default">{totalUsers} total users</Badge>
-          <Badge variant="success">{users.filter((u) => !u.isBanned).length} active</Badge>
-          <Badge variant="error">{users.filter((u) => u.isBanned).length} banned</Badge>
+        <div className="flex items-center gap-3 text-sm text-gray-600">
+          <Badge variant="success" size="sm">
+            {users.filter((u) => !u.isBanned).length} active
+          </Badge>
+          <Badge variant="error" size="sm">
+            {users.filter((u) => u.isBanned).length} banned
+          </Badge>
         </div>
       </div>
 
-      {/* User List */}
+      {/* User Table */}
       {isLoading && (
-        <p className="text-center text-gray-500" data-testid="users-loading">
-          Loading users...
-        </p>
+        <div className="flex items-center justify-center py-12" data-testid="users-loading">
+          <Loader2 className="w-8 h-8 animate-spin text-brand-purple" />
+        </div>
       )}
 
-      {error && <p className="text-center text-error-600">{error}</p>}
+      {error && (
+        <div className="text-center py-12">
+          <p className="text-error-600 mb-4">{error}</p>
+          <Button variant="outline" onClick={fetchUsers}>
+            Try Again
+          </Button>
+        </div>
+      )}
 
       {!isLoading && !error && users.length === 0 && (
         <div
@@ -237,19 +254,19 @@ export function UsersPage() {
       )}
 
       {!isLoading && !error && users.length > 0 && (
-        <div className="space-y-4" data-testid="users-list">
-          {users.map((user) => (
-            <UserCard
-              key={user.userId}
-              user={user}
-              onViewDetails={handleViewDetails}
-              onViewPosts={handleViewPosts}
-              onToggleBan={handleToggleBan}
-              isSelected={selectedUserIds.includes(user.userId)}
-              onSelect={handleSelectUser}
-            />
-          ))}
-        </div>
+        <UsersTable
+          users={users}
+          selectedUserIds={selectedUserIds}
+          onSelectUser={handleSelectUser}
+          onSelectAll={handleSelectAll}
+          onViewDetails={handleViewDetails}
+          onViewPosts={handleViewPosts}
+          onToggleBan={handleToggleBan}
+          isOnline={isOnline}
+          sortField={sortField}
+          sortDirection={sortDirection}
+          onSort={handleSort}
+        />
       )}
 
       {/* Pagination */}

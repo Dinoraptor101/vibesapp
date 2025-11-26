@@ -10,11 +10,11 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PigeonIdRegenerator } from '@/components/PigeonIdRegenerator';
 import api from '@/lib/api';
 import { formatRelativeTime } from '@/lib/utils';
 import type { AdminUser, FlaggedPost } from '@/types';
-import { RegeneratePasswordModal } from '../components/RegeneratePasswordModal';
 
 export function UserDetailPage() {
   const { userId } = useParams<{ userId: string }>();
@@ -28,10 +28,7 @@ export function UserDetailPage() {
   const [userPosts, setUserPosts] = useState<FlaggedPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Password regeneration state
-  const [regeneratedPassword, setRegeneratedPassword] = useState<string | null>(null);
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [showRegenerateSection, setShowRegenerateSection] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -75,27 +72,6 @@ export function UserDetailPage() {
     } catch (err) {
       console.error('Error toggling ban:', err);
       alert('Failed to toggle ban status');
-    }
-  };
-
-  const handleRegeneratePassword = async () => {
-    if (!user) return;
-
-    try {
-      const response = (await api.post(`/admin/users/${user.userId}/regenerate-password`)) as {
-        success: boolean;
-        newPassword: string;
-        user: {
-          userId: string;
-          userName: string;
-        };
-      };
-
-      setRegeneratedPassword(response.newPassword);
-      setIsPasswordModalOpen(true);
-    } catch (err) {
-      console.error('Error regenerating password:', err);
-      alert('Failed to regenerate password');
     }
   };
 
@@ -313,10 +289,10 @@ export function UserDetailPage() {
             </Button>
             <Button
               variant="outline"
-              onClick={handleRegeneratePassword}
+              onClick={() => setShowRegenerateSection(!showRegenerateSection)}
               data-testid="regenerate-password-button"
             >
-              Regenerate Password
+              {showRegenerateSection ? 'Hide Password Section' : 'Regenerate Password'}
             </Button>
             <Button
               variant="outline"
@@ -371,45 +347,50 @@ export function UserDetailPage() {
 
           {userPosts.length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {userPosts.slice(0, 8).map((post) => {
-                const imageUrl = post.image.startsWith('http')
-                  ? post.image
-                  : `${import.meta.env.VITE_CDN_URL}/${post.image}`;
+              {userPosts
+                .filter((post) => post.image) // Filter out posts without images (comments)
+                .slice(0, 8)
+                .map((post) => {
+                  const imageUrl = post.image.startsWith('http')
+                    ? post.image
+                    : `${import.meta.env.VITE_CDN_URL}/${post.image}`;
 
-                return (
-                  <button
-                    type="button"
-                    key={post._id}
-                    className="group relative aspect-square overflow-hidden rounded-lg cursor-pointer text-left"
-                    onClick={() => handleViewPost(post)}
-                  >
-                    <img
-                      src={imageUrl}
-                      alt={post.text || 'Post'}
-                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                    />
+                  return (
+                    <button
+                      type="button"
+                      key={post._id}
+                      className="group relative aspect-square overflow-hidden rounded-lg cursor-pointer text-left"
+                      onClick={() => handleViewPost(post)}
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={post.text || 'Post'}
+                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                      />
 
-                    {/* Overlay with caption - always visible */}
-                    <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/70 to-transparent p-3">
-                      {post.text && <p className="line-clamp-2 text-sm text-white">{post.text}</p>}
-                      <div className="mt-2 flex items-center gap-2 text-xs text-white/80">
-                        <span>❤️ {post.proximal_likes || 0}</span>
-                        {(post.proximal_dislikes || 0) > 0 && (
-                          <span className="text-red-300">💔 {post.proximal_dislikes}</span>
+                      {/* Overlay with caption - always visible */}
+                      <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/70 to-transparent p-3">
+                        {post.text && (
+                          <p className="line-clamp-2 text-sm text-white">{post.text}</p>
                         )}
+                        <div className="mt-2 flex items-center gap-2 text-xs text-white/80">
+                          <span>❤️ {post.proximal_likes || 0}</span>
+                          {(post.proximal_dislikes || 0) > 0 && (
+                            <span className="text-red-300">💔 {post.proximal_dislikes}</span>
+                          )}
+                        </div>
                       </div>
-                    </div>
 
-                    {post.isHidden && (
-                      <div className="absolute right-2 top-2">
-                        <Badge variant="error" size="sm">
-                          HIDDEN
-                        </Badge>
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
+                      {post.isHidden && (
+                        <div className="absolute right-2 top-2">
+                          <Badge variant="error" size="sm">
+                            HIDDEN
+                          </Badge>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
             </div>
           )}
 
@@ -426,16 +407,27 @@ export function UserDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Password Regeneration Modal (keeping this as it's a confirmation display) */}
-      <RegeneratePasswordModal
-        isOpen={isPasswordModalOpen}
-        onClose={() => {
-          setIsPasswordModalOpen(false);
-          setRegeneratedPassword(null);
-        }}
-        password={regeneratedPassword}
-        userName={user.userName}
-      />
+      {/* Password Regeneration Section */}
+      {showRegenerateSection && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Regenerate Password</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PigeonIdRegenerator
+              userId={user.userId}
+              userName={user.userName}
+              context="admin"
+              isOnline={true}
+              onSuccess={() => {
+                console.log('Password regenerated for user:', user.userName);
+                // Optionally auto-hide after successful regeneration
+                setTimeout(() => setShowRegenerateSection(false), 5000);
+              }}
+            />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
