@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -33,6 +33,27 @@ export function FlaggedPostCard({
 }: FlaggedPostCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDismissing, setIsDismissing] = useState(false);
+  const [showDeletingSpinner, setShowDeletingSpinner] = useState(false);
+  const [showDismissingSpinner, setShowDismissingSpinner] = useState(false);
+
+  // ZEN PRINCIPLE: Only show loading spinner if action takes > 1 second
+  useEffect(() => {
+    if (!isDeleting) {
+      setShowDeletingSpinner(false);
+      return;
+    }
+    const timer = setTimeout(() => setShowDeletingSpinner(true), 1000);
+    return () => clearTimeout(timer);
+  }, [isDeleting]);
+
+  useEffect(() => {
+    if (!isDismissing) {
+      setShowDismissingSpinner(false);
+      return;
+    }
+    const timer = setTimeout(() => setShowDismissingSpinner(true), 1000);
+    return () => clearTimeout(timer);
+  }, [isDismissing]);
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -160,8 +181,8 @@ export function FlaggedPostCard({
                 size="sm"
                 variant="destructive"
                 onClick={handleDelete}
-                loading={isDeleting}
-                disabled={!isOnline}
+                loading={showDeletingSpinner}
+                disabled={!isOnline || isDeleting}
                 data-testid="delete-post-button"
                 aria-label="Delete post"
               >
@@ -171,8 +192,8 @@ export function FlaggedPostCard({
                 size="sm"
                 variant="secondary"
                 onClick={handleDismiss}
-                loading={isDismissing}
-                disabled={!isOnline}
+                loading={showDismissingSpinner}
+                disabled={!isOnline || isDismissing}
                 data-testid="dismiss-reports-button"
                 aria-label="Dismiss reports"
               >

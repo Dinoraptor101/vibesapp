@@ -570,15 +570,15 @@ const getDashboardMetrics = async (req, res) => {
       createdAt: { $gte: twoWeeksAgo, $lt: lastWeek },
     });
 
-    // Flagged posts (reports today)
+    // Phase 3.4: Reports today (posts with reports created today)
     const reportsToday = await Post.countDocuments({
-      proximal_dislikes: { $gt: 0 },
+      'reports.0': { $exists: true },
       createdAt: { $gte: today },
     });
 
-    // Reports last week
+    // Phase 3.4: Reports last week
     const reportsLastWeek = await Post.countDocuments({
-      proximal_dislikes: { $gt: 0 },
+      'reports.0': { $exists: true },
       createdAt: { $gte: lastWeek, $lt: today },
     });
 
@@ -594,9 +594,9 @@ const getDashboardMetrics = async (req, res) => {
       createdAt: { $gte: oneHourAgo },
     });
 
-    // Unreviewed flagged posts (proximal_dislikes > 0 but not hidden)
+    // Phase 3.4: Unreviewed flagged posts (has reports but not hidden yet)
     const unreviewedFlagged = await Post.countDocuments({
-      proximal_dislikes: { $gt: 0 },
+      'reports.0': { $exists: true }, // Has at least 1 report
       isHidden: false,
     });
 
