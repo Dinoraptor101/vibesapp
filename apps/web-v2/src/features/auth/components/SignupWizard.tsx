@@ -2,7 +2,7 @@ import { Check, Copy, RotateCcw } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useNavigate } from 'react-router-dom';
-import { Button, Input, Textarea } from '@/components/ui-next';
+import { Button, Input, Logo, Textarea } from '@/components/ui-next';
 import { useAuth } from '@/features/auth';
 import { uploadImage } from '@/features/posts/api/s3Service';
 import { compressImage } from '@/features/posts/utils/imageUtils';
@@ -343,10 +343,10 @@ export function SignupWizard() {
             <button
               type="button"
               onClick={() => navigate('/login')}
-              className="text-6xl mb-2 hover:opacity-80 transition-opacity cursor-pointer"
+              className="flex justify-center hover:opacity-80 transition-opacity cursor-pointer mb-2"
               aria-label="Return to login"
             >
-              🕊️
+              <Logo size="xl" className="text-text-primary" />
             </button>
 
             <div className="space-y-2">
