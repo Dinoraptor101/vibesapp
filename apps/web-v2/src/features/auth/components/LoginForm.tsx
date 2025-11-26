@@ -9,7 +9,7 @@ import { CircleSlash, CornerDownLeft } from 'lucide-react';
 import { type FormEvent, useCallback, useEffect, useState } from 'react';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui-next';
+import { Button, Logo } from '@/components/ui-next';
 import { useAuth } from '@/features/auth/context/useAuth';
 import { deleteCookie } from '@/lib';
 import './LoginForm.css';
@@ -93,7 +93,9 @@ export function LoginForm() {
     <div className="w-full max-w-sm space-y-8">
       {/* Logo + Tagline */}
       <div className="text-center space-y-3">
-        <div className="text-6xl mb-2">🕊️</div>
+        <div className="flex justify-center mb-2">
+          <Logo size="xl" className="text-text-primary" />
+        </div>
         <p className="text-base text-text-secondary font-light tracking-wide">
           find your flock, locally
         </p>

@@ -31,6 +31,9 @@
   --error-hover: #991818;
   --warning: #ff9800;
   --warning-hover: #f57c00;
+
+  /* Logo Colors */
+  --logo-color: #1a1a1a;
 }
 
 /* Light Theme (default) */
@@ -44,12 +47,14 @@ body.light {
 body.dim {
   background-color: var(--dim-bg);
   color: var(--dim-text);
+  --logo-color: #ffffff;
 }
 
 /* Dark Theme */
 body.dark {
   background-color: var(--dark-bg);
   color: var(--dark-text);
+  --logo-color: #f5f5f5;
 }
 
 /* Smooth theme transitions */

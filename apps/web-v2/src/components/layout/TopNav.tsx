@@ -8,7 +8,7 @@
 import { Bell, Home, MessageSquare, Plus } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { OfflineIndicator } from '@/components/shared/OfflineIndicator';
-import { Button } from '@/components/ui-next';
+import { Button, Logo } from '@/components/ui-next';
 import { useUnreadCounts } from '@/features/activity';
 import { useActivitySSE } from '@/features/activity/hooks/useActivitySSE';
 import { useAuth } from '@/features/auth';
@@ -38,9 +38,11 @@ export function TopNav() {
       {/* Left: Logo + Offline Indicator */}
       <div className="flex items-center gap-3">
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="text-2xl font-bold text-brand-purple group-hover:scale-110 transition-transform">
-            🕊️
-          </div>
+          <Logo
+            size="sm"
+            className="text-brand-purple group-hover:scale-110 transition-transform"
+            aria-label="VibesApp Home"
+          />
           <span className="text-xl font-bold text-text-primary hidden lg:inline">VibesApp</span>
         </Link>
         <OfflineIndicator />
