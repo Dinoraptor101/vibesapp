@@ -79,7 +79,9 @@ export function TopNav() {
           <div className="relative">
             <Bell className="w-5 h-5" />
             {unreadActivity > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 text-[10px] font-bold tabular-nums">
+              <span
+                className={`absolute text-[10px] font-bold tabular-nums ${unreadActivity >= 10 ? '-top-2 -right-2' : '-top-1.5 -right-1.5'}`}
+              >
                 {unreadActivity > 99 ? '99+' : unreadActivity}
               </span>
             )}
@@ -102,7 +104,9 @@ export function TopNav() {
           <div className="relative">
             <MessageSquare className="w-5 h-5" />
             {unreadMessages > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 text-[10px] font-bold tabular-nums">
+              <span
+                className={`absolute text-[10px] font-bold tabular-nums ${unreadMessages >= 10 ? '-top-2 -right-2' : '-top-1.5 -right-1.5'}`}
+              >
                 {unreadMessages > 99 ? '99+' : unreadMessages}
               </span>
             )}

@@ -382,7 +382,6 @@ export function AccountTab() {
               src={getAvatarUrl(user?.profilePictureUrl)}
               alt={user?.username || 'User'}
               size="xl"
-              className="ring-2 ring-gray-200 dim:ring-gray-600 dark:ring-gray-700"
             />
           </button>
           <Button
