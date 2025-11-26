@@ -3,6 +3,7 @@ const User = require('../models/User');
 const { S3 } = require('@aws-sdk/client-s3');
 const crypto = require('node:crypto');
 const { verifyRecaptcha } = require('../utils/recaptcha');
+const { registerAdminToken } = require('../middleware/adminAuth');
 
 // Initialize S3 with correct AWS configuration
 const s3 = new S3({
@@ -43,6 +44,9 @@ const adminLogin = async (req, res) => {
 
     // Generate a simple session token (in production, use JWT)
     const token = crypto.randomBytes(32).toString('hex');
+
+    // Register token in admin auth middleware
+    registerAdminToken(token);
 
     res.status(200).json({
       success: true,
@@ -302,6 +306,99 @@ const toggleBanUser = async (req, res) => {
   }
 };
 
+// Pigeon ID generation utilities (same as user.js)
+const adjectives = [
+  'brave',
+  'calm',
+  'clever',
+  'cosmic',
+  'daring',
+  'dreamy',
+  'eager',
+  'fancy',
+  'gentle',
+  'happy',
+  'jolly',
+  'kind',
+  'lively',
+  'lucky',
+  'merry',
+  'noble',
+  'proud',
+  'quick',
+  'royal',
+  'shiny',
+  'smart',
+  'swift',
+  'vivid',
+  'wise',
+  'witty',
+  'zesty',
+  'amber',
+  'azure',
+  'coral',
+  'crimson',
+  'emerald',
+  'golden',
+  'jade',
+  'ruby',
+  'silver',
+  'stellar',
+  'lunar',
+  'solar',
+  'mystic',
+];
+
+const nouns = [
+  'tiger',
+  'eagle',
+  'dolphin',
+  'phoenix',
+  'dragon',
+  'falcon',
+  'panther',
+  'wolf',
+  'lion',
+  'hawk',
+  'bear',
+  'fox',
+  'owl',
+  'raven',
+  'swan',
+  'deer',
+  'comet',
+  'star',
+  'moon',
+  'sun',
+  'cloud',
+  'storm',
+  'breeze',
+  'wave',
+  'mountain',
+  'river',
+  'ocean',
+  'forest',
+  'meadow',
+  'canyon',
+  'glacier',
+  'valley',
+  'sage',
+  'knight',
+  'mage',
+  'warrior',
+  'ranger',
+  'scout',
+  'voyager',
+  'seeker',
+];
+
+function generatePigeonId() {
+  const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const noun = nouns[Math.floor(Math.random() * nouns.length)];
+  const numbers = Math.floor(1000 + Math.random() * 9000);
+  return `${adjective}-${noun}-${numbers}`;
+}
+
 // Regenerate password (Pigeon ID)
 const regeneratePassword = async (req, res) => {
   const { userId } = req.params;
@@ -312,8 +409,8 @@ const regeneratePassword = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    // Generate new password (simple implementation - should use crypto in production)
-    const newPassword = `pigeon-${Math.random().toString(36).substring(2, 10)}-${Date.now().toString(36)}`;
+    // Generate new password with memorable format
+    const newPassword = generatePigeonId();
 
     user.pigeonId = newPassword;
     await user.save();

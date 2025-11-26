@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { adminAuth } = require('../middleware/adminAuth');
 const {
   adminLogin,
   updateBalance,
@@ -22,6 +23,9 @@ const {
 
 // Admin login (no auth required)
 router.post('/login', adminLogin);
+
+// ALL routes below require admin authentication
+router.use(adminAuth);
 
 // Update Vibes balance
 router.put('/vibes', updateBalance);

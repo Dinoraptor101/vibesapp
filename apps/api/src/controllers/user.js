@@ -697,6 +697,16 @@ const regeneratePigeonId = async (req, res) => {
   const { userId } = req.params;
 
   try {
+    // SECURITY: Verify authenticated user matches target userId
+    // Users can only regenerate their own password
+    if (req.user.userId !== userId) {
+      console.error("Authorization failed: User attempted to regenerate another user's Pigeon ID");
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden: You can only regenerate your own password',
+      });
+    }
+
     const user = await User.findOne({ userId });
     if (!user) {
       console.error('User not found');

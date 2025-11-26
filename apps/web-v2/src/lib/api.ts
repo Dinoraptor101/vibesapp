@@ -81,6 +81,12 @@ class ApiClient {
           config.headers['X-Pigeon-Id'] = pigeonId;
         }
 
+        // Add Admin Token from cookie (for admin routes)
+        const adminToken = getCookie('adminToken');
+        if (adminToken) {
+          config.headers['X-Admin-Token'] = adminToken;
+        }
+
         return config;
       },
       (error) => {
