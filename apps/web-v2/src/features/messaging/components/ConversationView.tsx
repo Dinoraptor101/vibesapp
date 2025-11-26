@@ -8,7 +8,7 @@
  * - No more infinite loops or manual useRef flags
  */
 
-import { ArrowLeft, Ban } from 'lucide-react';
+import { ArrowLeft, Ban, MessageSquareDashed } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Avatar, Badge, Spinner } from '@/components/ui-next';
@@ -218,9 +218,7 @@ export function ConversationView() {
       <div id="messages-container" className="flex-1 space-y-4 overflow-y-auto p-4">
         {!activeConversation?.messages || activeConversation.messages.length === 0 ? (
           <div className="flex h-full items-center justify-center text-center">
-            <p className="text-sm text-gray-500 dim:text-gray-450 dark:text-gray-400">
-              No messages yet. Start the conversation!
-            </p>
+            <MessageSquareDashed className="w-12 h-12 text-gray-300 dim:text-gray-600 dark:text-gray-600" />
           </div>
         ) : (
           <>
