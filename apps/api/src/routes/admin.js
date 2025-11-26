@@ -15,6 +15,7 @@ const {
   bulkDeleteUserPosts,
   getDashboardMetrics,
   getActivityData,
+  getSettings,
   updateSettings,
   getReportedPosts,
   restorePost,
@@ -61,7 +62,8 @@ router.delete('/users/:userId/posts', bulkDeleteUserPosts);
 router.get('/metrics', getDashboardMetrics);
 router.get('/activity', getActivityData);
 
-// Settings route
+// Settings routes
+router.get('/settings', getSettings);
 router.put('/settings', updateSettings);
 
 module.exports = router;

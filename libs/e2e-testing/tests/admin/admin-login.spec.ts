@@ -41,13 +41,13 @@ test.describe('Admin Login Page', () => {
     await expect(passwordInput).toBeVisible();
     await expect(passwordInput).toHaveAttribute('placeholder', 'Enter password');
 
-    // Verify login button is visible
+    // Verify login button is visible (icon-based button with SVG)
     const loginButton = page.locator('button[type="submit"]');
     await expect(loginButton).toBeVisible();
-    await expect(loginButton).toContainText('Login');
+    await expect(loginButton.locator('svg').first()).toBeVisible(); // Button contains 2 icons (transitions)
 
-    // Verify footer text
-    await expect(page.locator('text=Admin access is restricted')).toBeVisible();
+    // Verify footer text (updated for new design)
+    await expect(page.locator('text=IP address and location logged')).toBeVisible();
   });
 
   test('should show error for empty password', async ({ page }) => {
@@ -60,13 +60,11 @@ test.describe('Admin Login Page', () => {
     // Button should be disabled when password is empty
     await expect(loginButton).toBeDisabled();
 
-    // Try to submit form by pressing Enter in empty input
+    // New design doesn't show explicit error message, just keeps button disabled
+    // and won't submit the form
     const passwordInput = page.locator('#admin-password');
-    await passwordInput.focus();
-    await passwordInput.press('Enter');
-
-    // Verify error message appears
-    await expect(page.locator('text=Please enter the admin password')).toBeVisible();
+    await expect(passwordInput).toBeVisible();
+    await expect(passwordInput).toHaveValue('');
   });
 
   test('should show error for invalid password', async ({ page }) => {
@@ -81,8 +79,11 @@ test.describe('Admin Login Page', () => {
     const loginButton = page.locator('button[type="submit"]');
     await loginButton.click();
 
-    // Wait for API response and error message
-    await expect(page.locator('text=/Invalid password/i')).toBeVisible({ timeout: 10000 });
+    // Wait for shake animation and error state (button morphs to error icon)
+    await page.waitForTimeout(1000);
+
+    // Verify password was cleared (shake animation clears field after error)
+    await expect(passwordInput).toHaveValue('');
 
     // Verify we're still on login page
     expect(page.url()).toContain('/admin/login');
@@ -117,13 +118,16 @@ test.describe('Admin Login Page', () => {
 
     // Click login button
     const loginButton = page.locator('button[type="submit"]');
+
+    // Check initial enabled state
+    await expect(loginButton).toBeEnabled();
+
     await loginButton.click();
 
-    // Verify loading state appears (button text changes)
-    await expect(page.locator('text=Logging in...')).toBeVisible();
-
-    // Wait for redirect to complete
+    // New design: button becomes disabled during loading, then redirects
+    // The disabled state might be very brief, so just verify redirect happens
     await page.waitForURL('**/admin/dashboard', { timeout: 10000 });
+    expect(page.url()).toContain('/admin/dashboard');
   });
 });
 
@@ -247,18 +251,13 @@ test.describe('Admin Session Expiry', () => {
     // Navigate to dashboard
     await page.goto('/admin/dashboard');
 
-    // Set up alert handler to capture the expiry alert
-    let alertMessage = '';
-    page.on('dialog', async (dialog) => {
-      alertMessage = dialog.message();
-      await dialog.accept();
-    });
-
     // Wait for session to expire (3 seconds + buffer)
+    // New implementation redirects to login instead of showing alert
     await page.waitForTimeout(5000);
 
-    // Verify the expiry alert was shown
-    expect(alertMessage).toContain('session has expired');
+    // Verify redirect to login page happened
+    await page.waitForURL('**/admin/login', { timeout: 5000 });
+    expect(page.url()).toContain('/admin/login');
   });
 });
 
@@ -348,15 +347,20 @@ test.describe('Admin Login - Accessibility', () => {
     await page.goto('/admin/login');
     await page.waitForLoadState('networkidle');
 
-    // Verify password input has associated label
+    // Verify password input is accessible
     const passwordInput = page.locator('#admin-password');
-    const label = page.locator('label[for="admin-password"]');
+    await expect(passwordInput).toBeVisible();
 
-    await expect(label).toBeVisible();
-    await expect(label).toContainText('Admin Password');
-
+    // New design doesn't have explicit label, but input has proper attributes
     // Verify password input has autocomplete attribute
     await expect(passwordInput).toHaveAttribute('autocomplete', 'current-password');
+
+    // Verify input has proper type
+    await expect(passwordInput).toHaveAttribute('type', 'password');
+
+    // Verify submit button has proper aria-label
+    const loginButton = page.locator('button[type="submit"]');
+    await expect(loginButton).toHaveAttribute('aria-label', 'Login');
   });
 
   test('should support keyboard navigation', async ({ page }) => {

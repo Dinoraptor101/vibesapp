@@ -284,7 +284,7 @@ export function FlaggedPostsPage() {
 
               {/* Bulk actions - only show when posts are selected */}
               {selectedPosts.size > 0 && (
-                <>
+                <div className="contents" data-testid="bulk-action-bar">
                   <Badge variant="brand" size="md" data-testid="selection-count">
                     {selectedPosts.size} selected
                   </Badge>
@@ -297,7 +297,7 @@ export function FlaggedPostsPage() {
                   >
                     Delete Selected
                   </Button>
-                </>
+                </div>
               )}
             </div>
 
