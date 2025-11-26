@@ -302,6 +302,15 @@ const updateUser = async (req, res) => {
       return res.status(400).json({ message: 'userId is required' });
     }
 
+    // Authorization check: user can only update their own profile
+    if (req.user.userId !== userId) {
+      console.error('Forbidden: User can only update their own profile');
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden: You can only update your own profile',
+      });
+    }
+
     // Check if user with userId exists
     const user = await User.findOne({ userId });
     if (!user) {

@@ -12,8 +12,9 @@ router.post('/create', userController.createUser);
 // POST endpoint to login with a Pigeon ID (with reCAPTCHA)
 router.post('/login', userController.login);
 
-// GET endpoint to login with a Pigeon ID (legacy - no reCAPTCHA)
-router.get('/login/:pigeonId', userController.login);
+// GET endpoint to login with a Pigeon ID (DEPRECATED - security risk, no reCAPTCHA)
+// TODO: Remove this endpoint after mobile apps are updated
+// router.get('/login/:pigeonId', userController.login);
 
 // GET endpoint to retrieve user's posts
 router.get('/:userId/posts', userController.getUserPosts);
@@ -36,11 +37,11 @@ router.get('/:userId', userController.getUserById);
 // GET endpoint to retrieve user strikes (Phase 3.4)
 router.get('/:userId/strikes', userController.getUserStrikes);
 
-// PUT endpoint to update existing user details
-router.put('/:userId', userController.updateUser);
+// PUT endpoint to update existing user details (requires authentication)
+router.put('/:userId', authenticate, userController.updateUser);
 
-// PATCH endpoint to update existing user details (same handler as PUT)
-router.patch('/:userId', userController.updateUser);
+// PATCH endpoint to update existing user details (requires authentication)
+router.patch('/:userId', authenticate, userController.updateUser);
 
 // PATCH endpoint to update notification preferences
 router.patch(
