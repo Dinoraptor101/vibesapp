@@ -10,6 +10,7 @@ import { Button } from '../../../components/ui/button';
 import { Card, CardContent } from '../../../components/ui/card';
 import { ActivityChart } from '../components/ActivityChart';
 import { MetricCard } from '../components/MetricCard';
+import { useAdminAuth } from '../hooks/useAdminAuth';
 
 interface DashboardMetrics {
   activeUsers: {
@@ -61,6 +62,7 @@ function DashboardSkeleton() {
 }
 
 export function AdminDashboardPage() {
+  const { isAuthenticated, isLoading: isAuthLoading } = useAdminAuth();
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [activityData, setActivityData] = useState<ActivityDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -93,8 +95,11 @@ export function AdminDashboardPage() {
   }, []);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, [fetchDashboardData]);
+    // Only fetch data if authenticated - prevents API calls during redirect
+    if (isAuthenticated && !isAuthLoading) {
+      fetchDashboardData();
+    }
+  }, [isAuthenticated, isAuthLoading, fetchDashboardData]);
 
   return (
     <div className="space-y-4">

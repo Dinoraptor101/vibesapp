@@ -111,20 +111,29 @@ class ApiClient {
           // Handle authentication errors
           if (error.response.status === 401) {
             // 401 = Unauthorized (missing or invalid authentication)
-            // Only log out if the error indicates the session is truly invalid
-            const errorMsg = apiError.message.toLowerCase();
-            const isSessionInvalid =
-              errorMsg.includes('invalid authentication') ||
-              errorMsg.includes('missing authentication') ||
-              errorMsg.includes('unauthorized');
+            const requestUrl = error.config?.url || '';
 
-            if (isSessionInvalid) {
-              // Clear auth cookies and trigger logout
-              deleteCookie('pigeonId');
-              deleteCookie('userId');
-              window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+            // Check if this is an admin endpoint
+            if (requestUrl.includes('/admin/')) {
+              // Admin token is invalid - clear admin auth and trigger logout
+              deleteCookie('adminToken');
+              deleteCookie('adminSessionExpiry');
+              window.dispatchEvent(new CustomEvent('admin:unauthorized'));
+            } else {
+              // User auth error - only log out if the error indicates the session is truly invalid
+              const errorMsg = apiError.message.toLowerCase();
+              const isSessionInvalid =
+                errorMsg.includes('invalid authentication') ||
+                errorMsg.includes('missing authentication') ||
+                errorMsg.includes('unauthorized');
+
+              if (isSessionInvalid) {
+                // Clear auth cookies and trigger logout
+                deleteCookie('pigeonId');
+                deleteCookie('userId');
+                window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+              }
             }
-            // Otherwise, it's a permission issue, not an auth issue - don't log out
           } else if (error.response.status === 403) {
             // 403 = Forbidden (authenticated but not authorized for this resource)
             // This is a permission issue, NOT an auth issue - don't log out
