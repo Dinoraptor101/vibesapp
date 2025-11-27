@@ -78,7 +78,7 @@ export function PreferencesTab() {
     updatePreferences.mutate({ [key]: newValue });
   };
   return (
-    <div className="p-4 pb-8 space-y-6">
+    <div className="p-4 space-y-6">
       {/* Proximity Range */}
       <div>
         <label

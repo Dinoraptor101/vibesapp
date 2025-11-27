@@ -170,7 +170,7 @@ export function PersistentPages() {
       )}
 
       {/* Main Content - Horizontal sliding pages */}
-      <main className="flex-1 pb-20 md:pb-0 overflow-hidden relative">
+      <main className="flex-1 overflow-hidden relative">
         {/* Main persistent pages */}
         <div
           className="absolute inset-0 flex transition-transform duration-300 ease-out"
@@ -190,7 +190,10 @@ export function PersistentPages() {
                   scrollContainerRefs.current[index] = el;
                 }}
                 className="h-full overflow-y-auto overscroll-contain"
-                style={{ width: `${100 / PERSISTENT_PAGES.length}%` }}
+                style={{
+                  width: `${100 / PERSISTENT_PAGES.length}%`,
+                  paddingBottom: 'var(--bottom-nav-height)',
+                }}
                 inert={!isActive ? true : undefined}
                 aria-hidden={!isActive}
               >
@@ -208,7 +211,11 @@ export function PersistentPages() {
           aria-hidden={!isPostDetail}
           inert={!isPostDetail ? true : undefined}
         >
-          <div ref={postDetailRef} className="h-full overflow-y-auto overscroll-contain">
+          <div
+            ref={postDetailRef}
+            className="h-full overflow-y-auto overscroll-contain"
+            style={{ paddingBottom: 'var(--bottom-nav-height)' }}
+          >
             {currentPostId ? (
               <PostDetailPageContent postId={currentPostId} />
             ) : (
@@ -233,7 +240,11 @@ export function PersistentPages() {
           aria-hidden={!isProfile}
           inert={!isProfile ? true : undefined}
         >
-          <div ref={profileRef} className="h-full overflow-y-auto overscroll-contain">
+          <div
+            ref={profileRef}
+            className="h-full overflow-y-auto overscroll-contain"
+            style={{ paddingBottom: 'var(--bottom-nav-height)' }}
+          >
             {currentProfileUserId ? (
               <ProfilePageContent userId={currentProfileUserId} />
             ) : (
