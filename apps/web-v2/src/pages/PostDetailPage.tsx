@@ -117,32 +117,36 @@ export function PostDetailPageContent({ postId: propPostId }: PostDetailPageCont
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
+    <div className="max-w-6xl mx-auto p-4 pb-36 md:pb-4">
       <Button variant="ghost" onClick={handleBack} className="mb-4">
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back
       </Button>
 
-      {/* Smart Caption Display: Either overlay (≤100 chars) OR full section (>100 chars) - Never both */}
-      {(() => {
-        const captionLength = post.text ? stripHtml(post.text).length : 0;
-        const showFullCaptionSection = captionLength > 100;
+      {/* Two-column layout on desktop: Post on left, Comments on right */}
+      <div className="flex flex-col md:flex-row md:gap-8">
+        {/* Left Column: Post Content (UNTOUCHED) */}
+        <div className="md:flex-1 md:max-w-2xl">
+          {/* Smart Caption Display: Either overlay (≤100 chars) OR full section (>100 chars) - Never both */}
+          {(() => {
+            const captionLength = post.text ? stripHtml(post.text).length : 0;
+            const showFullCaptionSection = captionLength > 100;
 
-        return (
-          <>
-            <PostCard
-              post={post}
-              onLike={handleLike}
-              onReport={handleReport}
-              onComment={handleComment}
-              hideCaption={showFullCaptionSection}
-            />
+            return (
+              <>
+                <PostCard
+                  post={post}
+                  onLike={handleLike}
+                  onReport={handleReport}
+                  onComment={handleComment}
+                  hideCaption={showFullCaptionSection}
+                />
 
-            {/* Full Caption Section - Only shown when caption exceeds 100 chars (≈2 lines) */}
-            {showFullCaptionSection && (
-              <div className="mt-6 p-4 bg-surface-elevated dim:bg-gray-700 dark:bg-gray-800 border border-border dim:border-gray-600 dark:border-gray-700 rounded-lg">
-                <div
-                  className="text-text-primary dim:text-gray-100 dark:text-gray-200 text-sm leading-relaxed prose prose-sm max-w-none
+                {/* Full Caption Section - Only shown when caption exceeds 100 chars (≈2 lines) */}
+                {showFullCaptionSection && (
+                  <div className="mt-6 p-4 bg-surface-elevated dim:bg-gray-700 dark:bg-gray-800 border border-border dim:border-gray-600 dark:border-gray-700 rounded-lg">
+                    <div
+                      className="text-text-primary dim:text-gray-100 dark:text-gray-200 text-sm leading-relaxed prose prose-sm max-w-none
                     prose-headings:text-text-primary dim:prose-headings:text-gray-100 dark:prose-headings:text-gray-200
                     prose-p:text-text-primary dim:prose-p:text-gray-100 dark:prose-p:text-gray-200
                     prose-strong:text-text-primary dim:prose-strong:text-gray-100 dark:prose-strong:text-gray-200
@@ -150,32 +154,60 @@ export function PostDetailPageContent({ postId: propPostId }: PostDetailPageCont
                     prose-a:text-brand-primary hover:prose-a:text-brand-600
                     prose-ul:text-text-primary dim:prose-ul:text-gray-100 dark:prose-ul:text-gray-200
                     prose-ol:text-text-primary dim:prose-ol:text-gray-100 dark:prose-ol:text-gray-200"
-                  dangerouslySetInnerHTML={{ __html: post.text || '' }}
-                />
-              </div>
-            )}
-          </>
-        );
-      })()}
+                      dangerouslySetInnerHTML={{ __html: post.text || '' }}
+                    />
+                  </div>
+                )}
+              </>
+            );
+          })()}
 
-      {/* Comments Section */}
-      <div id="comments-section" className="mt-6 space-y-4">
-        {/* Section Header */}
-        <div className="flex items-center gap-2 px-1">
-          <MessageCircle className="w-5 h-5 text-text-tertiary" />
-          <h2 className="text-lg font-semibold text-text-primary">Comments</h2>
+          {/* Mobile: Comment List (scrollable, above sticky input) */}
+          <div id="comments-section" className="mt-6 space-y-4 md:hidden">
+            {/* Section Header */}
+            <div className="flex items-center gap-2 px-1">
+              <MessageCircle className="w-5 h-5 text-text-tertiary" />
+              <h2 className="text-lg font-semibold text-text-primary">Comments</h2>
+            </div>
+
+            {/* Comment List */}
+            <CommentList postId={postId || ''} onReply={handleReply} />
+          </div>
         </div>
 
-        {/* Comment Input */}
+        {/* Right Column: Comments Section (Desktop only) */}
+        <div className="hidden md:block md:w-96 md:flex-shrink-0">
+          <div className="sticky top-24 space-y-4">
+            {/* Section Header */}
+            <div className="flex items-center gap-2 px-1">
+              <MessageCircle className="w-5 h-5 text-text-tertiary" />
+              <h2 className="text-lg font-semibold text-text-primary">Comments</h2>
+            </div>
+
+            {/* Comment Input */}
+            <CommentInput
+              onSubmit={handleSubmitComment}
+              replyTo={replyTo}
+              onCancelReply={handleCancelReply}
+              disabled={createComment.isPending}
+            />
+
+            {/* Comment List */}
+            <div className="max-h-[calc(100vh-280px)] overflow-y-auto">
+              <CommentList postId={postId || ''} onReply={handleReply} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile: Sticky Comment Input - Fixed above bottom nav (z-40) */}
+      <div className="md:hidden fixed bottom-20 left-0 right-0 bg-surface-elevated/95 backdrop-blur-md border-t border-border px-4 py-3 z-50 safe-area-inset-bottom">
         <CommentInput
           onSubmit={handleSubmitComment}
           replyTo={replyTo}
           onCancelReply={handleCancelReply}
           disabled={createComment.isPending}
         />
-
-        {/* Comment List */}
-        <CommentList postId={postId || ''} onReply={handleReply} />
       </div>
     </div>
   );
