@@ -22,7 +22,6 @@ import {
 } from '@/features/admin';
 import { AuthProvider, LoginPage, ProtectedRoute, SignupPage } from '@/features/auth';
 import { ConversationPage } from '@/pages/ConversationPage';
-import { ProfilePage } from '@/pages/ProfilePage';
 import { ReportPostPage } from '@/pages/ReportPostPage';
 import { SendDMRequestPage } from '@/pages/SendDMRequestPage';
 
@@ -80,6 +79,7 @@ function AppShell() {
         <Route path="/messages" element={null} />
         <Route path="/settings" element={null} />
         <Route path="/post/:postId" element={null} />
+        <Route path="/profile/:userId" element={null} />
 
         {/* Overlay routes - these render with their own layout */}
         <Route
@@ -87,14 +87,6 @@ function AppShell() {
           element={
             <ProtectedRoute>
               <ConversationPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile/:userId"
-          element={
-            <ProtectedRoute>
-              <ProfilePage />
             </ProtectedRoute>
           }
         />
