@@ -14,6 +14,12 @@
 
 import { test, expect } from '@playwright/test';
 import { loginAsAdmin } from './helpers/admin-auth';
+import { createFlaggedTestPosts } from './helpers/test-data';
+
+// Create test data once before all tests in this file
+test.beforeAll(async ({ request }) => {
+  await createFlaggedTestPosts(request, 3);
+});
 
 test.describe('Flagged Posts Page', () => {
   test.beforeEach(async ({ page }) => {

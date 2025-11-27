@@ -38,6 +38,11 @@ const createPost = async (req, res) => {
     return res.status(400).json({ error: 'Location (lat, lon) is required' });
   }
 
+  // Image is required for new posts (not replies)
+  if (!replyTo && !image) {
+    return res.status(400).json({ error: 'Image is required for new posts' });
+  }
+
   const session = await startSession();
 
   try {

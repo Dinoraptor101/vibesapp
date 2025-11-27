@@ -343,7 +343,7 @@ export function SignupWizard() {
             <button
               type="button"
               onClick={() => navigate('/login')}
-              className="flex justify-center hover:opacity-80 transition-opacity cursor-pointer mb-2"
+              className="block mx-auto hover:opacity-80 transition-opacity cursor-pointer mb-2"
               aria-label="Return to login"
             >
               <Logo size="xl" className="text-text-primary" />
