@@ -10,7 +10,7 @@
 
 | Phase | Status | Owner | Blocker |
 |-------|--------|-------|---------|
-| 1. Code Changes | 🔴 Not Started | Copilot | None |
+| 1. Code Changes | 🟢 Complete | Copilot | None |
 | 2. Heroku Config | 🔴 Not Started | Human | Heroku CLI setup |
 | 3. Environment Vars | 🔴 Not Started | Human | QA credentials |
 | 4. Database Migration | 🔴 Not Started | Human | Backend deployed |
@@ -25,13 +25,13 @@
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Fix `apps/api/Procfile` path | 🔴 TODO | Change `server/index.js` → `src/index.js` |
-| Create `apps/web-v2/static.json` | 🔴 TODO | Heroku static buildpack config |
-| Create `apps/web-v2/Procfile` | 🔴 TODO | Optional: `web: npx serve dist -s` |
+| Fix `apps/api/Procfile` path | 🟢 Done | Changed `server/index.js` → `src/index.js` |
+| Create `apps/web-v2/static.json` | 🟢 Done | Heroku static buildpack config |
+| Create `apps/web-v2/Procfile` | 🟢 Done | `web: npx serve dist -s -l $PORT` |
 | Update CORS origins (if needed) | ⚪ N/A | Already has `qa.vibesapp.net` |
-| Create Phase 3.4 migration script | 🔴 TODO | `migratePhase3_4.js` |
+| Create Phase 3.4 migration script | 🟢 Done | `migratePhase3_4.js` created |
 
-**Copilot Command**: "Implement the code changes from the QA deployment plan"
+**Copilot Command**: ~~"Implement the code changes from the QA deployment plan"~~ ✅ COMPLETED
 
 ---
 
@@ -146,7 +146,12 @@ heroku run node -e "require('mongoose').connect(process.env.MONGO_URI).then(asyn
 - **Finding**: API Procfile has wrong path (`server/index.js` should be `src/index.js`)
 - **Finding**: CORS already configured for `qa.vibesapp.net`
 - **Finding**: Database migrations exist but `migratePhase3_4.js` needs creation
-- **Next**: Human to verify Heroku CLI setup, then Copilot implements code changes
+- **Implemented**: All Phase 1 code changes completed:
+  - ✅ Fixed `apps/api/Procfile` → `web: node src/index.js`
+  - ✅ Created `apps/web-v2/static.json` for Heroku static buildpack
+  - ✅ Created `apps/web-v2/Procfile` → `web: npx serve dist -s -l $PORT`
+  - ✅ Created `apps/api/scripts/migratePhase3_4.js`
+- **Next**: Human to verify Heroku CLI setup and proceed with Phase 2
 
 ---
 
