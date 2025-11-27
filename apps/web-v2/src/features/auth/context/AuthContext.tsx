@@ -8,6 +8,8 @@
 import type { ReactNode } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { clearAllScrollPositions } from '@/hooks/useScrollRestoration';
 import { deleteCookie, getCookie, setCookie } from '@/lib/api';
 import type { User } from '@/types';
 import { authApi } from '../services/authApi';
@@ -21,6 +23,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   /**
    * Initialize auth state from cookies on mount
@@ -74,13 +77,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /**
    * Logout and clear session
+   * Clears all user-specific data to prevent leaking to next user
    */
   const logout = useCallback(() => {
+    // 1. Clear React state
     setUser(null);
+
+    // 2. Clear auth cookies
     deleteCookie('pigeonId');
     deleteCookie('userId');
+
+    // 3. Clear React Query cache (posts, messages, activities, profiles, etc.)
+    queryClient.clear();
+
+    // 4. Clear scroll positions from sessionStorage
+    clearAllScrollPositions();
+
+    // 5. Clear user-specific localStorage (keep theme - it's app-wide)
+    localStorage.removeItem('proximityRange');
+
+    // 6. Navigate to login
     navigate('/login');
-  }, [navigate]);
+  }, [navigate, queryClient]);
 
   /**
    * Refresh user data

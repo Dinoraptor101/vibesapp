@@ -116,6 +116,7 @@ export function UserMenu({ isActive = false }: UserMenuProps) {
 
           {/* Logout */}
           <DropdownMenu.Item
+            data-testid="logout-menu-item"
             className="flex items-center gap-3 px-3 py-2 text-sm text-vibe-negative rounded-md hover:bg-vibe-negative-bg cursor-pointer outline-none focus:bg-vibe-negative-bg"
             onSelect={handleLogout}
           >
