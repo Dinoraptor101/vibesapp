@@ -19,8 +19,16 @@ import {
 } from '@/features/posts';
 import { stripHtml } from '@/lib/utils';
 
-export function PostDetailPage() {
-  const { postId } = useParams<{ postId: string }>();
+interface PostDetailPageContentProps {
+  postId?: string;
+}
+
+/**
+ * Page content without layout wrapper (for persistent pages)
+ */
+export function PostDetailPageContent({ postId: propPostId }: PostDetailPageContentProps) {
+  const { postId: paramPostId } = useParams<{ postId: string }>();
+  const postId = propPostId || paramPostId;
   const navigate = useNavigate();
   const { post, isLoading, isError, error } = usePost(postId || '');
   const [replyTo, setReplyTo] = useState<{ id: string; username: string } | undefined>();
@@ -28,9 +36,8 @@ export function PostDetailPage() {
   const createComment = useCreateComment(postId || '');
   const toggleLike = useToggleLike();
 
-  // Redirect if no postId
+  // Show nothing if no postId (will show when route doesn't match)
   if (!postId) {
-    navigate('/');
     return null;
   }
 
@@ -78,13 +85,15 @@ export function PostDetailPage() {
     setReplyTo(undefined);
   };
 
+  const handleBack = () => {
+    navigate(-1);
+  };
+
   if (isLoading) {
     return (
-      <AppLayout>
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <Loader2 className="w-8 h-8 animate-spin text-brand-purple" />
-        </div>
-      </AppLayout>
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-brand-purple" />
+      </div>
     );
   }
 
@@ -95,83 +104,90 @@ export function PostDetailPage() {
     }
 
     return (
-      <AppLayout>
-        <div className="max-w-2xl mx-auto p-4">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-          <div className="text-center py-12">
-            <p className="text-text-secondary">Post not found</p>
-          </div>
+      <div className="max-w-2xl mx-auto p-4">
+        <Button variant="ghost" onClick={handleBack} className="mb-4">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+        <div className="text-center py-12">
+          <p className="text-text-secondary">Post not found</p>
         </div>
-      </AppLayout>
+      </div>
     );
   }
 
   return (
-    <AppLayout>
-      <div className="max-w-2xl mx-auto p-4">
-        <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
+    <div className="max-w-2xl mx-auto p-4">
+      <Button variant="ghost" onClick={handleBack} className="mb-4">
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back
+      </Button>
 
-        {/* Smart Caption Display: Either overlay (≤100 chars) OR full section (>100 chars) - Never both */}
-        {(() => {
-          const captionLength = post.text ? stripHtml(post.text).length : 0;
-          const showFullCaptionSection = captionLength > 100;
+      {/* Smart Caption Display: Either overlay (≤100 chars) OR full section (>100 chars) - Never both */}
+      {(() => {
+        const captionLength = post.text ? stripHtml(post.text).length : 0;
+        const showFullCaptionSection = captionLength > 100;
 
-          return (
-            <>
-              <PostCard
-                post={post}
-                onLike={handleLike}
-                onReport={handleReport}
-                onComment={handleComment}
-                hideCaption={showFullCaptionSection}
-              />
+        return (
+          <>
+            <PostCard
+              post={post}
+              onLike={handleLike}
+              onReport={handleReport}
+              onComment={handleComment}
+              hideCaption={showFullCaptionSection}
+            />
 
-              {/* Full Caption Section - Only shown when caption exceeds 100 chars (≈2 lines) */}
-              {showFullCaptionSection && (
-                <div className="mt-6 p-4 bg-surface-elevated dim:bg-gray-700 dark:bg-gray-800 border border-border dim:border-gray-600 dark:border-gray-700 rounded-lg">
-                  <div
-                    className="text-text-primary dim:text-gray-100 dark:text-gray-200 text-sm leading-relaxed prose prose-sm max-w-none
-                      prose-headings:text-text-primary dim:prose-headings:text-gray-100 dark:prose-headings:text-gray-200
-                      prose-p:text-text-primary dim:prose-p:text-gray-100 dark:prose-p:text-gray-200
-                      prose-strong:text-text-primary dim:prose-strong:text-gray-100 dark:prose-strong:text-gray-200
-                      prose-em:text-text-primary dim:prose-em:text-gray-100 dark:prose-em:text-gray-200
-                      prose-a:text-brand-primary hover:prose-a:text-brand-600
-                      prose-ul:text-text-primary dim:prose-ul:text-gray-100 dark:prose-ul:text-gray-200
-                      prose-ol:text-text-primary dim:prose-ol:text-gray-100 dark:prose-ol:text-gray-200"
-                    dangerouslySetInnerHTML={{ __html: post.text || '' }}
-                  />
-                </div>
-              )}
-            </>
-          );
-        })()}
+            {/* Full Caption Section - Only shown when caption exceeds 100 chars (≈2 lines) */}
+            {showFullCaptionSection && (
+              <div className="mt-6 p-4 bg-surface-elevated dim:bg-gray-700 dark:bg-gray-800 border border-border dim:border-gray-600 dark:border-gray-700 rounded-lg">
+                <div
+                  className="text-text-primary dim:text-gray-100 dark:text-gray-200 text-sm leading-relaxed prose prose-sm max-w-none
+                    prose-headings:text-text-primary dim:prose-headings:text-gray-100 dark:prose-headings:text-gray-200
+                    prose-p:text-text-primary dim:prose-p:text-gray-100 dark:prose-p:text-gray-200
+                    prose-strong:text-text-primary dim:prose-strong:text-gray-100 dark:prose-strong:text-gray-200
+                    prose-em:text-text-primary dim:prose-em:text-gray-100 dark:prose-em:text-gray-200
+                    prose-a:text-brand-primary hover:prose-a:text-brand-600
+                    prose-ul:text-text-primary dim:prose-ul:text-gray-100 dark:prose-ul:text-gray-200
+                    prose-ol:text-text-primary dim:prose-ol:text-gray-100 dark:prose-ol:text-gray-200"
+                  dangerouslySetInnerHTML={{ __html: post.text || '' }}
+                />
+              </div>
+            )}
+          </>
+        );
+      })()}
 
-        {/* Comments Section */}
-        <div id="comments-section" className="mt-6 space-y-4">
-          {/* Section Header */}
-          <div className="flex items-center gap-2 px-1">
-            <MessageCircle className="w-5 h-5 text-text-tertiary" />
-            <h2 className="text-lg font-semibold text-text-primary">Comments</h2>
-          </div>
-
-          {/* Comment Input */}
-          <CommentInput
-            onSubmit={handleSubmitComment}
-            replyTo={replyTo}
-            onCancelReply={handleCancelReply}
-            disabled={createComment.isPending}
-          />
-
-          {/* Comment List */}
-          <CommentList postId={postId || ''} onReply={handleReply} />
+      {/* Comments Section */}
+      <div id="comments-section" className="mt-6 space-y-4">
+        {/* Section Header */}
+        <div className="flex items-center gap-2 px-1">
+          <MessageCircle className="w-5 h-5 text-text-tertiary" />
+          <h2 className="text-lg font-semibold text-text-primary">Comments</h2>
         </div>
+
+        {/* Comment Input */}
+        <CommentInput
+          onSubmit={handleSubmitComment}
+          replyTo={replyTo}
+          onCancelReply={handleCancelReply}
+          disabled={createComment.isPending}
+        />
+
+        {/* Comment List */}
+        <CommentList postId={postId || ''} onReply={handleReply} />
       </div>
+    </div>
+  );
+}
+
+/**
+ * Full page with layout wrapper (for standalone routing)
+ */
+export function PostDetailPage() {
+  return (
+    <AppLayout>
+      <PostDetailPageContent />
     </AppLayout>
   );
 }

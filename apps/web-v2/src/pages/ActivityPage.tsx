@@ -20,7 +20,10 @@ import {
 import { useActivitySSE } from '@/features/activity/hooks/useActivitySSE';
 import { useAuth } from '@/features/auth';
 
-export function ActivityPage() {
+/**
+ * Page content without layout wrapper (for persistent pages)
+ */
+export function ActivityPageContent() {
   const { user } = useAuth();
 
   // SSE real-time updates for activities
@@ -49,86 +52,95 @@ export function ActivityPage() {
   const hasUnread = unreadActivities.length > 0;
 
   return (
-    <AppLayout>
-      <div className="bg-background">
-        {/* Header */}
-        {hasUnread && (
-          <div className="sticky top-0 z-10 bg-background">
-            <div className="max-w-2xl mx-auto px-4 py-4">
-              <div className="flex items-center justify-end">
-                {/* Mark All as Read button */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleMarkAllAsRead}
-                  disabled={markAllAsRead.isPending}
-                  leftIcon={<Check className="h-4 w-4" />}
-                >
-                  Mark all read
-                </Button>
-              </div>
+    <div className="bg-background">
+      {/* Header */}
+      {hasUnread && (
+        <div className="sticky top-0 z-10 bg-background">
+          <div className="max-w-2xl mx-auto px-4 py-4">
+            <div className="flex items-center justify-end">
+              {/* Mark All as Read button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleMarkAllAsRead}
+                disabled={markAllAsRead.isPending}
+                leftIcon={<Check className="h-4 w-4" />}
+              >
+                Mark all read
+              </Button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Activity List */}
+      <div className="max-w-2xl mx-auto">
+        {/* Unread activities */}
+        {unreadActivities.length > 0 && (
+          <ActivityList
+            activities={unreadActivities}
+            isLoading={false}
+            error={null}
+            onMarkAsRead={handleMarkAsRead}
+            emptyMessage=""
+          />
         )}
 
-        {/* Activity List */}
-        <div className="max-w-2xl mx-auto">
-          {/* Unread activities */}
-          {unreadActivities.length > 0 && (
-            <ActivityList
-              activities={unreadActivities}
-              isLoading={false}
-              error={null}
-              onMarkAsRead={handleMarkAsRead}
-              emptyMessage=""
-            />
-          )}
+        {/* Read activities */}
+        {readActivities.length > 0 && (
+          <ActivityList
+            activities={readActivities}
+            isLoading={false}
+            error={null}
+            onMarkAsRead={handleMarkAsRead}
+            emptyMessage=""
+          />
+        )}
 
-          {/* Read activities */}
-          {readActivities.length > 0 && (
-            <ActivityList
-              activities={readActivities}
-              isLoading={false}
-              error={null}
-              onMarkAsRead={handleMarkAsRead}
-              emptyMessage=""
-            />
-          )}
+        {/* Loading state */}
+        {isLoading && activities.length === 0 && (
+          <ActivityList
+            activities={[]}
+            isLoading={true}
+            error={null}
+            onMarkAsRead={handleMarkAsRead}
+            emptyMessage=""
+          />
+        )}
 
-          {/* Loading state */}
-          {isLoading && activities.length === 0 && (
-            <ActivityList
-              activities={[]}
-              isLoading={true}
-              error={null}
-              onMarkAsRead={handleMarkAsRead}
-              emptyMessage=""
-            />
-          )}
+        {/* Error state */}
+        {error && (
+          <ActivityList
+            activities={[]}
+            isLoading={false}
+            error={error as Error}
+            onMarkAsRead={handleMarkAsRead}
+            emptyMessage=""
+          />
+        )}
 
-          {/* Error state */}
-          {error && (
-            <ActivityList
-              activities={[]}
-              isLoading={false}
-              error={error as Error}
-              onMarkAsRead={handleMarkAsRead}
-              emptyMessage=""
-            />
-          )}
-
-          {/* Empty state */}
-          {!isLoading && !error && activities.length === 0 && (
-            <ActivityList
-              activities={[]}
-              isLoading={false}
-              error={null}
-              onMarkAsRead={handleMarkAsRead}
-              emptyMessage="No activities yet"
-            />
-          )}
-        </div>
+        {/* Empty state */}
+        {!isLoading && !error && activities.length === 0 && (
+          <ActivityList
+            activities={[]}
+            isLoading={false}
+            error={null}
+            onMarkAsRead={handleMarkAsRead}
+            emptyMessage="No activities yet"
+          />
+        )}
       </div>
+    </div>
+  );
+}
+
+/**
+ * Full page with layout wrapper (for standalone routing)
+ */
+export function ActivityPage() {
+  return (
+    <AppLayout>
+      <ActivityPageContent />
     </AppLayout>
   );
 }
