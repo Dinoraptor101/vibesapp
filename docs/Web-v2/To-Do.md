@@ -22,7 +22,10 @@
 
 
 
-
-BUGS
-
-We need to fix the backend to require images for Post Create API endpoint (this avoids creation of posts without images via API or while creating data for test automation)
+HUMAN ROLE (DEPLOYMENT TO QA)
+Verify Heroku CLI installed (heroku --version)
+Connect GitHub to Heroku apps via Dashboard
+Upload environment variables to both dynos
+Run database migration scripts via Heroku CLI
+Trigger deployments
+Verify everything works
