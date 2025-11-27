@@ -1,6 +1,5 @@
-import { Camera, Loader2, LogOut, MapPin } from 'lucide-react';
+import { Camera, Loader2, MapPin } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { PigeonIdRegenerator } from '@/components/PigeonIdRegenerator';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -32,8 +31,7 @@ const MBTI_TYPES = [
 ];
 
 export function AccountTab() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const { queueUpdate } = useAccountUpdates();
   const { isGettingLocation, getGPSLocation } = useLocationGPS();
   const { isOnline } = useNetworkStatus();
@@ -357,12 +355,6 @@ export function AccountTab() {
     }
   };
 
-  // Logout handler
-  const handleLogout = () => {
-    logout();
-    navigate('/welcome');
-  };
-
   return (
     <div className="p-4 space-y-6">
       {/* Profile Photo */}
@@ -549,21 +541,6 @@ export function AccountTab() {
             isOnline={isOnline}
           />
         )}
-      </div>
-
-      {/* Divider */}
-      <div className="border-t border-gray-200 dark:border-gray-700" />
-
-      {/* Logout */}
-      <div>
-        <Button
-          onClick={handleLogout}
-          variant="outline"
-          className="w-full text-red-600 dark:text-red-400 border-red-300 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20"
-        >
-          <LogOut className="w-4 h-4 mr-2" />
-          Logout
-        </Button>
       </div>
     </div>
   );

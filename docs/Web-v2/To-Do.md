@@ -24,9 +24,5 @@
 
 
 BUGS
-- Logout button is behind the Nav Bar in mobile view (Settings -> Account )
-
-On Logout clear all cached indexDB. so new user logging in fetch new content and data on login 
-
 
 We need to fix the backend to require images for Post Create API endpoint (this avoids creation of posts without images via API or while creating data for test automation)
