@@ -24,9 +24,16 @@ interface PostCardProps {
   onReport?: (postId: string) => void;
   onComment?: (postId: string) => void; // Legacy prop - not used in new design
   hideCaption?: boolean; // Hide caption overlay when showing full caption section in detail view
+  disableLink?: boolean; // Disable image click navigation (e.g., when already on detail page)
 }
 
-function PostCardComponent({ post, onLike, onReport, hideCaption = false }: PostCardProps) {
+function PostCardComponent({
+  post,
+  onLike,
+  onReport,
+  hideCaption = false,
+  disableLink = false,
+}: PostCardProps) {
   const { user: currentUser } = useAuth();
   const { isOnline } = useNetworkStatus();
 
@@ -89,7 +96,7 @@ function PostCardComponent({ post, onLike, onReport, hideCaption = false }: Post
   return (
     <Card noPadding className="min-w-[280px]">
       {/* Image with Caption Overlay - Full width, edge-to-edge */}
-      {isOnline ? (
+      {isOnline && !disableLink ? (
         <Link to={`/post/${post._id}`} className="block">
           <div className="relative aspect-square bg-surface-alt overflow-hidden">
             {/* Blur placeholder - shown while loading */}
