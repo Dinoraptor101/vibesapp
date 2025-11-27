@@ -74,11 +74,7 @@ export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
               </div>
             </div>
           ) : (
-            <CreatePostForm
-              onSubmit={handleSubmit}
-              onCancel={handleClose}
-              isSubmitting={createPostMutation.isPending}
-            />
+            <CreatePostForm onSubmit={handleSubmit} isSubmitting={createPostMutation.isPending} />
           )}
         </DialogBody>
       </DialogContent>
