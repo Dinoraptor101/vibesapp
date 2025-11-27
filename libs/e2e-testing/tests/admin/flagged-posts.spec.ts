@@ -572,26 +572,6 @@ test.describe('Flagged Posts - Loading & Error States', () => {
     // Loading indicator should be gone
     await expect(loadingIndicator).not.toBeVisible();
   });
-
-  test.skip('should handle API error gracefully', async ({ page }) => {
-    // TODO: Error state UI not implemented with test IDs
-    // Implementation logs errors to console but doesn't show error state with test IDs
-    // Mock API to return error
-    await page.route('**/api/admin/reported-posts**', async (route) => {
-      await route.fulfill({
-        status: 500,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          success: false,
-          message: 'Internal server error',
-        }),
-      });
-    });
-
-    // Navigate to flagged posts page
-    await page.goto('/admin/flagged');
-    await page.waitForLoadState('networkidle');
-  });
 });
 
 test.describe('Flagged Posts - Accessibility', () => {
