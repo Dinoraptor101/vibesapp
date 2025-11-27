@@ -23,6 +23,7 @@
 
 
 HUMAN ROLE (DEPLOYMENT TO QA)
+(BACKUP MONGODB Databases for QA and PROD)
 Verify Heroku CLI installed (heroku --version)
 Connect GitHub to Heroku apps via Dashboard
 Upload environment variables to both dynos
