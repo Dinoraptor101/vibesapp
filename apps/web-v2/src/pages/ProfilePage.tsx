@@ -13,8 +13,16 @@ import { ProfileHeader } from '@/features/profile/components/ProfileHeader';
 import { ProfilePosts } from '@/features/profile/components/ProfilePosts';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 
-export function ProfilePage() {
-  const { userId } = useParams<{ userId: string }>();
+interface ProfilePageContentProps {
+  userId?: string;
+}
+
+/**
+ * Page content without layout wrapper (for persistent pages)
+ */
+export function ProfilePageContent({ userId: propUserId }: ProfilePageContentProps) {
+  const { userId: paramUserId } = useParams<{ userId: string }>();
+  const userId = propUserId || paramUserId;
   const { user: currentUser } = useAuth();
   const navigate = useNavigate();
   const [showLoading, setShowLoading] = useState(false);
@@ -68,16 +76,19 @@ export function ProfilePage() {
     navigate(`/dm-request/${userId}`);
   };
 
+  // Show nothing if no userId (will show when route doesn't match)
+  if (!userId) {
+    return null;
+  }
+
   // ZEN: Show loading only after 1 second delay (avoid flash for fast loads)
   if (isLoading && showLoading) {
     return (
-      <AppLayout>
-        <div className="container mx-auto max-w-4xl px-4 py-8">
-          <div className="flex items-center justify-center py-12">
-            <Spinner size="lg" />
-          </div>
+      <div className="container mx-auto max-w-4xl px-4 py-8">
+        <div className="flex items-center justify-center py-12">
+          <Spinner size="lg" />
         </div>
-      </AppLayout>
+      </div>
     );
   }
 
@@ -87,41 +98,50 @@ export function ProfilePage() {
   }
 
   return (
-    <AppLayout>
-      <div className="container mx-auto max-w-4xl px-4 py-8">
-        {/* Back Button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          leftIcon={<ArrowLeft size={16} />}
-          onClick={() => window.history.back()}
-          className="mb-6"
-        >
-          Back
-        </Button>
+    <div className="container mx-auto max-w-4xl px-4 py-8">
+      {/* Back Button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        leftIcon={<ArrowLeft size={16} />}
+        onClick={() => window.history.back()}
+        className="mb-6"
+      >
+        Back
+      </Button>
 
-        {/* Profile Content */}
-        <div className="space-y-8">
-          {/* Header */}
-          <ProfileHeader
-            profile={profile}
-            isOwnProfile={isOwnProfile}
-            onDMRequest={handleMessageClick}
-            dmStatus={dmStatus?.reason}
-            postsCount={profile.postsCount}
-            followersCount={profile.followersCount}
-            followingCount={profile.followingCount}
-          />
+      {/* Profile Content */}
+      <div className="space-y-8">
+        {/* Header */}
+        <ProfileHeader
+          profile={profile}
+          isOwnProfile={isOwnProfile}
+          onDMRequest={handleMessageClick}
+          dmStatus={dmStatus?.reason}
+          postsCount={profile.postsCount}
+          followersCount={profile.followersCount}
+          followingCount={profile.followingCount}
+        />
 
-          {/* Posts Grid */}
-          <div>
-            <h2 className="mb-4 text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-white">
-              Posts
-            </h2>
-            {userId && <ProfilePosts userId={userId} />}
-          </div>
+        {/* Posts Grid */}
+        <div>
+          <h2 className="mb-4 text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-white">
+            Posts
+          </h2>
+          {userId && <ProfilePosts userId={userId} />}
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Full page with layout wrapper (for standalone routing)
+ */
+export function ProfilePage() {
+  return (
+    <AppLayout>
+      <ProfilePageContent />
     </AppLayout>
   );
 }

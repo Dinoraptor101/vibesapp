@@ -20,6 +20,7 @@ import { CreatePostPageContent } from '@/pages/CreatePostPage';
 import { HomePageContent } from '@/pages/HomePage';
 import { MessagesPageContent } from '@/pages/MessagesPage';
 import { PostDetailPageContent } from '@/pages/PostDetailPage';
+import { ProfilePageContent } from '@/pages/ProfilePage';
 import { SettingsPageContent } from '@/pages/SettingsPage';
 import { BottomNav } from './BottomNav';
 import { TopNav } from './TopNav';
@@ -54,9 +55,21 @@ function getPostIdFromPath(pathname: string): string | null {
   return parts[2] || null;
 }
 
-// Check if a path should be handled by persistent pages (including post detail)
+// Check if path is a profile page
+function isProfilePath(pathname: string): boolean {
+  return pathname.startsWith('/profile/');
+}
+
+// Extract user ID from profile path
+function getProfileUserIdFromPath(pathname: string): string | null {
+  if (!isProfilePath(pathname)) return null;
+  const parts = pathname.split('/');
+  return parts[2] || null;
+}
+
+// Check if a path should be handled by persistent pages (including post detail and profile)
 export function isPersistentPage(pathname: string): boolean {
-  return getPageIndex(pathname) !== -1 || isPostDetailPath(pathname);
+  return getPageIndex(pathname) !== -1 || isPostDetailPath(pathname) || isProfilePath(pathname);
 }
 
 export function PersistentPages() {
@@ -65,8 +78,11 @@ export function PersistentPages() {
   const currentIndex = getPageIndex(location.pathname);
   const isPostDetail = isPostDetailPath(location.pathname);
   const currentPostId = getPostIdFromPath(location.pathname);
+  const isProfile = isProfilePath(location.pathname);
+  const currentProfileUserId = getProfileUserIdFromPath(location.pathname);
   const scrollContainerRefs = useRef<(HTMLDivElement | null)[]>([]);
   const postDetailRef = useRef<HTMLDivElement | null>(null);
+  const profileRef = useRef<HTMLDivElement | null>(null);
 
   // Track the last main page index (for returning from post detail)
   const lastMainPageIndex = useRef(0);
@@ -126,8 +142,15 @@ export function PersistentPages() {
     }
   }, [isPostDetail, location.pathname]);
 
-  // If we're not on a persistent page or post detail, don't render
-  if (currentIndex === -1 && !isPostDetail) {
+  // Reset profile scroll when opening a new profile
+  useEffect(() => {
+    if (isProfile && profileRef.current) {
+      profileRef.current.scrollTop = 0;
+    }
+  }, [isProfile, location.pathname]);
+
+  // If we're not on a persistent page, post detail, or profile, don't render
+  if (currentIndex === -1 && !isPostDetail && !isProfile) {
     return null;
   }
 
@@ -158,7 +181,7 @@ export function PersistentPages() {
         >
           {PERSISTENT_PAGES.map((page, index) => {
             const PageComponent = page.Component;
-            const isActive = index === activeMainIndex && !isPostDetail;
+            const isActive = index === activeMainIndex && !isPostDetail && !isProfile;
 
             return (
               <div
@@ -196,6 +219,38 @@ export function PersistentPages() {
                 <div className="space-y-3">
                   <div className="h-4 bg-surface-elevated rounded w-3/4" />
                   <div className="h-4 bg-surface-elevated rounded w-1/2" />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Profile - Slides in from right as overlay */}
+        <div
+          className={`absolute inset-0 bg-surface transition-transform duration-300 ease-out ${
+            isProfile ? 'translate-x-0' : 'translate-x-full'
+          }`}
+          aria-hidden={!isProfile}
+          inert={!isProfile ? true : undefined}
+        >
+          <div ref={profileRef} className="h-full overflow-y-auto overscroll-contain">
+            {currentProfileUserId ? (
+              <ProfilePageContent userId={currentProfileUserId} />
+            ) : (
+              /* Skeleton placeholder when no userId */
+              <div className="max-w-4xl mx-auto p-4 animate-pulse">
+                <div className="h-8 w-20 bg-surface-elevated rounded mb-6" />
+                <div className="flex items-start gap-6 mb-8">
+                  <div className="w-24 h-24 bg-surface-elevated rounded-full" />
+                  <div className="flex-1 space-y-3">
+                    <div className="h-6 bg-surface-elevated rounded w-1/3" />
+                    <div className="h-4 bg-surface-elevated rounded w-1/4" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="aspect-square bg-surface-elevated rounded" />
+                  ))}
                 </div>
               </div>
             )}
