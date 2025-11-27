@@ -33,7 +33,6 @@ interface CreatePostFormProps {
     blurPlaceholder?: string;
     location: Location;
   }) => void;
-  onCancel: () => void;
   isSubmitting?: boolean;
 }
 
@@ -41,7 +40,7 @@ const MAX_TEXT_LENGTH = 5000;
 const CAPTION_THRESHOLD = 100; // Switch to article mode after 100 characters
 const NEWLINE_THRESHOLD = 3; // Switch to article mode after 3 newlines
 
-export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: CreatePostFormProps) {
+export function CreatePostForm({ onSubmit, isSubmitting = false }: CreatePostFormProps) {
   const [selectedImage, setSelectedImage] = useState<ImageFile | null>(null);
   const [text, setText] = useState('');
   const [mode, setMode] = useState<PostMode>('caption');
@@ -345,15 +344,7 @@ export function CreatePostForm({ onSubmit, onCancel, isSubmitting = false }: Cre
       )}
 
       {/* Actions */}
-      <div className="flex items-center justify-end space-x-3 pt-4">
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={onCancel}
-          disabled={isSubmitting || uploadProgress !== null}
-        >
-          Cancel
-        </Button>
+      <div className="flex items-center justify-end pt-4">
         <Button
           type="submit"
           variant="primary"

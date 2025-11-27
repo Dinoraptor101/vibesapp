@@ -44,12 +44,6 @@ export function CreatePostPageContent() {
     }
   };
 
-  const handleCancel = () => {
-    if (!createPostMutation.isPending) {
-      navigate(-1); // Go back to previous page
-    }
-  };
-
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       {showSuccess ? (
@@ -67,11 +61,7 @@ export function CreatePostPageContent() {
           </div>
         </div>
       ) : (
-        <CreatePostForm
-          onSubmit={handleSubmit}
-          onCancel={handleCancel}
-          isSubmitting={createPostMutation.isPending}
-        />
+        <CreatePostForm onSubmit={handleSubmit} isSubmitting={createPostMutation.isPending} />
       )}
     </div>
   );
