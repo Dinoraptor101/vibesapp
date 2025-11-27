@@ -140,6 +140,7 @@ export function PostDetailPageContent({ postId: propPostId }: PostDetailPageCont
                   onReport={handleReport}
                   onComment={handleComment}
                   hideCaption={showFullCaptionSection}
+                  disableLink
                 />
 
                 {/* Full Caption Section - Only shown when caption exceeds 100 chars (≈2 lines) */}
