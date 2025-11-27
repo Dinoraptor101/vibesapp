@@ -160,7 +160,7 @@ export function FlaggedPostDetailPage() {
   const showFullCaptionSection = captionLength > 100;
 
   return (
-    <div className="max-w-2xl mx-auto p-4 space-y-3">
+    <div data-testid="flagged-post-detail" className="max-w-2xl mx-auto p-4 space-y-3">
       {/* Back button */}
       <Button variant="ghost" onClick={() => navigate(-1)}>
         <ArrowLeft className="w-4 h-4 mr-2" />

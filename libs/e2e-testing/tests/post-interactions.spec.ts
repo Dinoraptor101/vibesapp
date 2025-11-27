@@ -742,6 +742,31 @@ async function createUserForReporting(
   return { userId: user.userId, pigeonId: userData.pigeonId };
 }
 
+// Helper to upload test image to S3 and get the key
+async function uploadTestImage(request: any, baseURL: string, pigeonId: string): Promise<string> {
+  // Get presigned S3 URL
+  const s3Response = await request.get(`${baseURL}/api/s3/s3Url`, {
+    headers: getApiHeaders(pigeonId),
+  });
+  const { url, key } = await s3Response.json();
+
+  // Read the test image file
+  const fs = await import('fs');
+  const path = await import('path');
+  const imagePath = path.join(__dirname, '../../assets/test_image.jpeg');
+  const imageBuffer = fs.readFileSync(imagePath);
+
+  // Upload to S3
+  await request.put(url, {
+    data: imageBuffer,
+    headers: {
+      'Content-Type': 'image/jpeg',
+    },
+  });
+
+  return key;
+}
+
 // Helper to create a post
 async function createPostForReporting(
   request: any,
@@ -751,13 +776,18 @@ async function createPostForReporting(
     pigeonId: string;
     text?: string;
     location?: { lat: number; lon: number };
+    image?: string;
   }
 ) {
+  // Upload image if not provided
+  const imageKey = postData.image || (await uploadTestImage(request, baseURL, postData.pigeonId));
+
   return await request.post(`${baseURL}/api/posts/create`, {
     headers: getApiHeaders(postData.pigeonId),
     data: {
       userId: postData.userId,
       text: postData.text || 'Test post',
+      image: imageKey,
       location: postData.location || TEST_LOCATION_API,
     },
   });
