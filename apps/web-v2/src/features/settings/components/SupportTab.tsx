@@ -10,7 +10,7 @@ export function SupportTab() {
   };
 
   return (
-    <div className="p-4 pb-8 space-y-6">
+    <div className="p-4 space-y-6">
       {/* Help & Feedback */}
       <div>
         <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">

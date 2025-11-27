@@ -364,7 +364,7 @@ export function AccountTab() {
   };
 
   return (
-    <div className="p-4 pb-8 space-y-6">
+    <div className="p-4 space-y-6">
       {/* Profile Photo */}
       <div>
         <div className="block text-sm font-medium text-gray-700 dim:text-gray-200 dark:text-gray-300 mb-2">

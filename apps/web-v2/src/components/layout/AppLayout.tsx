@@ -30,7 +30,9 @@ export function AppLayout({ children }: AppLayoutProps) {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 pb-20 md:pb-0">{children}</main>
+      <main className="flex-1" style={{ paddingBottom: 'var(--bottom-nav-height)' }}>
+        {children}
+      </main>
 
       {/* Bottom Navigation (Mobile) */}
       <BottomNav />

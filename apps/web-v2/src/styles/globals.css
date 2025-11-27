@@ -12,6 +12,8 @@
   /* Light theme semantic tokens (default) */
   :root,
   body {
+    /* Bottom navigation height for mobile safe area */
+    --bottom-nav-height: calc(5.5rem + env(safe-area-inset-bottom, 0px)); /* 88px + iOS safe area */
     --surface: #f8f8f8;
     --surface-elevated: #ffffff;
     --surface-hover: rgba(0, 0, 0, 0.05);
@@ -100,7 +102,20 @@
   }
 }
 
+/* Desktop: No bottom nav padding needed */
+@media (min-width: 768px) {
+  :root,
+  body {
+    --bottom-nav-height: 0px;
+  }
+}
+
 @layer utilities {
+  /* Safe area inset for iOS notched devices */
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
   /* Focus visible utilities */
   .focus-ring {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2;
