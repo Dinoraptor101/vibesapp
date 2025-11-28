@@ -116,9 +116,9 @@ const MBTI_TYPES = [
 
 export function MBTISelector({ value, onChange }: MBTISelectorProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Grid of MBTI types */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-4 gap-1.5 sm:gap-3">
         {MBTI_TYPES.map((mbti) => {
           const isSelected = value === mbti.type;
           return (
@@ -127,24 +127,26 @@ export function MBTISelector({ value, onChange }: MBTISelectorProps) {
               type="button"
               onClick={() => onChange(mbti.type)}
               className={`
-                flex flex-col items-center justify-center rounded-lg border-2 p-4 transition-all
+                flex flex-col items-center justify-center rounded-lg border-2 p-2 sm:p-4 transition-all
                 ${mbti.color}
                 ${
                   isSelected
-                    ? 'ring-2 ring-brand-purple ring-offset-2 ring-offset-surface scale-105'
+                    ? 'ring-2 ring-brand-purple ring-offset-1 sm:ring-offset-2 ring-offset-surface scale-105'
                     : 'border-opacity-50'
                 }
               `}
             >
-              <span className="text-lg font-bold text-text-primary">{mbti.type}</span>
-              <span className="text-xs text-text-secondary">{mbti.name}</span>
+              <span className="text-sm sm:text-lg font-bold text-text-primary">{mbti.type}</span>
+              <span className="text-[10px] sm:text-xs text-text-secondary truncate max-w-full">
+                {mbti.name}
+              </span>
             </button>
           );
         })}
       </div>
 
       {/* Legend */}
-      <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm sm:grid-cols-4">
         <div className="flex items-center gap-2">
           <div className="h-4 w-4 rounded border-2 border-mbti-analyst-border bg-mbti-analyst-bg" />
           <span className="text-text-secondary">Analyst</span>

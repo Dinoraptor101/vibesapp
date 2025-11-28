@@ -379,15 +379,14 @@ export function SignupWizard() {
               </p>
             </div>
 
-            <div className="space-y-4 rounded-lg border border-border bg-surface-elevated p-6 text-left">
+            <div className="space-y-4 rounded-lg border border-border bg-surface-elevated p-4 sm:p-6 text-left">
               <h3 className="font-semibold text-text-primary">What makes us unique?</h3>
               <ul className="space-y-2 text-sm text-text-secondary">
                 <li>
                   🔐 <strong>Single ID login</strong> - No emails, no passwords
                 </li>
                 <li>
-                  🎭 <strong>Yin/Yang & MBTI connections</strong> - Match with personalities that
-                  vibe with you
+                  🎭 <strong>Yin/Yang & MBTI</strong> - Match with personalities that vibe with you
                 </li>
                 <li>
                   📍 <strong>Location-aware</strong> - Discover nearby posts and local content
@@ -420,7 +419,7 @@ export function SignupWizard() {
               </p>
             </div>
 
-            <div className="rounded-lg border-2 border-brand-purple bg-brand-purple/5 p-6">
+            <div className="rounded-lg border-2 border-brand-purple bg-brand-purple/5 p-4 sm:p-6">
               <div className="mb-4 flex items-center gap-2">
                 <Button
                   variant="ghost"
@@ -431,13 +430,15 @@ export function SignupWizard() {
                 >
                   <RotateCcw className="h-4 w-4" />
                 </Button>
-                <div className="flex flex-1 items-center justify-between rounded-md bg-surface p-4 font-mono text-lg">
-                  <span className="font-bold text-text-primary">{signupData.pigeonId}</span>
+                <div className="flex flex-1 items-center justify-between rounded-md bg-surface p-3 sm:p-4 font-mono text-base sm:text-lg">
+                  <span className="font-bold text-text-primary break-all">
+                    {signupData.pigeonId}
+                  </span>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleCopyPigeonId}
-                    className="shrink-0"
+                    className="shrink-0 ml-2"
                   >
                     {copiedPigeonId ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
@@ -489,7 +490,7 @@ export function SignupWizard() {
               <p className="text-text-secondary">We use this to show your age on your profile</p>
             </div>
 
-            <div className="space-y-4 rounded-lg border border-border bg-surface-elevated p-6">
+            <div className="space-y-4 rounded-lg border border-border bg-surface-elevated p-4 sm:p-6">
               {/* Month Selector */}
               <div className="space-y-2">
                 <select
@@ -584,8 +585,8 @@ export function SignupWizard() {
               </p>
             </div>
 
-            <div className="space-y-6 rounded-lg border border-border bg-surface-elevated p-6">
-              <div className="flex items-center justify-center gap-4">
+            <div className="space-y-4 sm:space-y-6 rounded-lg border border-border bg-surface-elevated p-4 sm:p-6">
+              <div className="flex items-center justify-center gap-3 sm:gap-4">
                 <span className="text-sm font-semibold text-text-primary">YIN</span>
                 <button
                   type="button"
@@ -611,19 +612,19 @@ export function SignupWizard() {
                 <span className="text-sm font-semibold text-text-primary">YANG</span>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="space-y-2 rounded-lg bg-surface p-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 text-sm">
+                <div className="space-y-2 rounded-lg bg-surface p-3 sm:p-4">
                   <p className="font-semibold text-brand-purple">🌙 YIN</p>
-                  <ul className="list-inside list-disc space-y-1 text-text-secondary">
+                  <ul className="list-inside list-disc space-y-1 text-text-secondary text-xs sm:text-sm">
                     <li>Receptive</li>
                     <li>Reflective</li>
                     <li>Calm energy</li>
                     <li>Intuitive</li>
                   </ul>
                 </div>
-                <div className="space-y-2 rounded-lg bg-surface p-4">
+                <div className="space-y-2 rounded-lg bg-surface p-3 sm:p-4">
                   <p className="font-semibold text-orange-500">☀️ YANG</p>
-                  <ul className="list-inside list-disc space-y-1 text-text-secondary">
+                  <ul className="list-inside list-disc space-y-1 text-text-secondary text-xs sm:text-sm">
                     <li>Active</li>
                     <li>Expressive</li>
                     <li>Dynamic energy</li>
@@ -727,7 +728,7 @@ export function SignupWizard() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8 p-6">
+    <div className="mx-auto max-w-2xl space-y-6 p-4 sm:space-y-8 sm:p-6">
       {/* Progress Indicator */}
       <div className="space-y-4">
         <div className="flex justify-between text-sm">
@@ -757,7 +758,9 @@ export function SignupWizard() {
       </div>
 
       {/* Step Content */}
-      <div className="rounded-lg border border-border bg-surface p-8">{renderStepContent()}</div>
+      <div className="rounded-lg border border-border bg-surface p-4 sm:p-8">
+        {renderStepContent()}
+      </div>
 
       {/* Error Message */}
       {error && (
