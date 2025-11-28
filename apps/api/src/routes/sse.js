@@ -13,7 +13,7 @@ const sseManager = require('../handlers/sseManager');
  */
 router.get('/connect', authenticate, (req, res) => {
   try {
-    const userId = req.user.pigeonId;
+    const userId = req.user.userId; // Use public userId, not pigeonId
 
     // Set SSE headers
     res.setHeader('Content-Type', 'text/event-stream');
@@ -107,7 +107,7 @@ router.get('/connect', authenticate, (req, res) => {
  */
 router.get('/status', authenticate, (req, res) => {
   try {
-    const userId = req.user.pigeonId;
+    const userId = req.user.userId;
 
     const stats = {
       isConnected: sseManager.isConnected(userId),
@@ -139,7 +139,7 @@ router.get('/status', authenticate, (req, res) => {
  */
 router.post('/test-broadcast', authenticate, (req, res) => {
   try {
-    const userId = req.user.pigeonId;
+    const userId = req.user.userId;
     const { message = 'Test broadcast message' } = req.body;
 
     const result = sseManager.broadcast(userId, 'test', {
