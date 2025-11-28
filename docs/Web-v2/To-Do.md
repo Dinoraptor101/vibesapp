@@ -1,5 +1,14 @@
 - We are yet to implement a Vibes Score (Karma engine) into Web-V2 and how to better represent it
 
+- **Build In-House JSON-Based Rich Text Editor** - Replace current contentEditable + execCommand approach (deprecated, unreliable) with a proper JSON document model:
+  1. **Document Model**: Define node types (paragraph, bulletList, listItem, text) with optional marks (bold, underline)
+  2. **Operations/Commands**: insertText, deleteText, splitBlock, toggleMark, wrapInList, unwrapFromList - each transforms JSON predictably
+  3. **Rendering Layer**: JSON model → React components → DOM with cursor/selection sync
+  4. **Input Handling**: Keyboard events → operations, paste handling, IME support
+  5. **Serialization**: JSON ↔ HTML conversion for storage compatibility
+  
+  This fixes bullet points, nested lists, and eliminates browser inconsistencies. Estimated: 2-4 weeks focused work. No external dependencies - we own it forever.
+
 - **Enhanced Search Functionality** - Currently search only finds posts by caption text. Need to implement:
   1. **Search by Username** - Exact match (case-insensitive). Searching "kindness" should find all posts by user "Kindness", but "kind" should NOT match "kindness".
   2. **Hashtag Extraction & Search** - Extract hashtags from post captions on creation, store as lowercase array field. Searching `#travel` should specifically query the hashtags field. All hashtags stored in lowercase for consistency.
