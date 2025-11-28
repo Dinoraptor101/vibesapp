@@ -44,6 +44,8 @@ Launch MVP: Test in Chesterfield, VA, with your LLC, focusing on picture posts +
 
 Growth: Partner with kindness apps for cross-promos, avoiding VC greed. Measure success by real-world meetups, not DAUs.​ - Kindess Apps? maybe build my own kindness elements into this one? what does Personal Grown social network look like?
 
+## Idea to avoid multiple accounts per person
+Enforce registering using a popular Social Network OpenID like Google or Facebook.
 
 ## HUMAN ROLE (DEPLOYMENT TO QA)
 (BACKUP MONGODB Databases for QA and PROD)
