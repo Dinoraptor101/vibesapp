@@ -29,7 +29,7 @@ export interface Conversation {
   user2Id: string;
   lastRequesterId?: string;
   messages: Message[];
-  status: 'pending' | 'approved' | 'closed';
+  status: 'pending' | 'approved' | 'closed' | 'archived';
   createdAt?: Date;
   updatedAt?: Date;
   // Backend determines and provides the "other" user based on auth
