@@ -100,6 +100,7 @@ export function MessageInput({
           placeholder={!isOnline ? 'Connect to internet to send messages...' : placeholder}
           disabled={disabled || !isOnline}
           rows={1}
+          data-testid="message-input"
           className={cn(
             'w-full px-4 py-3 pr-12 rounded-lg resize-none',
             'bg-surface text-text-primary placeholder:text-text-tertiary',
@@ -123,6 +124,7 @@ export function MessageInput({
           )}
           aria-label="Send message"
           title={!isOnline ? 'Connect to internet to send messages' : undefined}
+          data-testid="send-message-button"
         >
           <Send className="w-5 h-5" />
         </button>

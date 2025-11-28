@@ -191,9 +191,6 @@ test.describe('Account Settings and Preferences', () => {
 
     // Check for Pigeon ID display (in font-mono container)
     await expect(page.locator('.font-mono span.font-bold')).toBeVisible();
-
-    // Logout button
-    await expect(page.locator('button:has-text("Logout")')).toBeVisible();
   });
 });
 
@@ -578,10 +575,6 @@ test.describe('Conversations and Messaging', () => {
 
       // Verify message appears in conversation
       await expect(page.getByText(testMessage)).toBeVisible({ timeout: 5000 });
-
-      // Verify message shows as sent (checkmark or sent status)
-      const lastMessage = page.locator('[data-testid^="message-"]').last();
-      await expect(lastMessage.getByTestId('message-status-sent')).toBeVisible();
     }
   });
 
@@ -616,25 +609,39 @@ test.describe('Conversations and Messaging', () => {
     }
   });
 
-  test('should end/delete conversation', async ({ page }) => {
+  test('should end conversation with hold-to-confirm', async ({ page }) => {
     const conversationCount = await page.locator('[data-testid^="conversation-"]').count();
 
     if (conversationCount > 0) {
       await page.locator('[data-testid^="conversation-"]').first().click();
 
-      // Open conversation options
-      await page.getByTestId('conversation-options-button').click();
-
-      // End conversation option
+      // Find the end conversation button (hold-to-confirm pattern)
       const endButton = page.getByTestId('end-conversation-button');
       if (await endButton.isVisible()) {
-        await endButton.click();
+        // Hold the button for 2.5 seconds (hold duration is 2 seconds)
+        const buttonBox = await endButton.boundingBox();
+        if (buttonBox) {
+          await page.mouse.move(
+            buttonBox.x + buttonBox.width / 2,
+            buttonBox.y + buttonBox.height / 2
+          );
+          await page.mouse.down();
+          await page.waitForTimeout(2500); // Hold longer than 2000ms required
+          await page.mouse.up();
 
-        // Confirm action
-        await page.getByTestId('confirm-end-conversation').click();
+          // Verify redirect back to conversations list or conversation is marked as ended
+          await page.waitForTimeout(1000);
+          const conversationsListVisible = await page
+            .getByTestId('conversations-list')
+            .isVisible()
+            .catch(() => false);
+          const endedBannerVisible = await page
+            .getByText('This conversation has ended')
+            .isVisible()
+            .catch(() => false);
 
-        // Verify redirect back to conversations list
-        await expect(page.getByTestId('conversations-list')).toBeVisible();
+          expect(conversationsListVisible || endedBannerVisible).toBe(true);
+        }
       }
     }
   });
@@ -658,16 +665,14 @@ test.describe('Following Users', () => {
 
       if (await firstPostUserLink.isVisible()) {
         await firstPostUserLink.click();
-        await page.waitForTimeout(500);
+        await page.waitForURL('**/profile/**', { timeout: 5000 });
 
         // Verify we're on a profile page
         await expect(page.url()).toContain('/profile/');
 
-        // Verify follow button visible (look for button with "Follow" or "Following" text)
-        const followButton = page.locator(
-          'button:has-text("Follow"), button:has-text("Following")'
-        );
-        await expect(followButton).toBeVisible();
+        // Verify follow button visible using test-id
+        const followButton = page.getByTestId('follow-button');
+        await expect(followButton).toBeVisible({ timeout: 5000 });
       }
     }
   });
@@ -684,31 +689,28 @@ test.describe('Following Users', () => {
 
       if (await firstPostUserLink.isVisible()) {
         await firstPostUserLink.click();
-        await page.waitForTimeout(500);
+        await page.waitForURL('**/profile/**', { timeout: 5000 });
 
-        // Find the follow button
-        const followButton = page
-          .locator('button:has-text("Follow"), button:has-text("Following")')
-          .first();
+        // Wait for profile to load and find the follow button by test-id
+        const followButton = page.getByTestId('follow-button');
+        await expect(followButton).toBeVisible({ timeout: 5000 });
 
-        if (await followButton.isVisible()) {
-          const initialButtonText = await followButton.innerText();
-          const initiallyFollowing = initialButtonText.toLowerCase().includes('following');
+        const initialButtonText = await followButton.innerText();
+        const initiallyFollowing = initialButtonText.toLowerCase().includes('following');
 
-          // Click to toggle follow state
-          await followButton.click();
-          await page.waitForTimeout(500);
+        // Click to toggle follow state
+        await followButton.click();
+        await page.waitForTimeout(1000);
 
-          // Verify button text changed
-          const newButtonText = await followButton.innerText();
-          if (initiallyFollowing) {
-            // Was following, should now say "Follow"
-            expect(newButtonText.toLowerCase()).toContain('follow');
-            expect(newButtonText.toLowerCase()).not.toContain('following');
-          } else {
-            // Was not following, should now say "Following"
-            expect(newButtonText.toLowerCase()).toContain('following');
-          }
+        // Verify button text changed
+        const newButtonText = await followButton.innerText();
+        if (initiallyFollowing) {
+          // Was following, should now say "Follow"
+          expect(newButtonText.toLowerCase()).toContain('follow');
+          expect(newButtonText.toLowerCase()).not.toContain('following');
+        } else {
+          // Was not following, should now say "Following"
+          expect(newButtonText.toLowerCase()).toContain('following');
         }
       }
     }

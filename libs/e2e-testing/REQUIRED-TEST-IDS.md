@@ -100,7 +100,7 @@ Note: Theme is stored on `<html>` element as `data-theme` attribute
 'requester-avatar'        // Avatar in request
 'request-message'         // Message in request
 'accept-request-button'   // Accept DM request
-'reject-request-button'   // Reject DM request
+'decline-request-button'  // Decline DM request
 'dm-requests-empty-state' // Empty state for no requests
 
 // Conversations
@@ -114,10 +114,15 @@ Note: Theme is stored on `<html>` element as `data-theme` attribute
 // Conversation View
 'conversation-view'       // Main conversation view container
 'conversation-header'     // Conversation header
+'conversation-back-button'    // Back button in conversation
+'conversation-avatar'     // Avatar in conversation header
+'conversation-username'   // Username in conversation header (also used in preview)
+'end-conversation-button' // Hold-to-confirm end conversation button
 'message-{id}'            // Individual message (dynamic)
+'message-content'         // Message content bubble
+'message-timestamp'       // Timestamp on message
 'message-input'           // Message input field
 'send-message-button'     // Send message button
-'message-status-sent'     // Sent status indicator
 'message-timestamp'       // Message timestamp
 'conversation-options-button'  // Conversation options menu
 'end-conversation-button' // End conversation option

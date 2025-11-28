@@ -6,10 +6,10 @@
  */
 
 import { useEffect } from 'react';
-import { useAuth } from '@/features/auth';
 import { useActivitySSE } from '@/features/activity/hooks/useActivitySSE';
-import { useMessagingSSE } from '@/features/messaging/hooks/useMessagingSSE';
+import { useAuth } from '@/features/auth';
 import { useDMRequestsSSE } from '@/features/messaging/hooks/useDMRequestsSSE';
+import { useMessagingSSE } from '@/features/messaging/hooks/useMessagingSSE';
 
 interface SSEProviderProps {
   children: React.ReactNode;

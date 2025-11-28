@@ -35,6 +35,7 @@ export function MessageBubble({
           '--slide-from': isCurrentUser ? '15px' : '-15px',
         } as React.CSSProperties
       }
+      data-testid={`message-${message._id}`}
     >
       {/* Avatar (only for other user) */}
       {!isCurrentUser && <Avatar src={otherUserAvatar} alt={otherUserName || 'User'} size="sm" />}
@@ -49,12 +50,16 @@ export function MessageBubble({
               ? 'bg-brand-primary text-white'
               : 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white'
           }`}
+          data-testid="message-content"
         >
           <p className="break-words text-sm">{message.body}</p>
         </div>
 
         {/* Timestamp */}
-        <span className="text-xs text-gray-500 dim:text-gray-450 dark:text-gray-400">
+        <span
+          className="text-xs text-gray-500 dim:text-gray-450 dark:text-gray-400"
+          data-testid="message-timestamp"
+        >
           {formatRelativeTime(message.timestamp)}
         </span>
       </div>
