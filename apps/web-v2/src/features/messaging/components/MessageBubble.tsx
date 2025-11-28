@@ -42,7 +42,7 @@ export function MessageBubble({
 
       {/* Message Content */}
       <div
-        className={`flex max-w-[70%] flex-col gap-1 ${isCurrentUser ? 'items-end' : 'items-start'}`}
+        className={`flex min-w-0 max-w-[70%] flex-col gap-1 ${isCurrentUser ? 'items-end' : 'items-start'}`}
       >
         <div
           className={`rounded-2xl px-4 py-2 ${
@@ -52,7 +52,7 @@ export function MessageBubble({
           }`}
           data-testid="message-content"
         >
-          <p className="break-words text-sm">{message.body}</p>
+          <p className="text-sm [overflow-wrap:anywhere]">{message.body}</p>
         </div>
 
         {/* Timestamp */}
