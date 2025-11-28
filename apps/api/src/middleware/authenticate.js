@@ -2,13 +2,13 @@ const User = require('../models/User');
 
 /**
  * Authentication middleware for protected routes
- * Validates user session from Pigeon ID in cookies or headers
+ * Validates user session from Pigeon ID in cookies, headers, or query params
  * Attaches user object to req.user
  */
 const authenticate = async (req, res, next) => {
   try {
-    // Extract Pigeon ID from cookies or headers
-    const pigeonId = req.cookies?.pigeonId || req.headers['x-pigeon-id'];
+    // Extract Pigeon ID from cookies, headers, or query params (for SSE EventSource)
+    const pigeonId = req.cookies?.pigeonId || req.headers['x-pigeon-id'] || req.query?.pigeonId;
 
     if (!pigeonId) {
       return res.status(401).json({ error: 'Unauthorized: Missing authentication' });
