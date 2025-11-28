@@ -28,6 +28,8 @@ const authenticate = async (req, res, next) => {
 
     // Attach user to request object
     req.user = user;
+    // Also attach pigeonId since it's excluded from User model by default (select: false)
+    req.user.pigeonId = pigeonId;
 
     next();
   } catch (error) {
