@@ -130,13 +130,20 @@ export function ConversationView() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-white dim:bg-gray-800 dark:bg-gray-900">
+    <div
+      className="flex h-screen flex-col bg-white dim:bg-gray-800 dark:bg-gray-900"
+      data-testid="conversation-view"
+    >
       {/* Header */}
-      <div className="flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
+      <div
+        className="flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800"
+        data-testid="conversation-header"
+      >
         <button
           type="button"
           onClick={() => navigate('/messages')}
           className="text-gray-600 hover:text-gray-900 dim:text-gray-500 dim:hover:text-gray-100 dark:text-gray-400 dark:hover:text-white"
+          data-testid="conversation-back-button"
         >
           <ArrowLeft className="h-6 w-6" />
         </button>
@@ -150,11 +157,15 @@ export function ConversationView() {
             src={otherUser?.profilePictureUrl}
             alt={otherUser?.username || 'User'}
             size="md"
+            data-testid="conversation-avatar"
           />
 
           <div className="flex-1 text-left">
             <div className="flex items-center gap-2">
-              <h2 className="font-semibold text-gray-900 dim:text-gray-100 dark:text-white">
+              <h2
+                className="font-semibold text-gray-900 dim:text-gray-100 dark:text-white"
+                data-testid="conversation-username"
+              >
                 {otherUser?.username || 'Unknown'}
               </h2>
               {otherUser?.mbtiPersonality && (
@@ -180,6 +191,7 @@ export function ConversationView() {
             }`}
             disabled={endConversationMutation.isPending}
             aria-label="Hold to end conversation"
+            data-testid="end-conversation-button"
           >
             {/* Text and Icon */}
             <div className="flex items-center gap-2 relative z-10">

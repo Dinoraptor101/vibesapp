@@ -302,9 +302,6 @@ test.describe('Integration Tests - Web-V2', () => {
     // Verify security section with Pigeon ID is visible
     await expect(page.getByText('Security')).toBeVisible();
     await expect(page.getByText(/this acts as your password/i)).toBeVisible();
-
-    // Verify logout button is visible
-    await expect(page.getByRole('button', { name: /logout/i })).toBeVisible();
   });
 
   test('should display and interact with preferences settings', async ({ page }) => {

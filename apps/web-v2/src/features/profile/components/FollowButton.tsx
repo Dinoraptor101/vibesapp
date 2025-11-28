@@ -31,6 +31,7 @@ export function FollowButton({ userId, isFollowing, className }: FollowButtonPro
       loading={followMutation.isPending}
       leftIcon={<Icon size={16} />}
       className={className}
+      data-testid="follow-button"
     >
       {isFollowing ? 'Following' : 'Follow'}
     </Button>

@@ -17,10 +17,11 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'vibes_admin_2025';
 export async function loginAsAdmin(page: Page): Promise<void> {
   // Navigate to admin login page
   await page.goto('/admin/login');
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
 
-  // Fill password input
+  // Fill password input - wait for it to be visible
   const passwordInput = page.locator('#admin-password');
+  await passwordInput.waitFor({ state: 'visible', timeout: 10000 });
   await passwordInput.fill(ADMIN_PASSWORD);
 
   // Click login button

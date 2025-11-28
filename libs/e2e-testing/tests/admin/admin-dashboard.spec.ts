@@ -216,66 +216,71 @@ test.describe('Admin Dashboard - Data Refresh', () => {
   });
 
   test('should handle metric refresh on data change', async ({ page }) => {
-    // Wait for initial metrics load
-    await page.waitForLoadState('networkidle');
-
-    // Get initial metric value
+    // Wait for initial metrics to load
     const activeUsersCard = page.getByTestId('metric-card-active-users');
-    await expect(activeUsersCard).toBeVisible();
+    await expect(activeUsersCard).toBeVisible({ timeout: 10000 });
 
     // Store initial value for comparison
     const initialValue = await activeUsersCard.getByTestId('metric-card-value').innerText();
     expect(initialValue).toBeTruthy(); // Ensure initial value exists
 
-    // Intercept next metrics call with updated data
-    let interceptCount = 0;
+    // Set up route interception for the NEXT metrics call
+    let metricsCallCount = 0;
     await page.route('**/api/admin/metrics', async (route) => {
-      interceptCount++;
-      if (interceptCount > 1) {
-        // Return modified metrics on refresh
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            success: true,
-            data: {
-              activeUsers: 999,
-              postsToday: 50,
-              reportsToday: 5,
-              autoHiddenPosts: 2,
+      metricsCallCount++;
+      // Return mock data matching the actual API response structure
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          success: true,
+          metrics: {
+            activeUsers: {
+              today: 999,
+              thisWeek: 999,
+              total: 1000,
             },
-          }),
-        });
-      } else {
-        await route.continue();
-      }
+            posts: {
+              today: 50,
+              thisWeek: 100,
+              change: 10,
+            },
+            reports: {
+              today: 5,
+              thisWeek: 10,
+              change: -5,
+            },
+            autoHidden: {
+              total: 2,
+              lastHour: 1,
+            },
+            urgent: {
+              autoHiddenLastHour: 1,
+              unreviewedFlagged: 3,
+            },
+          },
+        }),
+      });
     });
 
-    // Look for refresh button if it exists
-    const refreshButton = page.getByTestId('admin-metrics-refresh');
-    const hasRefreshButton = await refreshButton.isVisible().catch(() => false);
+    // Navigate away and back to trigger a data refresh
+    await page.getByTestId('admin-nav-users').click();
+    await page.waitForURL('**/admin/users', { timeout: 5000 });
 
-    if (hasRefreshButton) {
-      // Click refresh button
-      await refreshButton.click();
+    await page.getByTestId('admin-nav-dashboard').click();
+    await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
 
-      // Wait for data to update
-      await page.waitForTimeout(1000);
+    // Re-query the element after navigation (locators are stale after nav)
+    const refreshedActiveUsersCard = page.getByTestId('metric-card-active-users');
+    await expect(refreshedActiveUsersCard).toBeVisible({ timeout: 5000 });
 
-      // Verify metric value updated
-      const newValue = await activeUsersCard.getByTestId('metric-card-value').innerText();
-      expect(newValue).toBe('999');
-    } else {
-      // If no explicit refresh button, test that navigating away and back refreshes data
-      await page.getByTestId('admin-nav-users').click();
-      await page.waitForURL('**/admin/users', { timeout: 5000 });
+    // Wait for the metrics card to update with mocked data
+    await expect(refreshedActiveUsersCard.getByTestId('metric-card-value')).toHaveText('999', {
+      timeout: 5000,
+    });
 
-      await page.getByTestId('admin-nav-dashboard').click();
-      await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
-
-      // Data should be re-fetched
-      expect(interceptCount).toBeGreaterThanOrEqual(2);
-    }
+    // Verify at least one metrics call was intercepted
+    expect(metricsCallCount).toBeGreaterThanOrEqual(1);
   });
 
   test('should display metric card with subtitle and trend', async ({ page }) => {

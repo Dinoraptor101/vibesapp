@@ -753,7 +753,7 @@ async function uploadTestImage(request: any, baseURL: string, pigeonId: string):
   // Read the test image file
   const fs = await import('fs');
   const path = await import('path');
-  const imagePath = path.join(__dirname, '../../assets/test_image.jpeg');
+  const imagePath = path.join(__dirname, '../assets/test_image.jpeg');
   const imageBuffer = fs.readFileSync(imagePath);
 
   // Upload to S3
@@ -816,6 +816,9 @@ async function reportPostAPI(
 }
 
 test.describe('Report Post - API Tests', () => {
+  // Run in serial mode to avoid race conditions with shared test data
+  test.describe.configure({ mode: 'serial' });
+
   let baseURL: string;
   let testPostId: string;
   let postAuthor: { userId: string; pigeonId: string };
@@ -823,9 +826,10 @@ test.describe('Report Post - API Tests', () => {
   test.beforeAll(async ({ request, baseURL: configBaseURL }) => {
     baseURL = configBaseURL?.replace(':5173', ':5001') || 'http://localhost:5001';
 
-    // Create post author
+    // Create post author with unique ID including random suffix to avoid collisions
+    const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
     postAuthor = await createUserForReporting(request, baseURL, {
-      pigeonId: `pigeon-author-${Date.now()}`,
+      pigeonId: `pigeon-author-${uniqueSuffix}`,
       userName: 'Report Test Author',
       location: TEST_LOCATION_API,
     });
