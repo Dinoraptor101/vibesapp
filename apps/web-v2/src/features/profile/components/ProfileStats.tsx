@@ -1,22 +1,16 @@
 /**
  * ProfileStats Component
- * Displays post count, followers, and following counts
+ * Displays post count
  */
 
 interface ProfileStatsProps {
   postsCount: number;
-  followersCount: number;
-  followingCount: number;
 }
 
-export function ProfileStats({ postsCount, followersCount, followingCount }: ProfileStatsProps) {
+export function ProfileStats({ postsCount }: ProfileStatsProps) {
   return (
     <div className="flex items-center justify-around gap-4 rounded-lg border border-gray-200 dim:border-gray-600 dark:border-gray-700 bg-white dim:bg-gray-700 dark:bg-gray-800 p-4">
       <StatItem label="Posts" count={postsCount} />
-      <div className="h-10 w-px bg-gray-200 dim:bg-gray-600 dark:bg-gray-700" />
-      <StatItem label="Followers" count={followersCount} />
-      <div className="h-10 w-px bg-gray-200 dim:bg-gray-600 dark:bg-gray-700" />
-      <StatItem label="Following" count={followingCount} />
     </div>
   );
 }
