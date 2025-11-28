@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['vite.svg'],
+      includeAssets: ['logo.svg'],
       manifest: {
         name: 'VibesApp',
         short_name: 'Vibes',
@@ -19,8 +19,13 @@ export default defineConfig({
         display: 'standalone',
         icons: [
           {
-            src: '/vite.svg',
+            src: '/logo.svg',
             sizes: '192x192',
+            type: 'image/svg+xml',
+          },
+          {
+            src: '/logo.svg',
+            sizes: '512x512',
             type: 'image/svg+xml',
           },
         ],
