@@ -15,6 +15,10 @@ export function useEndConversation() {
       // Invalidate conversations list to show updated status
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
       queryClient.invalidateQueries({ queryKey: ['conversation'] });
+
+      // Invalidate DM request status so profile pages show correct button state
+      // (enables "Send DM Request" instead of navigating to closed conversation)
+      queryClient.invalidateQueries({ queryKey: ['dm-request-status'] });
     },
     onError: (error) => {
       console.error('Failed to end conversation:', error);
