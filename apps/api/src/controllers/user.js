@@ -167,8 +167,9 @@ const createUser = async (req, res) => {
   if (!recaptchaResult.success) {
     console.error('reCAPTCHA verification failed:', recaptchaResult.error);
     return res.status(403).json({
-      message: 'reCAPTCHA verification failed',
+      message: 'Unable to verify you are human. Please refresh the page and try again.',
       error: recaptchaResult.error,
+      code: 'RECAPTCHA_FAILED',
     });
   }
 
@@ -257,8 +258,9 @@ const login = async (req, res) => {
     if (!recaptchaResult.success) {
       console.error('reCAPTCHA verification failed:', recaptchaResult.error);
       return res.status(403).json({
-        message: 'reCAPTCHA verification failed',
+        message: 'Unable to verify you are human. Please refresh the page and try again.',
         error: recaptchaResult.error,
+        code: 'RECAPTCHA_FAILED',
       });
     }
   }

@@ -26,7 +26,8 @@ const adminLogin = async (req, res) => {
       console.log('[Admin Login] FAILED - reCAPTCHA verification failed:', recaptchaResult.error);
       return res.status(403).json({
         success: false,
-        message: recaptchaResult.error || 'reCAPTCHA verification failed',
+        message: 'Unable to verify you are human. Please refresh the page and try again.',
+        code: 'RECAPTCHA_FAILED',
       });
     }
 
