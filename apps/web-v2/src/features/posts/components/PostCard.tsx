@@ -8,8 +8,8 @@
  * - Image is not clickable; only comment button navigates to detail
  */
 
-import { MessageSquare, Heart, Flag } from 'lucide-react';
-import { useState, memo } from 'react';
+import { MessageSquare, Heart, Flag, Trash2 } from 'lucide-react';
+import { useState, memo, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui-next';
 import { useAuth } from '@/features/auth';
@@ -22,6 +22,7 @@ interface PostCardProps {
   post: Post;
   onLike?: (postId: string) => void;
   onReport?: (postId: string) => void;
+  onDelete?: (postId: string) => void;
   onComment?: (postId: string) => void; // Legacy prop - not used in new design
   hideCaption?: boolean; // Hide caption overlay when showing full caption section in detail view
   disableLink?: boolean; // Disable image click navigation (e.g., when already on detail page)
@@ -31,6 +32,7 @@ function PostCardComponent({
   post,
   onLike,
   onReport,
+  onDelete,
   hideCaption = false,
   disableLink = false,
 }: PostCardProps) {
@@ -39,10 +41,31 @@ function PostCardComponent({
 
   // Track if this specific post's like is being processed
   const [isLiking, setIsLiking] = useState(false);
+  // Track if delete is being processed
+  const [isDeleting, setIsDeleting] = useState(false);
+  // Track delete hold progress (0-100)
+  const [deleteProgress, setDeleteProgress] = useState(0);
+  // Refs for delete hold timers
+  const deleteTimerRef = useRef<number | null>(null);
+  const deleteIntervalRef = useRef<number | null>(null);
   // Track image load state for progressive loading
   const [imageLoaded, setImageLoaded] = useState(false);
   // Track if image error fallback was already attempted (prevents infinite loop)
   const [imageFailed, setImageFailed] = useState(false);
+
+  // Cleanup delete timers on unmount
+  useEffect(() => {
+    const timerRef = deleteTimerRef;
+    const intervalRef = deleteIntervalRef;
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
 
   // Calculate stats from reactions
   const likes = post.reactions.filter((r) => r.type === 'like').length;
@@ -54,6 +77,9 @@ function PostCardComponent({
 
   // Check if current user can report (not their own post)
   const canReport = currentUser && post.user.userId !== currentUser._id;
+
+  // Check if current user is the post owner (can delete)
+  const isOwner = currentUser && post.user.userId === currentUser._id;
 
   // Construct full image URL from CloudFront CDN
   const CDN_URL = import.meta.env.VITE_CDN_URL;
@@ -86,6 +112,55 @@ function PostCardComponent({
     e.preventDefault();
     e.stopPropagation();
     onReport?.(post._id);
+  };
+
+  // Execute delete after hold completes
+  const executeDelete = () => {
+    setIsDeleting(true);
+    setDeleteProgress(0);
+    onDelete?.(post._id);
+  };
+
+  // Hold-to-delete handlers
+  const handleDeleteMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isDeleting) return;
+
+    // Start progress animation
+    setDeleteProgress(0);
+    const startTime = Date.now();
+    const holdDuration = 1500; // 1.5 seconds hold required
+
+    deleteIntervalRef.current = window.setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min((elapsed / holdDuration) * 100, 100);
+      setDeleteProgress(progress);
+    }, 30);
+
+    // Trigger delete after hold duration
+    deleteTimerRef.current = window.setTimeout(() => {
+      if (deleteIntervalRef.current) {
+        clearInterval(deleteIntervalRef.current);
+      }
+      setDeleteProgress(100);
+      executeDelete();
+    }, holdDuration);
+  };
+
+  const handleDeleteMouseUp = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Cancel if not held long enough
+    if (deleteTimerRef.current) {
+      clearTimeout(deleteTimerRef.current);
+      deleteTimerRef.current = null;
+    }
+    if (deleteIntervalRef.current) {
+      clearInterval(deleteIntervalRef.current);
+      deleteIntervalRef.current = null;
+    }
+    setDeleteProgress(0);
   };
 
   // Don't render if no image (e.g., comments)
@@ -235,6 +310,53 @@ function PostCardComponent({
                 aria-label="Report post"
               >
                 <Flag className="w-4 h-4 transition-transform duration-200" />
+              </button>
+            )}
+
+            {/* Delete (only if owner) - Hold to confirm */}
+            {isOwner && (
+              <button
+                type="button"
+                onMouseDown={handleDeleteMouseDown}
+                onMouseUp={handleDeleteMouseUp}
+                onMouseLeave={handleDeleteMouseUp}
+                onTouchStart={handleDeleteMouseDown}
+                onTouchEnd={handleDeleteMouseUp}
+                disabled={isDeleting}
+                className={`relative flex items-center gap-1.5 transition-colors duration-200 group ml-auto ${
+                  isDeleting
+                    ? 'opacity-50 cursor-not-allowed text-text-secondary'
+                    : deleteProgress > 0
+                      ? 'text-vibe-negative'
+                      : 'text-text-secondary hover:text-vibe-negative'
+                }`}
+                aria-label="Hold to delete post"
+                title="Hold to delete"
+              >
+                <div className="relative">
+                  <Trash2
+                    className={`w-4 h-4 transition-transform duration-200 relative z-10 ${isDeleting ? 'animate-pulse' : ''}`}
+                  />
+                  {/* Circular progress indicator */}
+                  {deleteProgress > 0 && !isDeleting && (
+                    <svg
+                      className="absolute -inset-1 w-6 h-6 -rotate-90"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeDasharray={`${(deleteProgress / 100) * 62.8} 62.8`}
+                        className="text-vibe-negative"
+                      />
+                    </svg>
+                  )}
+                </div>
               </button>
             )}
           </div>

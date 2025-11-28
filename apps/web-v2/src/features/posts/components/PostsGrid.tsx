@@ -15,10 +15,11 @@ interface PostsGridProps {
   posts: Post[];
   onLike?: (postId: string) => void;
   onReport?: (postId: string) => void;
+  onDelete?: (postId: string) => void;
   onComment?: (postId: string) => void;
 }
 
-export function PostsGrid({ posts, onLike, onReport, onComment }: PostsGridProps) {
+export function PostsGrid({ posts, onLike, onReport, onDelete, onComment }: PostsGridProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
       {posts.map((post) => (
@@ -27,6 +28,7 @@ export function PostsGrid({ posts, onLike, onReport, onComment }: PostsGridProps
           post={post}
           onLike={onLike}
           onReport={onReport}
+          onDelete={onDelete}
           onComment={onComment}
         />
       ))}

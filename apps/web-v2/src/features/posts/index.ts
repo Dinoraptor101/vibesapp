@@ -45,6 +45,7 @@ export { useComments } from './hooks/useComments';
 export { useCreateComment } from './hooks/useCreateComment';
 export { useCreatePost } from './hooks/useCreatePost';
 export { useDeleteComment } from './hooks/useDeleteComment';
+export { useDeletePost } from './hooks/useDeletePost';
 export { useHeartComment } from './hooks/useHeartComment';
 export { useInfinitePosts } from './hooks/useInfinitePosts';
 export { usePost } from './hooks/usePost';

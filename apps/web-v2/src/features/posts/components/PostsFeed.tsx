@@ -11,6 +11,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui-next';
 import { searchPosts } from '../api/postService';
+import { useDeletePost } from '../hooks/useDeletePost';
 import { useInfinitePosts } from '../hooks/useInfinitePosts';
 import { usePostFilters } from '../hooks/usePostFilters';
 import type { Post } from '../types';
@@ -162,6 +163,12 @@ export function PostsFeed({ className, searchQuery }: PostsFeedProps) {
     navigate(`/report/${postId}`);
   };
 
+  // Handle delete
+  const { mutate: deletePost } = useDeletePost();
+  const handleDelete = (postId: string) => {
+    deletePost(postId);
+  };
+
   // SEARCH MODE RENDERING
   if (isSearchMode) {
     // Zen: Show loading only after 1 second
@@ -188,6 +195,7 @@ export function PostsFeed({ className, searchQuery }: PostsFeedProps) {
           posts={searchResults}
           onLike={toggleLike}
           onReport={handleReport}
+          onDelete={handleDelete}
           onComment={handleComment}
         />
 
@@ -268,6 +276,7 @@ export function PostsFeed({ className, searchQuery }: PostsFeedProps) {
         posts={posts}
         onLike={toggleLike}
         onReport={handleReport}
+        onDelete={handleDelete}
         onComment={handleComment}
       />
 
