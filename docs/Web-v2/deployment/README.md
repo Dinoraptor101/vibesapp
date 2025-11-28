@@ -28,7 +28,25 @@
 
 ## Deployment Process
 
-### Frontend (Vercel)
+### Quick Deployment (Recommended)
+
+Use the npm scripts from the repository root:
+
+```bash
+# Deploy both frontend and backend to QA
+npm run deploy:qa
+
+# Deploy only backend
+npm run deploy:qa:api
+
+# Deploy only frontend (builds automatically)
+npm run deploy:qa:web
+
+# Build frontend without deploying
+npm run build:qa:web
+```
+
+### Manual Frontend Deployment (Vercel)
 
 The frontend is pre-built locally and deployed as static files to Vercel.
 
@@ -54,7 +72,7 @@ cd dist && vercel --prod
 - Automatic SSL
 - Fast global CDN
 
-### Backend (Heroku)
+### Manual Backend Deployment (Heroku)
 
 The backend deploys from the `rebuilding-front-end` branch using the monorepo buildpack.
 
