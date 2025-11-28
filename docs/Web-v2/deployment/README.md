@@ -1,62 +1,130 @@
 # QA Deployment Documentation
 
-This directory contains the deployment plan, tracker, and machine-readable instructions for deploying Web V2 to the QA environment.
+> **Status**: ✅ DEPLOYED (November 27, 2025)
 
-## Files
+## Live Environment
 
-| File | Purpose | Audience |
-|------|---------|----------|
-| [QA-DEPLOYMENT-PLAN.md](./QA-DEPLOYMENT-PLAN.md) | Complete deployment plan with step-by-step instructions | Human |
-| [QA-DEPLOYMENT-TRACKER.md](./QA-DEPLOYMENT-TRACKER.md) | Status tracker for all tasks | Human |
-| [QA-DEPLOYMENT-PROMPT.md](./QA-DEPLOYMENT-PROMPT.md) | Machine-readable instructions for Copilot | Copilot |
+| Component | Platform | URL |
+|-----------|----------|-----|
+| **Frontend** | Vercel | https://qa.vibesapp.net |
+| **Backend** | Heroku | https://logosil-backend-a8355253628c.herokuapp.com |
+| **Database** | MongoDB Atlas | QA cluster |
 
-## Quick Start
+## Architecture
 
-### For Humans
+```
+┌─────────────────────┐         ┌─────────────────────┐
+│       Vercel        │   API   │       Heroku        │
+│   (Static Files)    │ ──────► │    (Node.js API)    │
+│  qa.vibesapp.net    │   SSE   │  logosil-backend    │
+└─────────────────────┘         └─────────────────────┘
+                                          │
+                                          ▼
+                                ┌─────────────────────┐
+                                │   MongoDB Atlas     │
+                                │    (QA Cluster)     │
+                                └─────────────────────┘
+```
 
-1. Read [QA-DEPLOYMENT-PLAN.md](./QA-DEPLOYMENT-PLAN.md) for the full plan
-2. Use [QA-DEPLOYMENT-TRACKER.md](./QA-DEPLOYMENT-TRACKER.md) to track progress
-3. Complete tasks marked 👤 HUMAN manually
+## Deployment Process
 
-### For Copilot
+### Frontend (Vercel)
 
-Use this prompt to execute code changes:
+The frontend is pre-built locally and deployed as static files to Vercel.
 
-> "Implement the QA deployment code changes from docs/Web-V2/deployment/QA-DEPLOYMENT-PROMPT.md"
+```bash
+# 1. Build with production environment variables
+cd apps/web-v2
+VITE_API_URL=https://logosil-backend-a8355253628c.herokuapp.com/api \
+VITE_CDN_URL=https://d1pegm4swremw5.cloudfront.net \
+VITE_BACKEND_API_KEY=<your-api-key> \
+VITE_S3_BUCKET=logosil-image-host \
+VITE_S3_REGION=us-east-2 \
+VITE_ENABLE_RECAPTCHA=false \
+VITE_USE_SSE=true \
+npm run build
 
-## Task Distribution
+# 2. Deploy to Vercel
+cd dist && vercel --prod
+```
 
-### Copilot Can Do ⚙️
+**Why Vercel?**
+- Monorepo-friendly (no buildpack complexity)
+- Free tier for static sites
+- Automatic SSL
+- Fast global CDN
 
-- Fix `apps/api/Procfile` path
-- Create `apps/web-v2/static.json`
-- Create `apps/web-v2/Procfile` (optional)
-- Create `apps/api/scripts/migratePhase3_4.js`
-- Update CORS origins if needed
+### Backend (Heroku)
 
-### Human Must Do 👤
+The backend deploys from the `rebuilding-front-end` branch using the monorepo buildpack.
 
-- Verify Heroku CLI installed and authenticated
-- Configure Heroku Dashboard (connect GitHub, set branch)
-- Upload environment variables to Heroku config vars
-- Execute database migration scripts
-- Trigger deployment
-- Verify deployment success
-- Run smoke tests / E2E tests
+```bash
+# Deploy backend
+git push https://git.heroku.com/logosil-backend.git rebuilding-front-end:main --force
+```
 
-## Target Environment
+**Buildpacks:**
+1. `https://github.com/lstoll/heroku-buildpack-monorepo` (copies `apps/api` to root)
+2. `heroku/nodejs`
 
-| Component | Value |
-|-----------|-------|
-| Frontend Heroku App | `logosil-frontend` |
-| Backend Heroku App | `logosil-backend` |
-| Source Branch | `rebuilding-front-end` |
-| Frontend URL | `https://qa.vibesapp.net` (or Heroku default) |
-| Backend URL | `https://api-qa.vibesapp.net` (or Heroku default) |
-| Database | MongoDB Atlas (QA cluster) |
+**Config Vars:**
+- `APP_BASE=apps/api`
+- `NODE_ENV=production`
+- `MONGO_URI`, `AWS_*`, `API_KEY`, etc.
+
+## Environment Variables
+
+### Frontend (Build-time)
+
+| Variable | Value |
+|----------|-------|
+| `VITE_API_URL` | `https://logosil-backend-a8355253628c.herokuapp.com/api` |
+| `VITE_CDN_URL` | `https://d1pegm4swremw5.cloudfront.net` |
+| `VITE_BACKEND_API_KEY` | (set at build time) |
+| `VITE_S3_BUCKET` | `logosil-image-host` |
+| `VITE_S3_REGION` | `us-east-2` |
+| `VITE_ENABLE_RECAPTCHA` | `false` |
+| `VITE_USE_SSE` | `true` |
+
+### Backend (Heroku Config Vars)
+
+| Variable | Description |
+|----------|-------------|
+| `APP_BASE` | `apps/api` |
+| `NODE_ENV` | `production` |
+| `MONGO_URI` | MongoDB Atlas connection string |
+| `AWS_ACCESS_KEY_ID` | S3 access key |
+| `AWS_SECRET_ACCESS_KEY` | S3 secret key |
+| `AWS_REGION` | `us-east-2` |
+| `AWS_S3_BUCKET` | `logosil-image-host` |
+| `API_KEY` | Backend API key |
+| `ADMIN_PASSWORD` | Admin panel password |
+| `FRONTEND_URL` | `https://qa.vibesapp.net` |
+
+## DNS Configuration
+
+| Domain | Type | Value | Provider |
+|--------|------|-------|----------|
+| `qa.vibesapp.net` | A | `76.76.21.21` | GoDaddy → Vercel |
+
+## CORS Configuration
+
+The backend (`apps/api/src/index.js`) allows these origins:
+- `https://vibesapp.net` (production)
+- `https://qa.vibesapp.net` (QA)
+- `https://dist-gamma-cyan.vercel.app` (Vercel default)
+
+## Legacy Files
+
+The following files in this directory were created for the original Heroku-based deployment plan and are now outdated:
+
+| File | Status |
+|------|--------|
+| `QA-DEPLOYMENT-PLAN.md` | Outdated (was for dual-Heroku setup) |
+| `QA-DEPLOYMENT-TRACKER.md` | Outdated |
+| `QA-DEPLOYMENT-PROMPT.md` | Outdated |
 
 ## Related Documentation
 
-- [Phase 3.4 Implementation Log](../development-log/PHASE-3.4-IMPLEMENTATION-LOG.md)
 - [Production Deployment Guide](../../Web-V1/13-production-deployment.md)
 - [SSE Implementation](../../../apps/api/SSE-IMPLEMENTATION-SUMMARY.md)
