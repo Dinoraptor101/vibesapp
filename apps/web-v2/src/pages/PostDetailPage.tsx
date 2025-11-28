@@ -171,7 +171,7 @@ export function PostDetailPageContent({ postId: propPostId }: PostDetailPageCont
           })()}
 
           {/* Mobile: Comment List (scrollable, above sticky input) */}
-          <div id="comments-section" className="mt-6 space-y-4 md:hidden">
+          <div id="comments-section" className="mt-6 mb-16 space-y-4 md:mb-0 md:hidden">
             {/* Section Header */}
             <div className="flex items-center gap-2 px-1">
               <MessageCircle className="w-5 h-5 text-text-tertiary" />
