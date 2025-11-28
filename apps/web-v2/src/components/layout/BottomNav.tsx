@@ -2,6 +2,7 @@ import { Bell, Home, MessageSquare, Plus } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUnreadCounts } from '@/features/activity';
 import { useAuth } from '@/features/auth/context/useAuth';
+import { useUnreadMessageCount } from '@/features/messaging';
 import { UserMenu } from './UserMenu';
 
 export function BottomNav() {
@@ -9,10 +10,12 @@ export function BottomNav() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // Fetch real unread counts from Activity API
+  // Activity counts (likes, comments, follows, etc.)
   const { data: activityCounts } = useUnreadCounts();
   const unreadActivity = activityCounts?.all || 0;
-  const unreadMessages = activityCounts?.messages || 0;
+
+  // Message counts (unread conversations + pending DM requests)
+  const unreadMessages = useUnreadMessageCount();
 
   const isActive = (path: string) => location.pathname === path;
 

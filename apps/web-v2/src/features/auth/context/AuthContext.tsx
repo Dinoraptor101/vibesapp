@@ -9,6 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { GlobalSSE } from '@/components/GlobalSSE';
 import { clearAllScrollPositions } from '@/hooks/useScrollRestoration';
 import { deleteCookie, getCookie, setCookie } from '@/lib/api';
 import type { User } from '@/types';
@@ -151,5 +152,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     refreshUser,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {user && <GlobalSSE userId={user._id} />}
+      {children}
+    </AuthContext.Provider>
+  );
 }

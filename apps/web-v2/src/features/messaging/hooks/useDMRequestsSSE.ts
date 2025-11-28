@@ -28,16 +28,15 @@ export function useDMRequestsSSE(userId: string | undefined) {
   });
 
   useEffect(() => {
-    if (!userId || !isConnected) return;
+    if (!userId) return;
 
     /**
      * Handle dm-request-update event
      * Updates DM requests list based on action type
      */
-    const handleDMRequestUpdate = (event: MessageEvent) => {
+    const handleDMRequestUpdate = (data: unknown) => {
       try {
-        const data: DMRequestUpdateEvent = JSON.parse(event.data);
-        const { request, action } = data;
+        const { request, action } = data as DMRequestUpdateEvent;
 
         console.log('[useDMRequestsSSE] DM request update:', action, request._id);
 
@@ -91,7 +90,7 @@ export function useDMRequestsSSE(userId: string | undefined) {
     return () => {
       removeEventListener('dm-request-update', handleDMRequestUpdate);
     };
-  }, [userId, isConnected, addEventListener, removeEventListener, queryClient]);
+  }, [userId, addEventListener, removeEventListener, queryClient]);
 
   return {
     isConnected,

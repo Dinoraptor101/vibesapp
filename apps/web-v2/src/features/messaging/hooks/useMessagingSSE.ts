@@ -39,16 +39,15 @@ export function useMessagingSSE(userId: string | undefined) {
   const processedMessageIds = useRef(new Set<string>());
 
   useEffect(() => {
-    if (!userId || !isConnected) return;
+    if (!userId) return;
 
     /**
      * Handle new-message event
      * Updates both conversation details and conversations list
      */
-    const handleNewMessage = (event: MessageEvent) => {
+    const handleNewMessage = (rawData: unknown) => {
       try {
-        const data: NewMessageEvent = JSON.parse(event.data);
-        const { conversationId, message } = data;
+        const { conversationId, message } = rawData as NewMessageEvent;
 
         // Prevent duplicate message processing
         if (message._id && processedMessageIds.current.has(message._id)) {
@@ -123,10 +122,9 @@ export function useMessagingSSE(userId: string | undefined) {
      * Handle read-status event
      * Updates message read status in conversation
      */
-    const handleReadStatus = (event: MessageEvent) => {
+    const handleReadStatus = (rawData: unknown) => {
       try {
-        const data: ReadStatusEvent = JSON.parse(event.data);
-        const { conversationId, userId: readByUserId, messageIds } = data;
+        const { conversationId, userId: readByUserId, messageIds } = rawData as ReadStatusEvent;
 
         console.log('[useMessagingSSE] Read status update:', conversationId, messageIds.length);
 
@@ -182,7 +180,7 @@ export function useMessagingSSE(userId: string | undefined) {
       removeEventListener('new-message', handleNewMessage);
       removeEventListener('read-status', handleReadStatus);
     };
-  }, [userId, isConnected, addEventListener, removeEventListener, queryClient]);
+  }, [userId, addEventListener, removeEventListener, queryClient]);
 
   return {
     isConnected,
