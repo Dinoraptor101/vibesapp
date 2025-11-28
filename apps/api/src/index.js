@@ -15,6 +15,7 @@ const corsOptions = {
     'https://qa.vibesapp.net', // QA frontend
     'https://api-qa.vibesapp.net', // QA backend
     'https://dinoraptor101.github.io', // Failover production
+    'https://dist-gamma-cyan.vercel.app', // Vercel QA frontend
   ],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'x-pigeon-id', 'x-admin-token'],
