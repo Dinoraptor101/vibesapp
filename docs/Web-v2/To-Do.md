@@ -1,5 +1,10 @@
 - We are yet to implement a Vibes Score (Karma engine) into Web-V2 and how to better represent it
 
+- **Enhanced Search Functionality** - Currently search only finds posts by caption text. Need to implement:
+  1. **Search by Username** - Exact match (case-insensitive). Searching "kindness" should find all posts by user "Kindness", but "kind" should NOT match "kindness".
+  2. **Hashtag Extraction & Search** - Extract hashtags from post captions on creation, store as lowercase array field. Searching `#travel` should specifically query the hashtags field. All hashtags stored in lowercase for consistency.
+  3. Update search placeholder to "Search posts, users, or hashtags..."
+
 - We need a technology approach that will enforce 1 user per account policy... maybe we can track users created using the exact same location or the exact same IP, and flag them with a unique identifier, and then group them under the User Management Admin Dashboard
 
 - We should consider how secure our database is from hacking we do use Atlas MongoDB but is our API access to it best in class? 
