@@ -11,7 +11,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getCookie } from '@/lib/api';
 
-const SSE_ENDPOINT = '/api/sse/connect';
+const SSE_ENDPOINT = '/sse/connect';
 const SSE_ENABLED = import.meta.env.VITE_USE_SSE === 'true';
 const MAX_BACKOFF_MS = 30000; // 30 seconds max
 
