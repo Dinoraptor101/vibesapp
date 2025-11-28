@@ -15,8 +15,6 @@ interface ProfileHeaderProps {
   onDMRequest: () => void;
   dmStatus?: 'connected' | 'pending' | 'received' | 'none';
   postsCount: number;
-  followersCount: number;
-  followingCount: number;
 }
 
 export function ProfileHeader({
@@ -25,8 +23,6 @@ export function ProfileHeader({
   onDMRequest,
   dmStatus,
   postsCount,
-  followersCount,
-  followingCount,
 }: ProfileHeaderProps) {
   // Determine button text and state
   const getMessageButtonProps = () => {
@@ -56,24 +52,24 @@ export function ProfileHeader({
         />
 
         <div className="flex-1 space-y-2">
-          {/* Username and Age */}
+          {/* Username */}
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-gray-900 dim:text-gray-100 dark:text-white">
               @{profile.username}
             </h1>
-            {profile.age && (
-              <span className="text-sm text-gray-500 dim:text-gray-450 dark:text-gray-400">
-                Age: {profile.age}
-              </span>
-            )}
           </div>
 
-          {/* MBTI + Polarity (on same line per spec) */}
+          {/* MBTI + Polarity + Age (on same line per spec) */}
           <div className="flex items-center gap-2">
             {profile.mbtiPersonality && <Badge variant="brand">{profile.mbtiPersonality}</Badge>}
             {profile.polarity && (
               <span className="text-sm font-medium text-gray-600 dim:text-gray-400 dark:text-gray-400">
                 • {profile.polarity.toUpperCase()}
+              </span>
+            )}
+            {profile.age && (
+              <span className="text-sm font-medium text-gray-600 dim:text-gray-400 dark:text-gray-400">
+                • Age: {profile.age}
               </span>
             )}
           </div>
@@ -90,10 +86,6 @@ export function ProfileHeader({
               </>
             )}
             <span>{postsCount} posts</span>
-            <span className="text-gray-400">•</span>
-            <span>{followersCount} followers</span>
-            <span className="text-gray-400">•</span>
-            <span>{followingCount} following</span>
           </div>
 
           {/* Action Buttons */}

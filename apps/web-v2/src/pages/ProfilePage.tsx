@@ -119,8 +119,6 @@ export function ProfilePageContent({ userId: propUserId }: ProfilePageContentPro
           onDMRequest={handleMessageClick}
           dmStatus={dmStatus?.reason}
           postsCount={profile.postsCount}
-          followersCount={profile.followersCount}
-          followingCount={profile.followingCount}
         />
 
         {/* Posts Grid */}
