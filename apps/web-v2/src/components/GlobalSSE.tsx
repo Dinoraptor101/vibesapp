@@ -14,7 +14,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import type { Activity } from '@/features/activity/types';
-import type { Conversation, DMRequest, Message } from '@/features/messaging/api/dmService';
+import type { Conversation, Message } from '@/features/messaging/api/dmService';
 import { sseManager } from '@/lib/sse';
 
 // Event type definitions
@@ -32,11 +32,6 @@ interface ReadStatusEvent {
   conversationId: string;
   userId: string;
   messageIds: string[];
-}
-
-interface DMRequestUpdateEvent {
-  request: DMRequest;
-  action: 'created' | 'accepted' | 'declined';
 }
 
 interface GlobalSSEProps {
@@ -201,28 +196,16 @@ export function GlobalSSE({ userId }: GlobalSSEProps) {
     // DM Request Events
     // ========================================
     const handleDMRequestUpdate = (data: unknown) => {
-      const { request, action } = data as DMRequestUpdateEvent;
-      console.log('[GlobalSSE] DM request:', action, request._id);
+      // Backend sends: { requestId, status, sender } or { requestId, status }
+      const updateData = data as { requestId: string; status: string; sender?: string };
+      console.log('[GlobalSSE] DM request update:', updateData.status, updateData.requestId);
 
-      queryClient.setQueryData(['dm-requests'], (oldData: DMRequest[] | undefined) => {
-        if (!oldData) {
-          return action === 'created' ? [request] : [];
-        }
+      // Simply invalidate the dm-requests query to refetch fresh data
+      // This is more reliable than trying to update the cache with partial data
+      queryClient.invalidateQueries({ queryKey: ['dm-requests'] });
 
-        if (action === 'created') {
-          if (oldData.some((r) => r._id === request._id)) return oldData;
-          return [request, ...oldData];
-        }
-
-        if (action === 'accepted' || action === 'declined') {
-          return oldData.filter((r) => r._id !== request._id);
-        }
-
-        return oldData;
-      });
-
-      // Refresh conversations if accepted
-      if (action === 'accepted') {
+      // Refresh conversations if accepted (new conversation created or reopened)
+      if (updateData.status === 'accepted') {
         queryClient.invalidateQueries({ queryKey: ['conversations', userId] });
       }
 

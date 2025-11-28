@@ -5,6 +5,7 @@
 
 import { formatDistanceToNow } from 'date-fns';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Avatar, Badge, Button } from '@/components/ui-next';
 import { useAcceptDMRequest } from '../hooks/useAcceptDMRequest';
 import { useDeclineDMRequest } from '../hooks/useDeclineDMRequest';
@@ -16,6 +17,7 @@ interface DMRequestCardProps {
 
 export function DMRequestCard({ request }: DMRequestCardProps) {
   const [showFullMessage, setShowFullMessage] = useState(false);
+  const navigate = useNavigate();
   const acceptMutation = useAcceptDMRequest();
   const declineMutation = useDeclineDMRequest();
 
@@ -23,7 +25,14 @@ export function DMRequestCard({ request }: DMRequestCardProps) {
   if (!sender) return null;
 
   const handleAccept = () => {
-    acceptMutation.mutate(request._id);
+    acceptMutation.mutate(request._id, {
+      onSuccess: (data) => {
+        // Navigate to the conversation after accepting
+        if (data.conversation?._id) {
+          navigate(`/messages/${data.conversation._id}`);
+        }
+      },
+    });
   };
 
   const handleDecline = () => {
