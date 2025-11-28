@@ -492,12 +492,6 @@ export function SignupWizard() {
             <div className="space-y-4 rounded-lg border border-border bg-surface-elevated p-6">
               {/* Month Selector */}
               <div className="space-y-2">
-                <label
-                  htmlFor="birth-month"
-                  className="block text-sm font-medium text-text-secondary"
-                >
-                  Month
-                </label>
                 <select
                   id="birth-month"
                   value={signupData.birthMonth || ''}
@@ -510,7 +504,7 @@ export function SignupWizard() {
                   className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-text-primary transition-colors focus:border-brand-purple focus:outline-none focus:ring-2 focus:ring-brand-purple/20"
                 >
                   <option value="" disabled>
-                    Select month
+                    Month
                   </option>
                   {MONTHS.map((month) => (
                     <option key={month.value} value={month.value}>
@@ -522,12 +516,6 @@ export function SignupWizard() {
 
               {/* Year Selector */}
               <div className="space-y-2">
-                <label
-                  htmlFor="birth-year"
-                  className="block text-sm font-medium text-text-secondary"
-                >
-                  Year
-                </label>
                 <select
                   id="birth-year"
                   value={signupData.birthYear || ''}
@@ -540,7 +528,7 @@ export function SignupWizard() {
                   className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-text-primary transition-colors focus:border-brand-purple focus:outline-none focus:ring-2 focus:ring-brand-purple/20"
                 >
                   <option value="" disabled>
-                    Select year
+                    Year
                   </option>
                   {YEARS.map((year) => (
                     <option key={year} value={year}>
