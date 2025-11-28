@@ -31,12 +31,35 @@ const STEPS = [
   { id: 1, title: 'Welcome', required: true },
   { id: 2, title: 'Your Pigeon ID', required: true },
   { id: 3, title: 'Username', required: true },
-  { id: 4, title: 'MBTI Type', required: true },
-  { id: 5, title: 'Polarity', required: true },
-  { id: 6, title: 'Location', required: true },
-  { id: 7, title: 'Avatar', required: false },
-  { id: 8, title: 'About You', required: false },
+  { id: 4, title: 'Your Age', required: true },
+  { id: 5, title: 'MBTI Type', required: true },
+  { id: 6, title: 'Polarity', required: true },
+  { id: 7, title: 'Location', required: true },
+  { id: 8, title: 'Avatar', required: false },
+  { id: 9, title: 'About You', required: false },
 ];
+
+// Month names for birth date selector
+const MONTHS = [
+  { value: 1, label: 'January' },
+  { value: 2, label: 'February' },
+  { value: 3, label: 'March' },
+  { value: 4, label: 'April' },
+  { value: 5, label: 'May' },
+  { value: 6, label: 'June' },
+  { value: 7, label: 'July' },
+  { value: 8, label: 'August' },
+  { value: 9, label: 'September' },
+  { value: 10, label: 'October' },
+  { value: 11, label: 'November' },
+  { value: 12, label: 'December' },
+];
+
+// Generate year options (13 to 100 years old)
+const currentYear = new Date().getFullYear();
+const MIN_AGE = 13;
+const MAX_AGE = 100;
+const YEARS = Array.from({ length: MAX_AGE - MIN_AGE + 1 }, (_, i) => currentYear - MIN_AGE - i);
 
 export function SignupWizard() {
   const navigate = useNavigate();
@@ -92,8 +115,8 @@ export function SignupWizard() {
     polarity: 'yang', // Default to yang
     location: null,
     bio: '',
-    birthYear: new Date().getFullYear() - 20, // Default to 20 years old
-    birthMonth: 1,
+    birthYear: 0, // User must select
+    birthMonth: 0, // User must select
     sex: 'Other',
   });
 
@@ -171,9 +194,10 @@ export function SignupWizard() {
       }
     }
 
-    // Step 4 MBTI - validation handled by disabled button
-    // Step 5 is polarity - no validation needed (has default)
-    // Step 6 location - validation handled by disabled button
+    // Step 4 Birth Date - validation handled by disabled button
+    // Step 5 MBTI - validation handled by disabled button
+    // Step 6 is polarity - no validation needed (has default)
+    // Step 7 location - validation handled by disabled button
 
     if (currentStep < STEPS.length) {
       setCurrentStep(currentStep + 1);
@@ -461,6 +485,82 @@ export function SignupWizard() {
         return (
           <div className="space-y-6">
             <div className="space-y-2 text-center">
+              <h2 className="text-2xl font-bold text-text-primary">Your Age</h2>
+              <p className="text-text-secondary">We use this to show your age on your profile</p>
+            </div>
+
+            <div className="space-y-4 rounded-lg border border-border bg-surface-elevated p-6">
+              {/* Month Selector */}
+              <div className="space-y-2">
+                <label
+                  htmlFor="birth-month"
+                  className="block text-sm font-medium text-text-secondary"
+                >
+                  Month
+                </label>
+                <select
+                  id="birth-month"
+                  value={signupData.birthMonth || ''}
+                  onChange={(e) =>
+                    setSignupData((prev) => ({
+                      ...prev,
+                      birthMonth: Number(e.target.value),
+                    }))
+                  }
+                  className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-text-primary transition-colors focus:border-brand-purple focus:outline-none focus:ring-2 focus:ring-brand-purple/20"
+                >
+                  <option value="" disabled>
+                    Select month
+                  </option>
+                  {MONTHS.map((month) => (
+                    <option key={month.value} value={month.value}>
+                      {month.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Year Selector */}
+              <div className="space-y-2">
+                <label
+                  htmlFor="birth-year"
+                  className="block text-sm font-medium text-text-secondary"
+                >
+                  Year
+                </label>
+                <select
+                  id="birth-year"
+                  value={signupData.birthYear || ''}
+                  onChange={(e) =>
+                    setSignupData((prev) => ({
+                      ...prev,
+                      birthYear: Number(e.target.value),
+                    }))
+                  }
+                  className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-text-primary transition-colors focus:border-brand-purple focus:outline-none focus:ring-2 focus:ring-brand-purple/20"
+                >
+                  <option value="" disabled>
+                    Select year
+                  </option>
+                  {YEARS.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <p className="text-center text-xs text-text-secondary">
+                🔒 This data is private and only used to calculate your age
+              </p>
+            </div>
+          </div>
+        );
+
+      case 5:
+        return (
+          <div className="space-y-6">
+            <div className="space-y-2 text-center">
               <h2 className="text-2xl font-bold text-text-primary">Your MBTI Personality</h2>
               <p className="text-text-secondary">Help others understand how you think</p>
             </div>
@@ -486,7 +586,7 @@ export function SignupWizard() {
           </div>
         );
 
-      case 5:
+      case 6:
         return (
           <div className="space-y-6">
             <div className="space-y-2 text-center">
@@ -551,7 +651,7 @@ export function SignupWizard() {
           </div>
         );
 
-      case 6:
+      case 7:
         return (
           <div className="space-y-6">
             <div className="space-y-2 text-center">
@@ -568,7 +668,7 @@ export function SignupWizard() {
           </div>
         );
 
-      case 7:
+      case 8:
         return (
           <div className="space-y-6">
             <div className="space-y-2 text-center">
@@ -613,7 +713,7 @@ export function SignupWizard() {
           </div>
         );
 
-      case 8:
+      case 9:
         return (
           <div className="space-y-6">
             <div className="space-y-2 text-center">
@@ -693,8 +793,9 @@ export function SignupWizard() {
               disabled={
                 isSubmitting ||
                 (currentStep === 3 && !isUsernameValid(signupData.userName)) ||
-                (currentStep === 4 && !signupData.mbtiPersonality) ||
-                (currentStep === 6 && !signupData.location)
+                (currentStep === 4 && (!signupData.birthMonth || !signupData.birthYear)) ||
+                (currentStep === 5 && !signupData.mbtiPersonality) ||
+                (currentStep === 7 && !signupData.location)
               }
               className="ml-auto"
             >
