@@ -5,10 +5,10 @@
  * Uses Pigeon ID (password-only) authentication system.
  */
 
+import { useQueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
 import { clearAllScrollPositions } from '@/hooks/useScrollRestoration';
 import { deleteCookie, getCookie, setCookie } from '@/lib/api';
 import type { User } from '@/types';
