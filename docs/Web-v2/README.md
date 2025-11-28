@@ -30,12 +30,20 @@ Web-v2 is a complete rewrite of the VibesApp frontend using modern technologies 
 - **State**: React Query + Zustand
 - **UI**: Radix UI, Lucide icons
 - **Build**: ESLint + Biome, Playwright testing
-- **Deployment**: Heroku with PWA support
+- **Deployment**: Vercel (frontend) + Heroku (backend)
+
+## Live Environments
+
+| Environment | Frontend | Backend |
+|-------------|----------|--------|
+| **QA** | https://qa.vibesapp.net (Vercel) | https://logosil-backend-a8355253628c.herokuapp.com (Heroku) |
+| **Production** | https://vibesapp.net | https://api.vibesapp.net |
 
 ## Development Status
 
 ✅ **Complete** - All features implemented
-⏳ **Pending** - ReCaptcha V3 integration, production deployment
+✅ **Deployed** - QA environment live on Vercel + Heroku
+⏳ **Pending** - Production deployment
 
 ## Archived Documentation
 
@@ -45,5 +53,5 @@ Historical planning and implementation documents are archived in:
 
 ---
 
-**Last Updated**: November 24, 2025
-**Status**: Documentation Complete
+**Last Updated**: November 27, 2025
+**Status**: QA Deployed

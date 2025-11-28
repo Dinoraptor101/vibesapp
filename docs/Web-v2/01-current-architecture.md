@@ -28,7 +28,23 @@
 ### Build & Deployment
 - **Vite Build** - Optimized production builds
 - **PWA Support** - Service worker and offline capabilities
-- **Heroku** - Cloud hosting platform
+- **Vercel** - Frontend static hosting (CDN, auto SSL)
+- **Heroku** - Backend API hosting
+
+### Deployment Architecture
+```
+┌─────────────────────┐         ┌─────────────────────┐
+│       Vercel        │   API   │       Heroku        │
+│   (Static Files)    │ ──────► │    (Node.js API)    │
+│  qa.vibesapp.net    │   SSE   │  logosil-backend    │
+└─────────────────────┘         └─────────────────────┘
+```
+
+**Why this architecture?**
+- Monorepo-friendly (no complex buildpack issues)
+- Frontend builds locally, deploys as static files
+- SSE connections go directly from browser to Heroku
+- Fast global CDN for static assets via Vercel
 
 ## Project Structure
 
