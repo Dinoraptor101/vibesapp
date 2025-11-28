@@ -268,7 +268,7 @@ const getPosts = async (req, res) => {
 
   try {
     // Build query filter
-    const query = { isHidden: false };
+    const query = { isHidden: false, isDeleted: { $ne: true } };
 
     // Exclude posts that the current user has reported (hidden for them)
     if (currentUserId) {
@@ -372,7 +372,7 @@ const getPostById = async (req, res) => {
   try {
     // Fetch the post document from the database
     const post = await Post.findById(postHex);
-    if (!post) {
+    if (!post || post.isDeleted) {
       return res.status(404).json({ error: 'Post not found' });
     }
 
@@ -413,8 +413,8 @@ const getPostById = async (req, res) => {
 const deletePost = async (req, res) => {
   try {
     const { postId } = req.params;
-    const { userId } = req.body;
-    console.log('Deleting post', { postId, userId });
+    const userId = req.validatedUserId; // Get userId from auth middleware
+    console.log('Soft deleting post', { postId, userId });
 
     if (!postId) {
       console.error('API Error: Missing postId');
@@ -442,6 +442,11 @@ const deletePost = async (req, res) => {
       return res.status(403).json({ message: 'You cannot delete posts of others' });
     }
 
+    // Check if already deleted
+    if (post.isDeleted) {
+      return res.status(400).json({ message: 'Post is already deleted' });
+    }
+
     // Transact Karma for deleting a post before making any changes
     console.time('karma');
 
@@ -455,21 +460,18 @@ const deletePost = async (req, res) => {
     const action = 'handlePostDeletion';
     const karmaResult = await karma[action](user);
     if (karmaResult !== true) {
-      await session.abortTransaction();
-      session.endSession();
       console.error('Karma action failed', { userId, karmaResult });
       return res.status(400).json({ error: karmaResult });
     }
     console.timeEnd('karma');
 
-    console.log('Deleting image from S3');
-    await deleteImageFromS3(post.image);
+    // Soft delete: Set isDeleted flag instead of removing from database
+    console.log('Soft deleting post (setting isDeleted=true)');
+    post.isDeleted = true;
+    await post.save();
 
-    console.log('Deleting post from database');
-    await Post.findByIdAndDelete(postId);
-
-    console.log('Post and image deleted successfully');
-    res.status(200).json({ message: 'Post and image deleted successfully' });
+    console.log('Post soft deleted successfully');
+    res.status(200).json({ message: 'Post deleted successfully' });
   } catch (err) {
     console.error('Error:', err);
     res.status(500).json({ error: err.message });

@@ -14,6 +14,7 @@ import {
   CommentList,
   PostCard,
   useCreateComment,
+  useDeletePost,
   usePost,
   useToggleLike,
 } from '@/features/posts';
@@ -35,6 +36,7 @@ export function PostDetailPageContent({ postId: propPostId }: PostDetailPageCont
 
   const createComment = useCreateComment(postId || '');
   const toggleLike = useToggleLike();
+  const { mutate: deletePostMutation } = useDeletePost();
 
   // Show nothing if no postId (will show when route doesn't match)
   if (!postId) {
@@ -48,6 +50,10 @@ export function PostDetailPageContent({ postId: propPostId }: PostDetailPageCont
 
   const handleReport = (postId: string) => {
     navigate(`/report/${postId}`);
+  };
+
+  const handleDelete = (postId: string) => {
+    deletePostMutation(postId);
   };
 
   const handleComment = () => {
@@ -138,6 +144,7 @@ export function PostDetailPageContent({ postId: propPostId }: PostDetailPageCont
                   post={post}
                   onLike={handleLike}
                   onReport={handleReport}
+                  onDelete={handleDelete}
                   onComment={handleComment}
                   hideCaption={showFullCaptionSection}
                   disableLink

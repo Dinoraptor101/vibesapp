@@ -18,7 +18,7 @@ router.post('/create', checkPostingRestrictions, createPost);
 router.get('/', pigeonAuth, getPosts);
 router.get('/search', searchPosts); // Search must come before /:id to avoid conflict
 router.get('/:id', getPostById);
-router.delete('/:postId', deletePost);
+router.delete('/:postId', pigeonAuth, deletePost);
 router.post('/:id/like', likePost);
 router.post('/:id/react', reactToPost); // Toggle like/unlike
 router.delete('/:id/reaction', unlikePost); // Unlike a post
