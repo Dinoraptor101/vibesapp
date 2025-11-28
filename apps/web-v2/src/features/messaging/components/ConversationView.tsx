@@ -5,7 +5,7 @@
  * Phase 4.6 Update:
  * - Uses unified polling (useMessagingPolling)
  * - Automatic visibility-based read detection (useAutoMarkAsRead)
- * - No more infinite loops or manual useRef flags
+ * - SSE updates handled globally by GlobalSSE
  */
 
 import { ArrowLeft, Ban, MessageSquareDashed } from 'lucide-react';
@@ -16,7 +16,6 @@ import { useAuth } from '@/features/auth';
 import { useAutoMarkAsRead } from '../hooks/useAutoMarkAsRead';
 import { useEndConversation } from '../hooks/useEndConversation';
 import { useMessagingPolling } from '../hooks/useMessagingPolling';
-import { useMessagingSSE } from '../hooks/useMessagingSSE';
 import { useSendMessage } from '../hooks/useSendMessage';
 import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
@@ -28,10 +27,8 @@ export function ConversationView() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const previousMessageCountRef = useRef(0);
 
-  // SSE real-time updates for messaging
-  useMessagingSSE(user?._id);
-
   // Unified polling - automatically manages queries based on URL
+  // SSE updates are handled globally by GlobalSSE component in AuthContext
   const { activeConversation, isLoading } = useMessagingPolling();
 
   // Automatic read detection - marks as read when user is viewing

@@ -32,16 +32,15 @@ export function useActivitySSE(userId: string | undefined) {
   });
 
   useEffect(() => {
-    if (!userId || !isConnected) return;
+    if (!userId) return;
 
     /**
      * Handle activity-update event
      * Adds new activity to the activities list
      */
-    const handleActivityUpdate = (event: MessageEvent) => {
+    const handleActivityUpdate = (rawData: unknown) => {
       try {
-        const data: ActivityUpdateEvent = JSON.parse(event.data);
-        const { activity } = data;
+        const { activity } = rawData as ActivityUpdateEvent;
 
         console.log('[useActivitySSE] New activity received:', activity.type);
 
@@ -116,10 +115,9 @@ export function useActivitySSE(userId: string | undefined) {
      * Handle unread-count-update event
      * Updates the cached unread counts
      */
-    const handleUnreadCountUpdate = (event: MessageEvent) => {
+    const handleUnreadCountUpdate = (rawData: unknown) => {
       try {
-        const data: UnreadCountUpdateEvent = JSON.parse(event.data);
-        const { counts } = data;
+        const { counts } = rawData as UnreadCountUpdateEvent;
 
         console.log('[useActivitySSE] Unread counts updated:', counts);
 
@@ -142,7 +140,7 @@ export function useActivitySSE(userId: string | undefined) {
       removeEventListener('activity-update', handleActivityUpdate);
       removeEventListener('unread-count-update', handleUnreadCountUpdate);
     };
-  }, [userId, isConnected, addEventListener, removeEventListener, queryClient]);
+  }, [userId, addEventListener, removeEventListener, queryClient]);
 
   return {
     isConnected,

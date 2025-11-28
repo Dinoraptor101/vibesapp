@@ -10,26 +10,20 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { OfflineIndicator } from '@/components/shared/OfflineIndicator';
 import { Button, Logo } from '@/components/ui-next';
 import { useUnreadCounts } from '@/features/activity';
-import { useActivitySSE } from '@/features/activity/hooks/useActivitySSE';
-import { useAuth } from '@/features/auth';
+import { useUnreadMessageCount } from '@/features/messaging';
 import { UserMenu } from './UserMenu';
 
 export function TopNav() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
 
-  // SSE real-time updates for activity counts
-  useActivitySSE(user?._id);
-
-  // Fetch real unread counts from Activity API
-  // Note: This is safe to call even when not logged in because the query
-  // has `enabled: !!user?._id` which prevents execution until user is loaded
+  // Activity counts (likes, comments, follows, etc.)
+  // SSE updates are handled globally by GlobalSSE component in AuthContext
   const { data: activityCounts } = useUnreadCounts();
-
-  // Messages count comes from activity feed (messages category)
   const unreadActivity = activityCounts?.all || 0;
-  const unreadMessages = activityCounts?.messages || 0;
+
+  // Message counts (unread conversations + pending DM requests)
+  const unreadMessages = useUnreadMessageCount();
 
   const isActive = (path: string) => location.pathname === path;
 
