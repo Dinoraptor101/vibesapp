@@ -41,9 +41,12 @@ export async function fetchPosts(
   if (filters?.userId) params.append('userId', filters.userId);
   if (filters?.following) params.append('following', 'true');
   if (filters?.nearby) {
-    params.append('latitude', filters.nearby.lat.toString());
-    params.append('longitude', filters.nearby.lon.toString());
-    params.append('radius', filters.nearby.radius.toString());
+    params.append('lat', filters.nearby.lat.toString());
+    params.append('lon', filters.nearby.lon.toString());
+    // Backend expects range in miles, frontend sends radius in meters
+    // Convert: meters -> km -> miles (1 km = 0.621371 miles)
+    const radiusInMiles = (filters.nearby.radius / 1000) * 0.621371;
+    params.append('range', radiusInMiles.toString());
   }
 
   params.append('page', page.toString());
