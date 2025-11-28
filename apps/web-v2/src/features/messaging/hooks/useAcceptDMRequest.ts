@@ -6,10 +6,12 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
+import type { Conversation } from '../api/dmService';
+import type { DMRequest } from '../types';
 
 interface AcceptDMRequestResponse {
-  success: boolean;
-  conversationId: string;
+  dmRequest: DMRequest;
+  conversation: Conversation;
 }
 
 export function useAcceptDMRequest() {

@@ -25,14 +25,19 @@ const sendDMRequest = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Check if already connected (existing conversation)
+    // Check if already connected (existing ACTIVE conversation)
     const existingConversation = await Conversation.findOne({
       $or: [
         { user1Id: senderId, user2Id: recipientId },
         { user1Id: recipientId, user2Id: senderId },
       ],
     });
-    if (existingConversation) {
+    // Only block if conversation exists AND is active (not archived/closed)
+    if (
+      existingConversation &&
+      existingConversation.status !== 'archived' &&
+      existingConversation.status !== 'closed'
+    ) {
       return res.status(400).json({ message: 'Already connected with this user' });
     }
 
@@ -149,16 +154,33 @@ const acceptDMRequest = async (req, res) => {
     dmRequest.respondedAt = new Date();
     await dmRequest.save();
 
-    // Create conversation with proper field names
-    const conversation = await Conversation.create({
-      user1Id: dmRequest.sender,
-      user2Id: dmRequest.recipient,
-      lastRequesterId: dmRequest.sender,
-      status: 'approved', // Immediately approved since request was accepted
-      messages: [],
+    // Check if there's an existing archived/closed conversation to reopen
+    let conversation = await Conversation.findOne({
+      $or: [
+        { user1Id: dmRequest.sender, user2Id: dmRequest.recipient },
+        { user1Id: dmRequest.recipient, user2Id: dmRequest.sender },
+      ],
+      status: { $in: ['archived', 'closed'] },
     });
 
-    console.log('DM request accepted and conversation created');
+    if (conversation) {
+      // Reopen existing conversation
+      conversation.status = 'approved';
+      conversation.lastRequesterId = dmRequest.sender;
+      conversation.updatedAt = new Date();
+      await conversation.save();
+      console.log('DM request accepted and existing conversation reopened:', conversation._id);
+    } else {
+      // Create new conversation
+      conversation = await Conversation.create({
+        user1Id: dmRequest.sender,
+        user2Id: dmRequest.recipient,
+        lastRequesterId: dmRequest.sender,
+        status: 'approved', // Immediately approved since request was accepted
+        messages: [],
+      });
+      console.log('DM request accepted and new conversation created:', conversation._id);
+    }
 
     // Broadcast DM request update to both users via SSE
     sseManager.broadcast(dmRequest.sender, 'dm-request-update', {
@@ -230,7 +252,7 @@ const checkDMRequestStatus = async (req, res) => {
   }
 
   try {
-    // Check if already connected (conversation exists)
+    // Check if already connected (conversation exists and is active)
     const existingConversation = await Conversation.findOne({
       $or: [
         { user1Id: currentUserId, user2Id: targetUserId },
@@ -238,7 +260,12 @@ const checkDMRequestStatus = async (req, res) => {
       ],
     });
 
-    if (existingConversation) {
+    // Only block new DM request if conversation is active (not archived/closed)
+    if (
+      existingConversation &&
+      existingConversation.status !== 'archived' &&
+      existingConversation.status !== 'closed'
+    ) {
       return res.status(200).json({
         canSend: false,
         reason: 'connected',
