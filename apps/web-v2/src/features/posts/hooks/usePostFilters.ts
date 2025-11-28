@@ -7,6 +7,10 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/features/auth';
+import {
+  getProximityRadiusMeters,
+  PROXIMITY_STORAGE_KEY,
+} from '@/features/settings/constants/proximity';
 import type { FeedTab } from '../components/FilterBar';
 import type { PostFilters } from '../types';
 
@@ -64,8 +68,6 @@ async function getUserLocation(userProfileLocation?: {
   return null;
 }
 
-const DEFAULT_NEARBY_RADIUS = 10000; // 10km in meters
-
 /**
  * Hook for managing post feed filters with tab-based navigation
  */
@@ -74,6 +76,7 @@ export function usePostFilters(): UsePostFiltersReturn {
   const [activeTab, setActiveTab] = useState<FeedTab>('nearby');
   const [filters, setFilters] = useState<PostFilters>({});
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
+  const [proximityRadius, setProximityRadius] = useState(getProximityRadiusMeters);
 
   // Get user location on mount
   useEffect(() => {
@@ -84,7 +87,31 @@ export function usePostFilters(): UsePostFiltersReturn {
     });
   }, [user?.location]);
 
-  // Update filters when tab changes
+  // Listen for localStorage changes (when user updates proximity in settings)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === PROXIMITY_STORAGE_KEY) {
+        setProximityRadius(getProximityRadiusMeters());
+      }
+    };
+
+    // Also check periodically for same-tab changes (storage event doesn't fire for same tab)
+    const checkProximity = () => {
+      const current = getProximityRadiusMeters();
+      setProximityRadius((prev) => (prev !== current ? current : prev));
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    // Check when tab becomes visible (user may have changed settings)
+    document.addEventListener('visibilitychange', checkProximity);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      document.removeEventListener('visibilitychange', checkProximity);
+    };
+  }, []);
+
+  // Update filters when tab changes or proximity changes
   useEffect(() => {
     if (activeTab === 'nearby') {
       // Nearby tab: Posts within proximity radius (from settings)
@@ -98,7 +125,7 @@ export function usePostFilters(): UsePostFiltersReturn {
         nearby: {
           lat: userLocation.lat,
           lon: userLocation.lon,
-          radius: DEFAULT_NEARBY_RADIUS,
+          radius: proximityRadius,
         },
       });
     } else {
@@ -107,7 +134,7 @@ export function usePostFilters(): UsePostFiltersReturn {
         following: true,
       });
     }
-  }, [activeTab, userLocation]);
+  }, [activeTab, userLocation, proximityRadius]);
 
   // Check if any filters are active
   const isFiltering = !!(filters.nearby || filters.following);

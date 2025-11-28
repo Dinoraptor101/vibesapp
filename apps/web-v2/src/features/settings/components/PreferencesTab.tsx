@@ -1,15 +1,15 @@
 import { Bell, BellOff } from 'lucide-react';
 import { useState } from 'react';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import {
+  getStoredProximityKm,
+  PROXIMITY_OPTIONS,
+  PROXIMITY_STORAGE_KEY,
+  type ProximityRadiusKm,
+} from '../constants/proximity';
 import { useAccountUpdates } from '../hooks/useAccountUpdates';
 import { useNotificationPreferences } from '../hooks/useNotificationPreferences';
 import { useUpdatePreferences } from '../hooks/useUpdatePreferences';
-
-const PROXIMITY_OPTIONS = [
-  { value: 50, label: '50 kilometers' },
-  { value: 100, label: '100 kilometers' },
-  { value: 150, label: '150 kilometers' },
-];
 
 const NOTIFICATION_TYPES = [
   {
@@ -53,20 +53,17 @@ export function PreferencesTab() {
   const { isOnline } = useNetworkStatus();
   const { queueUpdate } = useAccountUpdates();
 
-  // Initialize proximity from localStorage, default to 100km
-  const [proximityRange, setProximityRange] = useState(() => {
-    const stored = localStorage.getItem('proximityRange');
-    return stored ? Number(stored) : 100;
-  });
+  // Initialize proximity from localStorage, default to 50km
+  const [proximityRange, setProximityRange] = useState<ProximityRadiusKm>(getStoredProximityKm);
 
   const { data: preferences, isLoading } = useNotificationPreferences();
   const updatePreferences = useUpdatePreferences();
 
-  const handleProximityChange = (newRange: number) => {
+  const handleProximityChange = (newRange: ProximityRadiusKm) => {
     if (!isOnline) return; // Prevent action when offline
     setProximityRange(newRange);
     // Store in localStorage for persistence
-    localStorage.setItem('proximityRange', String(newRange));
+    localStorage.setItem(PROXIMITY_STORAGE_KEY, String(newRange));
     // Queue update to backend (for future implementation)
     queueUpdate({ proximityRange: newRange });
   };
@@ -91,7 +88,7 @@ export function PreferencesTab() {
           id="proximity"
           data-testid="proximity-input"
           value={proximityRange}
-          onChange={(e) => handleProximityChange(Number(e.target.value))}
+          onChange={(e) => handleProximityChange(Number(e.target.value) as ProximityRadiusKm)}
           disabled={!isOnline}
           className="w-full px-3 py-2 border border-gray-300 dim:border-gray-500 dark:border-gray-600 rounded-lg bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-gray-100 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
         >
