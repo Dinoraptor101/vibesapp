@@ -56,6 +56,10 @@ app.use((req, res, next) => {
 const healthCheckRouter = require('./routes/healthCheck');
 app.use('/api/health', healthCheckRouter);
 
+// SSE route (uses its own authentication via query params)
+const sseRouter = require('./routes/sse');
+app.use('/api/sse', sseRouter);
+
 // Import and use the API key middleware
 const apiKeyMiddleware = require('./middleware/apiKey');
 const pigeonAuthMiddleware = require('./middleware/pigeonAuth');
