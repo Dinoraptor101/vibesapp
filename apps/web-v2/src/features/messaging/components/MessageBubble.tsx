@@ -48,7 +48,7 @@ export function MessageBubble({
           className={`rounded-2xl px-4 py-2 ${
             isCurrentUser
               ? 'bg-brand-primary text-white'
-              : 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white'
+              : 'bg-gray-100 dim:bg-gray-700 dark:bg-gray-700 text-gray-900 dim:text-white dark:text-white'
           }`}
           data-testid="message-content"
         >

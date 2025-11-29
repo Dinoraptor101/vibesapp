@@ -22,10 +22,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-surface-1">
+    <div className="min-h-screen bg-gray-50 dim:bg-gray-900 dark:bg-gray-950">
       {/* Header */}
       <header
-        className="bg-surface-elevated/95 backdrop-blur-md border-b border-border sticky top-0 z-50"
+        className="bg-white/95 dim:bg-gray-800/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dim:border-gray-700 dark:border-gray-800 sticky top-0 z-50"
         data-testid="admin-header"
       >
         <div className="container mx-auto px-4">
@@ -48,7 +48,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   />
                 </svg>
               </div>
-              <h1 className="text-xl font-bold text-text-primary">Vibes Admin</h1>
+              <h1 className="text-xl font-bold text-gray-900 dim:text-white dark:text-white">
+                Vibes Admin
+              </h1>
             </div>
 
             {/* Navigation */}
@@ -59,7 +61,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-brand-purple text-white'
-                      : 'text-text-secondary hover:text-text-primary hover:bg-surface-3'
+                      : 'text-gray-600 dim:text-gray-300 dark:text-gray-400 hover:text-gray-900 dim:hover:text-white dark:hover:text-white hover:bg-gray-100 dim:hover:bg-gray-700 dark:hover:bg-gray-800'
                   }`
                 }
                 title="Dashboard"
@@ -76,7 +78,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-brand-purple text-white'
-                      : 'text-text-secondary hover:text-text-primary hover:bg-surface-3'
+                      : 'text-gray-600 dim:text-gray-300 dark:text-gray-400 hover:text-gray-900 dim:hover:text-white dark:hover:text-white hover:bg-gray-100 dim:hover:bg-gray-700 dark:hover:bg-gray-800'
                   }`
                 }
                 title="Flagged Posts"
@@ -93,7 +95,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-brand-purple text-white'
-                      : 'text-text-secondary hover:text-text-primary hover:bg-surface-3'
+                      : 'text-gray-600 dim:text-gray-300 dark:text-gray-400 hover:text-gray-900 dim:hover:text-white dark:hover:text-white hover:bg-gray-100 dim:hover:bg-gray-700 dark:hover:bg-gray-800'
                   }`
                 }
                 title="Users"
@@ -110,7 +112,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-brand-purple text-white'
-                      : 'text-text-secondary hover:text-text-primary hover:bg-surface-3'
+                      : 'text-gray-600 dim:text-gray-300 dark:text-gray-400 hover:text-gray-900 dim:hover:text-white dark:hover:text-white hover:bg-gray-100 dim:hover:bg-gray-700 dark:hover:bg-gray-800'
                   }`
                 }
                 title="Settings"
@@ -127,8 +129,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <button
               type="button"
               onClick={handleLogout}
-              className="px-3 py-2 text-sm font-medium text-text-secondary hover:text-vibe-negative-light 
-                       hover:bg-surface-3 rounded-lg transition-colors
+              className="px-3 py-2 text-sm font-medium text-gray-600 dim:text-gray-300 dark:text-gray-400 hover:text-red-600 dim:hover:text-red-400 dark:hover:text-red-400
+                       hover:bg-gray-100 dim:hover:bg-gray-700 dark:hover:bg-gray-800 rounded-lg transition-colors
                        flex items-center gap-2"
               title="Logout"
             >
@@ -143,7 +145,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       <main className="container mx-auto px-4 py-8">{children}</main>
 
       {/* Footer (Optional) */}
-      <footer className="mt-auto py-6 text-center text-sm text-text-tertiary border-t border-border">
+      <footer className="mt-auto py-6 text-center text-sm text-gray-500 dim:text-gray-400 dark:text-gray-500 border-t border-gray-200 dim:border-gray-700 dark:border-gray-800">
         <p>Vibes Admin Panel - All actions are logged</p>
       </footer>
     </div>

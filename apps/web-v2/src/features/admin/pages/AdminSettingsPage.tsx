@@ -95,11 +95,17 @@ export function AdminSettingsPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-          <p className="mt-2 text-gray-600">Configure admin preferences and system settings</p>
+          <h1 className="text-3xl font-bold text-gray-900 dim:text-white dark:text-white">
+            Settings
+          </h1>
+          <p className="mt-2 text-gray-600 dim:text-gray-400 dark:text-gray-400">
+            Configure admin preferences and system settings
+          </p>
         </div>
         <div className="flex items-center justify-center py-12">
-          <div className="text-gray-600">Loading settings...</div>
+          <div className="text-gray-600 dim:text-gray-400 dark:text-gray-400">
+            Loading settings...
+          </div>
         </div>
       </div>
     );
@@ -109,20 +115,31 @@ export function AdminSettingsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-        <p className="mt-2 text-gray-600">Configure admin preferences and system settings</p>
+        <h1 className="text-3xl font-bold text-gray-900 dim:text-white dark:text-white">
+          Settings
+        </h1>
+        <p className="mt-2 text-gray-600 dim:text-gray-400 dark:text-gray-400">
+          Configure admin preferences and system settings
+        </p>
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
         {/* Admin Password */}
         <Card>
           <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900">Admin Password</h2>
-            <p className="text-sm text-gray-600">Change your admin panel password</p>
+            <h2 className="text-lg font-semibold text-gray-900 dim:text-white dark:text-white">
+              Admin Password
+            </h2>
+            <p className="text-sm text-gray-600 dim:text-gray-400 dark:text-gray-400">
+              Change your admin panel password
+            </p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="currentPassword"
+                className="block text-sm font-medium text-gray-700 dim:text-gray-300 dark:text-gray-300"
+              >
                 Current Password
               </label>
               <input
@@ -130,13 +147,16 @@ export function AdminSettingsPage() {
                 type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="mt-1 w-full rounded-lg border border-gray-300 dim:border-gray-600 dark:border-gray-700 bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-white dark:text-white placeholder:text-gray-400 dim:placeholder:text-gray-500 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 placeholder="Required to change password"
               />
             </div>
 
             <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="newPassword"
+                className="block text-sm font-medium text-gray-700 dim:text-gray-300 dark:text-gray-300"
+              >
                 New Password
               </label>
               <input
@@ -144,13 +164,16 @@ export function AdminSettingsPage() {
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="mt-1 w-full rounded-lg border border-gray-300 dim:border-gray-600 dark:border-gray-700 bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-white dark:text-white placeholder:text-gray-400 dim:placeholder:text-gray-500 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 placeholder="Leave blank to keep current password"
               />
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700 dim:text-gray-300 dark:text-gray-300"
+              >
                 Confirm New Password
               </label>
               <input
@@ -158,7 +181,7 @@ export function AdminSettingsPage() {
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="mt-1 w-full rounded-lg border border-gray-300 dim:border-gray-600 dark:border-gray-700 bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-white dark:text-white placeholder:text-gray-400 dim:placeholder:text-gray-500 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 placeholder="Confirm your new password"
               />
             </div>
@@ -168,12 +191,19 @@ export function AdminSettingsPage() {
         {/* Moderation Settings */}
         <Card>
           <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900">Moderation Settings</h2>
-            <p className="text-sm text-gray-600">Configure automatic moderation rules</p>
+            <h2 className="text-lg font-semibold text-gray-900 dim:text-white dark:text-white">
+              Moderation Settings
+            </h2>
+            <p className="text-sm text-gray-600 dim:text-gray-400 dark:text-gray-400">
+              Configure automatic moderation rules
+            </p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label htmlFor="reportThreshold" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="reportThreshold"
+                className="block text-sm font-medium text-gray-700 dim:text-gray-300 dark:text-gray-300"
+              >
                 Auto-Hide Threshold
               </label>
               <input
@@ -183,9 +213,9 @@ export function AdminSettingsPage() {
                 max="10"
                 value={reportThreshold}
                 onChange={(e) => setReportThreshold(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="mt-1 w-full rounded-lg border border-gray-300 dim:border-gray-600 dark:border-gray-700 bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-white dark:text-white px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-500 dim:text-gray-400 dark:text-gray-500">
                 Number of nearby reports (within 50 miles) before a post is automatically hidden
                 (default: 3)
               </p>
@@ -196,14 +226,18 @@ export function AdminSettingsPage() {
         {/* Notification Settings */}
         <Card>
           <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
-            <p className="text-sm text-gray-600">Email notifications for urgent actions</p>
+            <h2 className="text-lg font-semibold text-gray-900 dim:text-white dark:text-white">
+              Notifications
+            </h2>
+            <p className="text-sm text-gray-600 dim:text-gray-400 dark:text-gray-400">
+              Email notifications for urgent actions
+            </p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <label
                 htmlFor="notificationEmail"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-gray-700 dim:text-gray-300 dark:text-gray-300"
               >
                 Notification Email
               </label>
@@ -212,10 +246,10 @@ export function AdminSettingsPage() {
                 type="email"
                 value={notificationEmail}
                 onChange={(e) => setNotificationEmail(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="mt-1 w-full rounded-lg border border-gray-300 dim:border-gray-600 dark:border-gray-700 bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-white dark:text-white placeholder:text-gray-400 dim:placeholder:text-gray-500 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 placeholder="admin@vibesapp.com"
               />
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-500 dim:text-gray-400 dark:text-gray-500">
                 Receive alerts when posts are auto-hidden or urgent actions are needed
               </p>
             </div>

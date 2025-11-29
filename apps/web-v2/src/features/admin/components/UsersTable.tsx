@@ -35,21 +35,21 @@ export function UsersTable({
     <button
       type="button"
       onClick={() => onSort(field)}
-      className="flex items-center gap-1 hover:text-gray-900 transition-colors"
+      className="flex items-center gap-1 hover:text-gray-900 dim:hover:text-white dark:hover:text-white transition-colors"
       data-testid={`sort-${field}`}
     >
       {children}
       <ArrowUpDown
-        className={`h-3 w-3 ${sortField === field ? 'text-brand-purple' : 'text-gray-400'}`}
+        className={`h-3 w-3 ${sortField === field ? 'text-brand-purple' : 'text-gray-400 dim:text-gray-500 dark:text-gray-500'}`}
       />
     </button>
   );
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
+    <div className="rounded-lg border border-gray-200 dim:border-gray-700 dark:border-gray-800 bg-white dim:bg-gray-800 dark:bg-gray-900 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full" data-testid="users-table">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="bg-gray-50 dim:bg-gray-700 dark:bg-gray-800 border-b border-gray-200 dim:border-gray-600 dark:border-gray-700">
             <tr>
               {/* Checkbox Column */}
               <th className="w-12 px-3 py-3 text-left">
@@ -57,7 +57,7 @@ export function UsersTable({
                   type="checkbox"
                   checked={allSelected}
                   onChange={(e) => onSelectAll(e.target.checked)}
-                  className="h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                  className="h-5 w-5 rounded border-gray-300 dim:border-gray-600 dark:border-gray-600 bg-white dim:bg-gray-700 dark:bg-gray-800 text-primary-600 focus:ring-primary-500"
                   data-testid="select-all-checkbox"
                   aria-label="Select all users"
                 />
@@ -74,37 +74,37 @@ export function UsersTable({
               </th>
 
               {/* Username Column */}
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dim:text-gray-300 dark:text-gray-300 uppercase tracking-wider">
                 <SortButton field="userName">Username</SortButton>
               </th>
 
               {/* MBTI Column */}
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider hidden lg:table-cell">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dim:text-gray-300 dark:text-gray-300 uppercase tracking-wider hidden lg:table-cell">
                 <SortButton field="mbtiPersonality">MBTI</SortButton>
               </th>
 
               {/* Polarity Column */}
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider hidden lg:table-cell">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dim:text-gray-300 dark:text-gray-300 uppercase tracking-wider hidden lg:table-cell">
                 <SortButton field="masculineFeminineScale">Polarity</SortButton>
               </th>
 
               {/* Status Column */}
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider hidden md:table-cell">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dim:text-gray-300 dark:text-gray-300 uppercase tracking-wider hidden md:table-cell">
                 <SortButton field="isBanned">Status</SortButton>
               </th>
 
               {/* Posts Column */}
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dim:text-gray-300 dark:text-gray-300 uppercase tracking-wider">
                 <SortButton field="postCount">Posts</SortButton>
               </th>
 
               {/* Ban Button Column */}
-              <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 dim:text-gray-300 dark:text-gray-300 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-200 dim:divide-gray-700 dark:divide-gray-700">
             {users.map((user) => {
               const isSelected = selectedUserIds.includes(user.userId);
               const polarityLabel = (user.masculineFeminineScale ?? 0) > 0 ? '☀️ Yang' : '🌙 Yin';
@@ -112,7 +112,7 @@ export function UsersTable({
               return (
                 <tr
                   key={user.userId}
-                  className="hover-lift hover:bg-gray-50 transition-colors"
+                  className="hover-lift hover:bg-gray-50 dim:hover:bg-gray-700 dark:hover:bg-gray-800 transition-colors"
                   data-testid={`user-row-${user.userId}`}
                 >
                   {/* Checkbox */}
@@ -121,7 +121,7 @@ export function UsersTable({
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => onSelectUser(user.userId)}
-                      className="h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      className="h-5 w-5 rounded border-gray-300 dim:border-gray-600 dark:border-gray-600 bg-white dim:bg-gray-700 dark:bg-gray-800 text-primary-600 focus:ring-primary-500"
                       aria-label={`Select ${user.userName}`}
                     />
                   </td>
@@ -169,7 +169,9 @@ export function UsersTable({
                           title="Online"
                         />
                       )}
-                      <span className="font-medium text-gray-900">{user.userName}</span>
+                      <span className="font-medium text-gray-900 dim:text-white dark:text-white">
+                        {user.userName}
+                      </span>
                     </button>
                   </td>
 
@@ -207,7 +209,7 @@ export function UsersTable({
                     <button
                       type="button"
                       onClick={() => onViewPosts(user)}
-                      className="text-gray-900 hover:text-brand-purple font-medium transition-colors"
+                      className="text-gray-900 dim:text-white dark:text-white hover:text-brand-purple font-medium transition-colors"
                       data-testid="user-post-count"
                     >
                       {user.postCount || 0}

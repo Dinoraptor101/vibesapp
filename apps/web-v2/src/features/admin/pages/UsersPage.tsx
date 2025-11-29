@@ -151,12 +151,16 @@ export function UsersPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-        <p className="mt-2 text-gray-600">Manage users, ban/unban, and view user activity</p>
+        <h1 className="text-3xl font-bold text-gray-900 dim:text-white dark:text-white">
+          User Management
+        </h1>
+        <p className="mt-2 text-gray-600 dim:text-gray-400 dark:text-gray-400">
+          Manage users, ban/unban, and view user activity
+        </p>
       </div>
 
       {/* Search and Filters */}
-      <div className="rounded-lg border border-gray-200 bg-white p-4">
+      <div className="rounded-lg border border-gray-200 dim:border-gray-700 dark:border-gray-800 bg-white dim:bg-gray-800 dark:bg-gray-900 p-4">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           {/* Search */}
           <div className="md:col-span-2">
@@ -165,7 +169,7 @@ export function UsersPage() {
               placeholder="Search by username..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full rounded-lg border border-gray-300 dim:border-gray-600 dark:border-gray-700 bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-white dark:text-white placeholder:text-gray-400 dim:placeholder:text-gray-500 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
               data-testid="users-search-input"
             />
           </div>
@@ -175,7 +179,7 @@ export function UsersPage() {
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value as 'all' | 'active' | 'banned')}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full rounded-lg border border-gray-300 dim:border-gray-600 dark:border-gray-700 bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-white dark:text-white px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
               data-testid="users-filter-select"
             >
               <option value="all">All Status</option>
@@ -189,7 +193,7 @@ export function UsersPage() {
             <select
               value={filterMBTI}
               onChange={(e) => setFilterMBTI(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full rounded-lg border border-gray-300 dim:border-gray-600 dark:border-gray-700 bg-white dim:bg-gray-700 dark:bg-gray-800 text-gray-900 dim:text-white dark:text-white px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">All MBTI Types</option>
               {mbtiTypes.map((type) => (
@@ -203,9 +207,9 @@ export function UsersPage() {
       </div>
 
       {/* Stats and Bulk Actions */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white p-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-lg border border-gray-200 dim:border-gray-700 dark:border-gray-800 bg-white dim:bg-gray-800 dark:bg-gray-900 p-3">
         <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-gray-600 dim:text-gray-400 dark:text-gray-400">
             {selectedUserIds.length > 0
               ? `${selectedUserIds.length} selected`
               : `${totalUsers} total users`}
@@ -218,7 +222,7 @@ export function UsersPage() {
           )}
         </div>
 
-        <div className="flex items-center gap-3 text-sm text-gray-600">
+        <div className="flex items-center gap-3 text-sm text-gray-600 dim:text-gray-400 dark:text-gray-400">
           <Badge variant="success" size="sm">
             {users.filter((u) => !u.isBanned).length} active
           </Badge>
@@ -246,10 +250,10 @@ export function UsersPage() {
 
       {!isLoading && !error && users.length === 0 && (
         <div
-          className="rounded-lg border border-gray-200 bg-white p-12 text-center"
+          className="rounded-lg border border-gray-200 dim:border-gray-700 dark:border-gray-800 bg-white dim:bg-gray-800 dark:bg-gray-900 p-12 text-center"
           data-testid="users-empty-state"
         >
-          <p className="text-gray-500">No users found</p>
+          <p className="text-gray-500 dim:text-gray-400 dark:text-gray-500">No users found</p>
         </div>
       )}
 

@@ -72,7 +72,7 @@ export function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-surface-1 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dim:bg-gray-900 dark:bg-gray-950 px-4">
       <div className="w-full max-w-sm space-y-8">
         {/* Logo/Header - ZEN: Clean, no redundant text */}
         <div className="text-center space-y-2">
@@ -92,7 +92,9 @@ export function AdminLoginPage() {
               />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-text-primary">Vibes Admin</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dim:text-white dark:text-white">
+            Vibes Admin
+          </h1>
         </div>
 
         {/* Login Form - ZEN: Combined input + button, shake on error */}
@@ -106,8 +108,8 @@ export function AdminLoginPage() {
               disabled={isLoading}
               autoComplete="current-password"
               placeholder="Enter password"
-              className={`flex-1 h-12 px-4 bg-surface-2 border border-border rounded-l-lg 
-                         text-text-primary placeholder:text-text-tertiary
+              className={`flex-1 h-12 px-4 bg-white dim:bg-gray-800 dark:bg-gray-900 border border-gray-200 dim:border-gray-700 dark:border-gray-800 rounded-l-lg 
+                         text-gray-900 dim:text-white dark:text-white placeholder:text-gray-400 dim:placeholder:text-gray-500 dark:placeholder:text-gray-600
                          focus:outline-none focus:ring-2 focus:ring-brand-purple/50 
                          transition-all duration-200
                          disabled:opacity-50 disabled:cursor-not-allowed
@@ -145,13 +147,13 @@ export function AdminLoginPage() {
 
         {/* Footer - ZEN: Clean deterrent message */}
         <div className="text-center space-y-1">
-          <p className="text-xs text-text-tertiary">
+          <p className="text-xs text-gray-500 dim:text-gray-400 dark:text-gray-500">
             IP address and location logged.{' '}
             <a
               href="https://www.ic3.gov/Home/ComplaintChoice"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-text-secondary hover:text-brand-purple transition-colors underline"
+              className="text-gray-600 dim:text-gray-300 dark:text-gray-400 hover:text-brand-purple dim:hover:text-brand-purple dark:hover:text-brand-purple transition-colors underline"
             >
               Report fraud
             </a>

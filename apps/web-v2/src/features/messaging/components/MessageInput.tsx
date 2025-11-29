@@ -88,7 +88,7 @@ export function MessageInput({
   const charsRemaining = maxLength - message.length;
 
   return (
-    <div className="border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+    <div className="border-t border-gray-200 dim:border-gray-600 dark:border-gray-700 bg-white dim:bg-gray-800 dark:bg-gray-900 p-4">
       <div className="relative">
         <textarea
           ref={textareaRef}
