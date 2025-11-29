@@ -67,8 +67,8 @@ function PostCardComponent({
     };
   }, []);
 
-  // Calculate stats from reactions
-  const likes = post.reactions.filter((r) => r.type === 'like').length;
+  // Use backend-computed likeCount (no frontend derivation)
+  const likes = post.likeCount ?? 0;
 
   // Check if current user has liked this post
   const userHasLiked = currentUser
@@ -169,7 +169,7 @@ function PostCardComponent({
   }
 
   return (
-    <Card noPadding className="min-w-[280px]">
+    <Card noPadding className="min-w-[280px]" data-post-id={post._id}>
       {/* Image with Caption Overlay - Full width, edge-to-edge */}
       {isOnline && !disableLink ? (
         <Link to={`/post/${post._id}`} className="block">
@@ -288,7 +288,7 @@ function PostCardComponent({
                     userHasLiked ? 'fill-current' : ''
                   } ${isLiking ? 'animate-pulse' : ''}`}
                 />
-                <span className="text-sm font-medium">{likes}</span>
+                {likes > 0 && <span className="text-sm font-medium">{likes}</span>}
               </button>
             )}
 
@@ -296,9 +296,12 @@ function PostCardComponent({
             <Link
               to={`/post/${post._id}`}
               className="flex items-center gap-1.5 text-text-secondary hover:text-brand-purple transition-colors duration-200 group"
-              aria-label="View comments"
+              aria-label={`View comments (${post.commentCount})`}
             >
               <MessageSquare className="w-5 h-5 transition-transform duration-200" />
+              {post.commentCount > 0 && (
+                <span className="text-sm font-medium">{post.commentCount}</span>
+              )}
             </Link>
 
             {/* Report (only if not author) */}

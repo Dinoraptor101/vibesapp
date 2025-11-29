@@ -36,7 +36,7 @@ export interface Reaction {
 // Full post interface
 export interface Post {
   _id: string;
-  text?: string; // Optional caption
+  text?: string; // Optional caption (null if no caption)
   image: string; // Required - S3 URL
   blurPlaceholder?: string; // Base64 blur placeholder for progressive loading
   user: PostUser;
@@ -44,6 +44,11 @@ export interface Post {
   commentOn?: string; // Post ID if this is a comment on a post
   replyToCommentId?: string; // Comment ID if this is a reply to another comment
   reactions: Reaction[];
+
+  // Computed by backend - frontend should NOT derive these
+  likeCount: number; // Always present, 0 if none
+  commentCount: number; // Always present, 0 if none
+
   proximal_likes: number; // Likes from nearby users
   proximal_dislikes: number; // Dislikes from nearby users
   proximal_users: number; // Total nearby users who reacted

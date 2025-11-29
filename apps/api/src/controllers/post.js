@@ -14,6 +14,11 @@ const { startSession } = require('mongoose');
 const GroupChat = require('../models/Groupchat');
 const WatchersList = require('../models/WatchersList');
 const UserHandler = require('../handlers/UserHandler');
+const {
+  transformPostsWithCommentCounts,
+  transformPost,
+  getCommentCount,
+} = require('../utils/postTransformer');
 
 // Initialize S3 with correct AWS configuration
 const s3 = new S3({
@@ -225,7 +230,9 @@ const createPost = async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
-    res.status(201).json(newPost);
+    // Return complete post with consistent schema (new post has 0 comments/likes)
+    const transformedPost = transformPost(newPost, { commentCount: 0 });
+    res.status(201).json(transformedPost);
     console.timeEnd('createpost');
   } catch (err) {
     await session.abortTransaction();
@@ -343,11 +350,12 @@ const getPosts = async (req, res) => {
     const paginatedPosts = filteredPosts.slice(start, start + limitNumber);
     const hasMorePosts = pageNumber < totalPages;
 
-    //console.info(`Pagination: hasMorePosts=${hasMorePosts}, page=${pageNumber}, totalPages=${totalPages}`);
+    // Transform posts with complete schema (likeCount, commentCount, etc.)
+    const transformedPosts = await transformPostsWithCommentCounts(paginatedPosts);
 
     // Return standardized response format
     const responsePayload = {
-      posts: paginatedPosts,
+      posts: transformedPosts,
       page: pageNumber,
       limit: limitNumber,
       total: totalPosts,
@@ -391,9 +399,15 @@ const getPostById = async (req, res) => {
       { $set: { isRead: true } }
     );
 
+    // Get comment count for this post
+    const commentCount = await getCommentCount(post._id);
+
+    // Transform post with complete schema
+    const transformedPost = transformPost(post, { commentCount });
+
     const data = {
       post: {
-        ...post.toObject(),
+        ...transformedPost,
         post: post._id,
       },
       ownerReacted,
@@ -1022,8 +1036,10 @@ const searchPosts = async (req, res) => {
     const posts = await Post.find(searchQuery)
       .sort({ createdAt: -1 }) // Newest first
       .skip((pageNumber - 1) * limitNumber)
-      .limit(limitNumber)
-      .lean(); // Use lean() for better performance
+      .limit(limitNumber);
+
+    // Transform posts with complete schema (likeCount, commentCount)
+    const transformedPosts = await transformPostsWithCommentCounts(posts);
 
     // Calculate pagination info
     const totalPages = Math.ceil(total / limitNumber);
@@ -1031,7 +1047,7 @@ const searchPosts = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      posts: posts.map((post) => ({
+      posts: transformedPosts.map((post) => ({
         ...post,
         post: post._id, // Map _id to post field for frontend compatibility
       })),

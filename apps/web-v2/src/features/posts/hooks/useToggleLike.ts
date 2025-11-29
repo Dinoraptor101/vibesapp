@@ -55,6 +55,7 @@ export function useToggleLike() {
                     ...post,
                     reactions: post.reactions.filter((r) => r.userId !== currentUserId),
                     proximal_likes: Math.max(0, post.proximal_likes - 1),
+                    likeCount: Math.max(0, (post.likeCount ?? 0) - 1),
                   };
                 }
                 // Like: add reaction
@@ -69,6 +70,7 @@ export function useToggleLike() {
                     },
                   ],
                   proximal_likes: post.proximal_likes + 1,
+                  likeCount: (post.likeCount ?? 0) + 1,
                 };
               }),
             })),
@@ -87,6 +89,7 @@ export function useToggleLike() {
             ...old,
             reactions: old.reactions.filter((r) => r.userId !== currentUserId),
             proximal_likes: Math.max(0, old.proximal_likes - 1),
+            likeCount: Math.max(0, (old.likeCount ?? 0) - 1),
           };
         }
         return {
@@ -100,6 +103,7 @@ export function useToggleLike() {
             },
           ],
           proximal_likes: old.proximal_likes + 1,
+          likeCount: (old.likeCount ?? 0) + 1,
         };
       });
     },
@@ -115,6 +119,11 @@ export function useToggleLike() {
     onSuccess: (_data, { postId }) => {
       // Clear pending state on success
       pendingMutations.current.delete(postId);
+
+      // Invalidate queries to get fresh data with updated likeCount from backend
+      // This ensures UI reflects the actual API response (no optimistic updates for counts)
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['post', postId] });
     },
     onSettled: (_data, _error, { postId }) => {
       // Ensure pending state is always cleared

@@ -105,6 +105,61 @@ Each feature is self-contained with its own:
 - **Error Handling**: Global error boundaries
 - **Loading States**: Suspense and skeleton components
 
+## API Design Principles
+
+### Dumb Frontend, Smart Backend
+
+The frontend is a **visual presentation layer only**. All data logic, aggregation, and computation lives in the backend.
+
+#### Core Rules:
+
+1. **Single Request = Complete Response**
+   - When the frontend requests an entity (post, user, conversation), the backend returns ALL data needed to display it
+   - No multiple API calls to display a single entity
+   - No "get post" then "get comments count" then "get likes count"
+
+2. **No Frontend Data Derivation**
+   - Frontend should NOT calculate, aggregate, or derive data
+   - ❌ `const likes = post.reactions.filter(r => r.type === 'like').length`
+   - ✅ `post.likeCount` (computed by backend)
+
+3. **Consistent Schema**
+   - Every response of the same type MUST include all fields
+   - Use `0` or `null` for empty values, never `undefined`
+   - Frontend can choose to hide "0" values visually, but data is always present
+
+4. **Backend Computes, Frontend Displays**
+   - Backend: "Here's a post with 5 likes and 3 comments"
+   - Frontend: "I'll show the heart icon with '5' and comment icon with '3'"
+
+#### Post Response Schema Example:
+
+```typescript
+interface PostResponse {
+  _id: string;
+  text: string | null;
+  image: string;
+  user: PostUser;
+  
+  // Always computed by backend, never derived on frontend
+  likeCount: number;      // Always present, 0 if none
+  commentCount: number;   // Always present, 0 if none
+  
+  // Raw data if frontend needs it for other purposes
+  reactions: Reaction[];
+  
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+#### Benefits:
+- **Performance**: Single round-trip, no waterfall requests
+- **Consistency**: Same data structure everywhere
+- **Maintainability**: Logic changes only need backend updates
+- **Testability**: Backend logic is easier to unit test
+- **Offline Support**: Complete data cached from single request
+
 ## Performance Optimizations
 
 ### Build Performance
