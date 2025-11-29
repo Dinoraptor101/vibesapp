@@ -96,7 +96,7 @@ export function ProfilePosts({ userId }: ProfilePostsProps) {
   // ZEN: Show loading only after 1 second
   if (isLoading && showLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <PostSkeleton />
         <PostSkeleton />
         <PostSkeleton />

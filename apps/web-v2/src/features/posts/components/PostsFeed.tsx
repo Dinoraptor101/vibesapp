@@ -191,13 +191,15 @@ export function PostsFeed({ className, searchQuery }: PostsFeedProps) {
     return (
       <div className={className}>
         {/* Posts Grid */}
-        <PostsGrid
-          posts={searchResults}
-          onLike={toggleLike}
-          onReport={handleReport}
-          onDelete={handleDelete}
-          onComment={handleComment}
-        />
+        <div className="p-4">
+          <PostsGrid
+            posts={searchResults}
+            onLike={toggleLike}
+            onReport={handleReport}
+            onDelete={handleDelete}
+            onComment={handleComment}
+          />
+        </div>
 
         {/* Load more trigger */}
         <div ref={loadMoreRef} className="py-4">
@@ -272,13 +274,15 @@ export function PostsFeed({ className, searchQuery }: PostsFeedProps) {
       <FilterBar activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Posts Grid */}
-      <PostsGrid
-        posts={posts}
-        onLike={toggleLike}
-        onReport={handleReport}
-        onDelete={handleDelete}
-        onComment={handleComment}
-      />
+      <div className="p-4">
+        <PostsGrid
+          posts={posts}
+          onLike={toggleLike}
+          onReport={handleReport}
+          onDelete={handleDelete}
+          onComment={handleComment}
+        />
+      </div>
 
       {/* Load more trigger */}
       <div ref={loadMoreRef} className="py-4">

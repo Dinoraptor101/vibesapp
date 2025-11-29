@@ -21,7 +21,7 @@ interface PostsGridProps {
 
 export function PostsGrid({ posts, onLike, onReport, onDelete, onComment }: PostsGridProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {posts.map((post) => (
         <PostCard
           key={post._id}
