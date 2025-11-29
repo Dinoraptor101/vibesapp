@@ -16,9 +16,10 @@ import { useTheme } from '@/lib/useTheme';
 
 interface UserMenuProps {
   isActive?: boolean;
+  icon?: React.ReactNode;
 }
 
-export function UserMenu({ isActive = false }: UserMenuProps) {
+export function UserMenu({ isActive = false, icon }: UserMenuProps) {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
@@ -44,19 +45,25 @@ export function UserMenu({ isActive = false }: UserMenuProps) {
         <button
           type="button"
           data-testid="user-menu-button"
-          className={`rounded-full focus:outline-none transition-all ${
+          className={`focus:outline-none transition-all ${icon ? '' : 'rounded-full'} ${
             isActive
-              ? 'ring-2 ring-brand-purple'
-              : 'focus-visible:ring-2 focus-visible:ring-brand-purple'
+              ? icon
+                ? 'text-brand-purple'
+                : 'ring-2 ring-brand-purple'
+              : icon
+                ? ''
+                : 'focus-visible:ring-2 focus-visible:ring-brand-purple'
           }`}
           aria-label="User menu"
         >
-          <Avatar
-            src={getAvatarUrl(user.profilePictureUrl)}
-            alt={user.username}
-            name={user.username}
-            size="md"
-          />
+          {icon || (
+            <Avatar
+              src={getAvatarUrl(user.profilePictureUrl)}
+              alt={user.username}
+              name={user.username}
+              size="md"
+            />
+          )}
         </button>
       </DropdownMenu.Trigger>
 

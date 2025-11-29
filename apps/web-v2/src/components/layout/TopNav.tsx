@@ -6,6 +6,7 @@
  */
 
 import { Bell, Home, MessageSquare, Plus } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { OfflineIndicator } from '@/components/shared/OfflineIndicator';
 import { Button, Logo } from '@/components/ui-next';
@@ -24,6 +25,31 @@ export function TopNav() {
 
   // Message counts (unread conversations + pending DM requests)
   const unreadMessages = useUnreadMessageCount();
+
+  // Track previous counts to detect new notifications
+  const prevActivityRef = useRef(unreadActivity);
+  const prevMessagesRef = useRef(unreadMessages);
+  const [shakeActivity, setShakeActivity] = useState(false);
+  const [shakeMessages, setShakeMessages] = useState(false);
+
+  // Trigger shake animation when counts increase
+  useEffect(() => {
+    if (unreadActivity > prevActivityRef.current) {
+      setShakeActivity(true);
+      const timer = setTimeout(() => setShakeActivity(false), 1000);
+      return () => clearTimeout(timer);
+    }
+    prevActivityRef.current = unreadActivity;
+  }, [unreadActivity]);
+
+  useEffect(() => {
+    if (unreadMessages > prevMessagesRef.current) {
+      setShakeMessages(true);
+      const timer = setTimeout(() => setShakeMessages(false), 1000);
+      return () => clearTimeout(timer);
+    }
+    prevMessagesRef.current = unreadMessages;
+  }, [unreadMessages]);
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -64,13 +90,11 @@ export function TopNav() {
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors relative ${
             isActive('/activity')
               ? 'bg-brand-purple text-white'
-              : unreadActivity > 0
-                ? 'text-vibe-negative hover:bg-surface-hover'
-                : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
+              : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
           }`}
           aria-label={`Activity${unreadActivity > 0 ? ` (${unreadActivity} unread)` : ''}`}
         >
-          <div className="relative">
+          <div className={`relative ${shakeActivity ? 'animate-notification-shake' : ''}`}>
             <Bell className="w-5 h-5" />
             {unreadActivity > 0 && (
               <span
@@ -89,13 +113,11 @@ export function TopNav() {
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors relative ${
             isActive('/messages')
               ? 'bg-brand-purple text-white'
-              : unreadMessages > 0
-                ? 'text-vibe-negative hover:bg-surface-hover'
-                : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
+              : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
           }`}
           aria-label={`Messages${unreadMessages > 0 ? ` (${unreadMessages} unread)` : ''}`}
         >
-          <div className="relative">
+          <div className={`relative ${shakeMessages ? 'animate-notification-shake' : ''}`}>
             <MessageSquare className="w-5 h-5" />
             {unreadMessages > 0 && (
               <span
