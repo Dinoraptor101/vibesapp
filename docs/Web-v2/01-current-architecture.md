@@ -160,6 +160,30 @@ interface PostResponse {
 - **Testability**: Backend logic is easier to unit test
 - **Offline Support**: Complete data cached from single request
 
+### Comment System (Polymorphic Post Model)
+
+Comments are stored in the **same MongoDB collection as posts** using a polymorphic design. The `commentOn` field distinguishes them:
+
+```typescript
+interface Post {
+  _id: string;
+  text?: string;
+  image?: string;              // Required for posts, optional for comments
+  commentOn?: string;          // If set, this is a comment on that post ID
+  replyToCommentId?: string;   // If set, this is a reply to another comment
+  // ... other fields
+}
+```
+
+**Why?** Comments share most fields with posts (text, user, reactions, timestamps) and can be "vibed" just like posts.
+
+**API Separation:**
+- `GET /api/posts` → Filters out comments (`!post.commentOn`)
+- `GET /api/comments/:postId` → Returns only comments for that post
+- `POST /api/comments` → Creates a comment (sets `commentOn`)
+
+See [Backend Architecture - Comment System](../Web-V1/05-backend-architecture.md#comment-system-architecture-polymorphic-design) for full documentation.
+
 ## Performance Optimizations
 
 ### Build Performance
