@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import type React from 'react';
 import { Toaster } from 'sonner';
+import { PWAInstallPrompt } from '@/components/PWAInstallPrompt';
 import { AdminAuthProvider } from '@/features/admin';
 import { ReCaptchaProvider } from '@/lib/recaptcha';
 import { ThemeProvider } from '@/lib/theme';
@@ -33,6 +34,7 @@ export function Providers({ children }: ProvidersProps): JSX.Element {
         <ReCaptchaProvider>
           <AdminAuthProvider>
             <Toaster position="top-right" richColors />
+            <PWAInstallPrompt />
             {children}
             {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
           </AdminAuthProvider>
