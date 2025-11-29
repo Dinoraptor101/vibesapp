@@ -18,6 +18,11 @@ import { useEffect, useState } from 'react';
 const STORAGE_KEY = 'pwa-install-dismissed';
 const DISMISS_DURATION_DAYS = 7;
 
+// ⚠️ DEBUG: Uncomment ONE of these lines to test on desktop
+// const DEBUG_FORCE_PLATFORM: 'ios' | 'android' | null = 'ios';
+// const DEBUG_FORCE_PLATFORM: 'ios' | 'android' | null = 'android';
+const DEBUG_FORCE_PLATFORM: 'ios' | 'android' | null = null; // Normal behavior
+
 /**
  * Detect if running as installed PWA
  */
@@ -61,6 +66,9 @@ function isMobilePhone(): boolean {
  * Detect platform for instruction display
  */
 function getPlatform(): 'ios' | 'android' | 'other' {
+  // DEBUG: Force platform for testing on desktop
+  if (DEBUG_FORCE_PLATFORM) return DEBUG_FORCE_PLATFORM;
+
   const userAgent = navigator.userAgent.toLowerCase();
 
   if (/iphone|ipod/.test(userAgent)) {
@@ -97,6 +105,14 @@ export function PWAInstallPrompt() {
   const platform = getPlatform();
 
   useEffect(() => {
+    // DEBUG: Skip checks if forcing platform
+    if (DEBUG_FORCE_PLATFORM) {
+      if (!wasRecentlyDismissed()) {
+        setShowPrompt(true);
+      }
+      return;
+    }
+
     // Don't show if:
     // 1. Already installed as PWA
     // 2. Not a mobile phone
@@ -118,7 +134,8 @@ export function PWAInstallPrompt() {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] bg-background-primary flex flex-col"
+      className="fixed inset-0 z-[9999] bg-white dim:bg-gray-900 dark:bg-gray-950 flex flex-col"
+      style={{ isolation: 'isolate' }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="pwa-prompt-title"
@@ -144,7 +161,7 @@ export function PWAInstallPrompt() {
 
         {/* Title */}
         <h1 id="pwa-prompt-title" className="text-2xl font-semibold text-text-primary mb-3">
-          Add VibesApp to Home Screen
+          Add to Home Screen
         </h1>
 
         {/* Subtitle */}
