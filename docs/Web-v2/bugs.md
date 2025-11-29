@@ -2,19 +2,21 @@
 
 **Reported:** November 28, 2025  
 **Source:** QA Tester Feedback  
-**Status:** Open
+**Status:** In Progress (12/19 Fixed)
 
 ---
 
 ## Navigation & Layout
 
-### 1. Navbar Not Centered
+### 1. ✅ Navbar Not Centered
 - **Priority:** Medium
+- **Status:** FIXED
 - **Description:** The navbar is not true center based on the create post button
 - **Location:** Global navigation
 
-### 2. iOS Menu Bar Overlap
+### 2. ✅ iOS Menu Bar Overlap
 - **Priority:** High
+- **Status:** FIXED (commit `d4d20bc`)
 - **Description:** Raise the navbar to account for iOS menu bar button (safe area insets)
 - **Location:** Global navigation on iOS devices
 - **Proposed Solution:**
@@ -23,8 +25,9 @@
   3. Apply to any fixed-position elements at screen edges
   4. Sources: [Apple HIG](https://developer.apple.com/design/human-interface-guidelines/layout), [WebKit Blog](https://webkit.org/blog/7929/designing-websites-for-iphone-x/)
 
-### 3. Overall Mobile Width Too Wide
+### 3. ✅ Overall Mobile Width Too Wide
 - **Priority:** High
+- **Status:** FIXED (commit `ca4240e`)
 - **Description:** Overall width in mobile view is too wide for default iPhone 15 Pro experience. Need to adjust padding to make mobile view fit smaller width by approximately 50px
 - **Action:** Review official iOS guidelines for proper sizing
 - **Location:** Global mobile layout
@@ -39,18 +42,21 @@
 
 ## Posts & Feed
 
-### 4. Offline Mode - Disable Post Button
+### 4. ✅ Offline Mode - Disable Post Button
 - **Priority:** Medium
+- **Status:** FIXED (commit `3fef2e6`)
 - **Description:** In offline mode, disable the Post button in create post screen
 - **Location:** Create Post page
 
-### 5. Post Button Width on Mobile
+### 5. ✅ Post Button Width on Mobile
 - **Priority:** Low
+- **Status:** FIXED
 - **Description:** Make Post button wide as the viewport when in mobile view
 - **Location:** Create Post page
 
-### 6. User Cannot Delete Own Post
+### 6. ✅ User Cannot Delete Own Post
 - **Priority:** High
+- **Status:** FIXED (commit `829faae`)
 - **Description:** Users should be able to delete their own posts
 - **Location:** Post actions/options
 - **Proposed Solution:**
@@ -59,13 +65,15 @@
   3. Add confirmation dialog before deletion
   4. Implement soft delete (mark as deleted) vs hard delete based on business requirements
 
-### 7. User Profile Post Padding Inconsistency
+### 7. ✅ User Profile Post Padding Inconsistency
 - **Priority:** Medium
+- **Status:** FIXED (commit `2c370de`)
 - **Description:** The horizontal padding/margins for posts in user profile is bigger than it is for PostFeed. Should use PostFeed layout but load different content (DRY the code instead of duplicating)
 - **Location:** User Profile page vs PostFeed
 
-### 8. Add Comment Count to Posts
+### 8. ✅ Add Comment Count to Posts
 - **Priority:** Medium
+- **Status:** FIXED (commit `fce6d62`)
 - **Description:** Add a comment count next to the comments button in posts (both feed and details page)
 - **Location:** Post component (feed view and detail view)
 
@@ -73,8 +81,9 @@
 
 ## Messaging
 
-### 9. Long Messages Break Layout
+### 9. ✅ Long Messages Break Layout
 - **Priority:** High
+- **Status:** FIXED (commit `20c9a42`)
 - **Description:** When messages are too long in the conversation detail page, the page becomes wider than it should be, exceeding mobile viewport
 - **Note:** This issue affects single line, no-spaces long text
 - **Test strings:** 
@@ -126,8 +135,9 @@
 
 ## Post Details Page
 
-### 15. Sticky Comment Input Padding
+### 15. ✅ Sticky Comment Input Padding
 - **Priority:** High
+- **Status:** FIXED (commit `ce65c7c`)
 - **Description:** Since we added a sticky comment input in mobile view, we need to account for that in padding the Post Details Page so comments at the bottom of the page don't end up hidden under the input field
 - **Location:** Post Details page (mobile view)
 - **Proposed Solution:**
@@ -164,8 +174,9 @@
 - **Description:** If person is using browser, suggest them to save the app as PWA on their home screen
 - **Location:** App-wide (browser detection)
 
-### 18. PWA Logo Not Displaying
+### 18. ✅ PWA Logo Not Displaying
 - **Priority:** High
+- **Status:** FIXED (commit `2276086`)
 - **Description:** The PWA doesn't display our logo as it should. Instead, the Vite logo appears
 - **Location:** PWA manifest/icons configuration
 - **Proposed Solution:**
@@ -180,8 +191,9 @@
 
 ## Signup Wizard
 
-### 19. Signup Wizard Mobile Layout Issues
+### 19. ✅ Signup Wizard Mobile Layout Issues
 - **Priority:** High
+- **Status:** FIXED
 - **Description:** The signup wizard is looking poor on iPhone - all crammed up around the back and next buttons:
   - MBTI selector is crammed up
   - Labels start squeezing out of the boxes
@@ -200,12 +212,12 @@
 
 ## Summary
 
-| Priority | Count |
-|----------|-------|
-| High     | 8     |
-| Medium   | 8     |
-| Low      | 3     |
-| **Total**| **19**|
+| Priority | Open | Fixed |
+|----------|------|-------|
+| High     | 1    | 7     |
+| Medium   | 4    | 4     |
+| Low      | 2    | 1     |
+| **Total**| **7**| **12**|
 
 ---
 

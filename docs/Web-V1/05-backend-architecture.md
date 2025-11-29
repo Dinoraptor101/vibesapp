@@ -75,8 +75,8 @@ All API requests require authentication headers:
 ```javascript
 {
   _id: ObjectId,          // MongoDB document ID
-  text: String,           // Post content (optional)
-  image: String,          // S3 image key (required)
+  text: String,           // Post content (optional for posts with images)
+  image: String,          // S3 image key (required for posts, optional for comments)
   user: {                 // Embedded user data (snapshot)
     userId: String,
     userName: String,
@@ -88,7 +88,9 @@ All API requests require authentication headers:
       lon: Number
     }
   },
-  replyTo: ObjectId,      // Parent post ID (for replies)
+  replyTo: ObjectId,      // Reserved for future post-to-post replies (V1 feature)
+  commentOn: ObjectId,    // Parent post ID (if this document is a comment)
+  replyToCommentId: ObjectId, // Parent comment ID (if this is a reply to another comment)
   reactions: [{           // User reactions array
     userId: String,
     type: String,         // "like" or "dislike"
@@ -106,6 +108,64 @@ All API requests require authentication headers:
   updatedAt: Date
 }
 ```
+
+### Comment System Architecture (Polymorphic Design)
+
+Comments are stored in the **same `Post` collection** as regular posts, using a polymorphic design pattern. This architectural decision reduces code duplication since comments share most fields with posts (text, user, reactions, location, timestamps).
+
+#### How It Works
+
+```
+┌──────────────────────────────────────────────────────┐
+│              MongoDB: Post Collection                 │
+│                                                      │
+│  ┌─────────────────┐      ┌─────────────────────┐   │
+│  │  Regular Post   │      │      Comment        │   │
+│  │  commentOn:     │      │  commentOn:         │   │
+│  │     null        │      │    <postId>         │   │
+│  │  image:         │      │  image: null        │   │
+│  │    required     │      │    (optional)       │   │
+│  └─────────────────┘      └─────────────────────┘   │
+└──────────────────────────────────────────────────────┘
+           ▲                          ▲
+           │                          │
+     /api/posts                /api/comments
+   (filters out comments)    (dedicated endpoint)
+```
+
+#### Key Fields
+
+| Field | Purpose |
+|-------|---------|
+| `commentOn` | If set, this document is a comment on the referenced post |
+| `replyToCommentId` | If set, this comment is a reply to another comment (threading) |
+| `replyTo` | Reserved for future post-to-post reply feature (V1 legacy) |
+
+#### API Separation
+
+Despite sharing the same data model, comments have **dedicated endpoints**:
+
+- **`POST /api/comments`** - Create a comment
+- **`GET /api/comments/:postId`** - Get comments for a post
+- **`DELETE /api/comments/:commentId`** - Delete a comment
+
+The posts endpoint (`/api/posts`) automatically **filters out comments**:
+```javascript
+filteredPosts = filteredPosts.filter((post) => !post.commentOn);
+```
+
+#### Why This Design?
+
+1. **Shared functionality** - Comments can be "vibed" (liked/disliked) just like posts
+2. **Consistent reactions** - Same reaction system for both posts and comments
+3. **Reduced duplication** - One model, one set of validation logic
+4. **Flexible queries** - Easy to aggregate posts with comment counts
+
+#### Trade-offs
+
+- The `Post` collection serves dual purposes (can be confusing at first)
+- Must remember to filter by `commentOn` when querying posts
+- Frontend types include `commentOn?: string` even though posts don't use it
 
 ### Conversation Model (Direct Messages)
 
