@@ -2,10 +2,12 @@
  * RichTextToolbar Component
  *
  * Basic HTML formatting toolbar for article mode.
- * Supports: Bold, Underline, Bullet List, Text Alignment
+ * Supports: Bold, Underline, Text Alignment
+ *
+ * Note: Bullet list removed - will be re-added when we build the JSON-based editor (see To-Do.md)
  */
 
-import { AlignCenter, AlignLeft, AlignRight, Bold, List, Underline } from 'lucide-react';
+import { AlignCenter, AlignLeft, AlignRight, Bold, Underline } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/cn';
 
@@ -46,40 +48,6 @@ export function RichTextToolbar({ textareaRef, className }: RichTextToolbarProps
       // Restore focus and cursor position
       textarea.focus();
       const newCursorPos = start + openTag.length + selectedText.length + closeTag.length;
-      textarea.setSelectionRange(newCursorPos, newCursorPos);
-    }
-  };
-
-  /**
-   * Convert lines to bullet list
-   */
-  const applyBulletList = () => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const text = textarea.value;
-    const selectedText = text.substring(start, end);
-
-    if (selectedText) {
-      const lines = selectedText.split('\n').filter((line) => line.trim());
-      const listItems = lines.map((line) => `<li>${line.trim()}</li>`).join('\n');
-      const bulletList = `<ul>\n${listItems}\n</ul>`;
-
-      const before = text.substring(0, start);
-      const after = text.substring(end);
-      const newText = `${before}${bulletList}${after}`;
-
-      textarea.value = newText;
-
-      // Dispatch input event
-      const event = new Event('input', { bubbles: true });
-      textarea.dispatchEvent(event);
-
-      // Restore focus
-      textarea.focus();
-      const newCursorPos = start + bulletList.length;
       textarea.setSelectionRange(newCursorPos, newCursorPos);
     }
   };
@@ -170,17 +138,6 @@ export function RichTextToolbar({ textareaRef, className }: RichTextToolbarProps
 
       {/* Divider */}
       <div className="w-px h-6 bg-border dim:bg-gray-600 mx-1" />
-
-      {/* Bullet List */}
-      <button
-        type="button"
-        onClick={applyBulletList}
-        className={buttonClass}
-        aria-label="Bullet list"
-        title="Bullet list"
-      >
-        <List className={iconClass} />
-      </button>
 
       {/* Text Alignment */}
       <button
