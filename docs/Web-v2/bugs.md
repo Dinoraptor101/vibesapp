@@ -162,11 +162,10 @@
 - **Additional consideration:** Support nested bullets using tabs or indentations
 - **Location:** Article Editor
 - **Proposed Solution:**
-  1. Identify the rich text editor library being used (TipTap, Slate, Draft.js, etc.)
-  2. For TipTap: Use `editor.chain().focus().toggleBulletList().run()`
-  3. Ensure bullet list extension is properly imported and registered
-  4. Wire up button onClick to call the toggle function
-  5. For nested bullets: Use Tab key handler with `sinkListItem`/`liftListItem` commands
+  1. we will not use third party libraries and we will build an in-house editor that will be JSON driven and explort into HTML.
+  2. Ensure bullet list extension is properly imported and registered
+  3. Wire up button onClick to call the toggle function
+  4. For nested bullets: Use Tab key handler with `sinkListItem`/`liftListItem` commands (instead of indentation on normal non bullteted lines)
 
 ---
 
