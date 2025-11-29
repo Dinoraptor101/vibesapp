@@ -1,6 +1,8 @@
+const mongoose = require('mongoose');
 const Post = require('../models/Post');
 const User = require('../models/User');
 const { createActivity } = require('./activityNew');
+const { transformPost, transformPostsWithCommentCounts } = require('../utils/postTransformer');
 
 /**
  * Create a comment on a post
@@ -136,12 +138,13 @@ exports.createComment = async (req, res) => {
       }
     }
 
-    // Return populated comment
+    // Return populated comment with consistent schema
     const populatedComment = await Post.findById(comment._id);
+    const transformedComment = transformPost(populatedComment, { commentCount: 0 });
 
     res.status(201).json({
       success: true,
-      post: populatedComment, // Keep 'post' key for frontend compatibility
+      post: transformedComment, // Keep 'post' key for frontend compatibility
     });
   } catch (error) {
     console.error('Error creating comment:', error);
@@ -164,18 +167,24 @@ exports.getComments = async (req, res) => {
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
 
+    // Convert string postId to ObjectId for MongoDB query
+    const postObjectId = new mongoose.Types.ObjectId(postId);
+
     // Get comments (posts with commentOn = postId)
     const comments = await Post.find({
-      commentOn: postId,
+      commentOn: postObjectId,
       isDeleted: false,
     })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
+    // Transform comments with consistent schema (likeCount, commentCount for replies)
+    const transformedComments = await transformPostsWithCommentCounts(comments);
+
     // Get total count
     const total = await Post.countDocuments({
-      commentOn: postId,
+      commentOn: postObjectId,
       isDeleted: false,
     });
 
@@ -184,7 +193,7 @@ exports.getComments = async (req, res) => {
 
     res.json({
       success: true,
-      posts: comments, // Keep 'posts' key for frontend compatibility
+      posts: transformedComments, // Keep 'posts' key for frontend compatibility
       currentPage: page,
       totalPages,
       totalPosts: total,
