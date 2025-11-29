@@ -12,6 +12,8 @@
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui-next';
+import { useAuth } from '@/features/auth/context/useAuth';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { cn } from '@/lib/cn';
 import { uploadImage } from '../api/s3Service';
 import type { ImageFile, UploadProgress } from '../utils/imageUtils';
@@ -51,10 +53,36 @@ export function CreatePostForm({ onSubmit, isSubmitting = false }: CreatePostFor
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const richEditorRef = useRef<RichTextEditorRef>(null);
 
-  // Silently get user location on mount (required by backend, but hidden from UI)
+  // Network status for disabling post when offline
+  const { isOnline } = useNetworkStatus();
+
+  // Get user's stored location as fallback
+  const { user } = useAuth();
+
+  // Get location: try browser geolocation first, fallback to user's stored location
   useEffect(() => {
+    // Helper to set location from user profile
+    const setUserStoredLocation = () => {
+      if (user?.location) {
+        // User location may have latitude/longitude or lat/lon depending on source
+        const lat =
+          (user.location as { lat?: number; latitude?: number }).lat ??
+          (user.location as { lat?: number; latitude?: number }).latitude;
+        const lon =
+          (user.location as { lon?: number; longitude?: number }).lon ??
+          (user.location as { lon?: number; longitude?: number }).longitude;
+        if (lat && lon) {
+          setLocation({ lat, lon, city: user.location.city });
+          return true;
+        }
+      }
+      return false;
+    };
+
+    // If geolocation not supported, use stored location
     if (!navigator.geolocation) {
-      console.warn('Geolocation not supported');
+      console.warn('Geolocation not supported, using stored location');
+      setUserStoredLocation();
       return;
     }
 
@@ -66,9 +94,11 @@ export function CreatePostForm({ onSubmit, isSubmitting = false }: CreatePostFor
         });
       },
       (err) => {
-        console.warn('Could not get location:', err.message);
-        // Set a default location (will be rejected by backend if location is truly required)
-        // Backend requires location, so we need some value
+        console.warn('Could not get browser location:', err.message);
+        // Fallback to user's stored location
+        if (!setUserStoredLocation()) {
+          console.warn('No stored location available');
+        }
       },
       {
         timeout: 5000,
@@ -76,7 +106,7 @@ export function CreatePostForm({ onSubmit, isSubmitting = false }: CreatePostFor
         enableHighAccuracy: false,
       }
     );
-  }, []);
+  }, [user]);
 
   // Auto-switch to article mode when text exceeds threshold (chars or newlines)
   useEffect(() => {
@@ -104,6 +134,11 @@ export function CreatePostForm({ onSubmit, isSubmitting = false }: CreatePostFor
     async (e: React.FormEvent) => {
       e.preventDefault();
       setError(null);
+
+      // Prevent submission when offline
+      if (!isOnline) {
+        return;
+      }
 
       // Validation: Show visual feedback for missing image
       if (!selectedImage?.compressed) {
@@ -133,7 +168,7 @@ export function CreatePostForm({ onSubmit, isSubmitting = false }: CreatePostFor
         setUploadProgress(null);
       }
     },
-    [selectedImage, text, location, onSubmit]
+    [selectedImage, text, location, onSubmit, isOnline]
   );
 
   /**
@@ -197,7 +232,7 @@ export function CreatePostForm({ onSubmit, isSubmitting = false }: CreatePostFor
     setText(newValue);
   };
 
-  const canSubmit = selectedImage && location && !isSubmitting;
+  const canSubmit = selectedImage && location && !isSubmitting && isOnline;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -343,17 +378,20 @@ export function CreatePostForm({ onSubmit, isSubmitting = false }: CreatePostFor
         </div>
       )}
 
-      {/* Actions */}
-      <div className="flex items-center justify-end pt-4">
-        <Button
-          type="submit"
-          variant="primary"
-          disabled={!canSubmit || uploadProgress !== null}
-          leftIcon={isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : undefined}
-        >
-          {isSubmitting ? 'Posting...' : 'Post'}
-        </Button>
-      </div>
+      {/* Actions - hidden when offline */}
+      {isOnline && (
+        <div className="flex items-center justify-end pt-4">
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={!canSubmit || uploadProgress !== null}
+            leftIcon={isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : undefined}
+            className="w-full md:w-auto"
+          >
+            {isSubmitting ? 'Posting...' : 'Post'}
+          </Button>
+        </div>
+      )}
     </form>
   );
 }
