@@ -1,5 +1,14 @@
 - We are yet to implement a Vibes Score (Karma engine) into Web-V2 and how to better represent it
 
+- **Refactor Comments into Separate Collection** - Currently comments are stored as Posts with a `commentOn` field. This causes architectural issues:
+  1. **Problem**: Every feed query needs to filter out comments (`!post.commentOn`), activity notifications can't easily distinguish photos from comments, schema bloat (comments carry unused fields like `proximal_users`), Posts collection grows 10-100x faster than needed.
+  2. **Solution**: Create dedicated `Comment` model/collection with fields: `_id`, `postId` (ref to parent Post), `userId`, `text`, `replyToCommentId` (for nested replies), `reactions[]`, `reports[]`, `createdAt`, `isDeleted`.
+  3. **Migration**: Write script to move existing `Post` documents with `commentOn` to new `Comment` collection, update references.
+  4. **API Changes**: `/api/comments/:postId` already exists - just needs to query new collection. Feed endpoints no longer need comment filtering.
+  5. **Activity System**: Can use dedicated `comment` activity type without ambiguity.
+  
+  Estimated: 2-3 hours refactor + testing. This is proper data modeling that prevents future bugs.
+
 - **Build In-House JSON-Based Rich Text Editor** - Replace current contentEditable + execCommand approach (deprecated, unreliable) with a proper JSON document model:
   1. **Document Model**: Define node types (paragraph, bulletList, listItem, text) with optional marks (bold, underline)
   2. **Operations/Commands**: insertText, deleteText, splitBlock, toggleMark, wrapInList, unwrapFromList - each transforms JSON predictably
