@@ -12,7 +12,7 @@ export default defineConfig({
       includeAssets: ['logo.svg'],
       manifest: {
         name: 'VibesApp',
-        short_name: 'Vibes',
+        short_name: 'VibesApp',
         description: 'A picture-based social network',
         theme_color: '#10B981',
         background_color: '#ffffff',
