@@ -211,7 +211,7 @@ export function PostDetailPageContent({ postId: propPostId }: PostDetailPageCont
 
       {/* Mobile: Fixed Comment Input - Rendered via Portal to escape scroll container */}
       {createPortal(
-        <div className="md:hidden fixed bottom-[calc(var(--bottom-nav-height)-15px)] left-0 right-0 bg-surface-elevated/95 backdrop-blur-md border-t border-border px-4 py-3 z-40">
+        <div className="md:hidden fixed bottom-[calc(var(--bottom-nav-height)-15px)] left-0 right-0 glass border-t border-border px-4 py-3 z-40">
           <CommentInput
             onSubmit={handleSubmitComment}
             replyTo={replyTo}

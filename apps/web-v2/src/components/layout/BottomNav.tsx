@@ -48,7 +48,7 @@ export function BottomNav() {
   if (!user) return null;
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface-elevated/95 backdrop-blur-md border-t border-border z-40 safe-area-inset-bottom">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 glass border-t border-border z-40 safe-area-inset-bottom">
       <div className="grid grid-cols-5 items-end px-2 py-2">
         {/* Home */}
         <Link

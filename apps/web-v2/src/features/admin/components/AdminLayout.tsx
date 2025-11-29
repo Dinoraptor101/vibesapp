@@ -25,7 +25,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     <div className="min-h-screen bg-gray-50 dim:bg-gray-900 dark:bg-gray-950">
       {/* Header */}
       <header
-        className="bg-white/95 dim:bg-gray-800/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dim:border-gray-700 dark:border-gray-800 sticky top-0 z-50"
+        className="glass border-b border-gray-200 dim:border-gray-700 dark:border-gray-800 sticky top-0 z-50"
         data-testid="admin-header"
       >
         <div className="container mx-auto px-4">

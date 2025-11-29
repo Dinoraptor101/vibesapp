@@ -54,7 +54,7 @@ export function TopNav() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="hidden md:flex items-center justify-between px-6 py-3 bg-surface-elevated/95 backdrop-blur-md border-b border-border sticky top-0 z-40">
+    <nav className="hidden md:flex items-center justify-between px-6 py-3 glass border-b border-border fixed top-0 left-0 right-0 z-40">
       {/* Left: Logo + Offline Indicator */}
       <div className="flex items-center gap-3">
         <Link to="/" className="flex items-center gap-2 group">

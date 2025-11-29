@@ -134,7 +134,7 @@ export function ConversationView() {
     >
       {/* Header - Fixed at top with glass blur */}
       <div
-        className="fixed top-0 left-0 right-0 z-10 flex items-center gap-3 border-b border-border bg-surface-elevated/95 backdrop-blur-md px-4 py-3"
+        className="fixed top-0 left-0 right-0 z-10 flex items-center gap-3 border-b border-border glass px-4 py-3"
         data-testid="conversation-header"
       >
         <button

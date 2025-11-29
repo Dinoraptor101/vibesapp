@@ -396,6 +396,72 @@ function ThemeSwitcher() {
 }
 ```
 
+## Glass Effect System
+
+The glass effect provides a frosted, translucent appearance for navigation bars, headers, footers, and overlay elements. It uses backdrop-filter blur combined with semi-transparent backgrounds that adapt to each theme.
+
+### CSS Variables
+```css
+/* Light theme - subtle white tint */
+--glass-bg: rgba(255, 255, 255, 0.70);
+--glass-border: rgba(255, 255, 255, 0.2);
+--glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+
+/* Dim theme - medium gray tint */
+--glass-bg: rgba(66, 66, 66, 0.75);
+--glass-border: rgba(255, 255, 255, 0.1);
+--glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+/* Dark theme - dark tint */
+--glass-bg: rgba(26, 26, 26, 0.80);
+--glass-border: rgba(255, 255, 255, 0.05);
+--glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+```
+
+### Glass Utility Class
+```css
+@layer utilities {
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--glass-shadow);
+  }
+}
+```
+
+### Usage
+```tsx
+// Navigation bars
+<nav className="glass border-b border-border fixed top-0 left-0 right-0 z-40">
+  {/* Nav content */}
+</nav>
+
+// Floating headers/footers
+<header className="glass fixed top-0 left-0 right-0 z-10">
+  {/* Header content */}
+</header>
+
+// Dropdown menus
+<div className="glass rounded-lg p-2">
+  {/* Menu content */}
+</div>
+```
+
+### Implementation Notes
+- **Fixed Positioning**: Glass elements should use `fixed` positioning so content scrolls behind them, revealing the blur effect
+- **Z-Index**: Use appropriate z-index values (z-10 for page-level, z-40 for global nav)
+- **Content Padding**: Add corresponding padding to content areas to account for fixed elements
+- **Safari Support**: Always include `-webkit-backdrop-filter` for Safari compatibility
+
+### Components Using Glass Effect
+- `TopNav` - Desktop navigation bar (fixed)
+- `BottomNav` - Mobile navigation bar (fixed)
+- `ConversationView` - Chat header and footer (fixed)
+- `PostDetailPage` - Comment input area
+- `UserMenu` - Profile dropdown
+- `AdminLayout` - Admin navigation
+
 ## Navigation Design Language
 
 ### Core Principles
