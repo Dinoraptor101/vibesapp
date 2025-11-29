@@ -129,7 +129,7 @@ export function ConversationView() {
 
   return (
     <div
-      className="flex h-screen flex-col bg-white dim:bg-gray-800 dark:bg-gray-900"
+      className="flex h-dvh flex-col bg-white dim:bg-gray-800 dark:bg-gray-900 overscroll-y-contain"
       data-testid="conversation-view"
     >
       {/* Header */}
@@ -222,7 +222,10 @@ export function ConversationView() {
       </div>
 
       {/* Messages - IMPORTANT: id="messages-container" for Intersection Observer */}
-      <div id="messages-container" className="flex-1 space-y-4 overflow-y-auto p-4">
+      <div
+        id="messages-container"
+        className="flex-1 space-y-4 overflow-y-auto overscroll-contain p-4"
+      >
         {!activeConversation?.messages || activeConversation.messages.length === 0 ? (
           <div className="flex h-full items-center justify-center text-center">
             <MessageSquareDashed className="w-12 h-12 text-gray-300 dim:text-gray-600 dark:text-gray-600" />
