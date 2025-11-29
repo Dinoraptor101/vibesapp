@@ -2,7 +2,7 @@
 
 **Reported:** November 28, 2025  
 **Source:** QA Tester Feedback  
-**Status:** In Progress (12/19 Fixed)
+**Status:** In Progress (15/19 Fixed)
 
 ---
 
@@ -102,18 +102,21 @@
 
 ## Theming (Dim Theme Support)
 
-### 10. Conversation List - No Dim Theme
+### 10. ✅ Conversation List - No Dim Theme
 - **Priority:** Medium
+- **Status:** FIXED
 - **Description:** Conversation list doesn't support dim theme
 - **Location:** Conversation List page
 
-### 11. Conversation Detail - No Dim Theme
+### 11. ✅ Conversation Detail - No Dim Theme
 - **Priority:** Medium
+- **Status:** FIXED
 - **Description:** Conversation detail page doesn't support dim theme
 - **Location:** Conversation Detail page
 
-### 12. Admin Dashboard - No Dim Theme
+### 12. ✅ Admin Dashboard - No Dim Theme
 - **Priority:** Low
+- **Status:** FIXED
 - **Description:** Admin dashboard doesn't support dim theme
 - **Location:** Admin Dashboard
 
@@ -215,15 +218,23 @@
 | Priority | Open | Fixed |
 |----------|------|-------|
 | High     | 1    | 7     |
-| Medium   | 4    | 4     |
-| Low      | 2    | 1     |
-| **Total**| **7**| **12**|
+| Medium   | 2    | 6     |
+| Low      | 1    | 2     |
+| **Total**| **4**| **15**|
 
 ---
 
 ## Notes
 
 - Many issues relate to mobile responsiveness, particularly for iPhone 15 Pro viewport
-- Dim theme support needs to be extended to messaging and admin sections
+- ~~Dim theme support needs to be extended to messaging and admin sections~~ ✅ **DONE** - Full dim theme support added to:
+  - Conversation List & Detail pages
+  - Message bubbles and input
+  - Admin Layout (header, nav, footer)
+  - Admin Login page
+  - Flagged Posts page (including sort dropdown)
+  - User Management page (table, filters, search)
+  - Admin Settings page (all cards and inputs)
+  - Card UI component
 - Glass blur effects need consistency across the app
 - PWA configuration needs attention for proper branding

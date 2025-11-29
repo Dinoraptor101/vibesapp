@@ -31,7 +31,7 @@ export function ConversationList() {
         data-testid="conversations-error"
       >
         <AlertCircle className="h-12 w-12 text-red-500" />
-        <p className="text-sm text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400">
+        <p className="text-sm text-gray-600 dim:text-gray-400 dark:text-gray-400">
           Failed to load conversations
         </p>
         <button
@@ -74,10 +74,10 @@ export function ConversationList() {
           <div
             key={conversation._id}
             data-testid={`conversation-${conversation._id}`}
-            className={`flex w-full items-center gap-3 rounded-lg border bg-white p-3 transition-all ${
+            className={`flex w-full items-center gap-3 rounded-lg border bg-white dim:bg-gray-800 dark:bg-gray-900 p-3 transition-all ${
               isClosed
-                ? 'opacity-60 border-gray-200 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600 dark:hover:bg-gray-750'
-                : 'border-gray-200 hover:border-brand-primary hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-brand-primary dark:hover:bg-gray-750'
+                ? 'opacity-60 border-gray-200 dim:border-gray-600 dark:border-gray-700 hover:border-gray-300 hover:bg-gray-50 dim:hover:bg-gray-700 dark:hover:bg-gray-800 dim:hover:border-gray-500 dark:hover:border-gray-600'
+                : 'border-gray-200 dim:border-gray-600 dark:border-gray-700 hover:border-brand-primary hover:bg-gray-50 dim:hover:bg-gray-700 dark:hover:bg-gray-800'
             }`}
           >
             {/* Avatar - clickable to profile, grayscale if closed */}
@@ -119,7 +119,7 @@ export function ConversationList() {
                   )}
                   {/* Archive icon for closed conversations */}
                   {isClosed && (
-                    <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                    <span className="flex items-center gap-1 text-xs text-gray-500 dim:text-gray-400 dark:text-gray-400">
                       <Archive className="h-3 w-3" />
                       Ended
                     </span>
@@ -137,7 +137,7 @@ export function ConversationList() {
 
               {lastMessage && (
                 <p
-                  className="truncate text-sm text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400"
+                  className="truncate text-sm text-gray-600 dim:text-gray-400 dark:text-gray-400"
                   data-testid="conversation-last-message"
                 >
                   {lastMessage.senderId === user?._id && 'You: '}

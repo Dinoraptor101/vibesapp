@@ -186,10 +186,13 @@ export function FlaggedPostsPage() {
     <div className="p-6 space-y-4">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold" data-testid="flagged-posts-title">
+        <h1
+          className="text-2xl font-bold text-gray-900 dim:text-white dark:text-white"
+          data-testid="flagged-posts-title"
+        >
           🚩 Flagged Posts
         </h1>
-        <p className="text-text-secondary mt-1">
+        <p className="text-gray-600 dim:text-gray-400 dark:text-gray-400 mt-1">
           Review and manage posts reported by the community
         </p>
       </div>
@@ -233,14 +236,14 @@ export function FlaggedPostsPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-sm text-text-secondary">Sort:</span>
+          <span className="text-sm text-gray-600 dim:text-gray-400 dark:text-gray-400">Sort:</span>
           <select
             value={sort}
             onChange={(e) => {
               setSort(e.target.value as SortType);
               setPage(1);
             }}
-            className="px-3 py-1.5 rounded-lg border border-border bg-bg text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
+            className="px-3 py-1.5 rounded-lg border border-gray-200 dim:border-gray-600 dark:border-gray-700 bg-white dim:bg-gray-800 dark:bg-gray-900 text-gray-900 dim:text-white dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
             data-testid="sort-dropdown"
           >
             <option value="most-reports" data-testid="sort-option-most-reports">
@@ -262,9 +265,13 @@ export function FlaggedPostsPage() {
           <FlaggedPostsSkeleton />
         ) : posts.length === 0 ? (
           <div className="text-center py-12" data-testid="flagged-posts-empty">
-            <CheckCircle className="mx-auto mb-4 w-12 h-12 text-positive-500" />
-            <h3 className="text-lg font-medium mb-2">All clear!</h3>
-            <p className="text-text-secondary">No flagged posts to review right now</p>
+            <CheckCircle className="mx-auto mb-4 w-12 h-12 text-green-500" />
+            <h3 className="text-lg font-medium mb-2 text-gray-900 dim:text-white dark:text-white">
+              All clear!
+            </h3>
+            <p className="text-gray-600 dim:text-gray-400 dark:text-gray-400">
+              No flagged posts to review right now
+            </p>
           </div>
         ) : (
           <>
@@ -275,11 +282,13 @@ export function FlaggedPostsPage() {
                   type="checkbox"
                   checked={selectedPosts.size === posts.length && posts.length > 0}
                   onChange={handleSelectAll}
-                  className="h-4 w-4 cursor-pointer rounded border-border bg-bg focus:ring-2 focus:ring-brand-primary"
+                  className="h-4 w-4 cursor-pointer rounded border-gray-300 dim:border-gray-600 dark:border-gray-700 bg-white dim:bg-gray-800 dark:bg-gray-900 focus:ring-2 focus:ring-brand-primary"
                   aria-label="Select all posts"
                   data-testid="select-all-checkbox"
                 />
-                <span className="text-sm text-text-secondary">Select All</span>
+                <span className="text-sm text-gray-600 dim:text-gray-400 dark:text-gray-400">
+                  Select All
+                </span>
               </div>
 
               {/* Bulk actions - only show when posts are selected */}
@@ -328,7 +337,7 @@ export function FlaggedPostsPage() {
           >
             Previous
           </Button>
-          <span className="text-sm text-text-secondary">
+          <span className="text-sm text-gray-600 dim:text-gray-400 dark:text-gray-400">
             Page {page} of {totalPages}
           </span>
           <Button

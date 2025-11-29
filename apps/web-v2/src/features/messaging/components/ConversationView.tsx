@@ -114,10 +114,8 @@ export function ConversationView() {
 
   if (!activeConversation) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-2">
-        <p className="text-gray-600 dim:text-gray-500 dim:text-gray-450 dark:text-gray-400">
-          Conversation not found
-        </p>
+      <div className="flex h-screen flex-col items-center justify-center gap-2 bg-white dim:bg-gray-800 dark:bg-gray-900">
+        <p className="text-gray-600 dim:text-gray-400 dark:text-gray-400">Conversation not found</p>
         <button
           type="button"
           onClick={() => navigate('/messages')}
@@ -136,7 +134,7 @@ export function ConversationView() {
     >
       {/* Header */}
       <div
-        className="flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800"
+        className="flex items-center gap-3 border-b border-gray-200 dim:border-gray-600 dark:border-gray-700 bg-white dim:bg-gray-800 dark:bg-gray-900 px-4 py-3"
         data-testid="conversation-header"
       >
         <button
@@ -252,13 +250,13 @@ export function ConversationView() {
 
       {/* Archived Banner or Message Input */}
       {isConversationClosed ? (
-        <div className="border-t border-gray-200 dark:border-gray-700 bg-yellow-50 dark:bg-yellow-900/20">
+        <div className="border-t border-gray-200 dim:border-gray-600 dark:border-gray-700 bg-yellow-50 dim:bg-yellow-900/30 dark:bg-yellow-900/20">
           <div className="p-4">
-            <div className="flex items-start gap-2 text-sm text-yellow-800 dark:text-yellow-200">
+            <div className="flex items-start gap-2 text-sm text-yellow-800 dim:text-yellow-200 dark:text-yellow-200">
               <span className="text-lg">⚠️</span>
               <div>
                 <p className="font-medium">This conversation has ended</p>
-                <p className="text-xs mt-1 text-yellow-700 dark:text-yellow-300">
+                <p className="text-xs mt-1 text-yellow-700 dim:text-yellow-300 dark:text-yellow-300">
                   You can view the message history, but cannot send new messages. To reconnect, send
                   a new DM request.
                 </p>
