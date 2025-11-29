@@ -277,11 +277,13 @@ Let's start. Which bug(s) are we tackling today?
 
 ## Activity & Notifications
 
-### 22. Incorrect Activity Text for Comments
+### 22. ✅ Incorrect Activity Text for Comments
 - **Priority:** Medium
 - **Source:** Kindness
+- **Status:** FIXED (commit `ea9b258`)
 - **Description:** When someone posts a comment, the activity notification that other people receive incorrectly says "posted a photo" instead of "commented"
 - **Location:** Activity feed / Notifications
+- **Solution:** Modified `getActivityMessage()` in ActivityCard to check if `activity.target.thumbnail` exists - photos have thumbnails, comments don't. Long-term fix (separate Comment collection) documented in To-Do.md.
 
 ---
 
@@ -290,9 +292,9 @@ Let's start. Which bug(s) are we tackling today?
 | Priority | Open | Fixed |
 |----------|------|-------|
 | High     | 1    | 7     |
-| Medium   | 1    | 10    |
+| Medium   | 0    | 11    |
 | Low      | 1    | 2     |
-| **Total**| **3**| **19**|
+| **Total**| **2**| **20**|
 
 ---
 
