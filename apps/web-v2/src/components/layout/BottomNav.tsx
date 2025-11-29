@@ -1,4 +1,5 @@
-import { Bell, Home, MessageSquare, Plus } from 'lucide-react';
+import { Bell, Home, Menu, MessageSquare, Plus } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUnreadCounts } from '@/features/activity';
 import { useAuth } from '@/features/auth/context/useAuth';
@@ -17,38 +18,63 @@ export function BottomNav() {
   // Message counts (unread conversations + pending DM requests)
   const unreadMessages = useUnreadMessageCount();
 
+  // Track previous counts to detect new notifications
+  const prevActivityRef = useRef(unreadActivity);
+  const prevMessagesRef = useRef(unreadMessages);
+  const [shakeActivity, setShakeActivity] = useState(false);
+  const [shakeMessages, setShakeMessages] = useState(false);
+
+  // Trigger shake animation when counts increase
+  useEffect(() => {
+    if (unreadActivity > prevActivityRef.current) {
+      setShakeActivity(true);
+      const timer = setTimeout(() => setShakeActivity(false), 1000);
+      return () => clearTimeout(timer);
+    }
+    prevActivityRef.current = unreadActivity;
+  }, [unreadActivity]);
+
+  useEffect(() => {
+    if (unreadMessages > prevMessagesRef.current) {
+      setShakeMessages(true);
+      const timer = setTimeout(() => setShakeMessages(false), 1000);
+      return () => clearTimeout(timer);
+    }
+    prevMessagesRef.current = unreadMessages;
+  }, [unreadMessages]);
+
   const isActive = (path: string) => location.pathname === path;
 
   if (!user) return null;
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface-elevated/95 backdrop-blur-md border-t border-border z-40 safe-area-inset-bottom">
-      <div className="flex items-center justify-around px-2 py-2">
+      <div className="grid grid-cols-5 items-end px-2 py-2">
         {/* Home */}
         <Link
           to="/"
-          className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors min-w-[64px] ${
+          className={`flex flex-col items-center gap-1 py-2 rounded-lg transition-colors ${
             isActive('/') ? 'text-brand-purple' : 'text-text-secondary'
           }`}
           aria-label="Home"
         >
-          <Home className={`w-6 h-6 ${isActive('/') ? 'fill-current' : ''}`} />
+          <div className="h-6 flex items-center justify-center">
+            <Home className={`w-6 h-6 ${isActive('/') ? 'fill-current' : ''}`} />
+          </div>
           <span className="text-xs font-medium">Home</span>
         </Link>
 
         {/* Activity */}
         <Link
           to="/activity"
-          className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors min-w-[64px] relative ${
-            isActive('/activity')
-              ? 'text-brand-purple'
-              : unreadActivity > 0
-                ? 'text-brand-purple'
-                : 'text-text-secondary'
+          className={`flex flex-col items-center gap-1 py-2 rounded-lg transition-colors relative ${
+            isActive('/activity') ? 'text-brand-purple' : 'text-text-secondary'
           }`}
           aria-label={`Activity${unreadActivity > 0 ? ` (${unreadActivity} unread)` : ''}`}
         >
-          <div className="relative">
+          <div
+            className={`h-6 flex items-center justify-center relative ${shakeActivity ? 'animate-notification-shake' : ''}`}
+          >
             <Bell className={`w-6 h-6 ${isActive('/activity') ? 'fill-current' : ''}`} />
             {unreadActivity > 0 && (
               <span
@@ -61,38 +87,36 @@ export function BottomNav() {
           <span className="text-xs font-medium">Activity</span>
         </Link>
 
-        {/* Create Post */}
+        {/* Create Post - True Center */}
         <button
           type="button"
           onClick={() => navigate('/create-post')}
-          className="flex items-center justify-center min-w-[64px]"
+          className={`flex flex-col items-center gap-1 py-2 rounded-lg transition-colors ${
+            isActive('/create-post') ? 'text-brand-purple' : 'text-text-secondary'
+          }`}
           aria-label="Create post"
         >
-          <div
-            className={`text-white rounded-full p-3 shadow-lg hover:scale-110 transition-transform ${
-              isActive('/create-post')
-                ? 'bg-brand-purple hover:bg-brand-purple-hover'
-                : 'bg-notification hover:bg-notification-hover'
-            }`}
-          >
-            <Plus className="w-6 h-6" strokeWidth={2.5} />
+          <div className="h-6 flex items-center justify-center">
+            <Plus
+              className={`w-6 h-6 ${isActive('/create-post') ? 'fill-current' : ''}`}
+              strokeWidth={2.5}
+            />
           </div>
+          <span className="text-xs font-medium">Post</span>
         </button>
 
         {/* Messages */}
         <Link
           to="/messages"
           data-testid="nav-messages"
-          className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors min-w-[64px] relative ${
-            isActive('/messages')
-              ? 'text-brand-purple'
-              : unreadMessages > 0
-                ? 'text-brand-purple'
-                : 'text-text-secondary'
+          className={`flex flex-col items-center gap-1 py-2 rounded-lg transition-colors relative ${
+            isActive('/messages') ? 'text-brand-purple' : 'text-text-secondary'
           }`}
           aria-label={`Messages${unreadMessages > 0 ? ` (${unreadMessages} unread)` : ''}`}
         >
-          <div className="relative">
+          <div
+            className={`h-6 flex items-center justify-center relative ${shakeMessages ? 'animate-notification-shake' : ''}`}
+          >
             <MessageSquare className={`w-6 h-6 ${isActive('/messages') ? 'fill-current' : ''}`} />
             {unreadMessages > 0 && (
               <span
@@ -105,9 +129,19 @@ export function BottomNav() {
           <span className="text-xs font-medium">Messages</span>
         </Link>
 
-        {/* User Menu */}
-        <div className="flex flex-col items-center gap-1 px-4 py-2 min-w-[64px]">
-          <UserMenu isActive={isActive('/settings')} />
+        {/* Menu */}
+        <div
+          className={`flex flex-col items-center gap-1 py-2 rounded-lg transition-colors ${
+            isActive('/settings') ? 'text-brand-purple' : 'text-text-secondary'
+          }`}
+        >
+          <div className="h-6 flex items-center justify-center">
+            <UserMenu
+              isActive={isActive('/settings')}
+              icon={<Menu className={`w-6 h-6 ${isActive('/settings') ? 'fill-current' : ''}`} />}
+            />
+          </div>
+          <span className="text-xs font-medium">Menu</span>
         </div>
       </div>
     </nav>

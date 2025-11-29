@@ -396,6 +396,70 @@ function ThemeSwitcher() {
 }
 ```
 
+## Navigation Design Language
+
+### Core Principles
+
+Navigation elements must communicate two distinct concepts through separate visual channels:
+
+1. **Selection State** → **Color**
+2. **Unread/Notification Count** → **Badge**
+
+These channels should NEVER be conflated.
+
+### Selection State (Color)
+
+- **Active/Selected**: `text-brand-purple` - The user is currently on this page
+- **Inactive**: `text-text-secondary` - The user is not on this page
+
+```tsx
+// ✅ CORRECT: Color only indicates selection
+className={isActive('/activity') ? 'text-brand-purple' : 'text-text-secondary'}
+
+// ❌ WRONG: Color indicates both selection AND unread
+className={isActive('/activity') ? 'text-brand-purple' : unreadCount > 0 ? 'text-brand-purple' : 'text-text-secondary'}
+```
+
+### Unread/Notification Counts (Badge)
+
+- Display count via a **badge** positioned on the icon
+- Badge is always visible when count > 0, regardless of selection state
+- Badge styling: small, bold number, positioned top-right of icon
+
+```tsx
+// Badge example
+{unreadCount > 0 && (
+  <span className="absolute -top-1.5 -right-1.5 text-[10px] font-bold">
+    {unreadCount > 99 ? '99+' : unreadCount}
+  </span>
+)}
+```
+
+### Bottom Navigation Structure
+
+All navigation items must have identical dimensions:
+
+```
+┌─────────────────────────────────────────────────────┐
+│  [Icon]    [Icon]    [Icon]    [Icon]    [Icon]    │
+│   24px      24px      24px      24px      24px     │
+│  [Label]   [Label]   [Label]   [Label]   [Label]   │
+│   12px      12px      12px      12px      12px     │
+└─────────────────────────────────────────────────────┘
+
+- Grid: 5 equal columns (grid-cols-5)
+- Icon size: w-6 h-6 (24px)
+- Label: text-xs font-medium (12px)
+- Gap between icon and label: gap-1
+```
+
+### Why This Matters
+
+- **Cognitive clarity**: Users learn "purple = I'm here" and "badge = something new"
+- **Consistency**: Same visual language across all nav items
+- **Accessibility**: Clear distinction helps users with color perception differences
+- **Scalability**: Pattern works for any number of notification types
+
 ## Implementation Guidelines
 
 ### Component Creation
