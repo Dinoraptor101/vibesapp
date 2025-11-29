@@ -50,17 +50,22 @@ function getActivityIcon(type: Activity['type']) {
 
 /**
  * Get activity message based on type
+ *
+ * Note: Posts and comments share the same data model (comments are posts with commentOn field).
+ * We differentiate by checking if there's a thumbnail (image) - photos have thumbnails, comments don't.
  */
 function getActivityMessage(activity: Activity): string {
   const username = `@${activity.actor.username}`;
+  // Determine if this is a photo (has thumbnail) or comment (no thumbnail)
+  const isPhoto = !!activity.target?.thumbnail;
 
   switch (activity.type) {
     case 'new_follower':
       return `${username} followed you`;
     case 'following_post':
-      return `${username} posted a photo`;
+      return isPhoto ? `${username} posted a photo` : `${username} posted a comment`;
     case 'nearby_post':
-      return `${username} posted nearby`;
+      return isPhoto ? `${username} posted nearby` : `${username} commented nearby`;
     case 'comment':
       return `${username} commented on your post`;
     case 'comment_reply':
