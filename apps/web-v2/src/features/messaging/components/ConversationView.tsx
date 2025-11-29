@@ -129,12 +129,12 @@ export function ConversationView() {
 
   return (
     <div
-      className="flex h-dvh flex-col bg-white dim:bg-gray-800 dark:bg-gray-900 overscroll-y-contain"
+      className="relative h-dvh bg-white dim:bg-gray-800 dark:bg-gray-900 overscroll-y-contain"
       data-testid="conversation-view"
     >
-      {/* Header */}
+      {/* Header - Fixed at top with glass blur */}
       <div
-        className="flex items-center gap-3 border-b border-gray-200 dim:border-gray-600 dark:border-gray-700 bg-white dim:bg-gray-800 dark:bg-gray-900 px-4 py-3"
+        className="fixed top-0 left-0 right-0 z-10 flex items-center gap-3 border-b border-border bg-surface-elevated/95 backdrop-blur-md px-4 py-3"
         data-testid="conversation-header"
       >
         <button
@@ -222,12 +222,13 @@ export function ConversationView() {
       </div>
 
       {/* Messages - IMPORTANT: id="messages-container" for Intersection Observer */}
+      {/* pt-16 accounts for fixed header (~60px), pb-20 accounts for fixed footer (~76px) */}
       <div
         id="messages-container"
-        className="flex-1 space-y-4 overflow-y-auto overscroll-contain p-4"
+        className="h-full space-y-4 overflow-y-auto overscroll-contain px-4 pt-16 pb-20"
       >
         {!activeConversation?.messages || activeConversation.messages.length === 0 ? (
-          <div className="flex h-full items-center justify-center text-center">
+          <div className="flex h-[calc(100dvh-200px)] items-center justify-center text-center">
             <MessageSquareDashed className="w-12 h-12 text-gray-300 dim:text-gray-600 dark:text-gray-600" />
           </div>
         ) : (
@@ -251,29 +252,31 @@ export function ConversationView() {
         )}
       </div>
 
-      {/* Archived Banner or Message Input */}
-      {isConversationClosed ? (
-        <div className="border-t border-gray-200 dim:border-gray-600 dark:border-gray-700 bg-yellow-50 dim:bg-yellow-900/30 dark:bg-yellow-900/20">
-          <div className="p-4">
-            <div className="flex items-start gap-2 text-sm text-yellow-800 dim:text-yellow-200 dark:text-yellow-200">
-              <span className="text-lg">⚠️</span>
-              <div>
-                <p className="font-medium">This conversation has ended</p>
-                <p className="text-xs mt-1 text-yellow-700 dim:text-yellow-300 dark:text-yellow-300">
-                  You can view the message history, but cannot send new messages. To reconnect, send
-                  a new DM request.
-                </p>
+      {/* Archived Banner or Message Input - Fixed at bottom with glass blur */}
+      <div className="fixed bottom-0 left-0 right-0 z-10">
+        {isConversationClosed ? (
+          <div className="border-t border-border bg-yellow-50/95 dim:bg-yellow-900/80 dark:bg-yellow-900/70 backdrop-blur-md">
+            <div className="p-4">
+              <div className="flex items-start gap-2 text-sm text-yellow-800 dim:text-yellow-200 dark:text-yellow-200">
+                <span className="text-lg">⚠️</span>
+                <div>
+                  <p className="font-medium">This conversation has ended</p>
+                  <p className="text-xs mt-1 text-yellow-700 dim:text-yellow-300 dark:text-yellow-300">
+                    You can view the message history, but cannot send new messages. To reconnect,
+                    send a new DM request.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      ) : (
-        <MessageInput
-          onSend={handleSendMessage}
-          disabled={sendMessageMutation.isPending}
-          placeholder="Type a message..."
-        />
-      )}
+        ) : (
+          <MessageInput
+            onSend={handleSendMessage}
+            disabled={sendMessageMutation.isPending}
+            placeholder="Type a message..."
+          />
+        )}
+      </div>
     </div>
   );
 }
