@@ -6,6 +6,7 @@
 
 import { ArrowLeft, Loader2, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout';
 import { Button } from '@/components/ui-next';
@@ -208,15 +209,18 @@ export function PostDetailPageContent({ postId: propPostId }: PostDetailPageCont
         </div>
       </div>
 
-      {/* Mobile: Sticky Comment Input - Fixed above bottom nav (z-40) */}
-      <div className="md:hidden fixed bottom-20 left-0 right-0 bg-surface-elevated/95 backdrop-blur-md border-t border-border px-4 py-3 z-50 safe-area-inset-bottom">
-        <CommentInput
-          onSubmit={handleSubmitComment}
-          replyTo={replyTo}
-          onCancelReply={handleCancelReply}
-          disabled={createComment.isPending}
-        />
-      </div>
+      {/* Mobile: Fixed Comment Input - Rendered via Portal to escape scroll container */}
+      {createPortal(
+        <div className="md:hidden fixed bottom-[calc(var(--bottom-nav-height)-15px)] left-0 right-0 bg-surface-elevated/95 backdrop-blur-md border-t border-border px-4 py-3 z-40">
+          <CommentInput
+            onSubmit={handleSubmitComment}
+            replyTo={replyTo}
+            onCancelReply={handleCancelReply}
+            disabled={createComment.isPending}
+          />
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
