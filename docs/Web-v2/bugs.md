@@ -216,28 +216,32 @@ Let's start. Which bug(s) are we tackling today?
 
 ## Article Editor
 
-### 16. Bullet Points Not Working
+### 16. ✅ Bullet Points Not Working
 - **Priority:** High
+- **Status:** FIXED (commit `9c1278b`) - Button removed pending editor rebuild
 - **Description:** In article editor, bullets aren't working. They should work similar to indentation:
   - Make the current line bulleted based on cursor position (not text selection)
   - If text is selected, apply the bullet to the selected line(s)
   - Current state: button is simply not working
 - **Additional consideration:** Support nested bullets using tabs or indentations
 - **Location:** Article Editor
-- **Proposed Solution:**
-  1. we will not use third party libraries and we will build an in-house editor that will be JSON driven and explort into HTML.
-  2. Ensure bullet list extension is properly imported and registered
-  3. Wire up button onClick to call the toggle function
-  4. For nested bullets: Use Tab key handler with `sinkListItem`/`liftListItem` commands (instead of indentation on normal non bullteted lines)
+- **Solution:** Removed the broken bullet button from the toolbar. The full rich text editor will be rebuilt with a JSON-based document model (documented in To-Do.md). No point keeping broken UX in the meantime.
 
 ---
 
 ## PWA (Progressive Web App)
 
-### 17. PWA Install Prompt
+### 17. ✅ PWA Install Prompt
 - **Priority:** Low
+- **Status:** FIXED (commit `9c1278b`)
 - **Description:** If person is using browser, suggest them to save the app as PWA on their home screen
 - **Location:** App-wide (browser detection)
+- **Solution:** Created `PWAInstallPrompt` component with:
+  - Full-screen modal with platform-specific instructions (iOS Safari / Android Chrome)
+  - Mobile phones only (excludes tablets/desktop via user agent + screen width)
+  - 7-day dismissal period (localStorage)
+  - "Continue in browser" link (small, grey, top center)
+  - Follows ZEN principles: helpful, non-coercive guidance
 
 ### 18. ✅ PWA Logo Not Displaying
 - **Priority:** High
@@ -291,10 +295,10 @@ Let's start. Which bug(s) are we tackling today?
 
 | Priority | Open | Fixed |
 |----------|------|-------|
-| High     | 1    | 7     |
+| High     | 0    | 8     |
 | Medium   | 0    | 11    |
-| Low      | 1    | 2     |
-| **Total**| **2**| **20**|
+| Low      | 0    | 3     |
+| **Total**| **0**| **22**|
 
 ---
 
