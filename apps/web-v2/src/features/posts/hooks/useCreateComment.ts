@@ -61,6 +61,8 @@ export function useCreateComment(postId: string) {
         proximal_dislikes: 0,
         proximal_users: 0,
         isHidden: false,
+        likeCount: 0,
+        commentCount: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
