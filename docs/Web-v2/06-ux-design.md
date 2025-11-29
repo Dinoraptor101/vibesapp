@@ -507,6 +507,54 @@ const features = {
 - **Performance Metrics**: Monitor real user performance
 - **Conversion Funnels**: Track goal completion
 
+## Glass Effect System
+
+### Philosophy: Depth Through Transparency
+Glass effects (frosted glass / glassmorphism) create visual depth and hierarchy while maintaining content visibility. The glass tint is calibrated per theme for optimal readability.
+
+### Implementation
+```css
+/* Glass CSS Variables - Theme-specific */
+:root { /* Light theme */
+  --glass-bg: rgba(255, 255, 255, 0.70);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dim"] {
+  --glass-bg: rgba(66, 66, 66, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] {
+  --glass-bg: rgba(26, 26, 26, 0.80);
+  --glass-border: rgba(255, 255, 255, 0.05);
+  --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+/* Glass utility class */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--glass-shadow);
+}
+```
+
+### Usage Guidelines
+- **Fixed Positioning**: Glass elements must use `fixed` positioning so content scrolls behind them
+- **Tint Opacity**: Light (70%), Dim (75%), Dark (80%) - calibrated for readability
+- **Content Padding**: Add padding to content areas to account for fixed glass elements
+- **Safari Support**: Always include `-webkit-backdrop-filter` for Safari compatibility
+
+### Components Using Glass Effect
+- Navigation bars (TopNav, BottomNav)
+- Conversation headers and footers
+- Dropdown menus (UserMenu)
+- Comment input areas
+- Admin navigation
+
 ## Design System Maintenance
 
 ### Component Documentation
@@ -548,6 +596,11 @@ PostCard.story = {
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
   --line-height-tight: 1.25;
+
+  /* Glass Effects */
+  --glass-bg: rgba(255, 255, 255, 0.70);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 ```
 

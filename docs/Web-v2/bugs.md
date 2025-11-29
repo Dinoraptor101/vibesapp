@@ -1,8 +1,47 @@
 # Web-V2 Bug List
 
+---
+
+## Bug Fixing Workflow
+
+### Before Starting
+Create a list of the bugs we're going to tackle for the session.
+
+### Steps
+1. **Research** - Investigate root cause, research how big tech companies solved similar issues
+2. **Summary & Proposal** - Present findings and ask for preferred fix approach
+3. **Implementation** - Implement the fix and present for review (may iterate based on feedback)
+4. **Approval & Commit** - Once approved, run `npm run precommit` in web-v2, commit changes, and move to next bug
+
+### Copilot Prompt for Bug Fixing Sessions
+
+```
+We're going to fix bugs from docs/Web-V2/bugs.md. Follow this workflow for each bug:
+
+1. RESEARCH: Investigate the root cause in the codebase. Research how major tech companies (Apple, Google, Meta) solve similar issues. Check MDN, web.dev, and official documentation.
+
+2. SUMMARY: Present your findings:
+   - What's causing the bug
+   - How others have solved it
+   - Your recommended approach(es)
+   Then ask: "How would you like me to fix this?"
+
+3. IMPLEMENT: Make the fix based on my direction. Show me the changes for review. Be ready to iterate if I request changes.
+
+4. COMMIT: Only after I say "Approve":
+   - Run: cd apps/web-v2 && npm run precommit
+   - Commit with message: "fix(web-v2): [brief description] - closes #[bug number]"
+   - Mark the bug as FIXED in bugs.md
+   - Move to the next bug
+
+Let's start. Which bug(s) are we tackling today?
+```
+
+---
+
 **Reported:** November 28, 2025  
 **Source:** QA Tester Feedback  
-**Status:** In Progress (15/19 Fixed)
+**Status:** In Progress (18/22 Fixed)
 
 ---
 
@@ -124,15 +163,31 @@
 
 ## UI Consistency & Glass Effects
 
-### 13. Conversation Detail Header/Footer Glass Blur
+### 13. ✅ Conversation Detail Header/Footer Glass Blur
 - **Priority:** Medium
+- **Status:** FIXED (commit `0939e97`)
 - **Description:** Conversation details page header and footer should use Glass Blur effect (like the nav bars) for consistency
 - **Location:** Conversation Detail page
+- **Solution:** Used fixed positioning for header/footer with `bg-surface-elevated/95 backdrop-blur-md` so messages scroll behind them with glass blur effect
 
-### 14. Glass Tint for Readability
+### 14. ✅ Glass Tint for Readability
 - **Priority:** Medium
+- **Status:** FIXED
 - **Description:** Have all glass effects slightly tint dark or tint white to help reading the fonts
 - **Location:** All glass blur components
+- **Solution:** Created a unified Glass Effect System with:
+  - CSS variables for theme-specific glass backgrounds (`--glass-bg`, `--glass-border`, `--glass-shadow`)
+  - `.glass` utility class in globals.css with `backdrop-filter: blur(12px)`
+  - Theme-specific opacity values: Light (70%), Dim (75%), Dark (80%)
+  - Applied consistently across TopNav, BottomNav, ConversationView, UserMenu, PostDetailPage, and AdminLayout
+
+### 21. ✅ Conversation Header Not Fixed on Scroll
+- **Priority:** Medium
+- **Source:** Kindness
+- **Status:** FIXED (commit `edb8c7c`)
+- **Description:** On the conversation detail page, when scrolling, the header should remain fixed at the top and not move up with the content
+- **Location:** Conversation Detail page
+- **Solution:** Used `h-dvh` (dynamic viewport height) and `overscroll-contain` to prevent iOS Safari's collapsing UI from affecting the header position
 
 ---
 
@@ -148,6 +203,14 @@
   2. Use CSS variable for input height to keep values in sync
   3. Include safe area inset: `padding-bottom: calc(var(--sticky-input-height) + env(safe-area-inset-bottom))`
   4. Alternative: Use `scroll-padding-bottom` for scroll-into-view behavior
+
+### 20. ✅ Comment Input Not Sticky on Scroll
+- **Priority:** Medium
+- **Source:** Kindness
+- **Status:** FIXED (commit `f157c83`)
+- **Description:** On the post detail page, when scrolling, the comment input should remain sticky at the bottom and not move with the content
+- **Location:** Post Details page
+- **Solution:** Used React Portal to render comment input at document.body level, escaping the scroll container
 
 ---
 
@@ -212,14 +275,24 @@
 
 ---
 
+## Activity & Notifications
+
+### 22. Incorrect Activity Text for Comments
+- **Priority:** Medium
+- **Source:** Kindness
+- **Description:** When someone posts a comment, the activity notification that other people receive incorrectly says "posted a photo" instead of "commented"
+- **Location:** Activity feed / Notifications
+
+---
+
 ## Summary
 
 | Priority | Open | Fixed |
 |----------|------|-------|
 | High     | 1    | 7     |
-| Medium   | 2    | 6     |
+| Medium   | 1    | 10    |
 | Low      | 1    | 2     |
-| **Total**| **4**| **15**|
+| **Total**| **3**| **19**|
 
 ---
 
@@ -235,5 +308,5 @@
   - User Management page (table, filters, search)
   - Admin Settings page (all cards and inputs)
   - Card UI component
-- Glass blur effects need consistency across the app
+- ~~Glass blur effects need consistency across the app~~ ✅ **DONE** - Unified Glass Effect System implemented with CSS variables and `.glass` utility class
 - PWA configuration needs attention for proper branding
