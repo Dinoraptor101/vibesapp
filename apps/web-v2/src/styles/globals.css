@@ -13,7 +13,7 @@
   :root,
   body {
     /* Navigation heights for layout spacing */
-    --top-nav-height: 56px;
+    --top-nav-height: 60px;
     --bottom-nav-height: calc(5.5rem + env(safe-area-inset-bottom, 0px)); /* 88px + iOS safe area */
     --surface: #f8f8f8;
     --surface-elevated: #ffffff;
@@ -118,7 +118,15 @@
   }
 }
 
-/* Desktop: No bottom nav padding needed */
+/* Mobile: No top nav padding needed, only bottom nav */
+@media (max-width: 767px) {
+  :root,
+  body {
+    --top-nav-height: 0px;
+  }
+}
+
+/* Desktop: No bottom nav padding needed, only top nav */
 @media (min-width: 768px) {
   :root,
   body {
