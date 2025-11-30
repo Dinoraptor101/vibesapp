@@ -18,7 +18,7 @@ export function MessagesPageContent() {
   const pendingCount = dmRequestsData?.count || 0;
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto px-4 py-8">
       {/* Tab Navigation */}
       <div className="sticky top-0 z-10 bg-background mb-6 flex border-b border-gray-200 dim:border-gray-600 dark:border-gray-700">
         <button
