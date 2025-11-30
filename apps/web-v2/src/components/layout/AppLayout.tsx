@@ -3,6 +3,13 @@
  *
  * Main layout wrapper for authenticated pages.
  * Includes TopNav (desktop), BottomNav (mobile), and main content area.
+ *
+ * Standard Layout:
+ * - pt-8 for breathing room (works for mobile notch + desktop aesthetics)
+ * - px-4 side padding
+ * - max-w-2xl centered
+ *
+ * For immersive/full-bleed pages (chat, media viewers), use ImmersiveLayout instead.
  */
 
 import { OfflineIndicator } from '@/components/shared/OfflineIndicator';
@@ -37,7 +44,8 @@ export function AppLayout({ children }: AppLayoutProps) {
           paddingBottom: 'var(--bottom-nav-height)', // Mobile only - BottomNav is md:hidden
         }}
       >
-        {children}
+        {/* Standard content wrapper: consistent padding + width */}
+        <div className="pt-8 px-4 max-w-2xl mx-auto">{children}</div>
       </main>
 
       {/* Bottom Navigation (Mobile) */}

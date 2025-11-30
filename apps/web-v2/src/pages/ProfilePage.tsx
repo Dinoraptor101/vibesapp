@@ -84,7 +84,7 @@ export function ProfilePageContent({ userId: propUserId }: ProfilePageContentPro
   // ZEN: Show loading only after 1 second delay (avoid flash for fast loads)
   if (isLoading && showLoading) {
     return (
-      <div className="container mx-auto max-w-4xl px-4 py-8">
+      <div>
         <div className="flex items-center justify-center py-12">
           <Spinner size="lg" />
         </div>
@@ -98,7 +98,7 @@ export function ProfilePageContent({ userId: propUserId }: ProfilePageContentPro
   }
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8">
+    <div>
       {/* Back Button */}
       <Button
         variant="ghost"

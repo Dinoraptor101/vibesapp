@@ -45,7 +45,7 @@ export function CreatePostPageContent() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
+    <div>
       {showSuccess ? (
         <div className="flex flex-col items-center justify-center py-12 space-y-4">
           <div className="w-16 h-16 rounded-full bg-green-500/10 dim:bg-green-500/20 flex items-center justify-center">

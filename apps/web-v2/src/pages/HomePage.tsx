@@ -14,7 +14,7 @@ export function HomePageContent() {
   const [searchQuery, setSearchQuery] = useState('');
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+    <div>
       {/* Search Bar - Always visible on desktop, integrated into feed */}
       <div className="pb-4">
         <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="Search posts..." />

@@ -45,11 +45,11 @@ export function ActivityPageContent() {
   const hasUnread = unreadActivities.length > 0;
 
   return (
-    <div className="bg-background py-8">
+    <div className="bg-background">
       {/* Header */}
       {hasUnread && (
         <div className="sticky top-0 z-10 bg-background">
-          <div className="max-w-2xl mx-auto px-4 py-4">
+          <div className="py-4">
             <div className="flex items-center justify-end">
               {/* Mark All as Read button */}
               <Button
@@ -67,7 +67,7 @@ export function ActivityPageContent() {
       )}
 
       {/* Activity List */}
-      <div className="max-w-2xl mx-auto">
+      <div>
         {/* Unread activities */}
         {unreadActivities.length > 0 && (
           <ActivityList
