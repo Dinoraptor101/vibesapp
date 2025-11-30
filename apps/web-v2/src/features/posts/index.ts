@@ -18,7 +18,6 @@ export type {
 // Components
 export { CaptionArticleToggle } from './components/CaptionArticleToggle';
 export type { PostMode } from './components/CaptionArticleToggle';
-export { CollapsibleToolbar } from './components/CollapsibleToolbar';
 export { CommentCard } from './components/CommentCard';
 export { CommentInput } from './components/CommentInput';
 export { CommentList } from './components/CommentList';
@@ -37,6 +36,7 @@ export { PostsFeed } from './components/PostsFeed';
 export { ReportModal } from './components/ReportModal';
 export { ReportPostDialog } from './components/ReportPostDialog';
 export { RichTextToolbar } from './components/RichTextToolbar';
+export type { RichTextToolbarProps } from './components/RichTextToolbar';
 export { SearchBar } from './components/SearchBar';
 export { UserBadge } from './components/UserBadge';
 

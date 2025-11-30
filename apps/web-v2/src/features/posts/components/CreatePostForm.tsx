@@ -20,7 +20,7 @@ import type { ImageFile, UploadProgress } from '../utils/imageUtils';
 import { CaptionArticleToggle, type PostMode } from './CaptionArticleToggle';
 import { ImageUploader } from './ImageUploader';
 import { RichTextEditor, type RichTextEditorRef } from './RichTextEditor';
-import { RichTextToolbarV2 } from './RichTextToolbarV2';
+import { RichTextToolbar } from './RichTextToolbar';
 
 interface Location {
   lat: number;
@@ -314,7 +314,7 @@ export function CreatePostForm({ onSubmit, isSubmitting = false }: CreatePostFor
         {/* Article Mode: Toolbar + ContentEditable */}
         {mode === 'article' && (
           <>
-            <RichTextToolbarV2 editorRef={richEditorRef} />
+            <RichTextToolbar editorRef={richEditorRef} />
             <div>
               <label htmlFor="post-text" className="sr-only">
                 Article (Optional)
