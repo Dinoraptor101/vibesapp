@@ -45,7 +45,6 @@ export function ReCaptchaProvider({ children }: ReCaptchaProviderProps): React.J
         },
       }}
     >
-      {/* @ts-expect-error - React 19 type mismatch with library expecting React 18 types */}
       {children}
     </GoogleReCaptchaProvider>
   );
