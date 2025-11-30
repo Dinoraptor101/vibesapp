@@ -7,16 +7,15 @@ RUN apt-get update && \
     curl \
     ca-certificates \
     gnupg \
-    && rm -rf /var/lib/apt/lists*
+    && rm -rf /var/lib/apt/lists/*
 
 RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - && \
     apt-get install -y --no-install-recommends nodejs && \
     npm install -g npm@latest && \
-    rm -rf /var/lib/apt/lists*
+    rm -rf /var/lib/apt/lists/*
 
-# Install Heroku CLI
-RUN curl https://cli-assets.heroku.com/install-ubuntu.sh | sh && \
-    rm -rf /var/lib/apt/lists*
+# Install Heroku CLI using npm (universal approach)
+RUN npm install -g heroku || true
 
 # Set working directory
 WORKDIR /workspaces/vibesapp
