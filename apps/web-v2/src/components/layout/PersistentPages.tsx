@@ -170,11 +170,11 @@ export function PersistentPages() {
       )}
 
       {/* Main Content - Horizontal sliding pages */}
-      {/* md:pt-[var(--top-nav-height)] adds padding for fixed TopNav on desktop */}
-      <main className="flex-1 overflow-hidden relative md:pt-[var(--top-nav-height)]">
+      {/* The inner absolute containers use md:top-[var(--top-nav-height)] for fixed TopNav on desktop */}
+      <main className="flex-1 overflow-hidden relative">
         {/* Main persistent pages */}
         <div
-          className="absolute inset-0 flex transition-transform duration-300 ease-out"
+          className="absolute inset-x-0 top-0 bottom-0 md:top-[var(--top-nav-height)] flex transition-transform duration-300 ease-out"
           style={{
             width: `${PERSISTENT_PAGES.length * 100}%`,
             transform: `translateX(-${activeMainIndex * (100 / PERSISTENT_PAGES.length)}%)`,
@@ -206,7 +206,7 @@ export function PersistentPages() {
 
         {/* Post Detail - Slides in from right as overlay */}
         <div
-          className={`absolute inset-0 bg-surface transition-transform duration-300 ease-out ${
+          className={`absolute inset-x-0 top-0 bottom-0 md:top-[var(--top-nav-height)] bg-surface transition-transform duration-300 ease-out ${
             isPostDetail ? 'translate-x-0' : 'translate-x-full'
           }`}
           aria-hidden={!isPostDetail}
@@ -235,7 +235,7 @@ export function PersistentPages() {
 
         {/* Profile - Slides in from right as overlay */}
         <div
-          className={`absolute inset-0 bg-surface transition-transform duration-300 ease-out ${
+          className={`absolute inset-x-0 top-0 bottom-0 md:top-[var(--top-nav-height)] bg-surface transition-transform duration-300 ease-out ${
             isProfile ? 'translate-x-0' : 'translate-x-full'
           }`}
           aria-hidden={!isProfile}
