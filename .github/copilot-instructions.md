@@ -194,4 +194,10 @@ nx affected:test             # Test only affected projects
 - CORS configuration for cross-origin requests
 - Environment variable protection for sensitive data
 
+### Agent Decision-Making & Communication
+**Critical behavior:** When a requested change would require architectural adjustments or break existing patterns, explicitly **advise against it and explain why** rather than implementing a workaround that compromises design integrity. Examples:
+- ConversationView uses full-screen fixed layouts—adding generic padding breaks the design, so propose the correct approach instead
+- Recognize when micro-changes aren't appropriate for a feature and communicate the reasoning
+- This restraint and clarity is more valuable than blind execution
+
 This monorepo structure enables efficient development with shared code, consistent tooling, and streamlined deployment. When making changes, consider the impact across both applications and utilize the shared libraries for maximum code reuse.
