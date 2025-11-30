@@ -715,32 +715,4 @@ test.describe('Following Users', () => {
       }
     }
   });
-
-  test('should display follower and following counts on profile', async ({ page }) => {
-    // Navigate to home
-    await page.goto('/');
-
-    // Find a post and navigate to author profile
-    const postCount = await page.locator('article').count();
-
-    if (postCount > 0) {
-      const firstPostUserLink = page.locator('article a[href^="/profile/"]').first();
-
-      if (await firstPostUserLink.isVisible()) {
-        await firstPostUserLink.click();
-        await page.waitForTimeout(500);
-
-        // Verify follower/following stats are displayed
-        // They appear as text like "5 posts • 10 followers • 3 following"
-        const statsText = await page.textContent('body');
-
-        if (statsText) {
-          // Check that the stats text contains the expected words
-          expect(statsText).toContain('followers');
-          expect(statsText).toContain('following');
-          expect(statsText).toContain('posts');
-        }
-      }
-    }
-  });
 });

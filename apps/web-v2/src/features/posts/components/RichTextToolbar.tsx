@@ -1,108 +1,113 @@
 /**
  * RichTextToolbar Component
  *
- * Basic HTML formatting toolbar for article mode.
- * Supports: Bold, Underline, Text Alignment
- *
- * Note: Bullet list removed - will be re-added when we build the JSON-based editor (see To-Do.md)
+ * Toolbar for contentEditable-based RichTextEditor.
+ * Uses browser-native execCommand for zero-overhead formatting.
+ * Supports: Bold, Underline, Text Alignment, Indent/Outdent
  */
 
-import { AlignCenter, AlignLeft, AlignRight, Bold, Underline } from 'lucide-react';
-import { useState } from 'react';
+import {
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
+  Bold,
+  Indent,
+  Outdent,
+  Underline,
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/cn';
+import type { RichTextEditorRef } from './RichTextEditor';
 
-interface RichTextToolbarProps {
-  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
+export interface RichTextToolbarProps {
+  editorRef: React.RefObject<RichTextEditorRef | null>;
   className?: string;
 }
 
 type TextAlign = 'left' | 'center' | 'right';
 
-export function RichTextToolbar({ textareaRef, className }: RichTextToolbarProps) {
+export function RichTextToolbar({ editorRef, className }: RichTextToolbarProps) {
   const [alignState, setAlignState] = useState<TextAlign>('left');
+  const [isBold, setIsBold] = useState(false);
+  const [isUnderline, setIsUnderline] = useState(false);
 
-  /**
-   * Insert HTML tags around selected text
-   */
-  const wrapSelection = (openTag: string, closeTag: string) => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
+  // Update button states based on cursor position
+  const updateFormatStates = () => {
+    setIsBold(document.queryCommandState('bold'));
+    setIsUnderline(document.queryCommandState('underline'));
 
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const text = textarea.value;
-    const selectedText = text.substring(start, end);
-
-    if (selectedText) {
-      const before = text.substring(0, start);
-      const after = text.substring(end);
-      const newText = `${before}${openTag}${selectedText}${closeTag}${after}`;
-
-      // Update textarea value
-      textarea.value = newText;
-
-      // Dispatch input event to trigger React's onChange
-      const event = new Event('input', { bubbles: true });
-      textarea.dispatchEvent(event);
-
-      // Restore focus and cursor position
-      textarea.focus();
-      const newCursorPos = start + openTag.length + selectedText.length + closeTag.length;
-      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    // Detect alignment from browser state
+    if (document.queryCommandState('justifyCenter')) {
+      setAlignState('center');
+    } else if (document.queryCommandState('justifyRight')) {
+      setAlignState('right');
+    } else {
+      setAlignState('left');
     }
   };
 
-  /**
-   * Apply text alignment to paragraph
-   */
-  const applyAlignment = () => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
+  // Listen for selection changes in the editor
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      setIsBold(document.queryCommandState('bold'));
+      setIsUnderline(document.queryCommandState('underline'));
 
-    // Cycle through alignments: left → center → right → left
+      // Detect alignment from browser state
+      if (document.queryCommandState('justifyCenter')) {
+        setAlignState('center');
+      } else if (document.queryCommandState('justifyRight')) {
+        setAlignState('right');
+      } else {
+        setAlignState('left');
+      }
+    };
+
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => document.removeEventListener('selectionchange', handleSelectionChange);
+  }, []);
+
+  const execCommand = (command: string, value?: string) => {
+    editorRef.current?.execCommand(command, value);
+    // Update states after command execution
+    setTimeout(updateFormatStates, 0);
+  };
+
+  const handleBold = () => execCommand('bold');
+  const handleUnderline = () => execCommand('underline');
+  const handleIndent = () => execCommand('indent');
+  const handleOutdent = () => execCommand('outdent');
+
+  const handleAlignment = () => {
     const nextAlign: Record<TextAlign, TextAlign> = {
       left: 'center',
       center: 'right',
       right: 'left',
     };
     const newAlign = nextAlign[alignState];
+
+    const commandMap: Record<TextAlign, string> = {
+      left: 'justifyLeft',
+      center: 'justifyCenter',
+      right: 'justifyRight',
+    };
+
+    execCommand(commandMap[newAlign]);
+    // Update state immediately after command
     setAlignState(newAlign);
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const text = textarea.value;
-    const selectedText = text.substring(start, end);
-
-    if (selectedText) {
-      const alignedText =
-        newAlign === 'left'
-          ? selectedText // No wrapper for left (default)
-          : `<p style="text-align: ${newAlign}">${selectedText}</p>`;
-
-      const before = text.substring(0, start);
-      const after = text.substring(end);
-      const newText = `${before}${alignedText}${after}`;
-
-      textarea.value = newText;
-
-      // Dispatch input event
-      const event = new Event('input', { bubbles: true });
-      textarea.dispatchEvent(event);
-
-      // Restore focus
-      textarea.focus();
-      const newCursorPos = start + alignedText.length;
-      textarea.setSelectionRange(newCursorPos, newCursorPos);
-    }
   };
 
-  const buttonClass = cn(
-    'p-2 rounded hover:bg-surface-hover transition-colors',
-    'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand',
-    'disabled:opacity-50 disabled:cursor-not-allowed'
-  );
+  const getButtonClass = (isActive: boolean) =>
+    cn(
+      'p-2 rounded transition-colors',
+      'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+      'disabled:opacity-50 disabled:cursor-not-allowed',
+      isActive
+        ? 'bg-brand/10 text-brand hover:bg-brand/20 dim:bg-brand/20 dim:hover:bg-brand/30'
+        : 'hover:bg-surface-hover'
+    );
 
-  const iconClass = 'w-4 h-4 text-text-primary';
+  const getIconClass = (isActive: boolean) =>
+    cn('w-4 h-4 transition-colors', isActive ? 'text-brand' : 'text-text-primary');
 
   return (
     <div
@@ -114,42 +119,63 @@ export function RichTextToolbar({ textareaRef, className }: RichTextToolbarProps
       role="toolbar"
       aria-label="Text formatting toolbar"
     >
-      {/* Bold */}
       <button
         type="button"
-        onClick={() => wrapSelection('<b>', '</b>')}
-        className={buttonClass}
+        onClick={handleBold}
+        className={getButtonClass(isBold)}
         aria-label="Bold"
+        aria-pressed={isBold}
         title="Bold (Ctrl+B)"
       >
-        <Bold className={iconClass} />
+        <Bold className={getIconClass(isBold)} />
       </button>
 
-      {/* Underline */}
       <button
         type="button"
-        onClick={() => wrapSelection('<u>', '</u>')}
-        className={buttonClass}
+        onClick={handleUnderline}
+        className={getButtonClass(isUnderline)}
         aria-label="Underline"
+        aria-pressed={isUnderline}
         title="Underline (Ctrl+U)"
       >
-        <Underline className={iconClass} />
+        <Underline className={getIconClass(isUnderline)} />
       </button>
 
-      {/* Divider */}
       <div className="w-px h-6 bg-border dim:bg-gray-600 mx-1" />
 
-      {/* Text Alignment */}
       <button
         type="button"
-        onClick={applyAlignment}
-        className={buttonClass}
+        onClick={handleAlignment}
+        className={getButtonClass(alignState !== 'left')}
         aria-label={`Text alignment: ${alignState}`}
+        aria-pressed={alignState !== 'left'}
         title={`Text alignment: ${alignState} (click to cycle)`}
       >
-        {alignState === 'left' && <AlignLeft className={iconClass} />}
-        {alignState === 'center' && <AlignCenter className={iconClass} />}
-        {alignState === 'right' && <AlignRight className={iconClass} />}
+        {alignState === 'left' && <AlignLeft className={getIconClass(false)} />}
+        {alignState === 'center' && <AlignCenter className={getIconClass(true)} />}
+        {alignState === 'right' && <AlignRight className={getIconClass(true)} />}
+      </button>
+
+      <div className="w-px h-6 bg-border dim:bg-gray-600 mx-1" />
+
+      <button
+        type="button"
+        onClick={handleIndent}
+        className={getButtonClass(false)}
+        aria-label="Increase indentation"
+        title="Indent"
+      >
+        <Indent className={getIconClass(false)} />
+      </button>
+
+      <button
+        type="button"
+        onClick={handleOutdent}
+        className={getButtonClass(false)}
+        aria-label="Decrease indentation"
+        title="Outdent"
+      >
+        <Outdent className={getIconClass(false)} />
       </button>
     </div>
   );
