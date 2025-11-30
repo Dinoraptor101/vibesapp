@@ -34,7 +34,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         className="flex-1"
         style={{
           paddingTop: 'var(--top-nav-height)', // Desktop only - TopNav is hidden md:flex
-          paddingBottom: 'var(--bottom-nav-height)' // Mobile only - BottomNav is md:hidden
+          paddingBottom: 'var(--bottom-nav-height)', // Mobile only - BottomNav is md:hidden
         }}
       >
         {children}

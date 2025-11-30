@@ -27,7 +27,7 @@ interface ProvidersProps {
   children: React.ReactNode;
 }
 
-export function Providers({ children }: ProvidersProps): JSX.Element {
+export function Providers({ children }: ProvidersProps): React.ReactNode {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
