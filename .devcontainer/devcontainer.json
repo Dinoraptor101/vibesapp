@@ -12,7 +12,7 @@
       "onAutoForward": "notify"
     }
   },
-  "postCreateCommand": "npm install -g heroku && npm ci && npm run install:deps",
+  "postCreateCommand": "npm install -g heroku vercel && npm ci && npm run install:deps",
   "postAttachCommand": "echo '✅ VibesApp dev environment ready! Heroku CLI installed.' && echo 'Run: npm run dev (frontend + backend) or npm run start:web-v2 / npm run start:api'",
   "containerEnv": {
     "NODE_ENV": "development",
@@ -36,12 +36,7 @@
       "settings": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.formatOnSave": true,
-        "eslint.validate": [
-          "javascript",
-          "javascriptreact",
-          "typescript",
-          "typescriptreact"
-        ]
+        "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"]
       }
     }
   }
