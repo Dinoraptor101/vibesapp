@@ -45,7 +45,7 @@ export function ActivityPageContent() {
   const hasUnread = unreadActivities.length > 0;
 
   return (
-    <div className="bg-background">
+    <div className="bg-background py-8">
       {/* Header */}
       {hasUnread && (
         <div className="sticky top-0 z-10 bg-background">
