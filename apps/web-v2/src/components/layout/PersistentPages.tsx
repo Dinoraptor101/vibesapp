@@ -198,7 +198,10 @@ export function PersistentPages() {
                 inert={!isActive ? true : undefined}
                 aria-hidden={!isActive}
               >
-                <PageComponent />
+                {/* Standard content wrapper: consistent padding + width */}
+                <div className="pt-8 px-4 max-w-2xl mx-auto">
+                  <PageComponent />
+                </div>
               </div>
             );
           })}
@@ -217,19 +220,22 @@ export function PersistentPages() {
             className="h-full overflow-y-auto overscroll-contain"
             style={{ paddingBottom: 'var(--bottom-nav-height)' }}
           >
-            {currentPostId ? (
-              <PostDetailPageContent postId={currentPostId} />
-            ) : (
-              /* Skeleton placeholder when no postId */
-              <div className="max-w-2xl mx-auto p-4 animate-pulse">
-                <div className="h-8 w-20 bg-surface-elevated rounded mb-4" />
-                <div className="aspect-square bg-surface-elevated rounded-lg mb-4" />
-                <div className="space-y-3">
-                  <div className="h-4 bg-surface-elevated rounded w-3/4" />
-                  <div className="h-4 bg-surface-elevated rounded w-1/2" />
+            {/* Standard content wrapper: consistent padding + width */}
+            <div className="pt-8 px-4 max-w-2xl mx-auto">
+              {currentPostId ? (
+                <PostDetailPageContent postId={currentPostId} />
+              ) : (
+                /* Skeleton placeholder when no postId */
+                <div className="animate-pulse">
+                  <div className="h-8 w-20 bg-surface-elevated rounded mb-4" />
+                  <div className="aspect-square bg-surface-elevated rounded-lg mb-4" />
+                  <div className="space-y-3">
+                    <div className="h-4 bg-surface-elevated rounded w-3/4" />
+                    <div className="h-4 bg-surface-elevated rounded w-1/2" />
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
 
@@ -246,26 +252,32 @@ export function PersistentPages() {
             className="h-full overflow-y-auto overscroll-contain"
             style={{ paddingBottom: 'var(--bottom-nav-height)' }}
           >
-            {currentProfileUserId ? (
-              <ProfilePageContent userId={currentProfileUserId} />
-            ) : (
-              /* Skeleton placeholder when no userId */
-              <div className="max-w-4xl mx-auto p-4 animate-pulse">
-                <div className="h-8 w-20 bg-surface-elevated rounded mb-6" />
-                <div className="flex items-start gap-6 mb-8">
-                  <div className="w-24 h-24 bg-surface-elevated rounded-full" />
-                  <div className="flex-1 space-y-3">
-                    <div className="h-6 bg-surface-elevated rounded w-1/3" />
-                    <div className="h-4 bg-surface-elevated rounded w-1/4" />
+            {/* Standard content wrapper: consistent padding + width */}
+            <div className="pt-8 px-4 max-w-2xl mx-auto">
+              {currentProfileUserId ? (
+                <ProfilePageContent userId={currentProfileUserId} />
+              ) : (
+                /* Skeleton placeholder when no userId */
+                <div className="animate-pulse">
+                  <div className="h-8 w-20 bg-surface-elevated rounded mb-6" />
+                  <div className="flex items-start gap-6 mb-8">
+                    <div className="w-24 h-24 bg-surface-elevated rounded-full" />
+                    <div className="flex-1 space-y-3">
+                      <div className="h-6 bg-surface-elevated rounded w-1/3" />
+                      <div className="h-4 bg-surface-elevated rounded w-1/4" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[...Array(6)].map((_, i) => (
+                      <div
+                        key={`skeleton-${i}`}
+                        className="aspect-square bg-surface-elevated rounded"
+                      />
+                    ))}
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
-                  {[...Array(6)].map((_, i) => (
-                    <div key={i} className="aspect-square bg-surface-elevated rounded" />
-                  ))}
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </main>

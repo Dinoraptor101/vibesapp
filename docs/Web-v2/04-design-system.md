@@ -124,40 +124,84 @@ The VibesApp Web-v2 design system provides a comprehensive set of reusable compo
 
 ## Layout Patterns
 
+### Layout Components
+
+VibesApp uses two layout components to handle different page types:
+
+#### AppLayout (Standard)
+Used for most pages. Provides consistent spacing and width.
+
+```tsx
+import { AppLayout } from '@/components/layout';
+
+// Standard page - layout handles all spacing
+export function MyPage() {
+  return (
+    <AppLayout>
+      <div>
+        {/* Raw content - no padding needed */}
+      </div>
+    </AppLayout>
+  );
+}
+```
+
+**What AppLayout provides:**
+- `pt-8` top padding (breathing room for mobile notch + desktop aesthetics)
+- `px-4` side padding
+- `max-w-2xl` centered content
+
+#### ImmersiveLayout (Full-bleed)
+Used for immersive experiences like chat, media viewers.
+
+```tsx
+import { ImmersiveLayout } from '@/components/layout';
+
+// Immersive page - no padding, full control
+export function ChatPage() {
+  return (
+    <ImmersiveLayout>
+      <div className="h-dvh">
+        {/* Full-bleed content */}
+      </div>
+    </ImmersiveLayout>
+  );
+}
+
+// Hide nav entirely for media viewers
+<ImmersiveLayout hideNav>
+  {/* Full-screen content */}
+</ImmersiveLayout>
+```
+
 ### App Shell
 ```
 ┌─────────────────────────────────────┐
-│ Header (fixed)                      │
+│ Header (fixed) - Desktop only       │
 │ ┌─────────────────────────────────┐ │
 │ │ Navigation                     │ │
 │ └─────────────────────────────────┘ │
 ├─────────────────────────────────────┤
 │ Main Content (scrollable)           │
 │ ┌─────────────────────────────────┐ │
-│ │ Page Content                   │ │
+│ │ Page Content (max-w-2xl)       │ │
 │ └─────────────────────────────────┘ │
+├─────────────────────────────────────┤
+│ Footer Nav (fixed) - Mobile only    │
 └─────────────────────────────────────┘
 ```
 
-### Page Layouts
-```tsx
-// Centered content
-<div className="min-h-screen flex items-center justify-center">
-  <div className="max-w-md w-full p-6">
-    {/* Content */}
-  </div>
-</div>
+### Page Content Guidelines
 
-// Sidebar layout
-<div className="flex min-h-screen">
-  <aside className="w-64 border-r border-border-primary">
-    {/* Sidebar content */}
-  </aside>
-  <main className="flex-1 p-6">
-    {/* Main content */}
-  </main>
-</div>
-```
+**DO:**
+- Let AppLayout handle spacing
+- Use raw `<div>` containers in page content
+- Focus on content structure, not layout
+
+**DON'T:**
+- Add `px-4`, `py-8`, `max-w-2xl` to page content
+- Use `container mx-auto` in pages
+- Duplicate layout concerns
 
 ### Grid Systems
 ```tsx

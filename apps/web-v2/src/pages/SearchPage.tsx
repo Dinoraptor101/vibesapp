@@ -102,7 +102,7 @@ export function SearchPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-2xl mx-auto px-4 py-6">
+      <div>
         {/* Search Input */}
         <div className="relative mb-6">
           <div className="relative">
