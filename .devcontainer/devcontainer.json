@@ -1,12 +1,6 @@
 {
   "name": "VibesApp Monorepo Dev",
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
-  "features": {
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "20"
-    },
-    "ghcr.io/devcontainers/features/git:1": {}
-  },
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
   "forwardPorts": [5173, 5001],
   "portsAttributes": {
     "5173": {
@@ -18,9 +12,8 @@
       "onAutoForward": "notify"
     }
   },
-  "postCreateCommand": "npm ci && npm run install:deps",
-  "postAttachCommand": "echo '✅ VibesApp dev environment ready!' && echo 'Run: npm run dev (frontend + backend) or npm run start:web-v2 / npm run start:api'",
-  "remoteUser": "node",
+  "postCreateCommand": "npm install -g heroku && npm ci && npm run install:deps",
+  "postAttachCommand": "echo '✅ VibesApp dev environment ready! Heroku CLI installed.' && echo 'Run: npm run dev (frontend + backend) or npm run start:web-v2 / npm run start:api'",
   "containerEnv": {
     "NODE_ENV": "development",
     "PORT": "5001",
