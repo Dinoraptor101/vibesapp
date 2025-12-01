@@ -2,11 +2,13 @@ import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { buildVersionPlugin } from './vite-plugins/buildVersion';
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    buildVersionPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['logo.svg'],
