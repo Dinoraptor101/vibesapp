@@ -111,19 +111,21 @@ export function useToggleLike() {
       // Clear pending state
       pendingMutations.current.delete(postId);
 
-      // Revert optimistic update on error
+      // Revert optimistic update on error by invalidating queries
       console.error('Failed to toggle like:', error);
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({
+        queryKey: ['posts', 'infinite'],
+        exact: false,
+      });
       queryClient.invalidateQueries({ queryKey: ['post', postId] });
     },
     onSuccess: (_data, { postId }) => {
       // Clear pending state on success
       pendingMutations.current.delete(postId);
 
-      // Invalidate queries to get fresh data with updated likeCount from backend
-      // This ensures UI reflects the actual API response (no optimistic updates for counts)
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-      queryClient.invalidateQueries({ queryKey: ['post', postId] });
+      // Trust optimistic update - no invalidation needed
+      // The onMutate handler already updated the UI correctly
+      // This eliminates race conditions and provides instant feedback
     },
     onSettled: (_data, _error, { postId }) => {
       // Ensure pending state is always cleared
