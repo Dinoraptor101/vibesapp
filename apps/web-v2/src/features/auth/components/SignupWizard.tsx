@@ -607,29 +607,34 @@ export function SignupWizard() {
               </p>
             </div>
 
-            <div className="flex gap-4 justify-center">
-              <button
-                type="button"
-                onClick={() => setSignupData((prev) => ({ ...prev, sex: 'Male' }))}
-                className={`flex-1 max-w-[160px] py-4 px-6 rounded-lg border-2 text-lg font-semibold transition-all duration-200 ${
-                  signupData.sex === 'Male'
-                    ? 'border-brand-purple bg-brand-purple/10 text-brand-purple'
-                    : 'border-border bg-surface text-text-primary hover:border-brand-purple/50'
-                }`}
-              >
-                Male
-              </button>
-              <button
-                type="button"
-                onClick={() => setSignupData((prev) => ({ ...prev, sex: 'Female' }))}
-                className={`flex-1 max-w-[160px] py-4 px-6 rounded-lg border-2 text-lg font-semibold transition-all duration-200 ${
-                  signupData.sex === 'Female'
-                    ? 'border-brand-purple bg-brand-purple/10 text-brand-purple'
-                    : 'border-border bg-surface text-text-primary hover:border-brand-purple/50'
-                }`}
-              >
-                Female
-              </button>
+            <div className="space-y-4 sm:space-y-6 rounded-lg border border-border bg-surface-elevated p-4 sm:p-6">
+              <div className="flex items-center justify-center">
+                <span className="w-16 text-right text-sm font-semibold text-text-primary">
+                  FEMALE
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSignupData((prev) => ({
+                      ...prev,
+                      sex: prev.sex === 'Male' ? 'Female' : 'Male',
+                    }))
+                  }
+                  className="relative inline-flex h-14 w-28 mx-3 sm:mx-4 items-center rounded-full bg-surface ring-2 ring-border transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-purple focus:ring-offset-2"
+                  aria-label={`Current selection: ${signupData.sex || 'None'}`}
+                >
+                  <span
+                    className={`absolute inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-lg shadow-lg transition-all duration-300 ease-in-out ${
+                      signupData.sex === 'Male'
+                        ? 'translate-x-16 from-blue-400 to-cyan-500'
+                        : 'translate-x-2 from-pink-400 to-rose-500'
+                    }`}
+                  >
+                    {signupData.sex === 'Male' ? '♂️' : '♀️'}
+                  </span>
+                </button>
+                <span className="w-16 text-left text-sm font-semibold text-text-primary">MALE</span>
+              </div>
             </div>
           </div>
         );
