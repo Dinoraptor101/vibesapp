@@ -6,15 +6,7 @@
  * Supports: Bold, Underline, Text Alignment, Indent/Outdent
  */
 
-import {
-  AlignCenter,
-  AlignLeft,
-  AlignRight,
-  Bold,
-  Indent,
-  Outdent,
-  Underline,
-} from 'lucide-react';
+import { AlignCenter, AlignLeft, AlignRight, Bold, Indent, Outdent, Underline } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/cn';
 import type { RichTextEditorRef } from './RichTextEditor';

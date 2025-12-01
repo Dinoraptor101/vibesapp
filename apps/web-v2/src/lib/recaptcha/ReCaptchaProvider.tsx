@@ -30,8 +30,16 @@ export function ReCaptchaProvider({ children }: ReCaptchaProviderProps): React.J
 
   // Always wrap with provider - useGoogleReCaptcha throws if not wrapped
   // When disabled, executeRecaptcha returns undefined which is handled gracefully
+  // Note: Type assertion needed due to React 19 ReactNode type incompatibility with library
+  const GoogleProvider = GoogleReCaptchaProvider as React.ComponentType<{
+    reCaptchaKey: string;
+    scriptProps?: Record<string, unknown>;
+    container?: Record<string, unknown>;
+    children: React.ReactNode;
+  }>;
+
   return (
-    <GoogleReCaptchaProvider
+    <GoogleProvider
       reCaptchaKey={RECAPTCHA_SITE_KEY}
       scriptProps={{
         async: true,
@@ -46,6 +54,6 @@ export function ReCaptchaProvider({ children }: ReCaptchaProviderProps): React.J
       }}
     >
       {children}
-    </GoogleReCaptchaProvider>
+    </GoogleProvider>
   );
 }
