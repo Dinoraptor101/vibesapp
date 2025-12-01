@@ -1,10 +1,13 @@
 import { ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { getBuildVersion } from '@/utils/versionCheck';
 
 const APP_VERSION = '2.0.0';
 const FEEDBACK_URL = 'https://t.me/Dnegai';
 
 export function SupportTab() {
+  const buildVersion = getBuildVersion();
+
   const handleFeedbackClick = () => {
     window.open(FEEDBACK_URL, '_blank', 'noopener,noreferrer');
   };
@@ -59,6 +62,11 @@ export function SupportTab() {
         <p className="text-sm text-gray-500 dark:text-gray-400">
           App Version: <span className="font-medium">{APP_VERSION}</span>
         </p>
+        {buildVersion && (
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+            Build ID: <span className="font-mono">{buildVersion}</span>
+          </p>
+        )}
       </div>
     </div>
   );
