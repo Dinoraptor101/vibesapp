@@ -11,62 +11,85 @@
  * - Own post restrictions
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page, type Locator } from '@playwright/test';
+
+/**
+ * Helper to find a likeable post (a post from another user that has a visible like button).
+ * Will scroll through the feed and fall back to a known user's profile if needed.
+ */
+async function findLikeablePost(page: Page): Promise<{ post: Locator; heartButton: Locator }> {
+  const posts = page.locator('article');
+  await expect(posts.first()).toBeVisible({ timeout: 10000 });
+
+  // Try to find a likeable post by scrolling through the feed
+  for (let scroll = 0; scroll < 3; scroll++) {
+    const postCount = await posts.count();
+
+    for (let i = 0; i < postCount; i++) {
+      const post = posts.nth(i);
+      const button = post.locator('button[aria-label*="Like"], button[aria-label*="Unlike"]');
+
+      const isVisible = await button.isVisible().catch(() => false);
+      if (isVisible) {
+        return { post, heartButton: button };
+      }
+    }
+
+    // Scroll down to load more posts
+    await page.evaluate(() => window.scrollBy(0, 800));
+    await page.waitForTimeout(1000);
+  }
+
+  // If still no likeable post found, navigate to a known user's profile
+  // The user "Kindness" is a known test account with posts
+  await page.goto('/profile/Kindness');
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForTimeout(1000);
+
+  const profilePosts = page.locator('article');
+  const profilePostCount = await profilePosts.count();
+
+  for (let i = 0; i < profilePostCount; i++) {
+    const post = profilePosts.nth(i);
+    const button = post.locator('button[aria-label*="Like"], button[aria-label*="Unlike"]');
+
+    const isVisible = await button.isVisible().catch(() => false);
+    if (isVisible) {
+      return { post, heartButton: button };
+    }
+  }
+
+  throw new Error(
+    'Could not find a likeable post from another user - check that test user follows other users or that the feed has posts from others'
+  );
+}
 
 test.describe('Post Like/Unlike Toggle', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    // Use domcontentloaded - more reliable than networkidle with SSE/WebSocket connections
+    await page.waitForLoadState('domcontentloaded');
   });
 
-  test('should display like button on posts', async ({ page }) => {
-    // Wait for posts to load
-    const posts = page.locator('article');
-    await expect(posts.first()).toBeVisible({ timeout: 10000 });
+  test('should display like button on posts from other users', async ({ page }) => {
+    // Find a likeable post from another user
+    const { heartButton } = await findLikeablePost(page);
 
-    const postCount = await posts.count();
-    expect(postCount).toBeGreaterThan(0);
-
-    // Verify first post has a heart button
-    const firstPost = posts.first();
-    const heartButton = firstPost.locator(
-      'button[aria-label*="Like"], button[aria-label*="Unlike"]'
-    );
+    // Verify heart button is visible
     await expect(heartButton).toBeVisible();
 
     // Verify heart icon is present
     const heartIcon = heartButton.locator('svg');
     await expect(heartIcon).toBeVisible();
 
-    // Verify like count is displayed
-    const likeCount = heartButton.locator('span');
-    await expect(likeCount).toBeVisible();
+    // Verify like count is displayed in aria-label (span only shows when likes > 0)
+    const ariaLabel = await heartButton.getAttribute('aria-label');
+    expect(ariaLabel).toMatch(/\(\d+ likes?\)/);
   });
 
   test('should toggle like state when clicking heart button', async ({ page }) => {
-    // Wait for posts to load
-    const posts = page.locator('article');
-    await expect(posts.first()).toBeVisible({ timeout: 10000 });
-
-    // Find first post that is not own post (can be liked)
-    let heartButton = null;
-    const postCount = await posts.count();
-
-    for (let i = 0; i < Math.min(postCount, 5); i++) {
-      const post = posts.nth(i);
-      const button = post.locator('button[aria-label*="Like"], button[aria-label*="Unlike"]');
-
-      const isVisible = await button.isVisible().catch(() => false);
-      if (isVisible) {
-        heartButton = button;
-        break;
-      }
-    }
-
-    if (!heartButton) {
-      test.skip(true, 'No likeable posts found (all posts are own posts)');
-      return;
-    }
+    // Find a likeable post from another user
+    const { heartButton } = await findLikeablePost(page);
 
     // Get initial state
     const initialAriaLabel = await heartButton.getAttribute('aria-label');
@@ -84,153 +107,124 @@ test.describe('Post Like/Unlike Toggle', () => {
   });
 
   test('should toggle like back and forth multiple times', async ({ page }) => {
-    // Wait for posts to load
-    const posts = page.locator('article');
-    await expect(posts.first()).toBeVisible({ timeout: 10000 });
+    // Find a likeable post from another user
+    const { heartButton } = await findLikeablePost(page);
 
-    // Find a likeable post
-    let heartButton = null;
-    const postCount = await posts.count();
-
-    for (let i = 0; i < Math.min(postCount, 5); i++) {
-      const post = posts.nth(i);
-      const button = post.locator('button[aria-label*="Like"], button[aria-label*="Unlike"]');
-
-      const isVisible = await button.isVisible().catch(() => false);
-      if (isVisible) {
-        heartButton = button;
-        break;
-      }
-    }
-
-    if (!heartButton) {
-      test.skip(true, 'No likeable posts found');
-      return;
-    }
-
-    const likeCountSpan = heartButton.locator('span');
+    // Helper to extract like count from aria-label: "Like post (X likes)" or "Unlike post (X likes)"
+    const getLikeCount = async () => {
+      const ariaLabel = await heartButton.getAttribute('aria-label');
+      const match = ariaLabel?.match(/\((\d+) likes?\)/);
+      return match ? parseInt(match[1], 10) : 0;
+    };
 
     // Get initial state
-    const initialCountText = await likeCountSpan.textContent();
-    const initialCount = parseInt(initialCountText || '0', 10);
+    const initialCount = await getLikeCount();
 
     // Click 1: Like (or unlike if already liked)
     await heartButton.click();
     await page.waitForTimeout(600); // Wait for mutation to complete
 
-    const count1Text = await likeCountSpan.textContent();
-    const count1 = parseInt(count1Text || '0', 10);
+    const count1 = await getLikeCount();
     expect(count1).not.toBe(initialCount);
 
     // Click 2: Toggle back
     await heartButton.click();
     await page.waitForTimeout(600);
 
-    const count2Text = await likeCountSpan.textContent();
-    const count2 = parseInt(count2Text || '0', 10);
+    const count2 = await getLikeCount();
     expect(count2).toBe(initialCount); // Should be back to initial
 
     // Click 3: Toggle again
     await heartButton.click();
     await page.waitForTimeout(600);
 
-    const count3Text = await likeCountSpan.textContent();
-    const count3 = parseInt(count3Text || '0', 10);
+    const count3 = await getLikeCount();
     expect(count3).toBe(count1); // Should match first toggle
 
     // Click 4: Toggle back to initial
     await heartButton.click();
     await page.waitForTimeout(600);
 
-    const count4Text = await likeCountSpan.textContent();
-    const count4 = parseInt(count4Text || '0', 10);
+    const count4 = await getLikeCount();
     expect(count4).toBe(initialCount); // Should be back to initial again
   });
 
-  test.skip('should hide like button on own posts', async ({ page }) => {
-    // Navigate to own profile
-    await page.getByTestId('user-menu-button').first().click();
-    await page.getByRole('menuitem', { name: /profile/i }).click();
-    await page.waitForURL('**/profile/**', { timeout: 5000 });
-    await page.waitForLoadState('networkidle');
+  test('should hide like button on own posts', async ({ page }) => {
+    // Navigate to own profile via user menu
+    const userMenuButton = page.getByTestId('user-menu-button').first();
+    await expect(userMenuButton).toBeVisible({ timeout: 5000 });
+    await userMenuButton.click();
 
-    // Find own posts
-    const posts = page.locator('article');
+    const profileMenuItem = page.getByRole('menuitem', { name: /profile/i });
+    await expect(profileMenuItem).toBeVisible({ timeout: 3000 });
+    await profileMenuItem.click();
+
+    await page.waitForURL('**/profile/**', { timeout: 5000 });
+    await page.waitForLoadState('domcontentloaded');
+
+    // The profile page has a "Posts" section header - wait for it to ensure we're on the right page
+    const postsHeader = page.locator('h2:has-text("Posts")');
+    await expect(postsHeader).toBeVisible({ timeout: 10000 });
+
+    // IMPORTANT: The app uses PersistentPages which keeps all pages mounted.
+    // We need to scope our selectors to only look at the profile section, not the hidden home feed.
+    // Find posts within the visible profile page - they are in the div containing the "Posts" header
+    const profilePostsSection = postsHeader.locator('..'); // Parent div containing "Posts" header
+    const posts = profilePostsSection.locator('article');
+
+    // Check if user has any posts on their profile
     const postCount = await posts.count();
 
     if (postCount === 0) {
-      test.skip(true, 'Test user has no posts on their profile');
+      // User has no posts - this is valid, test passes (no like buttons to hide)
       return;
     }
 
     // On own posts: like and report buttons should be hidden
     const firstPost = posts.first();
-    const heartButton = firstPost.locator('button[aria-label*="Like"], button[aria-label*="Unlike"]');
+
+    const heartButton = firstPost.locator(
+      'button[aria-label*="Like"], button[aria-label*="Unlike"]'
+    );
     const reportButton = firstPost.locator('button[aria-label*="Report"]');
 
     await expect(heartButton).not.toBeVisible();
     await expect(reportButton).not.toBeVisible();
 
-    // Comment button should still be visible
+    // Comment button should still be visible (users can view comments on their own posts)
     const commentLink = firstPost.locator('a[href^="/post/"][aria-label*="comment" i]');
-    await expect(commentLink).NotVisible();
+    await expect(commentLink).toBeVisible();
   });
 
   test('should show like button on other users posts', async ({ page }) => {
-    // First, find another user's profile from the feed
-    // Wait for posts to load on the feed
-    const posts = page.locator('article');
-    await expect(posts.first()).toBeVisible({ timeout: 10000 });
+    // Find a likeable post from another user, which gives us both post and button
+    const { post } = await findLikeablePost(page);
 
-    // Find a post that has a like button (meaning it's not our own post)
-    // and click on the user's avatar/name to go to their profile
-    let otherUserProfileLink = null;
-    const postCount = await posts.count();
-
-    for (let i = 0; i < Math.min(postCount, 10); i++) {
-      const post = posts.nth(i);
-      const likeButton = post.locator('button[aria-label*="Like"], button[aria-label*="Unlike"]');
-
-      // If this post has a like button, it's not our own post
-      const hasLikeButton = await likeButton.isVisible().catch(() => false);
-      if (hasLikeButton) {
-        // Find the user profile link in this post (avatar or username link)
-        const userLink = post.locator('a[href^="/profile/"]').first();
-        const href = await userLink.getAttribute('href');
-        if (href) {
-          otherUserProfileLink = href;
-          break;
-        }
-      }
-    }
+    // Get the user profile link from the post
+    const userLink = post.locator('a[href^="/profile/"]').first();
+    const otherUserProfileLink = await userLink.getAttribute('href');
 
     if (!otherUserProfileLink) {
-      test.skip(true, 'No other user posts found in feed');
-      return;
+      throw new Error('Could not find profile link in the post');
     }
 
     // Navigate to the other user's profile
     await page.goto(otherUserProfileLink);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
 
     // Wait for posts to load on their profile
     const profilePosts = page.locator('article');
-    await page.waitForTimeout(2000);
-    const profilePostCount = await profilePosts.count();
-
-    if (profilePostCount === 0) {
-      test.skip(true, 'No posts found on other user profile');
-      return;
-    }
+    await expect(profilePosts.first()).toBeVisible({ timeout: 10000 });
 
     // Check first post - like button SHOULD be visible on other user's posts
     const firstPost = profilePosts.first();
-    const heartButton = firstPost.locator(
+    const profileHeartButton = firstPost.locator(
       'button[aria-label*="Like"], button[aria-label*="Unlike"]'
     );
 
     // Like button should be visible on other users' posts
-    await expect(heartButton).toBeVisible();
+    await expect(profileHeartButton).toBeVisible();
 
     // Comment button should also be visible
     const commentLink = firstPost.locator('a[href^="/post/"][aria-label*="comment" i]');
@@ -242,39 +236,20 @@ test.describe('Post Like/Unlike Toggle', () => {
   });
 
   test('should persist like state after page reload', async ({ page }) => {
-    // Wait for posts to load on the home feed
-    const posts = page.locator('article');
-    await expect(posts.first()).toBeVisible({ timeout: 10000 });
+    // Find a likeable post from another user
+    const { post } = await findLikeablePost(page);
 
-    // Find a likeable post (not own post, has like button visible)
-    let postUrl = '';
-    const postCount = await posts.count();
-
-    for (let i = 0; i < Math.min(postCount, 5); i++) {
-      const post = posts.nth(i);
-      const button = post.locator('button[aria-label*="Like"], button[aria-label*="Unlike"]');
-
-      // Check if button is visible (not own post)
-      const isVisible = await button.isVisible().catch(() => false);
-      if (isVisible) {
-        // Get the post link to navigate to detail page
-        const postLink = post.locator('a[href^="/post/"]').first();
-        const href = await postLink.getAttribute('href');
-        if (href) {
-          postUrl = href;
-          break;
-        }
-      }
-    }
+    // Get the post link to navigate to detail page
+    const postLink = post.locator('a[href^="/post/"]').first();
+    const postUrl = await postLink.getAttribute('href');
 
     if (!postUrl) {
-      test.skip(true, 'No likeable posts found with valid URL');
-      return;
+      throw new Error('Could not find post URL link');
     }
 
     // Navigate to post detail page (triggers PersistentPages slide-over)
     await page.goto(postUrl);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Wait for the post detail overlay to slide in (300ms CSS transition)
     await page.waitForTimeout(400);
@@ -323,7 +298,7 @@ test.describe('Post Like/Unlike Toggle', () => {
 
     // Reload the page to verify persistence from server
     await page.reload();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Wait for the post detail overlay to slide in again after reload
     await page.waitForTimeout(400);
