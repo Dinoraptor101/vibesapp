@@ -21,7 +21,7 @@ export default defineConfig({
     },
   },
   retries: 1, // Retry failed tests once (set to 0 for debugging)
-  workers: 3, // Number of parallel worker processes
+  workers: 2, // Number of parallel worker processes
   projects: [
     {
       name: 'chromium',

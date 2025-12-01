@@ -7,7 +7,8 @@
  */
 
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
-import { isPersistentPage, PersistentPages } from '@/components/layout/PersistentPages';
+import { PersistentPages } from '@/components/layout/PersistentPages';
+import { isPersistentPage } from '@/components/layout/persistentPagesUtils';
 import {
   AdminDashboardPage,
   AdminLayout,

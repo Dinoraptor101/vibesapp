@@ -67,11 +67,6 @@ function getProfileUserIdFromPath(pathname: string): string | null {
   return parts[2] || null;
 }
 
-// Check if a path should be handled by persistent pages (including post detail and profile)
-export function isPersistentPage(pathname: string): boolean {
-  return getPageIndex(pathname) !== -1 || isPostDetailPath(pathname) || isProfilePath(pathname);
-}
-
 export function PersistentPages() {
   const location = useLocation();
   const { isOnline } = useNetworkStatus();
@@ -92,6 +87,10 @@ export function PersistentPages() {
 
   // Store scroll positions when navigating away
   const scrollPositions = useRef<number[]>(PERSISTENT_PAGES.map(() => 0));
+
+  // Track previous post and profile IDs to detect changes
+  const prevPostIdRef = useRef<string | null>(null);
+  const prevProfileUserIdRef = useRef<string | null>(null);
 
   // Update last main page when on a main page
   useEffect(() => {
@@ -135,19 +134,21 @@ export function PersistentPages() {
     }
   }, [currentIndex]);
 
-  // Reset post detail scroll when opening a new post
+  // Reset post detail scroll when post ID changes
   useEffect(() => {
-    if (isPostDetail && postDetailRef.current) {
+    if (isPostDetail && postDetailRef.current && currentPostId !== prevPostIdRef.current) {
       postDetailRef.current.scrollTop = 0;
+      prevPostIdRef.current = currentPostId;
     }
-  }, [isPostDetail, location.pathname]);
+  }, [isPostDetail, currentPostId]);
 
-  // Reset profile scroll when opening a new profile
+  // Reset profile scroll when profile user ID changes
   useEffect(() => {
-    if (isProfile && profileRef.current) {
+    if (isProfile && profileRef.current && currentProfileUserId !== prevProfileUserIdRef.current) {
       profileRef.current.scrollTop = 0;
+      prevProfileUserIdRef.current = currentProfileUserId;
     }
-  }, [isProfile, location.pathname]);
+  }, [isProfile, currentProfileUserId]);
 
   // If we're not on a persistent page, post detail, or profile, don't render
   if (currentIndex === -1 && !isPostDetail && !isProfile) {
@@ -268,12 +269,15 @@ export function PersistentPages() {
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
-                    {[...Array(6)].map((_, i) => (
-                      <div
-                        key={`skeleton-${i}`}
-                        className="aspect-square bg-surface-elevated rounded"
-                      />
-                    ))}
+                    {Array.from({ length: 6 }, (_, i) => {
+                      const uniqueKey = `profile-skeleton-${currentProfileUserId || 'unknown'}-item-${i}`;
+                      return (
+                        <div
+                          key={uniqueKey}
+                          className="aspect-square bg-surface-elevated rounded"
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               )}
