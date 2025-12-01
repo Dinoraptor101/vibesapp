@@ -18,6 +18,7 @@ interface LoginResponse {
     lat: number;
     lon: number;
     city?: string;
+    state?: string;
   };
   vibes?: number;
   createdAt: string;
@@ -35,6 +36,7 @@ interface SignupData {
     lat: number;
     lon: number;
     city?: string;
+    state?: string;
   };
   polarity: 'yin' | 'yang';
   mbtiPersonality: string;
@@ -65,6 +67,7 @@ function transformUserData(data: LoginResponse): User {
           latitude: data.location.lat,
           longitude: data.location.lon,
           city: data.location.city,
+          state: data.location.state,
         }
       : undefined,
     vibes: data.vibes || 0,

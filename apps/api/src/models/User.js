@@ -55,6 +55,10 @@ const UserSchema = new mongoose.Schema({
       type: String,
       required: false,
     },
+    state: {
+      type: String,
+      required: false,
+    },
   },
   vibes: {
     type: Number,

@@ -32,6 +32,7 @@ export interface User {
     latitude: number;
     longitude: number;
     city?: string;
+    state?: string;
   };
   vibes?: number;
   createdAt: Date;

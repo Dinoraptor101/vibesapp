@@ -20,11 +20,13 @@ interface SignupData {
   mbtiPersonality: string;
   polarity: 'yin' | 'yang';
   location: { lat: number; lon: number } | null;
+  city: string;
+  state: string;
   profilePictureUrl?: string;
   bio?: string;
   birthYear: number;
   birthMonth: number;
-  sex: 'Male' | 'Female' | 'Other';
+  sex: 'Male' | 'Female' | '';
 }
 
 const STEPS = [
@@ -32,12 +34,37 @@ const STEPS = [
   { id: 2, title: 'Your Pigeon ID', required: true },
   { id: 3, title: 'Username', required: true },
   { id: 4, title: 'Your Age', required: true },
-  { id: 5, title: 'MBTI Type', required: true },
-  { id: 6, title: 'Polarity', required: true },
-  { id: 7, title: 'Location', required: true },
-  { id: 8, title: 'Avatar', required: false },
-  { id: 9, title: 'About You', required: false },
+  { id: 5, title: 'Biological Sex', required: true },
+  { id: 6, title: 'MBTI Type', required: true },
+  { id: 7, title: 'Polarity', required: true },
+  { id: 8, title: 'Location', required: true },
+  { id: 9, title: 'Avatar', required: false },
+  { id: 10, title: 'About You', required: false },
 ];
+
+// MBTI type nicknames for bio generation
+const MBTI_NICKNAMES: Record<string, string> = {
+  INTJ: 'Architect',
+  INTP: 'Logician',
+  ENTJ: 'Commander',
+  ENTP: 'Debater',
+  INFJ: 'Advocate',
+  INFP: 'Mediator',
+  ENFJ: 'Protagonist',
+  ENFP: 'Campaigner',
+  ISTJ: 'Logistician',
+  ISFJ: 'Defender',
+  ESTJ: 'Executive',
+  ESFJ: 'Consul',
+  ISTP: 'Virtuoso',
+  ISFP: 'Adventurer',
+  ESTP: 'Entrepreneur',
+  ESFP: 'Entertainer',
+};
+
+// Polarity descriptors for bio generation (grammatically smooth)
+const YIN_DESCRIPTORS = ['a reflective', 'an intuitive', 'a thoughtful', 'a calm'];
+const YANG_DESCRIPTORS = ['an expressive', 'a dynamic', 'an energetic', 'an assertive'];
 
 // Month names for birth date selector
 const MONTHS = [
@@ -114,10 +141,12 @@ export function SignupWizard() {
     mbtiPersonality: '',
     polarity: 'yang', // Default to yang
     location: null,
+    city: '',
+    state: '',
     bio: '',
     birthYear: 0, // User must select
     birthMonth: 0, // User must select
-    sex: 'Other',
+    sex: '',
   });
 
   const handleGeneratePigeonId = async () => {
@@ -309,6 +338,8 @@ export function SignupWizard() {
         birthMonth: signupData.birthMonth,
         sex: signupData.sex.toLowerCase(),
         location: signupData.location,
+        city: signupData.city,
+        state: signupData.state,
         polarity: signupData.polarity,
         mbtiPersonality: signupData.mbtiPersonality,
         profilePictureUrl: signupData.profilePictureUrl,
@@ -328,6 +359,8 @@ export function SignupWizard() {
         location: {
           lat: signupData.location.lat,
           lon: signupData.location.lon,
+          city: signupData.city || undefined,
+          state: signupData.state || undefined,
         },
         polarity: signupData.polarity,
         mbtiPersonality: signupData.mbtiPersonality,
@@ -482,7 +515,19 @@ export function SignupWizard() {
           </div>
         );
 
-      case 4:
+      case 4: {
+        // Calculate age for preview
+        const calculateAge = () => {
+          if (!signupData.birthYear || !signupData.birthMonth) return null;
+          const today = new Date();
+          const birthDate = new Date(signupData.birthYear, signupData.birthMonth - 1);
+          let age = today.getFullYear() - birthDate.getFullYear();
+          const monthDiff = today.getMonth() - birthDate.getMonth();
+          if (monthDiff < 0) age--;
+          return age;
+        };
+        const previewAge = calculateAge();
+
         return (
           <div className="space-y-6">
             <div className="space-y-2 text-center">
@@ -491,31 +536,7 @@ export function SignupWizard() {
             </div>
 
             <div className="space-y-4 rounded-lg border border-border bg-surface-elevated p-4 sm:p-6">
-              {/* Month Selector */}
-              <div className="space-y-2">
-                <select
-                  id="birth-month"
-                  value={signupData.birthMonth || ''}
-                  onChange={(e) =>
-                    setSignupData((prev) => ({
-                      ...prev,
-                      birthMonth: Number(e.target.value),
-                    }))
-                  }
-                  className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-text-primary transition-colors focus:border-brand-purple focus:outline-none focus:ring-2 focus:ring-brand-purple/20"
-                >
-                  <option value="" disabled>
-                    Month
-                  </option>
-                  {MONTHS.map((month) => (
-                    <option key={month.value} value={month.value}>
-                      {month.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Year Selector */}
+              {/* Year Selector (first) */}
               <div className="space-y-2">
                 <select
                   id="birth-year"
@@ -539,14 +560,83 @@ export function SignupWizard() {
                 </select>
               </div>
 
+              {/* Month Selector (second) */}
+              <div className="space-y-2">
+                <select
+                  id="birth-month"
+                  value={signupData.birthMonth || ''}
+                  onChange={(e) =>
+                    setSignupData((prev) => ({
+                      ...prev,
+                      birthMonth: Number(e.target.value),
+                    }))
+                  }
+                  className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-text-primary transition-colors focus:border-brand-purple focus:outline-none focus:ring-2 focus:ring-brand-purple/20"
+                >
+                  <option value="" disabled>
+                    Month
+                  </option>
+                  {MONTHS.map((month) => (
+                    <option key={month.value} value={month.value}>
+                      {month.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Age Preview */}
+              {previewAge !== null && (
+                <p className="text-center text-lg font-medium text-text-primary">
+                  You are {previewAge} years old
+                </p>
+              )}
+
               <p className="text-center text-xs text-text-secondary">
-                🔒 This data is private and only used to calculate your age
+                We only use this to calculate your age, so you don't have to update it manually.
               </p>
             </div>
           </div>
         );
+      }
 
       case 5:
+        return (
+          <div className="space-y-6">
+            <div className="space-y-2 text-center">
+              <h2 className="text-2xl font-bold text-text-primary">Your Biological Sex</h2>
+              <p className="text-text-secondary">
+                You'd want to know this about others. They want to know it about you.
+              </p>
+            </div>
+
+            <div className="flex gap-4 justify-center">
+              <button
+                type="button"
+                onClick={() => setSignupData((prev) => ({ ...prev, sex: 'Male' }))}
+                className={`flex-1 max-w-[160px] py-4 px-6 rounded-lg border-2 text-lg font-semibold transition-all duration-200 ${
+                  signupData.sex === 'Male'
+                    ? 'border-brand-purple bg-brand-purple/10 text-brand-purple'
+                    : 'border-border bg-surface text-text-primary hover:border-brand-purple/50'
+                }`}
+              >
+                Male
+              </button>
+              <button
+                type="button"
+                onClick={() => setSignupData((prev) => ({ ...prev, sex: 'Female' }))}
+                className={`flex-1 max-w-[160px] py-4 px-6 rounded-lg border-2 text-lg font-semibold transition-all duration-200 ${
+                  signupData.sex === 'Female'
+                    ? 'border-brand-purple bg-brand-purple/10 text-brand-purple'
+                    : 'border-border bg-surface text-text-primary hover:border-brand-purple/50'
+                }`}
+              >
+                Female
+              </button>
+            </div>
+          </div>
+        );
+
+      case 6:
         return (
           <div className="space-y-6">
             <div className="space-y-2 text-center">
@@ -575,7 +665,7 @@ export function SignupWizard() {
           </div>
         );
 
-      case 6:
+      case 7:
         return (
           <div className="space-y-6">
             <div className="space-y-2 text-center">
@@ -640,7 +730,7 @@ export function SignupWizard() {
           </div>
         );
 
-      case 7:
+      case 8:
         return (
           <div className="space-y-6">
             <div className="space-y-2 text-center">
@@ -653,11 +743,14 @@ export function SignupWizard() {
               onLocationChange={(location: { lat: number; lon: number } | null) =>
                 setSignupData((prev) => ({ ...prev, location }))
               }
+              onCityStateChange={(city: string, state: string) =>
+                setSignupData((prev) => ({ ...prev, city, state }))
+              }
             />
           </div>
         );
 
-      case 8:
+      case 9:
         return (
           <div className="space-y-6">
             <div className="space-y-2 text-center">
@@ -702,25 +795,67 @@ export function SignupWizard() {
           </div>
         );
 
-      case 9:
+      case 10: {
+        // Generate bio summary
+        const generateBioSummary = () => {
+          const mbti = signupData.mbtiPersonality;
+          const mbtiNickname = MBTI_NICKNAMES[mbti as keyof typeof MBTI_NICKNAMES] || mbti;
+          
+          const descriptors = signupData.polarity === 'yin' ? YIN_DESCRIPTORS : YANG_DESCRIPTORS;
+          const polarityDescriptor = descriptors[Math.floor(Math.random() * descriptors.length)];
+          
+          // Calculate age
+          let age = '';
+          if (signupData.birthYear && signupData.birthMonth) {
+            const today = new Date();
+            const birthDate = new Date(signupData.birthYear, signupData.birthMonth - 1);
+            let years = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0) years--;
+            age = `${years} years old`;
+          }
+          
+          const sex = signupData.sex ? signupData.sex.toLowerCase() : '';
+          const location = signupData.city && signupData.state 
+            ? `from ${signupData.city}, ${signupData.state}` 
+            : '';
+          
+          return `I'm a ${polarityDescriptor} ${mbtiNickname}${age ? `, ${age}` : ''}${sex ? `, ${sex}` : ''}${location ? `, ${location}` : ''}. Nice to meet you!`;
+        };
+        
+        // Auto-generate bio on first render of this step if bio is empty
+        const suggestedBio = generateBioSummary();
+        if (!signupData.bio) {
+          // Use setTimeout to avoid state update during render
+          setTimeout(() => {
+            setSignupData((prev) => {
+              if (!prev.bio) {
+                return { ...prev, bio: suggestedBio };
+              }
+              return prev;
+            });
+          }, 0);
+        }
+
         return (
           <div className="space-y-6">
             <div className="space-y-2 text-center">
-              <h2 className="text-2xl font-bold text-text-primary">Tell Us About Yourself</h2>
-              <p className="text-text-secondary">Optional - share a bit about who you are</p>
+              <h2 className="text-2xl font-bold text-text-primary">About You</h2>
+              <p className="text-text-secondary">We've written a summary for you. Feel free to edit it!</p>
             </div>
 
             <Textarea
               label="Bio"
               value={signupData.bio}
               onChange={(e) => setSignupData((prev) => ({ ...prev, bio: e.target.value }))}
-              placeholder="What's your vibe? What do you love? What makes you unique?"
+              placeholder="Your bio will appear here..."
               rows={5}
               maxLength={500}
               helperText="Max 500 characters"
             />
           </div>
         );
+      }
 
       default:
         return null;
@@ -785,8 +920,9 @@ export function SignupWizard() {
                 isSubmitting ||
                 (currentStep === 3 && !isUsernameValid(signupData.userName)) ||
                 (currentStep === 4 && (!signupData.birthMonth || !signupData.birthYear)) ||
-                (currentStep === 5 && !signupData.mbtiPersonality) ||
-                (currentStep === 7 && !signupData.location)
+                (currentStep === 5 && !signupData.sex) ||
+                (currentStep === 6 && !signupData.mbtiPersonality) ||
+                (currentStep === 8 && !signupData.location)
               }
               className="ml-auto"
             >

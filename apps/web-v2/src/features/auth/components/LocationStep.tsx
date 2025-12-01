@@ -11,10 +11,11 @@ import './LocationStep.css'; // Import shake animation
 interface LocationStepProps {
   location: { lat: number; lon: number } | null;
   onLocationChange: (location: { lat: number; lon: number } | null) => void;
+  onCityStateChange?: (city: string, state: string) => void;
   // Removed onAutoSuccess - no longer auto-advancing
 }
 
-export function LocationStep({ location, onLocationChange }: LocationStepProps) {
+export function LocationStep({ location, onLocationChange, onCityStateChange }: LocationStepProps) {
   const { isGettingLocation, getGPSLocation } = useLocationGPS();
   const [showLoadingSpinner, setShowLoadingSpinner] = useState(false); // ZEN: 1-second delay
   const [error, setError] = useState('');
@@ -52,6 +53,13 @@ export function LocationStep({ location, onLocationChange }: LocationStepProps) 
     if (result) {
       onLocationChange({ lat: result.lat, lon: result.lon });
       setDisplayLocation(result.city);
+      // Extract city and state from the result and pass to parent
+      if (onCityStateChange && result.city) {
+        const parts = result.city.split(', ');
+        const city = parts[0] || '';
+        const state = parts[1] || '';
+        onCityStateChange(city, state);
+      }
       setError('');
       // ZEN: Show detected location, let user confirm (no auto-advance)
     } else if (!isAutoDetect) {
@@ -133,6 +141,13 @@ export function LocationStep({ location, onLocationChange }: LocationStepProps) 
         setDisplayLocation(displayParts.join(',').trim());
       } else {
         setDisplayLocation(parts.join(', '));
+      }
+
+      // Pass city and state to parent
+      if (onCityStateChange) {
+        const resolvedCity = locality || '';
+        const resolvedState = address.state || '';
+        onCityStateChange(resolvedCity, resolvedState);
       }
     } catch {
       // Error - shake and clear
