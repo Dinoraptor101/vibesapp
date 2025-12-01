@@ -1,4 +1,5 @@
 import { ExternalLink } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { getBuildVersion } from '@/utils/versionCheck';
 
@@ -6,7 +7,13 @@ const APP_VERSION = '2.0.0';
 const FEEDBACK_URL = 'https://t.me/Dnegai';
 
 export function SupportTab() {
-  const buildVersion = getBuildVersion();
+  const [buildVersion, setBuildVersion] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Get build version after component mounts to ensure DOM is ready
+    const version = getBuildVersion();
+    setBuildVersion(version);
+  }, []);
 
   const handleFeedbackClick = () => {
     window.open(FEEDBACK_URL, '_blank', 'noopener,noreferrer');
