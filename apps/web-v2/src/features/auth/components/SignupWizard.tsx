@@ -42,30 +42,6 @@ const STEPS = [
   { id: 10, title: 'About You', required: false },
 ];
 
-// MBTI type nicknames for bio generation
-const MBTI_NICKNAMES: Record<string, string> = {
-  INTJ: 'Architect',
-  INTP: 'Logician',
-  ENTJ: 'Commander',
-  ENTP: 'Debater',
-  INFJ: 'Advocate',
-  INFP: 'Mediator',
-  ENFJ: 'Protagonist',
-  ENFP: 'Campaigner',
-  ISTJ: 'Logistician',
-  ISFJ: 'Defender',
-  ESTJ: 'Executive',
-  ESFJ: 'Consul',
-  ISTP: 'Virtuoso',
-  ISFP: 'Adventurer',
-  ESTP: 'Entrepreneur',
-  ESFP: 'Entertainer',
-};
-
-// Polarity descriptors for bio generation (grammatically smooth)
-const YIN_DESCRIPTORS = ['a reflective', 'an intuitive', 'a thoughtful', 'a calm'];
-const YANG_DESCRIPTORS = ['an expressive', 'a dynamic', 'an energetic', 'an assertive'];
-
 // Month names for birth date selector
 const MONTHS = [
   { value: 1, label: 'January' },
@@ -627,14 +603,29 @@ export function SignupWizard() {
                     className={`absolute inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-lg shadow-lg transition-all duration-300 ease-in-out ${
                       signupData.sex === 'Male'
                         ? 'translate-x-16 from-blue-400 to-cyan-500'
-                        : 'translate-x-2 from-pink-400 to-rose-500'
+                        : signupData.sex === 'Female'
+                          ? 'translate-x-2 from-pink-400 to-rose-500'
+                          : 'translate-x-9 from-gray-300 to-gray-400'
                     }`}
                   >
-                    {signupData.sex === 'Male' ? '♂️' : '♀️'}
+                    {signupData.sex === 'Male' ? '♂️' : signupData.sex === 'Female' ? '♀️' : '○'}
                   </span>
                 </button>
                 <span className="w-16 text-left text-sm font-semibold text-text-primary">MALE</span>
               </div>
+
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 text-sm">
+                <div className="space-y-2 rounded-lg bg-surface p-3 sm:p-4">
+                  <p className="font-semibold text-pink-500">♀️ Female</p>
+                  <p className="text-text-secondary text-xs sm:text-sm">XX chromosomes</p>
+                </div>
+                <div className="space-y-2 rounded-lg bg-surface p-3 sm:p-4">
+                  <p className="font-semibold text-blue-500">♂️ Male</p>
+                  <p className="text-text-secondary text-xs sm:text-sm">XY chromosomes</p>
+                </div>
+              </div>
+
+              <p className="text-center text-xs text-text-tertiary">This cannot be changed later</p>
             </div>
           </div>
         );
@@ -757,10 +748,8 @@ export function SignupWizard() {
         return (
           <div className="space-y-6">
             <div className="space-y-2 text-center">
-              <h2 className="text-2xl font-bold text-text-primary">Your Picture</h2>
-              <p className="text-text-secondary">
-                Optional - you can add this later from your profile
-              </p>
+              <h2 className="text-2xl font-bold text-text-primary">Your Photo</h2>
+              <p className="text-text-secondary">Be real — first impressions matter</p>
             </div>
 
             <div className="flex flex-col items-center space-y-4">
@@ -793,75 +782,30 @@ export function SignupWizard() {
                 {isUploadingImage ? 'Uploading...' : 'Upload Photo'}
               </Button>
 
-              <p className="text-sm text-text-secondary">JPG, PNG or WebP • Max 5MB</p>
+              <p className="text-xs text-text-tertiary">JPG, PNG or WebP • Max 5MB</p>
             </div>
           </div>
         );
 
-      case 10: {
-        // Generate bio summary
-        const generateBioSummary = () => {
-          const mbti = signupData.mbtiPersonality;
-          const mbtiNickname = MBTI_NICKNAMES[mbti as keyof typeof MBTI_NICKNAMES] || mbti;
-
-          const descriptors = signupData.polarity === 'yin' ? YIN_DESCRIPTORS : YANG_DESCRIPTORS;
-          const polarityDescriptor = descriptors[Math.floor(Math.random() * descriptors.length)];
-
-          // Calculate age
-          let age = '';
-          if (signupData.birthYear && signupData.birthMonth) {
-            const today = new Date();
-            const birthDate = new Date(signupData.birthYear, signupData.birthMonth - 1);
-            let years = today.getFullYear() - birthDate.getFullYear();
-            const monthDiff = today.getMonth() - birthDate.getMonth();
-            if (monthDiff < 0) years--;
-            age = `${years} years old`;
-          }
-
-          const sex = signupData.sex ? signupData.sex.toLowerCase() : '';
-          const location =
-            signupData.city && signupData.state
-              ? `from ${signupData.city}, ${signupData.state}`
-              : '';
-
-          return `I'm a ${polarityDescriptor} ${mbtiNickname}${age ? `, ${age}` : ''}${sex ? `, ${sex}` : ''}${location ? `, ${location}` : ''}. Nice to meet you!`;
-        };
-
-        // Auto-generate bio on first render of this step if bio is empty
-        const suggestedBio = generateBioSummary();
-        if (!signupData.bio) {
-          // Use setTimeout to avoid state update during render
-          setTimeout(() => {
-            setSignupData((prev) => {
-              if (!prev.bio) {
-                return { ...prev, bio: suggestedBio };
-              }
-              return prev;
-            });
-          }, 0);
-        }
-
+      case 10:
         return (
           <div className="space-y-6">
             <div className="space-y-2 text-center">
               <h2 className="text-2xl font-bold text-text-primary">About You</h2>
-              <p className="text-text-secondary">
-                We've written a summary for you. Feel free to edit it!
-              </p>
+              <p className="text-text-secondary">Tell us something interesting about yourself</p>
             </div>
 
             <Textarea
               label="Bio"
               value={signupData.bio}
               onChange={(e) => setSignupData((prev) => ({ ...prev, bio: e.target.value }))}
-              placeholder="Your bio will appear here..."
+              placeholder="I'm passionate about..."
               rows={5}
               maxLength={500}
               helperText="Max 500 characters"
             />
           </div>
         );
-      }
 
       default:
         return null;
