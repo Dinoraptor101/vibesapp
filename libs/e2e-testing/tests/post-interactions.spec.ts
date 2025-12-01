@@ -95,15 +95,30 @@ test.describe('Post Like/Unlike Toggle', () => {
     const initialAriaLabel = await heartButton.getAttribute('aria-label');
     const wasLiked = initialAriaLabel?.toLowerCase().includes('unlike');
 
-    // Click to toggle
-    await heartButton.click();
-    await page.waitForTimeout(500);
+    // Click and wait for the API response
+    const [likeResponse] = await Promise.all([
+      page.waitForResponse(
+        (response) =>
+          response.url().includes('/posts/') &&
+          response.url().endsWith('/like') &&
+          response.request().method() === 'POST',
+        { timeout: 10000 }
+      ),
+      heartButton.click(),
+    ]);
 
-    // Verify state toggled
-    const newAriaLabel = await heartButton.getAttribute('aria-label');
-    const isNowLiked = newAriaLabel?.toLowerCase().includes('unlike');
+    // Verify the API response was successful
+    expect(likeResponse.status()).toBeGreaterThanOrEqual(200);
+    expect(likeResponse.status()).toBeLessThan(300);
 
-    expect(isNowLiked).toBe(!wasLiked);
+    // Wait for optimistic update to render (no refetch, so shorter wait)
+    await page.waitForTimeout(300);
+
+    // Verify state toggled using auto-retry assertion
+    await expect(heartButton).toHaveAttribute(
+      'aria-label',
+      new RegExp(wasLiked ? '^Like post' : '^Unlike post')
+    );
   });
 
   test('should toggle like back and forth multiple times', async ({ page }) => {
@@ -121,29 +136,41 @@ test.describe('Post Like/Unlike Toggle', () => {
     const initialCount = await getLikeCount();
 
     // Click 1: Like (or unlike if already liked)
-    await heartButton.click();
-    await page.waitForTimeout(600); // Wait for mutation to complete
+    await Promise.all([
+      page.waitForResponse((res) => res.url().includes('/posts/') && res.url().endsWith('/like')),
+      heartButton.click(),
+    ]);
+    await page.waitForTimeout(300);
 
     const count1 = await getLikeCount();
     expect(count1).not.toBe(initialCount);
 
     // Click 2: Toggle back
-    await heartButton.click();
-    await page.waitForTimeout(600);
+    await Promise.all([
+      page.waitForResponse((res) => res.url().includes('/posts/') && res.url().endsWith('/like')),
+      heartButton.click(),
+    ]);
+    await page.waitForTimeout(300);
 
     const count2 = await getLikeCount();
     expect(count2).toBe(initialCount); // Should be back to initial
 
     // Click 3: Toggle again
-    await heartButton.click();
-    await page.waitForTimeout(600);
+    await Promise.all([
+      page.waitForResponse((res) => res.url().includes('/posts/') && res.url().endsWith('/like')),
+      heartButton.click(),
+    ]);
+    await page.waitForTimeout(300);
 
     const count3 = await getLikeCount();
     expect(count3).toBe(count1); // Should match first toggle
 
     // Click 4: Toggle back to initial
-    await heartButton.click();
-    await page.waitForTimeout(600);
+    await Promise.all([
+      page.waitForResponse((res) => res.url().includes('/posts/') && res.url().endsWith('/like')),
+      heartButton.click(),
+    ]);
+    await page.waitForTimeout(300);
 
     const count4 = await getLikeCount();
     expect(count4).toBe(initialCount); // Should be back to initial again
