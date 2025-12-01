@@ -532,7 +532,9 @@ export function SignupWizard() {
           <div className="space-y-6">
             <div className="space-y-2 text-center">
               <h2 className="text-2xl font-bold text-text-primary">Your Age</h2>
-              <p className="text-text-secondary">We use this to show your age on your profile</p>
+              <p className="text-text-secondary">
+                We use this to calculate your age on your profile.
+              </p>
             </div>
 
             <div className="space-y-4 rounded-lg border border-border bg-surface-elevated p-4 sm:p-6">
@@ -586,14 +588,10 @@ export function SignupWizard() {
 
               {/* Age Preview */}
               {previewAge !== null && (
-                <p className="text-center text-lg font-medium text-text-primary">
+                <p className="text-center text-xs text-text-secondary">
                   You are {previewAge} years old
                 </p>
               )}
-
-              <p className="text-center text-xs text-text-secondary">
-                We only use this to calculate your age, so you don't have to update it manually.
-              </p>
             </div>
           </div>
         );
@@ -605,7 +603,7 @@ export function SignupWizard() {
             <div className="space-y-2 text-center">
               <h2 className="text-2xl font-bold text-text-primary">Your Biological Sex</h2>
               <p className="text-text-secondary">
-                You'd want to know this about others. They want to know it about you.
+                You'd want to know this about others. They'd want to know it about you.
               </p>
             </div>
 
@@ -800,10 +798,10 @@ export function SignupWizard() {
         const generateBioSummary = () => {
           const mbti = signupData.mbtiPersonality;
           const mbtiNickname = MBTI_NICKNAMES[mbti as keyof typeof MBTI_NICKNAMES] || mbti;
-          
+
           const descriptors = signupData.polarity === 'yin' ? YIN_DESCRIPTORS : YANG_DESCRIPTORS;
           const polarityDescriptor = descriptors[Math.floor(Math.random() * descriptors.length)];
-          
+
           // Calculate age
           let age = '';
           if (signupData.birthYear && signupData.birthMonth) {
@@ -814,15 +812,16 @@ export function SignupWizard() {
             if (monthDiff < 0) years--;
             age = `${years} years old`;
           }
-          
+
           const sex = signupData.sex ? signupData.sex.toLowerCase() : '';
-          const location = signupData.city && signupData.state 
-            ? `from ${signupData.city}, ${signupData.state}` 
-            : '';
-          
+          const location =
+            signupData.city && signupData.state
+              ? `from ${signupData.city}, ${signupData.state}`
+              : '';
+
           return `I'm a ${polarityDescriptor} ${mbtiNickname}${age ? `, ${age}` : ''}${sex ? `, ${sex}` : ''}${location ? `, ${location}` : ''}. Nice to meet you!`;
         };
-        
+
         // Auto-generate bio on first render of this step if bio is empty
         const suggestedBio = generateBioSummary();
         if (!signupData.bio) {
@@ -841,7 +840,9 @@ export function SignupWizard() {
           <div className="space-y-6">
             <div className="space-y-2 text-center">
               <h2 className="text-2xl font-bold text-text-primary">About You</h2>
-              <p className="text-text-secondary">We've written a summary for you. Feel free to edit it!</p>
+              <p className="text-text-secondary">
+                We've written a summary for you. Feel free to edit it!
+              </p>
             </div>
 
             <Textarea
