@@ -99,27 +99,18 @@ function CommentCardComponent({ comment, onHeart, onReply, className }: CommentC
 
         {/* Actions */}
         <div className="flex items-center gap-4">
-          {/* Heart Button */}
-          {onHeart && (
+          {/* Heart Button - Hidden for own comments */}
+          {onHeart && !isOwnComment && (
             <button
               type="button"
               onClick={() => onHeart(comment._id, userHasHearted)}
-              disabled={isOwnComment}
               className={cn(
                 'flex items-center gap-1 text-xs transition-colors',
-                isOwnComment
-                  ? 'opacity-50 cursor-not-allowed'
-                  : userHasHearted
-                    ? 'text-vibe-positive'
-                    : 'text-text-tertiary hover:text-vibe-positive'
+                userHasHearted
+                  ? 'text-vibe-positive'
+                  : 'text-text-tertiary hover:text-vibe-positive'
               )}
-              aria-label={
-                isOwnComment
-                  ? 'Cannot heart your own comment'
-                  : userHasHearted
-                    ? 'Remove heart'
-                    : 'Heart comment'
-              }
+              aria-label={userHasHearted ? 'Remove heart' : 'Heart comment'}
             >
               <Heart className={cn('w-4 h-4', userHasHearted && 'fill-current')} />
               {heartCount > 0 && <span>{heartCount}</span>}
