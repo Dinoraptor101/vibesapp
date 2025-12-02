@@ -124,16 +124,16 @@ export function PostDetailPageContent({ postId: propPostId }: PostDetailPageCont
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-4">
-      <Button variant="ghost" onClick={handleBack} className="mb-4">
+    <div className="max-w-7xl mx-auto p-4 md:px-0 md:py-4">
+      <Button variant="ghost" onClick={handleBack} className="mb-4 md:ml-0">
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back
       </Button>
 
       {/* Two-column layout on desktop: Post on left, Comments on right */}
-      <div className="flex flex-col md:flex-row md:gap-8">
+      <div className="flex flex-col md:flex-row md:gap-6">
         {/* Left Column: Post Content (UNTOUCHED) */}
-        <div className="md:flex-1 md:max-w-2xl">
+        <div className="md:flex-[11]">
           {/* Smart Caption Display: Either overlay (≤100 chars) OR full section (>100 chars) - Never both */}
           {(() => {
             const captionLength = post.text ? stripHtml(post.text).length : 0;
@@ -185,7 +185,7 @@ export function PostDetailPageContent({ postId: propPostId }: PostDetailPageCont
         </div>
 
         {/* Right Column: Comments Section (Desktop only) */}
-        <div className="hidden md:block md:w-96 md:flex-shrink-0">
+        <div className="hidden md:block md:flex-[9]">
           <div className="sticky top-24 space-y-4">
             {/* Section Header */}
             <div className="flex items-center gap-2 px-1">
