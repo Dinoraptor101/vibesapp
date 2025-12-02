@@ -65,13 +65,16 @@ function transformActivity(backendActivity: BackendActivity): Activity {
 
 /**
  * Get all activities for the current user
+ * @param userId - User ID
+ * @param showRead - Include read activities (default: false, unread only)
  */
-export async function getActivities(userId: string): Promise<Activity[]> {
+export async function getActivities(userId: string, showRead = false): Promise<Activity[]> {
   if (!userId || userId === 'undefined') {
     console.warn('getActivities called with invalid userId:', userId);
     return [];
   }
-  const response = await apiClient.get<BackendActivity[]>(`/activities/${userId}`);
+  const params = showRead ? '?showRead=true' : '';
+  const response = await apiClient.get<BackendActivity[]>(`/activities/${userId}${params}`);
   return response.map(transformActivity);
 }
 
@@ -84,8 +87,8 @@ export async function getUnreadCounts(userId: string) {
     return { all: 0, messages: 0, social: 0, me: 0 };
   }
 
-  // For now, fetch all activities and count client-side
-  const activities = await getActivities(userId);
+  // Fetch only unread activities for counting
+  const activities = await getActivities(userId, false);
   const unreadActivities = activities.filter((a) => !a.isRead);
 
   // Categorize based on activity type
