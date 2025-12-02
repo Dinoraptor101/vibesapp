@@ -28,6 +28,7 @@ import { TopNav } from './TopNav';
 // Define the order of persistent pages (left to right)
 // PostDetail is at the end as a slide-over from any page
 const PERSISTENT_PAGES = [
+  { path: '/profile', Component: ProfilePageContent, key: 'profile' }, // Profile to the left of home
   { path: '/', Component: HomePageContent, key: 'home' },
   { path: '/activity', Component: ActivityPageContent, key: 'activity' },
   { path: '/create-post', Component: CreatePostPageContent, key: 'create-post' },
@@ -39,6 +40,11 @@ const PERSISTENT_PAGES = [
 function getPageIndex(pathname: string): number {
   const exactIndex = PERSISTENT_PAGES.findIndex((p) => p.path === pathname);
   if (exactIndex !== -1) return exactIndex;
+
+  // Check if it's a profile path (/profile/:userId)
+  if (isProfilePath(pathname)) {
+    return PERSISTENT_PAGES.findIndex((p) => p.key === 'profile');
+  }
 
   return -1;
 }
@@ -73,24 +79,21 @@ export function PersistentPages() {
   const currentIndex = getPageIndex(location.pathname);
   const isPostDetail = isPostDetailPath(location.pathname);
   const currentPostId = getPostIdFromPath(location.pathname);
-  const isProfile = isProfilePath(location.pathname);
   const currentProfileUserId = getProfileUserIdFromPath(location.pathname);
   const scrollContainerRefs = useRef<(HTMLDivElement | null)[]>([]);
   const postDetailRef = useRef<HTMLDivElement | null>(null);
-  const profileRef = useRef<HTMLDivElement | null>(null);
 
   // Track the last main page index (for returning from post detail)
   const lastMainPageIndex = useRef(0);
 
   // Track which pages have been visited (to know if we should restore scroll)
-  const visitedPages = useRef<Set<number>>(new Set([0])); // Home is visited by default
+  const visitedPages = useRef<Set<number>>(new Set([1])); // Home (index 1) is visited by default
 
   // Store scroll positions when navigating away
   const scrollPositions = useRef<number[]>(PERSISTENT_PAGES.map(() => 0));
 
-  // Track previous post and profile IDs to detect changes
+  // Track previous post ID to detect changes
   const prevPostIdRef = useRef<string | null>(null);
-  const prevProfileUserIdRef = useRef<string | null>(null);
 
   // Update last main page when on a main page
   useEffect(() => {
@@ -142,16 +145,8 @@ export function PersistentPages() {
     }
   }, [isPostDetail, currentPostId]);
 
-  // Reset profile scroll when profile user ID changes
-  useEffect(() => {
-    if (isProfile && profileRef.current && currentProfileUserId !== prevProfileUserIdRef.current) {
-      profileRef.current.scrollTop = 0;
-      prevProfileUserIdRef.current = currentProfileUserId;
-    }
-  }, [isProfile, currentProfileUserId]);
-
-  // If we're not on a persistent page, post detail, or profile, don't render
-  if (currentIndex === -1 && !isPostDetail && !isProfile) {
+  // If we're not on a persistent page or post detail, don't render
+  if (currentIndex === -1 && !isPostDetail) {
     return null;
   }
 
@@ -183,7 +178,7 @@ export function PersistentPages() {
         >
           {PERSISTENT_PAGES.map((page, index) => {
             const PageComponent = page.Component;
-            const isActive = index === activeMainIndex && !isPostDetail && !isProfile;
+            const isActive = index === activeMainIndex && !isPostDetail;
 
             return (
               <div
@@ -201,7 +196,12 @@ export function PersistentPages() {
               >
                 {/* Standard content wrapper: consistent padding + width */}
                 <div className="pt-8 px-4 max-w-2xl mx-auto">
-                  <PageComponent />
+                  {/* Pass userId prop to ProfilePageContent */}
+                  {page.key === 'profile' ? (
+                    <PageComponent userId={currentProfileUserId || undefined} />
+                  ) : (
+                    <PageComponent />
+                  )}
                 </div>
               </div>
             );
@@ -233,51 +233,6 @@ export function PersistentPages() {
                   <div className="space-y-3">
                     <div className="h-4 bg-surface-elevated rounded w-3/4" />
                     <div className="h-4 bg-surface-elevated rounded w-1/2" />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Profile - Slides in from right as overlay */}
-        <div
-          className={`absolute inset-x-0 top-0 bottom-0 md:top-[var(--top-nav-height)] bg-surface transition-transform duration-300 ease-out ${
-            isProfile ? 'translate-x-0' : 'translate-x-full'
-          }`}
-          aria-hidden={!isProfile}
-          inert={!isProfile ? true : undefined}
-        >
-          <div
-            ref={profileRef}
-            className="h-full overflow-y-auto overscroll-contain"
-            style={{ paddingBottom: 'var(--bottom-nav-height)' }}
-          >
-            {/* Standard content wrapper: consistent padding + width */}
-            <div className="pt-8 px-4 max-w-2xl mx-auto">
-              {currentProfileUserId ? (
-                <ProfilePageContent userId={currentProfileUserId} />
-              ) : (
-                /* Skeleton placeholder when no userId */
-                <div className="animate-pulse">
-                  <div className="h-8 w-20 bg-surface-elevated rounded mb-6" />
-                  <div className="flex items-start gap-6 mb-8">
-                    <div className="w-24 h-24 bg-surface-elevated rounded-full" />
-                    <div className="flex-1 space-y-3">
-                      <div className="h-6 bg-surface-elevated rounded w-1/3" />
-                      <div className="h-4 bg-surface-elevated rounded w-1/4" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {Array.from({ length: 6 }, (_, i) => {
-                      const uniqueKey = `profile-skeleton-${currentProfileUserId || 'unknown'}-item-${i}`;
-                      return (
-                        <div
-                          key={uniqueKey}
-                          className="aspect-square bg-surface-elevated rounded"
-                        />
-                      );
-                    })}
                   </div>
                 </div>
               )}
