@@ -106,13 +106,15 @@ export function LoginForm() {
         {/* Pigeon ID input with inline return button */}
         <div className="flex items-center gap-0">
           <input
-            type="text"
+            type="password"
+            name="password"
             value={pigeonId}
             onChange={(e) => setPigeonId(e.target.value)}
             disabled={isLoading}
             required
             autoComplete="current-password"
             placeholder="your pigeon id"
+            data-testid="pigeon-id-input"
             className={`flex-1 h-12 px-4 bg-surface border border-border rounded-l-lg text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-brand-purple/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
               isShaking ? 'animate-shake' : ''
             }`}
