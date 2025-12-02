@@ -3,7 +3,7 @@
  */
 
 import { ArrowLeft } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout';
 import { Button, Spinner } from '@/components/ui-next';
@@ -19,8 +19,11 @@ interface ProfilePageContentProps {
 
 /**
  * Page content without layout wrapper (for persistent pages)
+ * Memoized to prevent unnecessary re-renders when userId stays the same
  */
-export function ProfilePageContent({ userId: propUserId }: ProfilePageContentProps) {
+const ProfilePageContentInner = memo(function ProfilePageContentInner({
+  userId: propUserId,
+}: ProfilePageContentProps) {
   const { userId: paramUserId } = useParams<{ userId: string }>();
   const userId = propUserId || paramUserId;
   const { user: currentUser } = useAuth();
@@ -131,6 +134,25 @@ export function ProfilePageContent({ userId: propUserId }: ProfilePageContentPro
       </div>
     </div>
   );
+});
+
+/**
+ * Wrapper that manages userId stability to prevent unnecessary re-renders
+ */
+export function ProfilePageContent({ userId: propUserId }: ProfilePageContentProps) {
+  const { userId: paramUserId } = useParams<{ userId: string }>();
+  const userId = propUserId || paramUserId;
+
+  // Use a ref to track the stable userId - only update when it actually changes
+  const stableUserIdRef = useRef<string | undefined>(userId);
+
+  // Only update stable userId when it actually changes (not on every render)
+  if (userId && userId !== stableUserIdRef.current) {
+    stableUserIdRef.current = userId;
+  }
+
+  // Pass the stable userId to prevent re-renders
+  return <ProfilePageContentInner userId={stableUserIdRef.current} />;
 }
 
 /**
