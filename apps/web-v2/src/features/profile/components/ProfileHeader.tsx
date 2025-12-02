@@ -69,10 +69,9 @@ export function ProfileHeader({
               </>
             )}
             {profile.polarity && (
-              <>
-                <span>•</span>
-                <span>{profile.polarity.toUpperCase()}</span>
-              </>
+              <Badge variant="brand">
+                {profile.polarity.toLowerCase() === 'yang' ? '☀️ Yang' : '🌙 Yin'}
+              </Badge>
             )}
             {profile.age && (
               <>

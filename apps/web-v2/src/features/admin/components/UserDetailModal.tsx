@@ -1,3 +1,4 @@
+import { ExternalLink, MapPin } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { formatRelativeTime } from '@/lib/utils';
@@ -89,21 +90,58 @@ export function UserDetailModal({
                 )}
               </div>
 
-              <div className="mt-2 flex flex-wrap gap-2">
-                {user.mbtiPersonality && (
-                  <Badge variant="default" size="md">
-                    {user.mbtiPersonality}
-                  </Badge>
-                )}
-                <Badge variant="brand" size="md">
-                  {polarityLabel}
-                </Badge>
+              <div className="mt-2 flex flex-wrap gap-2 items-center">
+                {user.mbtiPersonality && <Badge variant="default">{user.mbtiPersonality}</Badge>}
+                <Badge variant="brand">{polarityLabel}</Badge>
                 {user.isBanned && (
-                  <Badge variant="error" size="md">
+                  <Badge variant="error">
                     BANNED {user.bannedAt && `since ${formatRelativeTime(user.bannedAt)}`}
                   </Badge>
                 )}
+                {user.age && (
+                  <>
+                    <span className="text-gray-500">•</span>
+                    <span className="text-sm text-gray-600">
+                      {user.age} year old
+                      {user.sex && user.sex.toLowerCase() !== 'other'
+                        ? ` ${user.sex.toLowerCase()}`
+                        : ''}
+                    </span>
+                  </>
+                )}
               </div>
+
+              {/* Location */}
+              {user.location &&
+                (user.location.city ||
+                  user.location.state ||
+                  (user.location.lat && user.location.lon)) && (
+                  <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
+                    <MapPin size={14} className="flex-shrink-0" />
+                    {user.location.city || user.location.state ? (
+                      <span>
+                        {user.location.city}
+                        {user.location.city && user.location.state && ', '}
+                        {user.location.state}
+                      </span>
+                    ) : (
+                      <span>
+                        {user.location.lat.toFixed(4)}, {user.location.lon.toFixed(4)}
+                      </span>
+                    )}
+                    {user.location.lat && user.location.lon && (
+                      <a
+                        href={`https://www.google.com/maps?q=${user.location.lat},${user.location.lon}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-primary-600 hover:text-primary-700 hover:underline"
+                      >
+                        View on Map
+                        <ExternalLink size={12} />
+                      </a>
+                    )}
+                  </div>
+                )}
 
               {user.bio && <p className="mt-3 text-gray-600">{user.bio}</p>}
 
@@ -111,10 +149,6 @@ export function UserDetailModal({
                 <div>
                   <span className="text-gray-500">User ID:</span>
                   <span className="ml-2 font-mono text-gray-900">{user.userId}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500">Pigeon ID:</span>
-                  <span className="ml-2 font-mono text-gray-900">{user.pigeonId}</span>
                 </div>
                 <div>
                   <span className="text-gray-500">Joined:</span>
