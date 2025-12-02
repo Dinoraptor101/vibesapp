@@ -6,6 +6,7 @@
 import { MapPin, MessageCircle } from 'lucide-react';
 import { Avatar, Badge, Button } from '@/components/ui-next';
 import { getAvatarUrl } from '@/lib/avatarUtils';
+import { getMBTITypeName } from '@/lib/mbtiUtils';
 import type { ProfileData } from '../hooks/useProfile';
 import { FollowButton } from './FollowButton';
 
@@ -59,18 +60,31 @@ export function ProfileHeader({
             </h1>
           </div>
 
-          {/* MBTI + Polarity + Age (on same line per spec) */}
-          <div className="flex items-center gap-2">
-            {profile.mbtiPersonality && <Badge variant="brand">{profile.mbtiPersonality}</Badge>}
+          {/* MBTI + Polarity + Age + Sex */}
+          <div className="flex items-center gap-2 text-sm font-medium text-gray-600 dim:text-gray-400 dark:text-gray-400">
+            {profile.mbtiPersonality && (
+              <>
+                <Badge variant="brand">{profile.mbtiPersonality.toUpperCase()}</Badge>
+                <span className="hidden sm:inline">{getMBTITypeName(profile.mbtiPersonality)}</span>
+              </>
+            )}
             {profile.polarity && (
-              <span className="text-sm font-medium text-gray-600 dim:text-gray-400 dark:text-gray-400">
-                • {profile.polarity.toUpperCase()}
-              </span>
+              <>
+                <span>•</span>
+                <span>{profile.polarity.toUpperCase()}</span>
+              </>
             )}
             {profile.age && (
-              <span className="text-sm font-medium text-gray-600 dim:text-gray-400 dark:text-gray-400">
-                • Age: {profile.age}
-              </span>
+              <>
+                <span>•</span>
+                <span>
+                  {profile.age} <span className="sm:hidden">years</span>
+                  <span className="hidden sm:inline">years old</span>
+                  {profile.sex && profile.sex.toLowerCase() !== 'other'
+                    ? ` ${profile.sex.toLowerCase()}`
+                    : ''}
+                </span>
+              </>
             )}
           </div>
 

@@ -26,6 +26,7 @@ export interface User {
   // It's only stored client-side in cookies for authentication
   polarity: string;
   mbtiPersonality: string;
+  sex?: string; // User's sex/gender
   profilePictureUrl?: string;
   bio?: string;
   location?: {
