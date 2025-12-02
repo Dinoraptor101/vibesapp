@@ -29,21 +29,23 @@ function categorizeActivity(activity: Activity): ActivityCategory {
 }
 
 /**
- * Hook to fetch all activities for the current user
+ * Hook to fetch activities for the current user
+ * @param category - Optional category filter
+ * @param showRead - Include read activities (default: false, unread only)
  * Polls every 30 seconds for updates
  */
-export function useActivities(category?: ActivityCategory) {
+export function useActivities(category?: ActivityCategory, showRead = false) {
   const { user } = useAuth();
 
   return useQuery<Activity[], Error>({
-    queryKey: ['activities', user?._id, category],
+    queryKey: ['activities', user?._id, category, showRead],
     queryFn: async () => {
       if (!user?._id) {
         console.warn('useActivities: user._id is undefined');
         return [];
       }
 
-      const activities = await activityService.getActivities(user._id);
+      const activities = await activityService.getActivities(user._id, showRead);
 
       // Filter by category if specified
       if (category && category !== 'all') {

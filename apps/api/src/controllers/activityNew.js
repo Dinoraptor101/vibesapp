@@ -5,14 +5,29 @@ const sseManager = require('../handlers/sseManager');
 /**
  * Get activities for a user
  * Returns activities sorted by newest first
+ * Query params:
+ * - showRead: 'true' to include read activities (default: false, unread only)
+ * - maxAge: hours to look back (default: 48 for read activities)
  */
 const getActivities = async (req, res) => {
   try {
     const { userId } = req.params;
+    const { showRead } = req.query;
 
-    const activities = await Activity.find({ recipientId: userId })
-      .sort({ createdAt: -1 })
-      .limit(100); // Limit to prevent huge responses
+    // Build query filter
+    const filter = { recipientId: userId };
+
+    // Default: only unread activities
+    if (showRead !== 'true') {
+      filter.isRead = false;
+    } else {
+      // If showing read, limit to recent activities (last 48 hours)
+      const maxAge = 48; // hours
+      const cutoffDate = new Date(Date.now() - maxAge * 60 * 60 * 1000);
+      filter.createdAt = { $gte: cutoffDate };
+    }
+
+    const activities = await Activity.find(filter).sort({ createdAt: -1 }).limit(100); // Limit to prevent huge responses
 
     res.status(200).json(activities);
   } catch (error) {
