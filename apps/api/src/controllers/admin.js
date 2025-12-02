@@ -239,7 +239,7 @@ const getUsers = async (req, res) => {
       .limit(parseInt(limit))
       .lean();
 
-    // Get post count for each user
+    // Get post count for each user and calculate age
     const usersWithPostCount = await Promise.all(
       users.map(async (user) => {
         const postCount = await Post.countDocuments({ 'user.userId': user.userId });
@@ -248,10 +248,25 @@ const getUsers = async (req, res) => {
           proximal_dislikes: { $gt: 0 },
         });
 
+        // Calculate age from birthYear and birthMonth
+        let age = null;
+        if (user.birthYear && user.birthMonth) {
+          const now = new Date();
+          const currentYear = now.getFullYear();
+          const currentMonth = now.getMonth() + 1; // 0-indexed
+
+          age = currentYear - user.birthYear;
+          // If birthday hasn't occurred this year yet, subtract 1
+          if (currentMonth < user.birthMonth) {
+            age--;
+          }
+        }
+
         return {
           ...user,
           postCount,
           flaggedPostCount,
+          age,
         };
       })
     );
@@ -482,9 +497,35 @@ const getUserPosts = async (req, res) => {
 
     const total = await Post.countDocuments({ 'user.userId': userId });
 
+    // Also get user data with age calculated
+    const user = await User.findOne({ userId }).lean();
+    let userWithAge = null;
+
+    if (user) {
+      // Calculate age from birthYear and birthMonth
+      let age = null;
+      if (user.birthYear && user.birthMonth) {
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth() + 1; // 0-indexed
+
+        age = currentYear - user.birthYear;
+        // If birthday hasn't occurred this year yet, subtract 1
+        if (currentMonth < user.birthMonth) {
+          age--;
+        }
+      }
+
+      userWithAge = {
+        ...user,
+        age,
+      };
+    }
+
     res.status(200).json({
       success: true,
       posts,
+      user: userWithAge,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),

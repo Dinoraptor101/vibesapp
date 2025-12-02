@@ -198,9 +198,13 @@ export interface AdminUser {
   masculineFeminineScale?: number;
   profilePictureUrl?: string;
   bio?: string;
+  age?: number;
+  sex?: string;
   location?: {
     lat: number;
     lon: number;
+    city?: string;
+    state?: string;
   };
   isBanned?: boolean;
   bannedAt?: string;

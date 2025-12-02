@@ -5,7 +5,7 @@
  * Follows Zen principles - no modals, full page experience.
  */
 
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Loader2, MapPin } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { PigeonIdRegenerator } from '@/components/PigeonIdRegenerator';
@@ -186,21 +186,58 @@ export function UserDetailPage() {
                 )}
               </div>
 
-              <div className="mt-2 flex flex-wrap gap-2">
-                {user.mbtiPersonality && (
-                  <Badge variant="default" size="md">
-                    {user.mbtiPersonality}
-                  </Badge>
-                )}
-                <Badge variant="brand" size="md">
-                  {polarityLabel}
-                </Badge>
+              <div className="mt-2 flex flex-wrap gap-2 items-center">
+                {user.mbtiPersonality && <Badge variant="default">{user.mbtiPersonality}</Badge>}
+                <Badge variant="brand">{polarityLabel}</Badge>
                 {user.isBanned && (
-                  <Badge variant="error" size="md" data-testid="user-banned-badge">
+                  <Badge variant="error" data-testid="user-banned-badge">
                     BANNED {user.bannedAt && `since ${formatRelativeTime(user.bannedAt)}`}
                   </Badge>
                 )}
+                {user.age && (
+                  <>
+                    <span className="text-gray-500 dim:text-gray-400 dark:text-gray-400">•</span>
+                    <span className="text-sm text-gray-600 dim:text-gray-400 dark:text-gray-400">
+                      {user.age} year old
+                      {user.sex && user.sex.toLowerCase() !== 'other'
+                        ? ` ${user.sex.toLowerCase()}`
+                        : ''}
+                    </span>
+                  </>
+                )}
               </div>
+
+              {/* Location */}
+              {user.location &&
+                (user.location.city ||
+                  user.location.state ||
+                  (user.location.lat && user.location.lon)) && (
+                  <div className="mt-2 flex items-center gap-2 text-sm text-gray-600 dim:text-gray-400 dark:text-gray-400">
+                    <MapPin size={14} className="flex-shrink-0" />
+                    {user.location.city || user.location.state ? (
+                      <span>
+                        {user.location.city}
+                        {user.location.city && user.location.state && ', '}
+                        {user.location.state}
+                      </span>
+                    ) : (
+                      <span>
+                        {user.location.lat.toFixed(4)}, {user.location.lon.toFixed(4)}
+                      </span>
+                    )}
+                    {user.location.lat && user.location.lon && (
+                      <a
+                        href={`https://www.google.com/maps?q=${user.location.lat},${user.location.lon}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-primary-600 hover:text-primary-700 hover:underline"
+                      >
+                        View on Map
+                        <ExternalLink size={12} />
+                      </a>
+                    )}
+                  </div>
+                )}
 
               {user.bio && (
                 <p className="mt-3 text-gray-600 dim:text-gray-400 dark:text-gray-400">
@@ -223,17 +260,6 @@ export function UserDetailPage() {
                 </div>
                 <div>
                   <span className="text-gray-500 dim:text-gray-400 dark:text-gray-400">
-                    Pigeon ID:
-                  </span>
-                  <span
-                    className="ml-2 font-mono text-gray-900 dim:text-gray-100 dark:text-gray-100"
-                    data-testid="user-detail-pigeon-id"
-                  >
-                    {user.pigeonId}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-500 dim:text-gray-400 dark:text-gray-400">
                     Joined:
                   </span>
                   <span className="ml-2 text-gray-900 dim:text-gray-100 dark:text-gray-100">
@@ -246,7 +272,7 @@ export function UserDetailPage() {
                     {user.postCount || 0}
                   </span>
                 </div>
-                {user.flaggedPostCount && user.flaggedPostCount > 0 && (
+                {(user.flaggedPostCount ?? 0) > 0 && (
                   <div>
                     <span className="text-gray-500 dim:text-gray-400 dark:text-gray-400">
                       Flagged Posts:
