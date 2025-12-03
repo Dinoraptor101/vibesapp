@@ -55,16 +55,13 @@ export function SupportTab() {
             Terms of Service
           </Button>
           <Button
-            variant="ghost"
-            className="w-full justify-start text-gray-600 dim:text-gray-400 dark:text-gray-400"
-            disabled
+            onClick={() => navigate('/privacy')}
+            variant="secondary"
+            className="w-full justify-start"
           >
             Privacy Policy
           </Button>
         </div>
-        <p className="text-xs text-gray-500 dim:text-gray-450 dark:text-gray-400 mt-2">
-          Privacy Policy coming soon...
-        </p>
       </div>
 
       {/* Divider */}
