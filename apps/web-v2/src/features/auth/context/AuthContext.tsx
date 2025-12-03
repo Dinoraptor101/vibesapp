@@ -60,9 +60,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setIsLoading(true);
         const userData = await authApi.login(pigeonId, recaptchaToken);
 
-        // Store credentials in cookies
-        setCookie('pigeonId', pigeonId, 30); // 30 days
-        setCookie('userId', userData._id, 30);
+        // Store credentials in cookies (10 years - effectively permanent)
+        setCookie('pigeonId', pigeonId, 3650); // 10 years
+        setCookie('userId', userData._id, 3650); // 10 years
 
         setUser(userData);
         navigate('/');
