@@ -49,7 +49,8 @@ test.describe('Admin Settings Page - Display', () => {
     await clearAdminSession(page);
     await loginAsAdmin(page);
     await page.goto('/admin/settings');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
   });
 
   test('should display settings page with title and description', async ({ page }) => {
@@ -130,7 +131,8 @@ test.describe('Admin Settings Page - Password Change', () => {
     await clearAdminSession(page);
     await loginAsAdmin(page);
     await page.goto('/admin/settings');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
   });
 
   test('should show error when passwords do not match', async ({ page }) => {
@@ -314,7 +316,8 @@ test.describe('Admin Settings Page - Moderation Settings', () => {
     await clearAdminSession(page);
     await loginAsAdmin(page);
     await page.goto('/admin/settings');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
   });
 
   test('should display default threshold value of 3', async ({ page }) => {
@@ -377,7 +380,8 @@ test.describe('Admin Settings Page - Moderation Settings', () => {
 
     // Refresh page
     await page.reload();
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Note: In a real test, this would verify the value is 7 if backend persists it
     // For now, it resets to default 3 since we're mocking
@@ -447,7 +451,8 @@ test.describe('Admin Settings Page - Notification Settings', () => {
     await clearAdminSession(page);
     await loginAsAdmin(page);
     await page.goto('/admin/settings');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
   });
 
   test('should update notification email', async ({ page }) => {
@@ -565,7 +570,8 @@ test.describe('Admin Settings Page - Form Behavior', () => {
     await clearAdminSession(page);
     await loginAsAdmin(page);
     await page.goto('/admin/settings');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
   });
 
   test('should save only moderation settings without password change', async ({ page }) => {
@@ -731,7 +737,8 @@ test.describe('Admin Settings Page - Navigation', () => {
   test('should return to dashboard via navigation', async ({ page }) => {
     // Start at settings
     await page.goto('/admin/settings');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Click dashboard navigation link
     await page.getByTestId('admin-nav-dashboard').click();
@@ -744,7 +751,8 @@ test.describe('Admin Settings Page - Navigation', () => {
   test('should maintain form state during navigation away and back', async ({ page }) => {
     // Start at settings
     await page.goto('/admin/settings');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Fill some fields
     await page.locator('#reportThreshold').fill('9');
@@ -770,7 +778,8 @@ test.describe('Admin Settings Page - Accessibility', () => {
     await clearAdminSession(page);
     await loginAsAdmin(page);
     await page.goto('/admin/settings');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
   });
 
   test('should have accessible form labels', async ({ page }) => {

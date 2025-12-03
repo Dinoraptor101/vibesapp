@@ -17,7 +17,12 @@ test.describe('Logout Cache Cleanup', () => {
   test.beforeEach(async ({ page }) => {
     // Start authenticated
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    // Wait for user menu to be visible (indicates page is loaded and user is authenticated)
+    // Don't use 'networkidle' as SSE connections remain open indefinitely
+    await page
+      .getByTestId('user-menu-button')
+      .first()
+      .waitFor({ state: 'visible', timeout: 10000 });
   });
 
   test('should clear localStorage proximityRange on logout', async ({ page }) => {
@@ -109,6 +114,7 @@ test.describe('Logout Cache Cleanup', () => {
   test('should redirect to login page after logout', async ({ page }) => {
     // Perform logout
     await page.getByTestId('user-menu-button').first().click();
+    await page.getByTestId('logout-menu-item').waitFor({ state: 'visible' });
     await page.getByTestId('logout-menu-item').click();
 
     // Should redirect to login

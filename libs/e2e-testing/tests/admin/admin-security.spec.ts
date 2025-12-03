@@ -135,13 +135,15 @@ test.describe('Admin Security - Authentication & Authorization', () => {
 
     // Navigate to a user detail page
     await page.goto('/admin/users');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Click first user to view details
     const firstUser = page.locator('[data-testid="user-row"]').first();
     if ((await firstUser.count()) > 0) {
       await firstUser.click();
-      await page.waitForLoadState('networkidle');
+      // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
       // Click regenerate password button
       const regenButton = page.locator('[data-testid="regenerate-password-button"]');
@@ -296,7 +298,8 @@ test.describe('Admin Security - CSRF & XSS Protection', () => {
 
     // Try to inject XSS in search/filter inputs
     await page.goto('/admin/users');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     const searchInput = page.locator('input[type="search"], input[placeholder*="Search"]').first();
     if ((await searchInput.count()) > 0) {

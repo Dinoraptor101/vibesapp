@@ -51,7 +51,20 @@ TEST_ENV=qa npx playwright test
 
 - `tests/unit-tests.spec.ts` - Configuration, utility, and integration tests
 - `tests/offline/` - PWA offline functionality tests (localhost only)
+- `tests/admin/` - Admin dashboard and moderation tests
 - `global-setup.ts` - Global test setup and authentication
+- `global-teardown.ts` - Automatic test data cleanup after tests complete
+
+## Test Data Cleanup
+
+All test data is automatically cleaned up after test runs complete. See [TEST-DATA-CLEANUP.md](./TEST-DATA-CLEANUP.md) for details on:
+- How automatic cleanup works
+- Writing tests that follow cleanup conventions
+- Manual cleanup procedures
+- Troubleshooting cleanup issues
+
+**Important**: When creating test users, always use approved `pigeonId` prefixes:
+- `test-*`, `pigeon-author-*`, `pigeon-reporter-*`, `test-author-*`, `test-reporter-*`
 
 ## Configuration
 

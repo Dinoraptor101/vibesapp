@@ -4,8 +4,18 @@
 ✅ **99 tests total** (6 integration tests rewritten for Web-V2)
 🚫 **19 tests excluded** (Offline PWA features not yet implemented)
 🌍 **Environment Support:** Localhost + QA (both test Web-V2)
+🧹 **Automatic Cleanup:** Test data automatically deleted after test runs
 
 ## Latest Updates
+
+**Automatic Test Data Cleanup (Dec 2, 2025)**
+- ✅ Global teardown script automatically cleans up test data after all tests complete
+- ✅ Backend cleanup endpoint (`DELETE /api/admin/cleanup-test-data`)
+- ✅ Removes all test users, posts, and reports created during test runs
+- ✅ Works in both localhost and QA environments
+- ✅ Comprehensive documentation added (TEST-DATA-CLEANUP.md)
+- ✅ Prevents test spam from accumulating in database
+
 **Post Interactions Tests Added (Nov 23, 2025)**
 - ✅ Comprehensive like/unlike toggle functionality tests
 - ✅ Tests for preventing duplicate mutations

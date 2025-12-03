@@ -487,7 +487,8 @@ test.describe('Conversations and Messaging', () => {
     // PREREQUISITE: Create a conversation by accepting a DM request
     // Navigate to messages page
     await page.goto('/messages');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Switch to DM Requests tab
     const dmRequestsTab = page.getByTestId('dm-requests-tab');

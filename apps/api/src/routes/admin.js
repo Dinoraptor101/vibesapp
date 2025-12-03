@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { adminAuth } = require('../middleware/adminAuth');
+const apiKeyAuth = require('../middleware/apiKey');
 const {
   adminLogin,
   updateBalance,
@@ -20,10 +21,14 @@ const {
   getReportedPosts,
   restorePost,
   banUser,
+  cleanupTestData,
 } = require('../controllers/admin');
 
 // Admin login (no auth required)
 router.post('/login', adminLogin);
+
+// Test data cleanup (API key auth only - for E2E tests)
+router.delete('/cleanup-test-data', apiKeyAuth, cleanupTestData);
 
 // ALL routes below require admin authentication
 router.use(adminAuth);
