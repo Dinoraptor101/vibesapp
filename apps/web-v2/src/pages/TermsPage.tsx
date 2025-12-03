@@ -1,10 +1,24 @@
 import { ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { AppLayout } from '@/components/layout';
-import { Button } from '@/components/ui/button';
+import { BackToTOCButton } from '@/components/document';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { Button } from '@/components/ui-next';
+import { handleTOCClick, useInitialHashScroll, useScrollPastElement } from '@/utils/documentScroll';
 
 export function TermsPage() {
   const navigate = useNavigate();
+  const [showBackToTOC] = useScrollPastElement('[data-toc]');
+
+  // Handle initial hash on page load
+  useInitialHashScroll(80, 1000, 100);
+
+  // Handle smooth scrolling with offset for top navigation bar
+  const handleSectionClick = (
+    e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>,
+    sectionId: string
+  ) => {
+    handleTOCClick(e, sectionId, 80, 1000);
+  };
 
   return (
     <AppLayout>
@@ -31,8 +45,53 @@ export function TermsPage() {
             <strong>Last Updated:</strong> 3 December 2025
           </p>
 
+          {/* Table of Contents */}
+          <section data-toc className="space-y-3">
+            <h2 className="text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
+              Table of Contents
+            </h2>
+            <div className="bg-gray-100 dim:bg-gray-800 dark:bg-gray-900 rounded-lg p-4">
+              <ol className="space-y-2">
+                {[
+                  { title: 'Acceptance of Terms', id: 'acceptance' },
+                  { title: 'Eligibility and Age Requirements', id: 'eligibility' },
+                  { title: 'Account Registration and Security', id: 'account' },
+                  { title: 'Description of Service', id: 'service' },
+                  { title: 'Acceptable Use Policy', id: 'acceptable-use' },
+                  { title: 'Events and In-Person Meetups', id: 'events' },
+                  { title: 'Messaging and Communication', id: 'messaging' },
+                  { title: 'Location Data and Privacy', id: 'location' },
+                  { title: 'Third-Party Services', id: 'third-party' },
+                  { title: 'Payments and Subscriptions', id: 'payments' },
+                  { title: 'Intellectual Property', id: 'intellectual-property' },
+                  { title: 'Account Termination', id: 'termination' },
+                  { title: 'Disclaimers and Warranties', id: 'disclaimers' },
+                  { title: 'Limitation of Liability', id: 'liability' },
+                  { title: 'Indemnification', id: 'indemnification' },
+                  { title: 'Dispute Resolution and Governing Law', id: 'disputes' },
+                  { title: 'Changes to Terms', id: 'changes' },
+                  { title: 'General Provisions', id: 'general' },
+                  { title: 'Contact Information', id: 'contact' },
+                ].map((item, index) => (
+                  <li key={item.id} className="flex gap-3">
+                    <span className="font-semibold text-brand-600 dim:text-brand-500 dark:text-brand-400">
+                      {index + 1}.
+                    </span>
+                    <a
+                      href={`#${item.id}`}
+                      onClick={(e) => handleSectionClick(e, item.id)}
+                      className="text-gray-700 dim:text-gray-300 dark:text-gray-300 hover:text-brand-600 dim:hover:text-brand-500 dark:hover:text-brand-400 hover:underline cursor-pointer"
+                    >
+                      {item.title}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </section>
+
           {/* Section 1 */}
-          <section className="space-y-3">
+          <section id="acceptance" className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
               1. Acceptance of Terms
             </h2>
@@ -49,7 +108,7 @@ export function TermsPage() {
           </section>
 
           {/* Section 2 */}
-          <section className="space-y-3">
+          <section id="eligibility" className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
               2. Eligibility and Age Requirements
             </h2>
@@ -74,7 +133,7 @@ export function TermsPage() {
           </section>
 
           {/* Section 3 */}
-          <section className="space-y-3">
+          <section id="account" className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
               3. Account Registration and Security
             </h2>
@@ -132,7 +191,7 @@ export function TermsPage() {
           </section>
 
           {/* Section 4 */}
-          <section className="space-y-3">
+          <section id="service" className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
               4. Description of Service
             </h2>
@@ -170,7 +229,7 @@ export function TermsPage() {
           </section>
 
           {/* Section 5 */}
-          <section className="space-y-3">
+          <section id="acceptable-use" className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
               5. Acceptable Use Policy
             </h2>
@@ -225,7 +284,7 @@ export function TermsPage() {
           </section>
 
           {/* Section 6 */}
-          <section className="space-y-3">
+          <section id="events" className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
               6. Events and In-Person Meetups
             </h2>
@@ -305,7 +364,7 @@ export function TermsPage() {
           </section>
 
           {/* Section 7 */}
-          <section className="space-y-3">
+          <section id="messaging" className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
               7. Messaging and Communication
             </h2>
@@ -318,7 +377,7 @@ export function TermsPage() {
           </section>
 
           {/* Section 8 */}
-          <section className="space-y-3">
+          <section id="location" className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
               8. Location Data and Privacy
             </h2>
@@ -335,7 +394,7 @@ export function TermsPage() {
           </section>
 
           {/* Section 9 */}
-          <section className="space-y-3">
+          <section id="third-party" className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
               9. Third-Party Services
             </h2>
@@ -367,7 +426,7 @@ export function TermsPage() {
           </section>
 
           {/* Section 10 */}
-          <section className="space-y-3">
+          <section id="payments" className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
               10. Payments and Subscriptions
             </h2>
@@ -417,7 +476,7 @@ export function TermsPage() {
           </section>
 
           {/* Section 11 */}
-          <section className="space-y-3">
+          <section id="intellectual-property" className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
               11. Intellectual Property
             </h2>
@@ -461,7 +520,7 @@ export function TermsPage() {
           </section>
 
           {/* Section 12 */}
-          <section className="space-y-3">
+          <section id="termination" className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
               12. Account Termination
             </h2>
@@ -528,7 +587,7 @@ export function TermsPage() {
           </section>
 
           {/* Section 13 */}
-          <section className="space-y-3">
+          <section id="disclaimers" className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
               13. Disclaimers and Warranties
             </h2>
@@ -579,7 +638,7 @@ export function TermsPage() {
           </section>
 
           {/* Section 14 */}
-          <section className="space-y-3">
+          <section id="liability" className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
               14. Limitation of Liability
             </h2>
@@ -605,7 +664,7 @@ export function TermsPage() {
           </section>
 
           {/* Section 15 */}
-          <section className="space-y-3">
+          <section id="indemnification" className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
               15. Indemnification
             </h2>
@@ -637,7 +696,7 @@ export function TermsPage() {
           </section>
 
           {/* Section 16 */}
-          <section className="space-y-3">
+          <section id="disputes" className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
               16. Dispute Resolution and Governing Law
             </h2>
@@ -699,7 +758,7 @@ export function TermsPage() {
           </section>
 
           {/* Section 17 */}
-          <section className="space-y-3">
+          <section id="changes" className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
               17. Changes to Terms
             </h2>
@@ -716,7 +775,7 @@ export function TermsPage() {
           </section>
 
           {/* Section 18 */}
-          <section className="space-y-3">
+          <section id="general" className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
               18. General Provisions
             </h2>
@@ -775,7 +834,7 @@ export function TermsPage() {
           </section>
 
           {/* Section 19 */}
-          <section className="space-y-3">
+          <section id="contact" className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
               19. Contact Information
             </h2>
@@ -807,6 +866,9 @@ export function TermsPage() {
           </div>
         </div>
       </div>
+
+      {/* Back to TOC Button */}
+      <BackToTOCButton show={showBackToTOC} />
     </AppLayout>
   );
 }
