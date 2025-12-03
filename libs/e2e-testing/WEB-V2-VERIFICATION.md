@@ -57,13 +57,6 @@ This document verifies that all e2e tests are designed for and compatible with W
 - Cookie/storage tests ✅
 - Mock-based tests, no DOM interaction
 
-#### ⚠️ `offline/*.spec.ts` (5 files)
-**Status:** Excluded (testIgnore in config)
-- Uses `data-testid` and modern selectors ✅
-- Designed for Web-V2 PWA features
-- Currently excluded until PWA features implemented
-- **No Web-V1 dependencies**
-
 ## 🚫 Legacy Patterns Removed
 
 ### CSS Class Selectors (Not Used)
