@@ -25,6 +25,7 @@ import { AuthProvider, LoginPage, ProtectedRoute, SignupPage } from '@/features/
 import { ConversationPage } from '@/pages/ConversationPage';
 import { ReportPostPage } from '@/pages/ReportPostPage';
 import { SendDMRequestPage } from '@/pages/SendDMRequestPage';
+import { TermsPage } from '@/pages/TermsPage';
 
 /**
  * Admin Layout Wrapper with Outlet for nested routes
@@ -104,6 +105,14 @@ function AppShell() {
           element={
             <ProtectedRoute>
               <ReportPostPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/terms"
+          element={
+            <ProtectedRoute>
+              <TermsPage />
             </ProtectedRoute>
           }
         />
