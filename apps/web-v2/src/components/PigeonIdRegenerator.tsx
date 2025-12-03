@@ -95,7 +95,7 @@ export function PigeonIdRegenerator({
         newPigeonId = await authApi.regeneratePigeonId(userId);
 
         // Update cookie with new Pigeon ID
-        setCookie('pigeonId', newPigeonId, 365);
+        setCookie('pigeonId', newPigeonId, 3650); // 10 years
         setPigeonId(newPigeonId);
 
         console.log('Pigeon ID regenerated successfully (user context)');

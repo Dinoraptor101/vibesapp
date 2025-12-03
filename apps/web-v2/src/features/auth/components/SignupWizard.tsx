@@ -323,7 +323,7 @@ export function SignupWizard() {
       });
 
       // Store Pigeon ID in cookie before signup (for security - backend doesn't return it)
-      setCookie('pigeonId', signupData.pigeonId, 365); // Store for 1 year
+      setCookie('pigeonId', signupData.pigeonId, 3650); // Store for 10 years (effectively permanent)
       console.log('Stored Pigeon ID in cookie:', signupData.pigeonId);
 
       await authApi.signup({
