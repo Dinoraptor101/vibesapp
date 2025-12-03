@@ -51,7 +51,12 @@
 
 - We should consider how secure our database is from hacking we do use Atlas MongoDB but is our API access to it best in class? 
 
-- Security Upgrade (Encryption) in the future is needed, can't risk the locations of people being shared, especially if we start collecting real identification in the future, that stuff should probably be encrypted when stored in DB ( PII, financial info, passwords, and location data ). that means building an encryption layer.... 
+- Security Upgrade (Encryption) in the future is needed, can't risk the locations of people being shared, especially if we start collecting real identification in the future, that stuff should probably be encrypted when stored in DB ( PII, financial info, passwords, and location data ). that means building an encryption layer....
+
+- **Location Data Privacy Enhancement** - Location data should be obtained from cache or database only, NOT from browser GPS on every action. Location should only be requested from browser using the location component tool in two places:
+  1. During signup (initial account creation)
+  2. In Settings > Account Tab (when user manually updates location)
+  This prevents constant GPS tracking, respects user privacy, and reduces battery drain. All other features (posts, nearby users, etc.) should use the cached location from user's profile in the database. 
 
 - **Add birth date collection step to signup process** - Currently SignupWizard has `birthYear` and `birthMonth` fields with default values (defaults to 20 years old, month 1), but there's NO UI step where users actually input their birth date. Need to add a dedicated signup step (probably between steps 3-4) where users select their birth month and year. This is important for age verification and profile completeness.
 
