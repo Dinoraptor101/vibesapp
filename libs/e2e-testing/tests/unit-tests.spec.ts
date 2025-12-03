@@ -6,7 +6,7 @@ type Theme = 'light' | 'dim' | 'dark';
 test.describe('Playwright Configuration Tests', () => {
   test('should have correct base configuration', () => {
     expect(playwrightConfig.testDir).toBe('./tests');
-    expect(playwrightConfig.fullyParallel).toBe(true);
+    expect(playwrightConfig.fullyParallel).toBe(false);
     expect(playwrightConfig.workers).toBe(2);
   });
 
