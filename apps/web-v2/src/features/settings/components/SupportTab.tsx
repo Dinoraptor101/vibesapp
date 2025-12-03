@@ -1,5 +1,6 @@
 import { ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { getBuildVersion } from '@/utils/versionCheck';
 
@@ -8,6 +9,7 @@ const FEEDBACK_URL = 'https://t.me/Dnegai';
 
 export function SupportTab() {
   const [buildVersion, setBuildVersion] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Get build version after component mounts to ensure DOM is ready
@@ -23,7 +25,7 @@ export function SupportTab() {
     <div className="p-4 space-y-6">
       {/* Help & Feedback */}
       <div>
-        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+        <h3 className="text-sm font-medium text-gray-700 dim:text-gray-200 dark:text-gray-300 mb-3">
           Help & Feedback
         </h3>
         <Button
@@ -37,40 +39,44 @@ export function SupportTab() {
       </div>
 
       {/* Divider */}
-      <div className="border-t border-gray-200 dark:border-gray-700" />
+      <div className="border-t border-gray-200 dim:border-gray-600 dark:border-gray-700" />
 
       {/* Legal */}
       <div>
-        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Legal</h3>
+        <h3 className="text-sm font-medium text-gray-700 dim:text-gray-200 dark:text-gray-300 mb-3">
+          Legal
+        </h3>
         <div className="space-y-2">
           <Button
-            variant="ghost"
-            className="w-full justify-start text-gray-600 dark:text-gray-400"
-            disabled
+            onClick={() => navigate('/terms')}
+            variant="secondary"
+            className="w-full justify-start"
           >
             Terms of Service
           </Button>
           <Button
             variant="ghost"
-            className="w-full justify-start text-gray-600 dark:text-gray-400"
+            className="w-full justify-start text-gray-600 dim:text-gray-400 dark:text-gray-400"
             disabled
           >
             Privacy Policy
           </Button>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Coming soon...</p>
+        <p className="text-xs text-gray-500 dim:text-gray-450 dark:text-gray-400 mt-2">
+          Privacy Policy coming soon...
+        </p>
       </div>
 
       {/* Divider */}
-      <div className="border-t border-gray-200 dark:border-gray-700" />
+      <div className="border-t border-gray-200 dim:border-gray-600 dark:border-gray-700" />
 
       {/* App Version */}
       <div>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-gray-500 dim:text-gray-450 dark:text-gray-400">
           App Version: <span className="font-medium">{APP_VERSION}</span>
         </p>
         {buildVersion && (
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+          <p className="text-xs text-gray-400 dim:text-gray-500 dark:text-gray-500 mt-1">
             Build ID: <span className="font-mono">{buildVersion}</span>
           </p>
         )}
