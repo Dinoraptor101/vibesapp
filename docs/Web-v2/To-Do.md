@@ -16,6 +16,8 @@
 
 - **Add message arrival sound** - Currently no audio notification when new message arrives. Add generic pleasant sound.
 
+- **Implement Account Deletion UI** - Design and implement a user-facing "Delete Account" button in Settings that allows users to permanently delete their account. Backend should handle full account deletion (or anonymization) including renaming their posts to "deleted-xxx" and removing personal data while preserving content for community context.
+
 ---
 
 ## 🎯 High Priority Features
