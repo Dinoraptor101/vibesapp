@@ -2,7 +2,6 @@
 
 ## Summary
 ✅ **99 tests total** (6 integration tests rewritten for Web-V2)
-🚫 **19 tests excluded** (Offline PWA features not yet implemented)
 🌍 **Environment Support:** Localhost + QA (both test Web-V2)
 🧹 **Automatic Cleanup:** Test data automatically deleted after test runs
 
@@ -65,35 +64,7 @@ Running 59 tests using 3 workers
 
 _Note: New user features tests pending first run_
 
-## Excluded Tests (Offline PWA Features)
-
-The following test suites have been **excluded from the test run** via `playwright.config.ts` because they require:
-- Web V2 development server running on `localhost:5173`
-- Offline PWA functionality (IndexedDB queue system)
-- Service worker registration and sync
-- Cache persistence features
-
-### Excluded Test Files:
-1. `tests/offline/01-post-creation-offline.spec.ts` - 3 tests
-2. `tests/offline/02-message-sending-offline.spec.ts` - 3 tests
-3. `tests/offline/03-interactions-offline.spec.ts` - 4 tests
-4. `tests/offline/04-conflict-resolution.spec.ts` - 4 tests
-5. `tests/offline/05-cache-persistence.spec.ts` - 5 tests
-
-**Total excluded:** 19 tests
-
-### Re-enabling Offline Tests
-To re-enable these tests:
-1. Remove `testIgnore: '**/offline/**'` from `playwright.config.ts`
-2. Implement offline PWA features in Web V2:
-   - IndexedDB mutation queue system
-   - Service worker with background sync
-   - Optimistic UI updates
-   - Cache persistence across page reloads
-3. Start dev server: `npm run dev` (runs on `localhost:5173`)
-4. Run tests: `npm test`
-
-## Passing Test Categories
+## Test Coverage (New!)
 
 ### ✅ API Service Layer Tests (8 tests)
 - URL construction
@@ -296,8 +267,6 @@ TEST_ENV=qa npm test
    - RichTextToolbarV2.tsx
    - CreatePostForm.tsx (mode switching, HTML stripping)
 
-3. **Low Priority:** Implement offline PWA features and re-enable offline test suite
-
 ## Test Execution Commands
 
 ```bash
@@ -324,5 +293,4 @@ npx playwright show-report
 - **Required Test IDs:** `REQUIRED-TEST-IDS.md` - All data-testid attributes needed for tests
 - Playwright Config: `playwright.config.ts`
 - Global Setup: `global-setup.ts`
-- Offline Test Helpers: `tests/offline/helpers.ts`
 - Authentication: Uses pre-existing test user with credentials
