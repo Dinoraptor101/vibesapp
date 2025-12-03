@@ -1110,6 +1110,80 @@ const banUser = async (req, res) => {
   }
 };
 
+/**
+ * Clean up test data created during E2E tests
+ * Deletes all users, posts, and reports with test identifiers
+ * Matches pigeonIds starting with: 'test-', 'pigeon-author-', 'pigeon-reporter-', 'test-author-', 'test-reporter-'
+ */
+const cleanupTestData = async (_req, res) => {
+  try {
+    console.log('[Admin] Starting test data cleanup...');
+
+    // Find all test users (pigeonId matches test patterns)
+    const testUsers = await User.find({
+      pigeonId: {
+        $regex: /^(test-|pigeon-author-|pigeon-reporter-|test-author-|test-reporter-)/i,
+      },
+    }).select('userId pigeonId userName');
+
+    const testUserIds = testUsers.map((user) => user.userId);
+    console.log(`[Admin] Found ${testUsers.length} test users to delete`);
+
+    // Delete all posts created by test users
+    const deletedPosts = await Post.deleteMany({
+      'user.userId': { $in: testUserIds },
+    });
+    console.log(`[Admin] Deleted ${deletedPosts.deletedCount} posts from test users`);
+
+    // Delete all reports on posts (if any posts had reports)
+    let deletedReports = 0;
+    const postsWithReports = await Post.find({
+      reports: { $exists: true, $ne: [] },
+    });
+
+    for (const post of postsWithReports) {
+      if (post.reports && post.reports.length > 0) {
+        // Remove reports from test users
+        const originalReportCount = post.reports.length;
+        post.reports = post.reports.filter((report) => !testUserIds.includes(report.userId));
+        const removedCount = originalReportCount - post.reports.length;
+        deletedReports += removedCount;
+
+        if (removedCount > 0) {
+          await post.save();
+        }
+      }
+    }
+    console.log(`[Admin] Deleted ${deletedReports} reports from test users`);
+
+    // Delete all test users
+    const deletedUsers = await User.deleteMany({
+      pigeonId: {
+        $regex: /^(test-|pigeon-author-|pigeon-reporter-|test-author-|test-reporter-)/i,
+      },
+    });
+    console.log(`[Admin] Deleted ${deletedUsers.deletedCount} test users`);
+
+    const result = {
+      success: true,
+      deletedUsers: deletedUsers.deletedCount,
+      deletedPosts: deletedPosts.deletedCount,
+      deletedReports,
+      message: `Cleanup complete: ${deletedUsers.deletedCount} users, ${deletedPosts.deletedCount} posts, ${deletedReports} reports`,
+    };
+
+    console.log('[Admin] Test data cleanup complete:', result);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('[Admin] Error during test data cleanup:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error cleaning up test data',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   adminLogin,
   updateBalance,
@@ -1129,4 +1203,5 @@ module.exports = {
   getReportedPosts, // Phase 3.4
   restorePost, // Phase 3.4
   banUser, // Phase 3.4
+  cleanupTestData, // E2E test cleanup
 };

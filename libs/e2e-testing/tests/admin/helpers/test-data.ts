@@ -2,6 +2,10 @@
  * Test Data Helper for Admin E2E Tests
  *
  * Creates flagged posts with images for testing the admin flagged posts page.
+ *
+ * IMPORTANT: All test users are created with pigeonId starting with "test-"
+ * This allows the global teardown script to identify and clean up test data
+ * after test runs complete. See: global-teardown.ts
  */
 
 import type { APIRequestContext } from '@playwright/test';

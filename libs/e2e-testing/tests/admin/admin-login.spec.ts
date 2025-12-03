@@ -31,7 +31,8 @@ test.describe('Admin Login Page', () => {
 
   test('should display admin login page at /admin/login', async ({ page }) => {
     await page.goto('/admin/login');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Verify page title/header
     await expect(page.locator('h1')).toContainText('Vibes Admin');
@@ -52,7 +53,8 @@ test.describe('Admin Login Page', () => {
 
   test('should show error for empty password', async ({ page }) => {
     await page.goto('/admin/login');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Click login without entering password
     const loginButton = page.locator('button[type="submit"]');
@@ -69,7 +71,8 @@ test.describe('Admin Login Page', () => {
 
   test('should show error for invalid password', async ({ page }) => {
     await page.goto('/admin/login');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Enter invalid password
     const passwordInput = page.locator('#admin-password');
@@ -91,7 +94,8 @@ test.describe('Admin Login Page', () => {
 
   test('should redirect to /admin/dashboard on successful login', async ({ page }) => {
     await page.goto('/admin/login');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Enter valid password
     const passwordInput = page.locator('#admin-password');
@@ -110,7 +114,8 @@ test.describe('Admin Login Page', () => {
 
   test('should show loading state during login', async ({ page }) => {
     await page.goto('/admin/login');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Enter valid password
     const passwordInput = page.locator('#admin-password');
@@ -146,7 +151,8 @@ test.describe('Admin Session Persistence', () => {
 
     // Refresh the page
     await page.reload();
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Verify we're still on the dashboard (not redirected to login)
     expect(page.url()).toContain('/admin/dashboard');
@@ -188,7 +194,8 @@ test.describe('Admin Session Persistence', () => {
   }) => {
     // Try to access dashboard directly without logging in
     await page.goto('/admin/dashboard');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Should be redirected to login page
     await page.waitForURL('**/admin/login', { timeout: 10000 });
@@ -205,14 +212,16 @@ test.describe('Admin Session Expiry', () => {
   test('should redirect to login when session is expired', async ({ page }) => {
     // Navigate to login page first to set cookies on correct domain
     await page.goto('/admin/login');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Set expired session cookies
     await setExpiredAdminSession(page);
 
     // Try to access dashboard
     await page.goto('/admin/dashboard');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Should be redirected to login page
     await page.waitForURL('**/admin/login', { timeout: 10000 });
@@ -243,7 +252,8 @@ test.describe('Admin Session Expiry', () => {
   test('should show alert when session expires while on page', async ({ page }) => {
     // Navigate to login page first to set cookies on correct domain
     await page.goto('/admin/login');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Set session to expire in 3 seconds
     await setAdminSessionExpiringSoon(page, 3);
@@ -277,7 +287,8 @@ test.describe('Admin Login - reCAPTCHA Verification', () => {
 
   test('should include reCAPTCHA v3 verification on login', async ({ page }) => {
     await page.goto('/admin/login');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Set up request interception to verify reCAPTCHA token is sent
     let recaptchaTokenSent = false;
@@ -307,7 +318,8 @@ test.describe('Admin Login - reCAPTCHA Verification', () => {
 
   test('should show error when reCAPTCHA verification fails', async ({ page }) => {
     await page.goto('/admin/login');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Mock the API to return reCAPTCHA failure
     await page.route('**/api/admin/login', async (route) => {
@@ -345,7 +357,8 @@ test.describe('Admin Login - Accessibility', () => {
 
   test('should have accessible form elements', async ({ page }) => {
     await page.goto('/admin/login');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Verify password input is accessible
     const passwordInput = page.locator('#admin-password');
@@ -365,7 +378,8 @@ test.describe('Admin Login - Accessibility', () => {
 
   test('should support keyboard navigation', async ({ page }) => {
     await page.goto('/admin/login');
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Tab to password input and enter password
     await page.keyboard.press('Tab');

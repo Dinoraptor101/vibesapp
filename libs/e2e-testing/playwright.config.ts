@@ -20,7 +20,7 @@ export default defineConfig({
       slowMo: 500, // Add slowMo to launch options
     },
   },
-  retries: 1, // Retry failed tests once (set to 0 for debugging)
+  retries: 0, // Retry failed tests once (set to 0 for debugging)
   workers: 2, // Number of parallel worker processes
   projects: [
     {
@@ -29,6 +29,7 @@ export default defineConfig({
     },
   ],
   globalSetup: require.resolve('./global-setup'), // Ensure this line is included to run the global setup script
+  globalTeardown: require.resolve('./global-teardown'), // Clean up test data after all tests complete
   // Start dev servers before running tests (only for localhost)
   webServer: isQAEnvironment
     ? undefined

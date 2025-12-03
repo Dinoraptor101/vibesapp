@@ -34,7 +34,8 @@ test.describe('Admin Dashboard', () => {
 
   test('should display key metrics cards', async ({ page }) => {
     // Wait for metrics to load
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Verify metrics container is visible
     const metricsContainer = page.getByTestId('admin-metrics-container');
@@ -90,7 +91,8 @@ test.describe('Admin Dashboard', () => {
 
   test('should display activity chart if present', async ({ page }) => {
     // Wait for page to fully load
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Check for activity chart component (always present with test ID)
     const activityChart = page.getByTestId('admin-activity-chart');
@@ -285,7 +287,8 @@ test.describe('Admin Dashboard - Data Refresh', () => {
 
   test('should display metric card with subtitle and trend', async ({ page }) => {
     // Wait for metrics to load
-    await page.waitForLoadState('networkidle');
+    // Wait for page elements to be visible (SSE keeps connections open)
+    await page.waitForTimeout(500);
 
     // Get a metric card
     const activeUsersCard = page.getByTestId('metric-card-active-users');

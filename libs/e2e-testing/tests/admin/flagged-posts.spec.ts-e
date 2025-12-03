@@ -65,6 +65,7 @@ test.describe('Flagged Posts Page', () => {
       const emptyState = page.locator('[data-testid="flagged-posts-empty"]');
       if (await emptyState.isVisible()) {
         throw new Error('No flagged posts available - test data setup may have failed');
+        return;
       }
     }
 
@@ -88,6 +89,7 @@ test.describe('Flagged Posts Page', () => {
 
     if (postCount === 0) {
       throw new Error('No flagged posts available - test data setup may have failed');
+      return;
     }
 
     await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });
@@ -116,6 +118,7 @@ test.describe('Flagged Posts Page', () => {
 
     if (postCount === 0) {
       throw new Error('No flagged posts available - test data setup may have failed');
+      return;
     }
 
     await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });
@@ -270,6 +273,7 @@ test.describe('Flagged Posts - Delete Actions', () => {
 
     if (postCount === 0) {
       throw new Error('No flagged posts available to delete - test data setup may have failed');
+      return;
     }
 
     await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });
@@ -316,6 +320,7 @@ test.describe('Flagged Posts - Delete Actions', () => {
 
     if (postCount < 2) {
       throw new Error('Not enough flagged posts for bulk delete test (need at least 2) - test data setup may have failed');
+      return;
     }
 
     await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });
@@ -385,6 +390,7 @@ test.describe('Flagged Posts - Dismiss Reports', () => {
 
     if (postCount === 0) {
       throw new Error('No flagged posts available to dismiss - test data setup may have failed');
+      return;
     }
 
     await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });
@@ -440,6 +446,7 @@ test.describe('Flagged Posts - Navigation', () => {
 
     if (postCount === 0) {
       throw new Error('No flagged posts available - test data setup may have failed');
+      return;
     }
 
     await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });
@@ -486,6 +493,7 @@ test.describe('Flagged Posts - Bulk Selection', () => {
 
     if (postCount === 0) {
       throw new Error('No flagged posts available - test data setup may have failed');
+      return;
     }
 
     await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });
@@ -518,6 +526,7 @@ test.describe('Flagged Posts - Bulk Selection', () => {
 
     if (postCount < 2) {
       throw new Error('Not enough flagged posts for select all test - test data setup may have failed');
+      return;
     }
 
     await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });
@@ -629,6 +638,7 @@ test.describe('Flagged Posts - Accessibility', () => {
 
     if (postCount === 0) {
       throw new Error('No flagged posts available - test data setup may have failed');
+      return;
     }
 
     await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });

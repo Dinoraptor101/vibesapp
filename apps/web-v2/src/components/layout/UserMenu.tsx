@@ -7,7 +7,7 @@
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { LogOut, Moon, Settings, Sun, Sunrise, User } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Avatar } from '@/components/ui-next';
 import { useAuth } from '@/features/auth/context/useAuth';
 import { getAvatarUrl } from '@/lib/avatarUtils';
@@ -22,11 +22,9 @@ interface UserMenuProps {
 export function UserMenu({ isActive = false, icon }: UserMenuProps) {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
-  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
   };
 
   const handleThemeChange = () => {
