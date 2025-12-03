@@ -1,3 +1,25 @@
+## 🔥 Urgent UI/UX Polish (Dec 2, 2025)
+
+- **Fix "Moment" timestamp caching issue** - Activities show cached timestamps (e.g., "7 minutes ago") until page refresh reveals actual time (7 hours ago). Need real-time or proper cache invalidation.
+
+- **Smooth page transitions** - Add easing/fade when navigating between Home, Activities, Create Post, etc. Currently feels abrupt.
+
+- **User Menu smooth animations** - Menu appears/disappears instantly. Add fade or slide transition for pleasant open/close experience.
+
+- **Browser notifications for Activities** - Whatever appears in Activities feed should trigger native browser notifications (governed by existing activity configuration).
+
+- **Reduce mobile padding on Profile page** - iPhone screen width is narrow, left/right padding on user profile page is too large. Other pages are fine, don't standardize.
+
+- **Add age/sex honesty advisory** - Gentle message advising users to be honest about age and sex to avoid unpleasant interactions (not threatening, just helpful).
+
+- **Build ethos messaging system** - (Keep as placeholder, will refine later)
+
+- **Add message arrival sound** - Currently no audio notification when new message arrives. Add generic pleasant sound.
+
+---
+
+## 🎯 High Priority Features
+
 - We are yet to implement a Vibes Score (Karma engine) into Web-V2 and how to better represent it
 
 - **Refactor Comments into Separate Collection** - Currently comments are stored as Posts with a `commentOn` field. This causes architectural issues:
