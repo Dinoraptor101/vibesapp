@@ -23,6 +23,7 @@ import {
 } from '@/features/admin';
 import { AuthProvider, LoginPage, ProtectedRoute, SignupPage } from '@/features/auth';
 import { ConversationPage } from '@/pages/ConversationPage';
+import { PrivacyPage } from '@/pages/PrivacyPage';
 import { ReportPostPage } from '@/pages/ReportPostPage';
 import { SendDMRequestPage } from '@/pages/SendDMRequestPage';
 import { TermsPage } from '@/pages/TermsPage';
@@ -113,6 +114,14 @@ function AppShell() {
           element={
             <ProtectedRoute>
               <TermsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/privacy"
+          element={
+            <ProtectedRoute>
+              <PrivacyPage />
             </ProtectedRoute>
           }
         />
