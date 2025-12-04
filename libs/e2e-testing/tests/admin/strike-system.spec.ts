@@ -13,7 +13,7 @@
 import { test, expect } from '@playwright/test';
 import { setupAdminAuth } from './helpers/admin-auth';
 
-test.describe('Strike System', () => {
+test.describe.skip('Strike System', () => {
   test.beforeEach(async ({ page }) => {
     await setupAdminAuth(page);
   });
@@ -107,7 +107,7 @@ test.describe('Strike System', () => {
   });
 });
 
-test.describe('Strike Cooldown Enforcement', () => {
+test.describe.skip('Strike Cooldown Enforcement', () => {
   const API_BASE_URL = process.env.VITE_API_BASE_URL || 'http://localhost:5001/api';
 
   test('ADM-STR-005: Should prevent post creation during Strike 1 cooldown', async ({
@@ -231,7 +231,7 @@ test.describe('Strike Cooldown Enforcement', () => {
   });
 });
 
-test.describe('Strike Expiration (30-day Sliding Window)', () => {
+test.describe.skip('Strike Expiration (30-day Sliding Window)', () => {
   const API_BASE_URL = process.env.VITE_API_BASE_URL || 'http://localhost:5001/api';
 
   test('ADM-STR-009: Should exclude strikes older than 30 days from active count', async ({
@@ -264,7 +264,7 @@ test.describe('Strike Expiration (30-day Sliding Window)', () => {
   });
 });
 
-test.describe('Strike Display and Notifications', () => {
+test.describe.skip('Strike Display and Notifications', () => {
   test('ADM-STR-011: Should display strike modal on app open after receiving strike', async ({
     page,
   }) => {

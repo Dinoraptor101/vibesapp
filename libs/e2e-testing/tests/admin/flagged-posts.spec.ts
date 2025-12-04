@@ -14,7 +14,7 @@
 
 import { test, expect } from '@playwright/test';
 import { loginAsAdmin } from './helpers/admin-auth';
-import { createFlaggedTestPosts } from './helpers/test-data';
+import { createFlaggedTestPosts } from '../helpers/test-post';
 
 // Create sufficient test data before all tests in this file
 // Creating 15 posts to account for destructive operations:
