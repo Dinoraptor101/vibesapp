@@ -523,9 +523,16 @@ const TEST_LOCATION_API = { lat: 37.41, lon: -77.46 }; // Richmond, VA
 
 // Helper to create API headers with authentication
 function getApiHeaders(pigeonId: string) {
+  const apiKey = process.env.BACKEND_API_KEY;
+  if (!apiKey) {
+    throw new Error(
+      'BACKEND_API_KEY environment variable is not set. Please add it to your .env file in libs/e2e-testing/'
+    );
+  }
+
   return {
     'Content-Type': 'application/json',
-    'x-api-key': '***REMOVED***',
+    'x-api-key': apiKey,
     'x-pigeon-id': pigeonId,
   };
 }

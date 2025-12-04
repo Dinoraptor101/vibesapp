@@ -12,6 +12,14 @@ import { chromium } from '@playwright/test';
 async function globalTeardown() {
   console.log('\n🧹 Starting test cleanup...');
 
+  // Validate API key is available
+  const apiKey = process.env.BACKEND_API_KEY;
+  if (!apiKey) {
+    console.error('❌ BACKEND_API_KEY environment variable is not set');
+    console.error('   Please add BACKEND_API_KEY to your .env file in libs/e2e-testing/');
+    return;
+  }
+
   const browser = await chromium.launch();
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -25,7 +33,7 @@ async function globalTeardown() {
     const response = await page.request.delete(`${baseURL}/api/admin/cleanup-test-data`, {
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': '***REMOVED***', // Internal API key
+        'x-api-key': apiKey,
       },
     });
 
@@ -34,6 +42,7 @@ async function globalTeardown() {
       console.log('✅ Cleanup successful:');
       console.log(`   - Users deleted: ${result.deletedUsers || 0}`);
       console.log(`   - Posts deleted: ${result.deletedPosts || 0}`);
+      console.log(`   - S3 images deleted: ${result.deletedImages || 0}`);
       console.log(`   - Reports deleted: ${result.deletedReports || 0}`);
     } else {
       const status = response.status();

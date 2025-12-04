@@ -110,3 +110,4 @@ testem.log
 *.backup
 *.bak
 *.tmp
+libs/e2e-testing/.env

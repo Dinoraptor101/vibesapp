@@ -48,9 +48,16 @@ function getCredentials() {
 // Helper to get API headers with real pigeonId from storage state
 function getApiHeaders() {
   const { pigeonId } = getCredentials();
+  const apiKey = process.env.BACKEND_API_KEY;
+  if (!apiKey) {
+    throw new Error(
+      'BACKEND_API_KEY environment variable is not set. Please add it to your .env file in libs/e2e-testing/'
+    );
+  }
+
   return {
     'Content-Type': 'application/json',
-    'x-api-key': '***REMOVED***',
+    'x-api-key': apiKey,
     'x-pigeon-id': pigeonId,
   };
 }
