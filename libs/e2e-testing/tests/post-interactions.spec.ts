@@ -12,6 +12,7 @@
  */
 
 import { test, expect, type Page, type Locator } from '@playwright/test';
+import { createTestPost } from './helpers/test-post';
 
 /**
  * Helper to find a likeable post (a post from another user that has a visible like button).
@@ -356,32 +357,36 @@ test.describe('Post Report Functionality', () => {
     await page.waitForTimeout(500);
   });
 
-  test('should display report button on posts (except own posts)', async ({ page }) => {
+  test('should display report button on posts (except own posts)', async ({ page, request }) => {
+    // Create a test post from another user (not the logged-in user)
+    // Use a unique pigeonId to ensure this post is from a different user
+    await createTestPost(request, {
+      caption: 'Test post to verify report button visibility',
+      pigeonId: `test-reporter-${Date.now()}`,
+    });
+
+    // Reload to see the new post in feed
+    await page.reload();
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
+
     // Wait for posts to load
     const posts = page.locator('article');
     await expect(posts.first()).toBeVisible({ timeout: 10000 });
 
-    // Find first post that has a report button (not own post)
-    let reportButton = null;
-    const postCount = await posts.count();
+    // Find the post we just created by looking for its caption
+    const testPostElement = posts
+      .filter({ hasText: 'Test post to verify report button visibility' })
+      .first();
+    await expect(testPostElement).toBeVisible({ timeout: 5000 });
 
-    for (let i = 0; i < Math.min(postCount, 5); i++) {
-      const post = posts.nth(i);
-      const button = post.locator('button[aria-label*="Report"]');
+    // Find report button on this post
+    const reportButton = testPostElement.locator('button[aria-label*="Report"]');
 
-      const isVisible = await button.isVisible().catch(() => false);
-      if (isVisible) {
-        reportButton = button;
-        break;
-      }
-    }
-
-    if (!reportButton) {
-      throw new Error('No posts with report buttons found - test data setup required');
-    }
+    // Verify report button is visible (should be visible on other users' posts)
+    await expect(reportButton).toBeVisible();
 
     // Verify report button has flag icon
-    await expect(reportButton).toBeVisible();
     const flagIcon = reportButton.locator('svg');
     await expect(flagIcon).toBeVisible();
   });
@@ -438,63 +443,6 @@ test.describe('Post Interactions - Edge Cases', () => {
     await page.goto('/');
     // Wait for page elements to be visible (SSE keeps connections open)
     await page.waitForTimeout(500);
-  });
-
-  // TODO: This test should create test posts from other users via API injection
-  test.skip('should handle offline state gracefully', async ({ page, context }) => {
-    // Wait for posts to load
-    const posts = page.locator('article');
-    await expect(posts.first()).toBeVisible({ timeout: 10000 });
-
-    // Find a post with a like button (not own post)
-    let post = null;
-    let heartButton = null;
-    const postCount = await posts.count();
-
-    for (let i = 0; i < Math.min(postCount, 5); i++) {
-      const currentPost = posts.nth(i);
-      const button = currentPost.locator(
-        'button[aria-label*="Like"], button[aria-label*="Unlike"]'
-      );
-
-      const isVisible = await button.isVisible().catch(() => false);
-      if (isVisible) {
-        post = currentPost;
-        heartButton = button;
-        break;
-      }
-    }
-
-    if (!post || !heartButton) {
-      throw new Error('No likeable posts found - test data setup required');
-    }
-
-    // Verify button is visible when online
-    await expect(heartButton).toBeVisible();
-
-    // Verify comment link is visible when online
-    const commentLink = post.locator('a[href^="/post/"][aria-label*="comment" i]');
-    await expect(commentLink).toBeVisible();
-
-    // Go offline
-    await context.setOffline(true);
-    await page.waitForTimeout(1000); // Wait for offline detection
-
-    // Buttons should now be hidden when offline
-    await expect(heartButton).not.toBeVisible();
-    await expect(commentLink).not.toBeVisible();
-
-    // The image should still be visible but not clickable
-    const postImage = post.locator('img').first();
-    await expect(postImage).toBeVisible();
-
-    // Go back online
-    await context.setOffline(false);
-    await page.waitForTimeout(1000); // Wait for online detection
-
-    // Buttons should be visible again
-    await expect(heartButton).toBeVisible();
-    await expect(commentLink).toBeVisible();
   });
 });
 

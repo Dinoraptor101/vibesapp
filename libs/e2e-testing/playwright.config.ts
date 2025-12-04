@@ -1,5 +1,6 @@
 // playwright.config.ts
 import { defineConfig } from '@playwright/test';
+import 'dotenv/config';
 
 // Support both localhost and QA environments (both running Web-V2)
 // Use TEST_ENV=qa to run against qa.vibesapp.net, otherwise defaults to localhost

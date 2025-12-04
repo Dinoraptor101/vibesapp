@@ -1,4 +1,17 @@
 import { chromium } from '@playwright/test';
+import * as path from 'path';
+import * as dotenv from 'dotenv';
+import * as fs from 'fs';
+
+// Load environment variables from .env file and inject into process.env
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+  const envConfig = dotenv.parse(fs.readFileSync(envPath));
+  // Inject all env vars into process.env so they're available to all tests
+  Object.keys(envConfig).forEach((key) => {
+    process.env[key] = envConfig[key];
+  });
+}
 
 async function globalSetup() {
   const browser = await chromium.launch();
