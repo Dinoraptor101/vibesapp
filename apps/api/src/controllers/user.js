@@ -763,6 +763,69 @@ const regeneratePigeonId = async (req, res) => {
   }
 };
 
+/**
+ * Delete user account (self-deletion)
+ * Anonymizes user's posts and soft-deletes the user account
+ */
+const deleteAccount = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    // Verify user can only delete their own account
+    if (req.user.userId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only delete your own account',
+      });
+    }
+
+    const user = await User.findOne({ userId });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Generate random 4-digit suffix for anonymization
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    const anonymizedUsername = `deleted-${randomSuffix}`;
+
+    // Anonymize all user's posts
+    const updateResult = await Post.updateMany(
+      { 'user.userId': userId },
+      {
+        $set: {
+          'user.userName': anonymizedUsername,
+          'user.userId': 'deleted-user',
+          'user.userAvatar': '',
+        },
+      }
+    );
+
+    console.log(`[User] Anonymized ${updateResult.modifiedCount} posts for user ${userId}`);
+
+    // Soft delete user by marking as banned and deleted
+    user.isBanned = true;
+    user.bannedAt = new Date();
+    user.isDeleted = true;
+    user.deletedAt = new Date();
+    user.userName = anonymizedUsername;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Account deleted successfully',
+      anonymizedPosts: updateResult.modifiedCount,
+    });
+  } catch (error) {
+    console.error('Error deleting account:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting account',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   generateUniquePigeonId,
   createUser,
@@ -777,4 +840,5 @@ module.exports = {
   getFollowing,
   updateNotificationPreferences,
   regeneratePigeonId,
+  deleteAccount,
 };
