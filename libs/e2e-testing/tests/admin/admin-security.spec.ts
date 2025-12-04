@@ -143,7 +143,7 @@ test.describe('Admin Security - Authentication & Authorization', () => {
     if ((await firstUser.count()) > 0) {
       await firstUser.click();
       // Wait for page elements to be visible (SSE keeps connections open)
-    await page.waitForTimeout(500);
+      await page.waitForTimeout(500);
 
       // Click regenerate password button
       const regenButton = page.locator('[data-testid="regenerate-password-button"]');
@@ -255,33 +255,6 @@ test.describe('User Security - Password Regeneration Authorization', () => {
     // Should return 401 (no valid auth) or 403 (Forbidden - authorization check failed)
     expect([401, 403]).toContain(response.status());
   });
-
-  test('should allow user to regenerate their own password', async ({ request }) => {
-    // When authenticated user's ID matches the target user ID, regeneration should succeed
-    // Note: This requires proper user authentication setup
-
-    // This test documents the expected behavior:
-    // PUT /users/:userId/regenerate-pigeon-id should work when req.user.userId === params.userId
-    // and return 403 when req.user.userId !== params.userId
-
-    expect(true).toBe(true); // Placeholder - real test would need user auth setup
-  });
-
-  test('should use memorable password format for user regeneration', async ({ request }) => {
-    // When users regenerate their password, it should use adjective-noun-number format
-    // e.g., "happy-elephant-42", not random string
-
-    // This test verifies the format matches the pattern
-    const passwordPattern = /^[a-z]+-[a-z]+-\d{4}$/;
-
-    // Test that generatePigeonId produces expected format
-    // Real test would call endpoint and verify response format
-    expect('brave-eagle-1234').toMatch(passwordPattern);
-    expect('cosmic-dragon-5678').toMatch(passwordPattern);
-
-    // Invalid formats should not match
-    expect('pigeon-abc123-xyz789').not.toMatch(passwordPattern);
-  });
 });
 
 test.describe('Admin Security - CSRF & XSS Protection', () => {
@@ -314,20 +287,5 @@ test.describe('Admin Security - CSRF & XSS Protection', () => {
       await page.waitForTimeout(1000);
       // If we reach here, XSS was prevented
     }
-  });
-
-  test.skip('should verify reCAPTCHA protection on admin login', async ({ request }) => {
-    // SKIPPED: reCAPTCHA cannot be tested in localhost environment
-    // This test documents that reCAPTCHA IS implemented on the login endpoint
-    // Manual testing or production E2E tests required to verify reCAPTCHA validation
-
-    const response = await request.post(`${API_BASE_URL}/admin/login`, {
-      data: {
-        password: 'test-password',
-        // Missing recaptchaToken
-      },
-    });
-
-    expect([400, 403]).toContain(response.status());
   });
 });

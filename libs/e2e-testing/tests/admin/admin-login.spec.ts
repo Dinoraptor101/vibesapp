@@ -31,8 +31,7 @@ test.describe('Admin Login Page', () => {
 
   test('should display admin login page at /admin/login', async ({ page }) => {
     await page.goto('/admin/login');
-    // Wait for page elements to be visible (SSE keeps connections open)
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('domcontentloaded');
 
     // Verify page title/header
     await expect(page.locator('h1')).toContainText('Vibes Admin');
@@ -82,11 +81,8 @@ test.describe('Admin Login Page', () => {
     const loginButton = page.locator('button[type="submit"]');
     await loginButton.click();
 
-    // Wait for shake animation and error state (button morphs to error icon)
-    await page.waitForTimeout(1000);
-
     // Verify password was cleared (shake animation clears field after error)
-    await expect(passwordInput).toHaveValue('');
+    await expect(passwordInput).toHaveValue('', { timeout: 2000 });
 
     // Verify we're still on login page
     expect(page.url()).toContain('/admin/login');

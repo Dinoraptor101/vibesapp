@@ -13,8 +13,18 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'vibes_admin_2025';
 /**
  * Login as admin user
  * Navigates to /admin/login, fills password, and waits for redirect to dashboard
+ *
+ * Note: For better performance, tests should reuse admin session when possible
+ * instead of clearing and logging in for each test.
  */
 export async function loginAsAdmin(page: Page): Promise<void> {
+  // Check if already logged in
+  if (await isAdminSessionActive(page)) {
+    await page.goto('/admin/dashboard');
+    await page.waitForLoadState('domcontentloaded');
+    return;
+  }
+
   // Navigate to admin login page
   await page.goto('/admin/login');
   await page.waitForLoadState('domcontentloaded');

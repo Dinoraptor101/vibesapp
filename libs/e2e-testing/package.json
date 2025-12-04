@@ -6,6 +6,8 @@
     "test": "npx playwright test",
     "test:localhost": "npx playwright test",
     "test:qa": "TEST_ENV=qa npx playwright test",
+    "test:skip-admin": "SKIP_ADMIN=true npx playwright test --ignore-snapshots '**/admin/**'",
+    "test:qa:skip-admin": "TEST_ENV=qa SKIP_ADMIN=true npx playwright test --ignore-snapshots '**/admin/**'",
     "test-headed": "xvfb-run npx playwright test --headed",
     "test:localhost:headed": "npx playwright test --headed",
     "test:qa:headed": "TEST_ENV=qa npx playwright test --headed"

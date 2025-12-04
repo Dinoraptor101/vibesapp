@@ -16,9 +16,14 @@ import { test, expect } from '@playwright/test';
 import { loginAsAdmin } from './helpers/admin-auth';
 import { createFlaggedTestPosts } from './helpers/test-data';
 
-// Create test data once before all tests in this file
+// Create sufficient test data before all tests in this file
+// Creating 15 posts to account for destructive operations:
+// - Single delete (1 post)
+// - Bulk delete (2 posts)
+// - Dismiss reports (1 post)
+// - Plus buffer for other tests (11 posts)
 test.beforeAll(async ({ request }) => {
-  await createFlaggedTestPosts(request, 3);
+  await createFlaggedTestPosts(request, 15);
 });
 
 test.describe('Flagged Posts Page', () => {
@@ -315,7 +320,9 @@ test.describe('Flagged Posts - Delete Actions', () => {
     const postCount = await flaggedPosts.count();
 
     if (postCount < 2) {
-      throw new Error('Not enough flagged posts for bulk delete test (need at least 2) - test data setup may have failed');
+      throw new Error(
+        'Not enough flagged posts for bulk delete test (need at least 2) - test data setup may have failed'
+      );
     }
 
     await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });
@@ -517,7 +524,9 @@ test.describe('Flagged Posts - Bulk Selection', () => {
     const postCount = await flaggedPosts.count();
 
     if (postCount < 2) {
-      throw new Error('Not enough flagged posts for select all test - test data setup may have failed');
+      throw new Error(
+        'Not enough flagged posts for select all test - test data setup may have failed'
+      );
     }
 
     await expect(flaggedPosts.first()).toBeVisible({ timeout: 10000 });
