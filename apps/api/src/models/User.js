@@ -77,6 +77,13 @@ const UserSchema = new mongoose.Schema({
   bannedAt: {
     type: Date,
   },
+  isDeleted: {
+    type: Boolean,
+    default: false,
+  },
+  deletedAt: {
+    type: Date,
+  },
   strikes: [
     {
       reason: {

@@ -461,16 +461,37 @@ const deleteUser = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    // Soft delete by banning and marking
+    // Generate random 4-digit suffix for anonymization
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    const anonymizedUsername = `deleted-${randomSuffix}`;
+
+    // Anonymize all user's posts
+    const updateResult = await Post.updateMany(
+      { 'user.userId': userId },
+      {
+        $set: {
+          'user.userName': anonymizedUsername,
+          'user.userId': 'deleted-user',
+          'user.userAvatar': '',
+        },
+      }
+    );
+
+    console.log(`[Admin] Anonymized ${updateResult.modifiedCount} posts for user ${userId}`);
+
+    // Soft delete user by marking as banned and deleted
     user.isBanned = true;
     user.bannedAt = new Date();
-    user.userName = `[deleted-${user.userId}]`;
+    user.isDeleted = true;
+    user.deletedAt = new Date();
+    user.userName = anonymizedUsername;
 
     await user.save();
 
     res.status(200).json({
       success: true,
       message: 'User deleted successfully',
+      anonymizedPosts: updateResult.modifiedCount,
     });
   } catch (error) {
     console.error('Error deleting user:', error);
@@ -1129,6 +1150,27 @@ const cleanupTestData = async (_req, res) => {
     const testUserIds = testUsers.map((user) => user.userId);
     console.log(`[Admin] Found ${testUsers.length} test users to delete`);
 
+    // Find all posts by test users and delete their S3 images
+    const testPosts = await Post.find({
+      'user.userId': { $in: testUserIds },
+    }).select('_id image');
+
+    let deletedImagesCount = 0;
+    for (const post of testPosts) {
+      if (post.image) {
+        try {
+          await s3.deleteObject({
+            Bucket: process.env.AWS_S3_BUCKET,
+            Key: post.image,
+          });
+          deletedImagesCount++;
+        } catch (error) {
+          console.error(`[Admin] Error deleting S3 image for post ${post._id}:`, error.message);
+        }
+      }
+    }
+    console.log(`[Admin] Deleted ${deletedImagesCount} S3 images`);
+
     // Delete all posts created by test users
     const deletedPosts = await Post.deleteMany({
       'user.userId': { $in: testUserIds },
@@ -1168,8 +1210,9 @@ const cleanupTestData = async (_req, res) => {
       success: true,
       deletedUsers: deletedUsers.deletedCount,
       deletedPosts: deletedPosts.deletedCount,
+      deletedImages: deletedImagesCount,
       deletedReports,
-      message: `Cleanup complete: ${deletedUsers.deletedCount} users, ${deletedPosts.deletedCount} posts, ${deletedReports} reports`,
+      message: `Cleanup complete: ${deletedUsers.deletedCount} users, ${deletedPosts.deletedCount} posts, ${deletedImagesCount} images, ${deletedReports} reports`,
     };
 
     console.log('[Admin] Test data cleanup complete:', result);
