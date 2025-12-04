@@ -106,15 +106,6 @@ test.describe('User Security - Login Endpoint Protection', () => {
     // In production, this should return 403
     expect([400, 403, 404]).toContain(response.status());
   });
-
-  test.skip('legacy GET login endpoint should be disabled', async ({ request }) => {
-    // SKIPPED: This test documents that GET /login/:pigeonId is deprecated
-    // Once mobile apps are updated, this endpoint should return 404 or 410
-    const response = await request.get(`${API_BASE_URL}/users/login/test-pigeon-id`);
-
-    // Should return 404 (not found) or 410 (gone) when endpoint is removed
-    expect([404, 410]).toContain(response.status());
-  });
 });
 
 test.describe('User Security - Notification Preferences', () => {
@@ -136,20 +127,6 @@ test.describe('User Security - Notification Preferences', () => {
 });
 
 test.describe('User Security - Public Endpoints', () => {
-  test.skip('getUserById should not expose sensitive information', async ({ request }) => {
-    // SKIPPED: This is a public endpoint - testing would require actual user data
-    // Manual verification required: ensure getUserById response does NOT include pigeonId field
-    const response = await request.get(`${API_BASE_URL}/users/test-user-id`);
-
-    if (response.status() === 200) {
-      const body = await response.json();
-      // Should NOT contain pigeonId field
-      expect(body).not.toHaveProperty('pigeonId');
-    }
-    // 404 is acceptable if user doesn't exist
-    expect([200, 404]).toContain(response.status());
-  });
-
   test('login endpoint should not expose pigeonId in response', async ({ request }) => {
     // Login should return user data but NOT the pigeonId
     const response = await request.post(`${API_BASE_URL}/users/login`, {

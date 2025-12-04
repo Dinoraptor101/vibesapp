@@ -21,8 +21,7 @@ import { loginAsAdmin, clearAdminSession } from './helpers/admin-auth';
 
 test.describe('User Management - Table View', () => {
   test.beforeEach(async ({ page }) => {
-    // Clear any existing session and login as admin
-    await clearAdminSession(page);
+    // Login as admin (reuses session if available)
     await loginAsAdmin(page);
 
     // Navigate to users page
@@ -83,7 +82,6 @@ test.describe('User Management - Table View', () => {
 
 test.describe('User Management - Search and Filters', () => {
   test.beforeEach(async ({ page }) => {
-    await clearAdminSession(page);
     await loginAsAdmin(page);
     await page.goto('/admin/users');
     // Wait for users list to be visible (SSE keeps connections open)
@@ -113,7 +111,7 @@ test.describe('User Management - Search and Filters', () => {
     await searchInput.fill(searchTerm);
 
     // Wait for debounce and table to update
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(600); // Reduced from 1000ms
     await expect(usersList).toBeVisible({ timeout: 5000 });
 
     // Verify results exist (may be filtered or not depending on API)
@@ -158,7 +156,7 @@ test.describe('User Management - Search and Filters', () => {
 
     // Filter by "active" users
     await filterSelect.selectOption('active');
-    await page.waitForTimeout(1000); // Wait for filter to apply
+    await page.waitForTimeout(400); // Reduced from 1000ms
 
     // Wait for filtered results by checking for rows or empty state
     const activeRows = page.locator('[data-testid^="user-row-"]');
@@ -208,7 +206,6 @@ test.describe('User Management - Search and Filters', () => {
 
 test.describe('User Management - Sorting', () => {
   test.beforeEach(async ({ page }) => {
-    await clearAdminSession(page);
     await loginAsAdmin(page);
     await page.goto('/admin/users');
     // Wait for users list to be visible (SSE keeps connections open)
@@ -307,7 +304,6 @@ test.describe('User Management - Sorting', () => {
 
 test.describe('User Management - Actions', () => {
   test.beforeEach(async ({ page }) => {
-    await clearAdminSession(page);
     await loginAsAdmin(page);
     await page.goto('/admin/users');
     // Wait for users list to be visible (SSE keeps connections open)
@@ -336,8 +332,8 @@ test.describe('User Management - Actions', () => {
     // Click to toggle ban
     await toggleBanButton.click();
 
-    // Wait for API response (longer timeout for ban operation)
-    await page.waitForTimeout(2000);
+    // Wait for API response
+    await page.waitForTimeout(1000); // Reduced from 2000ms
 
     // Wait for table to reload
     await expect(usersList).toBeVisible({ timeout: 5000 });
@@ -405,7 +401,6 @@ test.describe('User Management - Actions', () => {
 
 test.describe('User Management - Bulk Actions', () => {
   test.beforeEach(async ({ page }) => {
-    await clearAdminSession(page);
     await loginAsAdmin(page);
     await page.goto('/admin/users');
     // Wait for users list to be visible (SSE keeps connections open)
@@ -675,7 +670,6 @@ test.describe('User Management - Table Features', () => {
     await expect(page.getByTestId('users-list')).toBeVisible({ timeout: 5000 });
 
     const rows = page.locator('[data-testid^="user-row-"]');
-    const rowCount = await rows.count();
 
     // Verify first banned user has badge
     const bannedBadge = rows.first().getByTestId('user-banned-badge');

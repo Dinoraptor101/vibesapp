@@ -8,8 +8,11 @@ const baseURL = isQAEnvironment ? 'https://qa.vibesapp.net' : 'http://localhost:
 
 export default defineConfig({
   testDir: './tests',
-  testIgnore: '**/offline/**', // Ignore offline tests - require localhost:5173 and PWA features
-  fullyParallel: false, // Enable full parallelization - tests within the same file can run in parallel
+  testIgnore: [
+    '**/offline/**', // Ignore offline tests - require localhost:5173 and PWA features
+    ...(process.env.SKIP_ADMIN === 'true' ? ['**/admin/**'] : []),
+  ],
+  fullyParallel: true, // Enable full parallelization - tests within the same file can run in parallel
   use: {
     baseURL,
     headless: true,

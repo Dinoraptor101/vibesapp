@@ -385,39 +385,6 @@ test.describe('Post Report Functionality', () => {
     const flagIcon = reportButton.locator('svg');
     await expect(flagIcon).toBeVisible();
   });
-
-  // TODO: This test should create test posts from other users via API injection
-  test.skip('should navigate to report page when clicking report button', async ({ page }) => {
-    // Wait for posts to load
-    const posts = page.locator('article');
-    await expect(posts.first()).toBeVisible({ timeout: 10000 });
-
-    // Find first post that has a report button
-    let reportButton = null;
-    const postCount = await posts.count();
-
-    for (let i = 0; i < Math.min(postCount, 5); i++) {
-      const post = posts.nth(i);
-      const button = post.locator('button[aria-label*="Report"]');
-
-      const isVisible = await button.isVisible().catch(() => false);
-      if (isVisible) {
-        reportButton = button;
-        break;
-      }
-    }
-
-    if (!reportButton) {
-      throw new Error('No posts with report buttons found - test data setup required');
-    }
-
-    // Click report button
-    await reportButton.click();
-
-    // Should navigate to report page
-    await page.waitForURL('**/report/**', { timeout: 5000 });
-    expect(page.url()).toContain('/report/');
-  });
 });
 
 test.describe('Post Comment Navigation', () => {
@@ -553,8 +520,6 @@ test.describe('Post Interactions - Edge Cases', () => {
 
 // Test data for API tests
 const TEST_LOCATION_API = { lat: 37.41, lon: -77.46 }; // Richmond, VA
-const NEARBY_LOCATION_API = { lat: 37.45, lon: -77.5 }; // ~5 miles away
-const FAR_LOCATION_API = { lat: 40.7128, lon: -74.006 }; // NYC - ~300 miles
 
 // Helper to create API headers with authentication
 function getApiHeaders(pigeonId: string) {

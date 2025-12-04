@@ -16,9 +16,7 @@ import { loginAsAdmin, clearAdminSession } from './helpers/admin-auth';
 
 test.describe('Admin Dashboard', () => {
   test.beforeEach(async ({ page }) => {
-    // Clear any existing admin session before each test
-    await clearAdminSession(page);
-    // Login as admin
+    // Login as admin (reuses session if available)
     await loginAsAdmin(page);
   });
 
@@ -33,10 +31,6 @@ test.describe('Admin Dashboard', () => {
   });
 
   test('should display key metrics cards', async ({ page }) => {
-    // Wait for metrics to load
-    // Wait for page elements to be visible (SSE keeps connections open)
-    await page.waitForTimeout(500);
-
     // Verify metrics container is visible
     const metricsContainer = page.getByTestId('admin-metrics-container');
     await expect(metricsContainer).toBeVisible();
@@ -159,16 +153,12 @@ test.describe('Admin Dashboard', () => {
 
 test.describe('Admin Dashboard - Responsive', () => {
   test.beforeEach(async ({ page }) => {
-    await clearAdminSession(page);
     await loginAsAdmin(page);
   });
 
   test('should be responsive on mobile viewport', async ({ page }) => {
     // Set mobile viewport (below 768px breakpoint)
     await page.setViewportSize({ width: 375, height: 667 });
-
-    // Wait for layout to adjust
-    await page.waitForTimeout(300);
 
     // Verify admin header is still visible
     const adminHeader = page.getByTestId('admin-header');
@@ -213,7 +203,6 @@ test.describe('Admin Dashboard - Responsive', () => {
 
 test.describe('Admin Dashboard - Data Refresh', () => {
   test.beforeEach(async ({ page }) => {
-    await clearAdminSession(page);
     await loginAsAdmin(page);
   });
 
