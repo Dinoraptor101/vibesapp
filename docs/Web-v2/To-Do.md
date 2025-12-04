@@ -1,12 +1,15 @@
 ## 📋 Task Tracker (Generated Dec 3, 2025)
 
+### Required For Release
+- [x] Enhance UserMenu animations - Improve `apps/web-v2/src/components/layout/UserMenu.tsx` with custom CSS transitions or framer-motion overlays beyond current Radix fade-in defaults for smoother menu appearance.
+- [x] Reduce mobile padding on Profile page - Adjust horizontal padding in `apps/web-v2/src/pages/ProfilePage.tsx` specifically for mobile viewports without affecting other pages.
+- [X] Add age/sex honesty advisory - Insert gentle reminder message during signup in `apps/web-v2/src/components/signup/SignupWizard.tsx` or on profile edit encouraging honest demographic information.
+
+
 ### UI/UX Polish (Quick Wins)
 - [ ] Fix Activity timestamp caching - Update `formatRelativeTime` in `apps/web-v2/src/utils/dateUtils.ts` to recalculate on component render instead of caching, or reduce React Query staleTime in `useActivities` hook from 60s to prevent stale "X minutes ago" displays.
 - [ ] Add page transition animations - Implement fade/slide transitions in `apps/web-v2/src/components/navigation/PersistentPages.tsx` using framer-motion or CSS transitions for smoother navigation between Home, Activities, CreatePost pages.
-- [ ] Enhance UserMenu animations - Improve `apps/web-v2/src/components/layout/UserMenu.tsx` with custom CSS transitions or framer-motion overlays beyond current Radix fade-in defaults for smoother menu appearance.
 - [ ] Implement browser notifications for activities - Add Web Notifications API integration to `apps/web-v2/src/hooks/useActivities.ts` that triggers native browser notifications when new activities arrive, respecting user's activity configuration preferences.
-- [x] Reduce mobile padding on Profile page - Adjust horizontal padding in `apps/web-v2/src/pages/ProfilePage.tsx` specifically for mobile viewports without affecting other pages.
-- [X] Add age/sex honesty advisory - Insert gentle reminder message during signup in `apps/web-v2/src/components/signup/SignupWizard.tsx` or on profile edit encouraging honest demographic information.
 - [ ] Add message arrival sound notification - Integrate audio playback in `apps/web-v2/src/contexts/SocketContext.tsx` when new messages arrive via Socket.IO events.
 - [ ] Implement Account Deletion UI - Add "Delete Account" button and confirmation modal in `apps/web-v2/src/components/settings/AccountTab.tsx` that calls existing backend `/api/users/delete-account` endpoint.
 

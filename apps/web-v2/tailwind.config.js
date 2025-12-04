@@ -199,11 +199,21 @@ export default {
           '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' },
           '20%, 40%, 60%, 80%': { transform: 'translateX(4px)' },
         },
+        slideDownAndFade: {
+          '0%': { opacity: '0', transform: 'translateY(-8px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideUpAndFade: {
+          '0%': { opacity: '1', transform: 'translateY(0)' },
+          '100%': { opacity: '0', transform: 'translateY(-8px)' },
+        },
       },
 
       animation: {
         'slide-fade-in': 'slide-fade-in 250ms ease-out',
         shake: 'shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97)',
+        slideDownAndFade: 'slideDownAndFade 300ms cubic-bezier(0.16, 1, 0.3, 1)',
+        slideUpAndFade: 'slideUpAndFade 200ms cubic-bezier(0.16, 1, 0.3, 1)',
       },
     },
   },

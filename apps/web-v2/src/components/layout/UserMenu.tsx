@@ -67,7 +67,9 @@ export function UserMenu({ isActive = false, icon }: UserMenuProps) {
 
       <DropdownMenu.Portal>
         <DropdownMenu.Content
-          className="min-w-[220px] glass border border-border rounded-lg shadow-xl p-1 z-50 animate-in fade-in-0 zoom-in-95"
+          className="min-w-[220px] glass border border-border rounded-lg shadow-xl p-1 z-50 
+                     animate-[slideDownAndFade_300ms_cubic-bezier(0.16,1,0.3,1)]
+                     data-[state=closed]:animate-[slideUpAndFade_200ms_cubic-bezier(0.16,1,0.3,1)]"
           sideOffset={8}
           align="end"
         >
