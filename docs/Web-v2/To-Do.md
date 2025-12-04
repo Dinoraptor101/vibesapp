@@ -1,3 +1,43 @@
+## 📋 Task Tracker (Generated Dec 3, 2025)
+
+### UI/UX Polish (Quick Wins)
+- [ ] Fix Activity timestamp caching - Update `formatRelativeTime` in `apps/web-v2/src/utils/dateUtils.ts` to recalculate on component render instead of caching, or reduce React Query staleTime in `useActivities` hook from 60s to prevent stale "X minutes ago" displays.
+- [ ] Add page transition animations - Implement fade/slide transitions in `apps/web-v2/src/components/navigation/PersistentPages.tsx` using framer-motion or CSS transitions for smoother navigation between Home, Activities, CreatePost pages.
+- [ ] Enhance UserMenu animations - Improve `apps/web-v2/src/components/layout/UserMenu.tsx` with custom CSS transitions or framer-motion overlays beyond current Radix fade-in defaults for smoother menu appearance.
+- [ ] Implement browser notifications for activities - Add Web Notifications API integration to `apps/web-v2/src/hooks/useActivities.ts` that triggers native browser notifications when new activities arrive, respecting user's activity configuration preferences.
+- [x] Reduce mobile padding on Profile page - Adjust horizontal padding in `apps/web-v2/src/pages/ProfilePage.tsx` specifically for mobile viewports without affecting other pages.
+- [X] Add age/sex honesty advisory - Insert gentle reminder message during signup in `apps/web-v2/src/components/signup/SignupWizard.tsx` or on profile edit encouraging honest demographic information.
+- [ ] Add message arrival sound notification - Integrate audio playback in `apps/web-v2/src/contexts/SocketContext.tsx` when new messages arrive via Socket.IO events.
+- [ ] Implement Account Deletion UI - Add "Delete Account" button and confirmation modal in `apps/web-v2/src/components/settings/AccountTab.tsx` that calls existing backend `/api/users/delete-account` endpoint.
+
+### Core Features (High Priority)
+- [ ] Design and implement Vibes Score (Karma) system - Define scoring algorithm, add database schema to `apps/api/src/models/User.js`, create backend endpoints, and build frontend display components.
+- [ ] Refactor comments into separate Comment collection - Create new `Comment` model in `apps/api/src/models/Comment.js`, write migration script to move Posts with `commentOn` field, update `/api/comments` endpoints, and remove comment filtering from feed queries.
+- [ ] Build JSON-based rich text editor - Replace contentEditable in `apps/web-v2/src/components/posts/TextEditor.tsx` with custom JSON document model supporting paragraphs, lists, marks (bold/underline), and reliable input handling.
+- [ ] Implement username search - Update `apps/api/src/controllers/searchController.js` to add case-insensitive exact username matching alongside caption search.
+- [ ] Implement hashtag extraction and search - Add hashtag parsing on post creation in `apps/api/src/models/Post.js`, store as lowercase array field, and update search endpoint to query hashtags specifically.
+- [ ] Implement Strike System frontend UI - Build Strike Warning Modal, posting restriction checks, cooldown timer display, and strike history view in Settings consuming existing backend `User.getCurrentRestrictions()` data.
+
+### Security & Infrastructure
+- [ ] Track and flag accounts by IP/location - Add IP tracking middleware in `apps/api/src/middleware/` and location clustering logic to detect multiple accounts, store flags in User model, expose in admin dashboard.
+- [ ] Audit and enhance MongoDB Atlas security - Review API access patterns, implement connection string encryption, enable IP whitelist, add rate limiting middleware in `apps/api/src/middleware/rateLimiter.js`.
+- [ ] Implement data encryption layer - Add encryption for PII (location, identification) in `apps/api/src/utils/encryption.js`, encrypt before storage in database, decrypt on retrieval.
+- [ ] Restrict location requests to signup and Settings - Remove browser GPS calls from `apps/web-v2/src/hooks/useLocation.ts` everywhere except SignupWizard and Settings AccountTab, use cached database location for all other features.
+- [ ] Research and integrate OAuth (Google/Facebook) authentication - Replace current JWT auth with OpenID Connect providers to prevent multiple accounts per person, update `apps/api/src/middleware/authMiddleware.js`.
+
+### Future Features (Long-term)
+- [ ] Build group chat invite system - Implement invite flow in Messages section allowing users to add friends to existing conversations, update `apps/api/src/models/GroupChat.js` schema.
+- [ ] Design regional group chat moderation system - Create city-based public groups with verified resident moderators, add moderation tools in admin dashboard.
+- [ ] Design Wu-Wei Flow Score mechanism - Define scoring rules (compassionate comments, frugal shares, humble actions), explore small LLM integration for automated scoring, create database schema.
+- [ ] Implement daily post cap - Add post count tracking per user per day in backend, enforce limit in `apps/api/src/controllers/postController.js`, show friendly UI message when limit reached.
+
+### Notes
+- ✅ Birth date collection already exists in SignupWizard Step 4 (year/month selectors with validation)
+- Comments refactoring should happen before Activity system improvements
+- Rich text editor should happen before daily post caps
+
+---
+
 ## 🔥 Urgent UI/UX Polish (Dec 2, 2025)
 
 - **Fix "Moment" timestamp caching issue** - Activities show cached timestamps (e.g., "7 minutes ago") until page refresh reveals actual time (7 hours ago). Need real-time or proper cache invalidation.
