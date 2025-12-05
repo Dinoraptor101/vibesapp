@@ -26,7 +26,7 @@ export function ActivityPageContent() {
   // Toggle state for showing read activities
   const [showRecent, setShowRecent] = useState(false);
 
-  // Fetch activities - unread by default, or recent (last 48h) when toggled
+  // Fetch activities - unread by default, or recent (last 30 days) when toggled
   const { data: activities = [], isLoading, error } = useActivities('all', showRecent);
 
   // Mutations
@@ -155,7 +155,7 @@ export function ActivityPageContent() {
         {!isLoading && !error && showRecent && readActivities.length > 0 && (
           <div className="mt-6">
             <div className="px-4 py-2 text-xs font-semibold text-gray-500 dim:text-gray-600 dark:text-gray-500 uppercase tracking-wide">
-              Recent (Last 48h)
+              Recent (Last 30 Days)
             </div>
             <div className="opacity-60">
               <ActivityList
