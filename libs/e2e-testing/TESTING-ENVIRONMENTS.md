@@ -1,18 +1,43 @@
 # Testing Environments Configuration
 
 ## Overview
-The e2e test suite supports running tests against both **localhost** and **QA** environments, both running Web-V2.
+The e2e test suite supports running tests against both **localhost** and **QA** environments, both running Web-V2. All environment-specific URLs are centralized in the `.env` file for easy configuration and maintenance.
+
+## Environment Configuration
+
+### .env File
+All environment URLs are defined in `libs/e2e-testing/.env`:
+
+```bash
+# Backend API Key for authenticated test cleanup
+BACKEND_API_KEY=DxgVLXfMi4uJCk
+
+# Localhost URLs (default)
+LOCAL_FRONTEND_URL=http://localhost:5173
+LOCAL_BACKEND_URL=http://localhost:5001/api
+LOCAL_BACKEND_BASE=http://localhost:5001
+LOCAL_COOKIE_DOMAIN=localhost
+
+# QA Environment URLs
+QA_FRONTEND_URL=https://qa.vibesapp.net
+QA_BACKEND_URL=https://logosil-backend-a8355253628c.herokuapp.com/api
+QA_BACKEND_BASE=https://logosil-backend-a8355253628c.herokuapp.com
+QA_COOKIE_DOMAIN=qa.vibesapp.net
+```
+
+**⚠️ Never hardcode URLs in test files** - Always read from `process.env` variables defined in `.env`
 
 ## Environment Support
 
 ### Localhost - Default
-- **Frontend**: `http://localhost:5173`
-- **Backend**: `http://localhost:5001`
+- **Frontend**: Read from `LOCAL_FRONTEND_URL`
+- **Backend**: Read from `LOCAL_BACKEND_URL`
 - **Auto-starts**: Dev servers are automatically started before tests
 - **Use case**: Development testing, local debugging, rapid iteration
 
-### QA Environment
-- **URL**: `https://qa.vibesapp.net`
+### QA Environment  
+- **Frontend**: Read from `QA_FRONTEND_URL`
+- **Backend**: Read from `QA_BACKEND_URL`
 - **No servers needed**: Tests run against deployed environment
 - **Use case**: Pre-production validation, regression testing
 
@@ -50,33 +75,51 @@ TEST_ENV=qa npx playwright test
 
 ## Configuration Details
 
+### Environment Variable Pattern
+All test files follow this pattern to read URLs from `.env`:
+
+```typescript
+// Example: Reading API URL based on environment
+const isQAEnvironment = process.env.TEST_ENV === 'qa';
+const API_BASE_URL = isQAEnvironment
+  ? process.env.QA_BACKEND_URL
+  : process.env.LOCAL_BACKEND_URL;
+```
+
 ### Playwright Config (`playwright.config.ts`)
 - Automatically detects `TEST_ENV` environment variable
-- Sets `baseURL` dynamically based on environment
+- Sets `baseURL` dynamically from `.env` variables
 - Only starts local servers when testing localhost
 - Shared configuration: geolocation, storage state, browser settings
 
+### Global Setup (`global-setup.ts`)
+- Sets authentication cookies with correct domain (from `.env`)
+- Uses secure cookies for HTTPS (QA) vs HTTP (localhost)
+- Logs environment setup for debugging
+
 ### Test Files
-All test files use **relative URLs** (`page.goto('/')`) instead of hardcoded URLs:
+All test files use **relative URLs** (`page.goto('/')`) for navigation and read API URLs from environment variables:
 - `tests/unit-tests.spec.ts` - Configuration and integration tests
-- `tests/user-features.spec.ts` - User account and settings tests
+- `tests/user-features.spec.ts` - User account and settings tests  
+- `tests/user-security.spec.ts` - Security and authorization tests
 - `tests/component-unit-tests.spec.ts` - Component validation tests
-- `tests/api-service-tests.spec.ts` - API layer tests (environment-aware)
-- `tests/end-to-end.spec.ts` - Full user journey (currently .fixme for web-v1 selectors)
+- `tests/api-service-tests.spec.ts` - API layer tests
+- `tests/admin/**/*.spec.ts` - Admin panel tests
 
-## Key Changes Made
+## Key Implementation Pattern
 
-### 1. Dynamic Base URL
+### ✅ Correct - Read from .env
 ```typescript
 const isQAEnvironment = process.env.TEST_ENV === 'qa';
-const baseURL = isQAEnvironment ? 'https://qa.vibesapp.net' : 'http://localhost:5173';
+const baseURL = isQAEnvironment 
+  ? process.env.QA_FRONTEND_URL 
+  : process.env.LOCAL_FRONTEND_URL;
 ```
 
-### 2. Conditional Server Startup
+### ❌ Wrong - Hardcoded URLs
 ```typescript
-webServer: isQAEnvironment ? undefined : [
-  // Local dev servers config
-]
+// DON'T DO THIS
+const baseURL = isQAEnvironment ? 'https://qa.vibesapp.net' : 'http://localhost:5173';
 ```
 
 ### 3. Environment-Agnostic Tests

@@ -14,11 +14,13 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { createTestPost, createTestComment } from './helpers/test-post';
+import { createTestPost, createTestComment, getSecondUserCredentials } from './helpers/test-post';
 
-// API base URL (backend server, not frontend)
+// API base URL (backend server, not frontend) - from .env
 const API_BASE_URL =
-  process.env.TEST_ENV === 'qa' ? 'https://qa-api.vibesapp.net' : 'http://localhost:5001';
+  process.env.PLAYWRIGHT_CONFIG_QA === 'true'
+    ? process.env.QA_BACKEND_BASE
+    : process.env.LOCAL_BACKEND_BASE;
 
 // Storage state contains authenticated user's pigeonId and userId
 import * as fs from 'fs';
@@ -142,7 +144,18 @@ test.describe('Post Counts - Feed Display', () => {
     await page.waitForLoadState('domcontentloaded');
   });
 
-  test('should display like button on posts in feed', async ({ page }) => {
+  test('should display like button on posts in feed', async ({ page, request }) => {
+    // Create a post by a different user to ensure we have a post to interact with
+    const user2Credentials = getSecondUserCredentials();
+    await createTestPost(request, {
+      caption: `Test post for like button test ${Date.now()}`,
+      pigeonId: user2Credentials.pigeonId,
+    });
+
+    // Navigate to home feed
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
     // Wait for posts to load
     const posts = page.locator('article');
     await expect(posts.first()).toBeVisible({ timeout: 10000 });
@@ -161,7 +174,18 @@ test.describe('Post Counts - Feed Display', () => {
     expect(ariaLabel).toMatch(/\(\d+ likes?\)/);
   });
 
-  test('should display comment link on posts in feed', async ({ page }) => {
+  test('should display comment link on posts in feed', async ({ page, request }) => {
+    // Create a post by a different user to ensure we have a post to interact with
+    const user2Credentials = getSecondUserCredentials();
+    await createTestPost(request, {
+      caption: `Test post for comment link test ${Date.now()}`,
+      pigeonId: user2Credentials.pigeonId,
+    });
+
+    // Navigate to home feed
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
     // Wait for posts to load
     const posts = page.locator('article');
     await expect(posts.first()).toBeVisible({ timeout: 10000 });
@@ -581,8 +605,8 @@ test.describe('Post Counts - Comment Count Updates', () => {
     await page.goto(`/post/${postId}`);
     await page.waitForLoadState('domcontentloaded');
 
-    // Wait for post to load
-    await expect(page.locator('article').first()).toBeVisible({ timeout: 10000 });
+    // Wait for post detail page to load (comment input indicates page is ready)
+    await expect(page.getByPlaceholder('Add a comment...').first()).toBeVisible({ timeout: 10000 });
 
     // Get the CURRENT comment count right before adding a comment (more reliable)
     const currentPostResponse = await request.get(
@@ -626,36 +650,34 @@ test.describe('Post Counts - Feed Comment Display', () => {
     page,
     request,
   }) => {
-    // STEP 1: Get a RECENT post from the feed (more likely to appear in feed)
-    const postsResponse = await request.get(`${API_BASE_URL}/api/posts?limit=5`, {
-      headers: getApiHeaders(),
+    // STEP 1: Create a post as USER 2 (different from the logged-in user)
+    const user2Credentials = getSecondUserCredentials();
+
+    // Create a post using user 2's pigeonId
+    const user2Post = await createTestPost(request, {
+      caption: `User 2 post for nearby feed test ${Date.now()}`,
+      pigeonId: user2Credentials.pigeonId,
     });
-    const postsData = await postsResponse.json();
+    const postId = user2Post._id;
 
-    // Posts must exist in feed for this test to be valid - fail if not
-    expect(postsData.posts).toBeTruthy();
-    expect(postsData.posts.length).toBeGreaterThan(0);
-
-    const targetPost = postsData.posts[0];
-    const postId = targetPost._id;
-
-    // STEP 2: Add a comment to this post via UI
+    // STEP 2: User 1 adds a comment to User 2's post
     await page.goto(`/post/${postId}`);
     await page.waitForLoadState('domcontentloaded');
-    await expect(page.locator('article').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByPlaceholder('Add a comment...').first()).toBeVisible({ timeout: 10000 });
 
-    // Get current comment count before adding
+    // Get current comment count before adding (should be 0 for new post)
     const currentPostResponse = await request.get(
       `${API_BASE_URL}/api/posts/${postId}?userId=${getCredentials().userId}`,
       { headers: getApiHeaders() }
     );
     const currentPostData = await currentPostResponse.json();
-    const expectedCount = (currentPostData.post.commentCount ?? 0) + 1;
+    const initialCommentCount = currentPostData.post.commentCount ?? 0;
+    const expectedCount = initialCommentCount + 1;
 
-    // Add a comment
+    // Add a comment as User 1
     const commentInput = page.getByPlaceholder('Add a comment...').first();
     await expect(commentInput).toBeVisible({ timeout: 5000 });
-    const testComment = `Feed display test ${Date.now()}`;
+    const testComment = `User 1 comment ${Date.now()}`;
     await commentInput.fill(testComment);
 
     const submitButton = page.getByRole('button', { name: 'Send comment' }).first();
@@ -665,15 +687,14 @@ test.describe('Post Counts - Feed Comment Display', () => {
     await page.waitForTimeout(1500);
 
     // STEP 3: Verify via API that comment count increased
-    // Note: Use >= because parallel tests might add comments to same post
     const verifyResponse = await request.get(
       `${API_BASE_URL}/api/posts/${postId}?userId=${getCredentials().userId}`,
       { headers: getApiHeaders() }
     );
     const verifyData = await verifyResponse.json();
-    expect(verifyData.post.commentCount).toBeGreaterThanOrEqual(expectedCount);
+    expect(verifyData.post.commentCount).toBe(expectedCount);
 
-    // STEP 4: Navigate to Nearby feed and find the specific post
+    // STEP 4: Navigate to Nearby feed (User 1's view)
     await page.goto('/');
     await page.waitForLoadState('domcontentloaded');
 
@@ -691,38 +712,38 @@ test.describe('Post Counts - Feed Comment Display', () => {
     const posts = page.locator('article');
     await expect(posts.first()).toBeVisible({ timeout: 10000 });
 
-    // STEP 5: Find the specific post we commented on by its comment link href
+    // STEP 5: Find User 2's post (which we just commented on) in User 1's Nearby feed
     const targetCommentLink = page.locator(
       `a[href="/post/${postId}"][aria-label*="View comments"]`
     );
 
-    // The post should be visible in the feed (it's the most recent)
+    // The post should be visible in the feed (created by different user, in same location)
     if (await targetCommentLink.isVisible({ timeout: 3000 }).catch(() => false)) {
       // Found the post - verify the comment count is displayed
       const ariaLabel = await targetCommentLink.getAttribute('aria-label');
       const match = ariaLabel?.match(/View comments \((\d+)\)/);
       const displayedCount = match ? parseInt(match[1], 10) : 0;
 
-      // The comment count should be >= expected (parallel tests might add more)
-      expect(displayedCount).toBeGreaterThanOrEqual(expectedCount);
+      // The comment count should match what we expect
+      expect(displayedCount).toBe(expectedCount);
 
       // If count > 0, the span should be visible with the number
       if (expectedCount > 0) {
         const countSpan = targetCommentLink.locator('span');
         await expect(countSpan).toBeVisible();
         const spanText = await countSpan.textContent();
-        expect(parseInt(spanText || '0', 10)).toBeGreaterThanOrEqual(expectedCount);
+        expect(parseInt(spanText || '0', 10)).toBe(expectedCount);
       }
     } else {
       // Post not in first page of feed - verify via API that comment count is correct
-      // This can happen if the post isn't in the user's "nearby" location or pagination
+      // This can happen if pagination hides the post
       const apiVerify = await request.get(
         `${API_BASE_URL}/api/posts/${postId}?userId=${getCredentials().userId}`,
         { headers: getApiHeaders() }
       );
       const apiData = await apiVerify.json();
       // API must return correct comment count - this proves the backend is working
-      expect(apiData.post.commentCount).toBeGreaterThanOrEqual(expectedCount);
+      expect(apiData.post.commentCount).toBe(expectedCount);
       // Test passes: API returned correct count even though UI pagination hides the post
     }
   });
@@ -791,7 +812,7 @@ test.describe('Post Counts - Feed Comment Display', () => {
     // STEP 2: Add a comment to this post
     await page.goto(`/post/${postId}`);
     await page.waitForLoadState('domcontentloaded');
-    await expect(page.locator('article').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByPlaceholder('Add a comment...').first()).toBeVisible({ timeout: 10000 });
 
     // Get current comment count
     const currentPostResponse = await request.get(
@@ -886,7 +907,7 @@ test.describe('Post Counts - Feed Comment Display', () => {
     // STEP 2: Add a comment to the user's post
     await page.goto(`/post/${postId}`);
     await page.waitForLoadState('domcontentloaded');
-    await expect(page.locator('article').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByPlaceholder('Add a comment...').first()).toBeVisible({ timeout: 10000 });
 
     // Get current comment count
     const currentPostResponse = await request.get(

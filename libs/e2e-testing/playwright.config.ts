@@ -1,54 +1,53 @@
-// playwright.config.ts
+// playwright.config.ts - QA ENVIRONMENT (DEFAULT)
+// This is the default config used by VS Code Playwright Extension
+// For localhost testing with dev servers, use: playwright.config.local.ts
 import { defineConfig } from '@playwright/test';
 import 'dotenv/config';
 
-// Support both localhost and QA environments (both running Web-V2)
-// Use TEST_ENV=qa to run against qa.vibesapp.net, otherwise defaults to localhost
-const isQAEnvironment = process.env.TEST_ENV === 'qa';
-const baseURL = isQAEnvironment ? 'https://qa.vibesapp.net' : 'http://localhost:5173';
+// Set environment marker for global teardown
+process.env.PLAYWRIGHT_CONFIG_QA = 'true';
+
+console.log('🔍 Playwright Config: QA ENVIRONMENT (default)');
+console.log(`   baseURL: https://qa.vibesapp.net`);
+console.log(`   Servers: DISABLED`);
+console.log(`   Admin tests: SKIPPED\n`);
 
 export default defineConfig({
   testDir: './tests',
   testIgnore: [
-    '**/offline/**', // Ignore offline tests - require localhost:5173 and PWA features
-    ...(process.env.SKIP_ADMIN === 'true' ? ['**/admin/**'] : []),
+    '**/offline/**', // Offline tests require localhost PWA features
+    '**/admin/**', // Admin panel not deployed to QA
   ],
-  fullyParallel: true, // Enable full parallelization - tests within the same file can run in parallel
+  fullyParallel: true,
   use: {
-    baseURL,
+    baseURL: 'https://qa.vibesapp.net',
     headless: true,
     permissions: ['geolocation'],
     geolocation: { latitude: 37.41, longitude: -77.46 },
-    storageState: 'storageState.json', // Add this line to specify the storage state file
+    storageState: 'storageState.json',
     launchOptions: {
-      slowMo: 500, // Add slowMo to launch options
+      slowMo: 500,
     },
   },
-  retries: 0, // Retry failed tests once (set to 0 for debugging)
-  workers: 2, // Number of parallel worker processes
+  retries: 0,
+  workers: 2,
+  maxFailures: 3, // Fail-fast: stop after 5 failures to avoid wasting time on broken core
   projects: [
+    // Setup project: Core API tests must pass before other tests run
+    // This enforces test dependencies and prevents wasting time on UX tests if API is broken
+    {
+      name: 'prerequisites',
+      testMatch: '**/01-api-service-tests.spec.ts',
+      use: { browserName: 'chromium' },
+    },
+    // Main test execution - depends on core API working
     {
       name: 'chromium',
+      dependencies: ['prerequisites'],
       use: { browserName: 'chromium' },
     },
   ],
-  globalSetup: require.resolve('./global-setup'), // Ensure this line is included to run the global setup script
-  globalTeardown: require.resolve('./global-teardown'), // Clean up test data after all tests complete
-  // Start dev servers before running tests (only for localhost)
-  webServer: isQAEnvironment
-    ? undefined
-    : [
-        {
-          command: 'cd ../../apps/api && npm run dev',
-          url: 'http://localhost:5001/api/health',
-          timeout: 120000,
-          reuseExistingServer: !process.env.CI,
-        },
-        {
-          command: 'cd ../../apps/web-v2 && npm run dev',
-          url: 'http://localhost:5173',
-          timeout: 120000,
-          reuseExistingServer: !process.env.CI,
-        },
-      ],
+  globalSetup: require.resolve('./global-setup'),
+  globalTeardown: require.resolve('./global-teardown'),
+  // No webServer for QA - tests run against deployed environment
 });

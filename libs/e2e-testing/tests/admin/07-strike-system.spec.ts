@@ -108,7 +108,9 @@ test.describe.skip('Strike System', () => {
 });
 
 test.describe.skip('Strike Cooldown Enforcement', () => {
-  const API_BASE_URL = process.env.VITE_API_BASE_URL || 'http://localhost:5001/api';
+  // Use config marker to determine API URL from .env
+  const isQAEnvironment = process.env.PLAYWRIGHT_CONFIG_QA === 'true';
+  const API_BASE_URL = isQAEnvironment ? process.env.QA_BACKEND_URL : process.env.LOCAL_BACKEND_URL;
 
   test('ADM-STR-005: Should prevent post creation during Strike 1 cooldown', async ({
     request,
@@ -232,7 +234,10 @@ test.describe.skip('Strike Cooldown Enforcement', () => {
 });
 
 test.describe.skip('Strike Expiration (30-day Sliding Window)', () => {
-  const API_BASE_URL = process.env.VITE_API_BASE_URL || 'http://localhost:5001/api';
+  // Use config marker to determine API URL from .env
+  const isQAEnvironment = process.env.PLAYWRIGHT_CONFIG_QA === 'true';
+  const API_BASE_URL = isQAEnvironment ? process.env.QA_BACKEND_URL : process.env.LOCAL_BACKEND_URL;
+  const API_KEY = process.env.BACKEND_API_KEY;
 
   test('ADM-STR-009: Should exclude strikes older than 30 days from active count', async ({
     request,

@@ -597,8 +597,10 @@ test.describe('Report Post - API Tests', () => {
   let testPostId: string;
   let postAuthor: { userId: string; pigeonId: string };
 
-  test.beforeAll(async ({ request, baseURL: configBaseURL }) => {
-    baseURL = configBaseURL?.replace(':5173', ':5001') || 'http://localhost:5001';
+  test.beforeAll(async ({ request }) => {
+    // Determine API base URL from config marker via .env
+    const isQAEnvironment = process.env.PLAYWRIGHT_CONFIG_QA === 'true';
+    baseURL = isQAEnvironment ? process.env.QA_BACKEND_BASE : process.env.LOCAL_BACKEND_BASE;
 
     // Create post author with unique ID including random suffix to avoid collisions
     const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).substring(7)}`;

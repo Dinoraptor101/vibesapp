@@ -197,6 +197,100 @@ test.describe('Authentication', () => {
 });
 ```
 
+### reCAPTCHA Bypass for E2E Tests
+
+E2E tests require a special bypass mechanism to avoid Google reCAPTCHA v3 verification, which would block automated test user creation and form submissions. The system uses a bypass token that is checked **before** reCAPTCHA verification occurs.
+
+#### Backend Implementation
+
+**File**: `apps/api/src/utils/recaptcha.js`
+
+The bypass token is checked first in the verification flow:
+
+```javascript
+const E2E_BYPASS_TOKEN = process.env.E2E_BYPASS_TOKEN || 'e2e-test-bypass-secret-token-2024';
+
+export const verifyRecaptcha = async (token, expectedAction, req) => {
+  if (!token) {
+    throw new Error('reCAPTCHA token is required');
+  }
+
+  // Check for E2E bypass token FIRST (before reCAPTCHA enable check)
+  const bypassHeader = req?.headers?.['x-e2e-bypass'];
+  const bypassCookie = req?.cookies?.e2eBypass;
+
+  if (bypassHeader === E2E_BYPASS_TOKEN || bypassCookie === E2E_BYPASS_TOKEN) {
+    console.log('E2E bypass token detected - skipping reCAPTCHA verification');
+    return { success: true, score: 1.0, action: expectedAction };
+  }
+
+  // Continue with normal reCAPTCHA verification...
+};
+```
+
+Controllers must pass the `req` object to enable bypass checking:
+
+```javascript
+// apps/api/src/controllers/user.js
+await verifyRecaptcha(recaptchaToken, 'signup', req);
+```
+
+#### Test Setup
+
+**Cookie Approach** (for browser-based tests):
+
+```javascript
+// libs/e2e-testing/global-setup.ts
+await context.addCookies([
+  {
+    name: 'e2eBypass',
+    value: 'e2e-test-bypass-secret-token-2024',
+    domain: 'qa.vibesapp.net',
+    path: '/',
+    httpOnly: false,
+    secure: true,
+    sameSite: 'Lax',
+  }
+]);
+```
+
+**Header Approach** (for API requests):
+
+```javascript
+// libs/e2e-testing/tests/helpers/test-post.ts
+export function getApiHeaders() {
+  const credentials = getCredentials();
+  return {
+    'pigeonId': credentials.pigeonId,
+    'lat': credentials.lat,
+    'lon': credentials.lon,
+    'x-e2e-bypass': 'e2e-test-bypass-secret-token-2024'
+  };
+}
+```
+
+#### How It Works
+
+1. **Global Setup**: The bypass cookie is added to the browser context before any tests run
+2. **API Requests**: The bypass header is included in all API calls made by test helpers
+3. **Backend Check**: When a request reaches the backend, the bypass token is checked FIRST (line 23-31 in recaptcha.js)
+4. **Bypass Success**: If either the cookie or header matches the token, reCAPTCHA verification is skipped entirely
+5. **Security**: reCAPTCHA remains enabled for all non-test traffic (QA and production)
+
+#### Environment Configuration
+
+- **Default Token**: `'e2e-test-bypass-secret-token-2024'`
+- **Custom Token**: Set `E2E_BYPASS_TOKEN` environment variable
+- **Dual Method**: Both cookie and header are checked for redundancy
+- **No Disable**: reCAPTCHA is never globally disabled; bypass is an override mechanism
+
+#### Security Notes
+
+- The bypass token should be kept secret and not committed to version control if customized
+- The default token is acceptable for internal E2E testing environments
+- Production environments should have different reCAPTCHA keys that tests don't have access to
+- The bypass only works when the exact token matches - no partial matches or variations
+
 ## Test Categories
 
 ### Authentication Tests

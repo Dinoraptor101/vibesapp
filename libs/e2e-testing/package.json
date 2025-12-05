@@ -4,11 +4,13 @@
   "main": "index.js",
   "scripts": {
     "test": "npx playwright test",
-    "test:localhost": "npx playwright test",
-    "test:qa": "TEST_ENV=qa npx playwright test",
+    "test:qa": "npx playwright test",
+    "test:local": "npx playwright test --config=playwright.config.local.ts",
+    "test:admin": "npx playwright test --config=playwright-admin.config.ts",
     "test-headed": "xvfb-run npx playwright test --headed",
-    "test:localhost:headed": "npx playwright test --headed",
-    "test:qa:headed": "TEST_ENV=qa npx playwright test --headed"
+    "test:qa:headed": "npx playwright test --headed",
+    "test:local:headed": "npx playwright test --config=playwright.config.local.ts --headed",
+    "test:admin:headed": "npx playwright test --config=playwright-admin.config.ts --headed"
   },
   "keywords": [],
   "author": "",

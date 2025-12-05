@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
@@ -9,6 +10,18 @@ export default defineConfig({
   plugins: [
     react(),
     buildVersionPlugin(),
+    // Copy vercel.json to dist folder for deployment
+    {
+      name: 'copy-vercel-config',
+      closeBundle() {
+        const src = path.resolve(__dirname, 'vercel.json');
+        const dest = path.resolve(__dirname, 'dist/vercel.json');
+        if (fs.existsSync(src)) {
+          fs.copyFileSync(src, dest);
+          console.log('✓ Copied vercel.json to dist/');
+        }
+      },
+    },
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['logo.svg'],

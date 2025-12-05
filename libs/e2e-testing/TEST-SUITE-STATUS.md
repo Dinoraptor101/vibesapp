@@ -1,11 +1,36 @@
 # E2E Test Suite Status
 
 ## Summary
-✅ **99 tests total** (6 integration tests rewritten for Web-V2)
+✅ **99 tests total** (organized by execution priority)
 🌍 **Environment Support:** Localhost + QA (both test Web-V2)
 🧹 **Automatic Cleanup:** Test data automatically deleted after test runs
+⚡ **Fail-Fast:** Suite stops after 5 failures to avoid wasting time
+🎯 **Selective Execution:** Run core, integration, or UX tests independently
+
+## Test Organization
+
+Tests are numbered by execution priority to ensure methodical testing:
+
+### Main Tests (tests/)
+1. **01-02: Core Tests** (API + Unit) - Fast, foundational
+2. **03-05: Integration Tests** (Components, Security, Cleanup) - Medium speed
+3. **06-08: UX Tests** (Interactions, Features) - Slower, comprehensive
+
+### Admin Tests (tests/admin/)
+1. **01-02: Core Tests** (Security + Login) - Fast, foundational
+2. **03-04: Integration Tests** (Dashboard, Settings) - Medium speed
+3. **05-07: UX Tests** (User/Post Management, Strikes) - Slower, comprehensive
+
+This ordering ensures that if core functionality breaks, you don't waste time testing dependent features.
 
 ## Latest Updates
+
+**Test File Reorganization (Dec 4, 2025)**
+- ✅ Renamed all spec files with numeric prefixes (01-08)
+- ✅ Added Playwright projects for selective execution (core, integration, ux, admin)
+- ✅ Added fail-fast behavior (maxFailures: 5)
+- ✅ Tests now run in priority order automatically
+- ✅ Can run specific test tiers: `npx playwright test --project=core`
 
 **Automatic Test Data Cleanup (Dec 2, 2025)**
 - ✅ Global teardown script automatically cleans up test data after all tests complete

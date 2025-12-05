@@ -85,6 +85,7 @@ export async function setExpiredAdminSession(page: Page): Promise<void> {
   const context = page.context();
   const baseURL = page.url().split('/').slice(0, 3).join('/');
   const domain = new URL(baseURL).hostname;
+  const isSecure = baseURL.startsWith('https');
 
   // Set expired session (1 hour in the past)
   const expiredTime = Date.now() - 60 * 60 * 1000;
@@ -97,7 +98,7 @@ export async function setExpiredAdminSession(page: Page): Promise<void> {
       path: '/',
       expires: -1,
       httpOnly: false,
-      secure: false,
+      secure: isSecure,
       sameSite: 'Lax',
     },
     {
@@ -107,7 +108,7 @@ export async function setExpiredAdminSession(page: Page): Promise<void> {
       path: '/',
       expires: -1,
       httpOnly: false,
-      secure: false,
+      secure: isSecure,
       sameSite: 'Lax',
     },
   ]);
@@ -124,6 +125,7 @@ export async function setAdminSessionExpiringSoon(
   const context = page.context();
   const baseURL = page.url().split('/').slice(0, 3).join('/');
   const domain = new URL(baseURL).hostname;
+  const isSecure = baseURL.startsWith('https');
 
   const expiryTime = Date.now() + secondsUntilExpiry * 1000;
 
@@ -135,7 +137,7 @@ export async function setAdminSessionExpiringSoon(
       path: '/',
       expires: -1,
       httpOnly: false,
-      secure: false,
+      secure: isSecure,
       sameSite: 'Lax',
     },
     {
@@ -145,7 +147,7 @@ export async function setAdminSessionExpiringSoon(
       path: '/',
       expires: -1,
       httpOnly: false,
-      secure: false,
+      secure: isSecure,
       sameSite: 'Lax',
     },
   ]);

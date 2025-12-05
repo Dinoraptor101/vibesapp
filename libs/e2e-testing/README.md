@@ -49,11 +49,56 @@ TEST_ENV=qa npx playwright test
 
 ## Test Structure
 
-- `tests/unit-tests.spec.ts` - Configuration, utility, and integration tests
-- `tests/offline/` - PWA offline functionality tests (localhost only)
-- `tests/admin/` - Admin dashboard and moderation tests
+Tests are organized by execution priority using numeric prefixes to ensure core tests run first:
+
+### Main Tests (tests/)
+- `01-api-service-tests.spec.ts` - **Core**: API layer functionality (fastest)
+- `02-unit-tests.spec.ts` - **Core**: Utilities, validation, configuration
+- `03-component-unit-tests.spec.ts` - **Integration**: Component integration tests
+- `04-user-security.spec.ts` - **Integration**: Authentication and authorization
+- `05-logout-cleanup.spec.ts` - **Integration**: Session cleanup and data isolation
+- `06-post-counts.spec.ts` - **UX**: Data integrity and count validation
+- `07-post-interactions.spec.ts` - **UX**: Like/unlike, report, comment features
+- `08-user-features.spec.ts` - **UX**: Full user workflows (slowest)
+
+### Admin Tests (tests/admin/)
+- `01-admin-security.spec.ts` - **Core**: Security gates and authorization
+- `02-admin-login.spec.ts` - **Core**: Admin authentication
+- `03-admin-dashboard.spec.ts` - **Integration**: Dashboard overview
+- `04-admin-settings.spec.ts` - **Integration**: Admin configuration
+- `05-user-management.spec.ts` - **UX**: User operations
+- `06-flagged-posts.spec.ts` - **UX**: Content moderation
+- `07-strike-system.spec.ts` - **UX**: User strike system (currently skipped)
+
+### Offline Tests (tests/offline/)
+- PWA offline functionality tests (localhost only)
+
+### Supporting Files
 - `global-setup.ts` - Global test setup and authentication
 - `global-teardown.ts` - Automatic test data cleanup after tests complete
+
+## Selective Test Execution
+
+Run specific test tiers based on your needs:
+
+```bash
+# Run only core tests (API + Unit - fastest)
+npx playwright test --project=core
+
+# Run integration tests (Security + Cleanup)
+npx playwright test --project=integration
+
+# Run UX tests (Post interactions + User features - slowest)
+npx playwright test --project=ux
+
+# Run admin tests only (localhost only)
+npx playwright test --config=playwright.config.local.ts --project=admin
+
+# Run all tests in order (default behavior)
+npx playwright test
+```
+
+Tests run alphabetically by default, ensuring core tests execute first. If core tests fail (e.g., API or authentication issues), the suite stops after 5 failures (fail-fast) to avoid wasting time on dependent tests.
 
 ## Test Data Cleanup
 
