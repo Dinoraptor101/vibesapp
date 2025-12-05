@@ -163,7 +163,7 @@ const createUser = async (req, res) => {
   });
 
   // Verify reCAPTCHA token
-  const recaptchaResult = await verifyRecaptcha(recaptchaToken, 'signup');
+  const recaptchaResult = await verifyRecaptcha(recaptchaToken, 'signup', req);
   if (!recaptchaResult.success) {
     console.error('reCAPTCHA verification failed:', recaptchaResult.error);
     return res.status(403).json({

@@ -37,7 +37,7 @@
     "deploy:qa:web": "./scripts/deploy-qa.sh frontend",
     "deploy:qa:status": "./scripts/deploy-qa.sh status",
     "deploy:qa:dry-run": "./scripts/deploy-qa.sh --dry-run",
-    "build:qa:web": "cd apps/web-v2 && VITE_API_URL=https://logosil-backend-a8355253628c.herokuapp.com/api VITE_CDN_URL=https://d1pegm4swremw5.cloudfront.net VITE_S3_BUCKET=logosil-image-host VITE_S3_REGION=us-east-2 VITE_ENABLE_RECAPTCHA=true VITE_RECAPTCHA_SITE_KEY=6LfpRawqAAAAAAZ_B0K43mzoeqV7haGzqZ06qjxw VITE_USE_SSE=true npm run build",
+    "build:qa:web": "cd apps/web-v2 && VITE_API_URL=https://api-qa.vibesapp.net/api VITE_CDN_URL=https://d1pegm4swremw5.cloudfront.net VITE_S3_BUCKET=logosil-image-host VITE_S3_REGION=us-east-2 VITE_ENABLE_RECAPTCHA=true VITE_RECAPTCHA_SITE_KEY=6LfpRawqAAAAAAZ_B0K43mzoeqV7haGzqZ06qjxw VITE_USE_SSE=true npm run build",
     "clean": "nx reset && rm -rf node_modules apps/*/node_modules libs/*/node_modules",
     "graph": "nx graph",
     "affected:build": "nx affected:build",
