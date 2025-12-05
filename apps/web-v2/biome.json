@@ -1,7 +1,8 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.3.2/schema.json",
   "files": {
-    "ignoreUnknown": true
+    "ignoreUnknown": true,
+    "includes": ["**", "!src/styles/globals.css"]
   },
   "json": {
     "parser": {
@@ -18,8 +19,7 @@
   "css": {
     "parser": {
       "cssModules": false,
-      "allowWrongLineComments": true,
-      "tailwindDirectives": true
+      "allowWrongLineComments": true
     },
     "linter": {
       "enabled": false

@@ -12,7 +12,7 @@
  * - "Continue in browser" option (small, unobtrusive)
  */
 
-import { Download, Share, MoreVertical, Plus, X } from 'lucide-react';
+import { Download, MoreVertical, Plus, Share, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const STORAGE_KEY = 'pwa-install-dismissed';
