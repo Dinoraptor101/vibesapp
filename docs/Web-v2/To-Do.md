@@ -34,6 +34,19 @@
 ### Future Features (Long-term)
 - [ ] Build group chat invite system - Implement invite flow in Messages section allowing users to add friends to existing conversations, update `apps/api/src/models/GroupChat.js` schema.
 - [ ] Design regional group chat moderation system - Create city-based public groups with verified resident moderators, add moderation tools in admin dashboard.
+- [ ] Build Personal Growth Tracker (Carrot Principle) - Replace traditional gamification with an MBTI-driven growth platform:
+  1. **MBTI Integration**: Derive user strengths and weaknesses from MBTI personality type
+  2. **Growth Path Selection**: Allow users to choose between two paths:
+     - **Strength Path**: Double down on existing strengths with targeted challenges
+     - **Rounding Path**: Work on weaknesses to develop a more balanced personality
+  3. **Actionable Goals**: Translate selected growth paths into daily trackable goals
+  4. **Daily Progress Tracking**: UI for logging daily progress toward selected goals
+  5. **Community Reinforcement**: Leverage local community aspects to reinforce goal achievement using ADKAR change management approach
+  6. **Database Schema**: Add to `apps/api/src/models/User.js` for MBTI type, growth path, goals, and progress tracking
+  7. **Frontend Components**: Build goal dashboard, daily tracking interface, and progress analytics in `apps/web-v2/src/components/growth/`
+  
+  *Note: The "Stick" principle is handled by the Strike System (already implemented backend)*
+  
 - [ ] Design Wu-Wei Flow Score mechanism - Define scoring rules (compassionate comments, frugal shares, humble actions), explore small LLM integration for automated scoring, create database schema.
 - [ ] Implement daily post cap - Add post count tracking per user per day in backend, enforce limit in `apps/api/src/controllers/postController.js`, show friendly UI message when limit reached.
 
