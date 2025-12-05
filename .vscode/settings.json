@@ -43,5 +43,6 @@
     "**/build": true,
     "**/dist": true,
     "**/.nx": true
-  }
+  },
+  "remote.autoForwardPortsFallback": 0
 }
