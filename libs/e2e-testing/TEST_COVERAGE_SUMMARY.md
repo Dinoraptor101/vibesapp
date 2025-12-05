@@ -2,11 +2,31 @@
 
 ## Overview
 
-Comprehensive test coverage has been implemented for VibesApp, identifying and testing all missing elements that weren't previously covered in the End-to-End and Integration test suites.
+Comprehensive test coverage has been implemented for VibesApp, with tests organized by execution priority to ensure methodical testing from core API/unit tests through integration and security tests to full UX workflows.
+
+## Test Execution Priority
+
+Tests are numbered to run in order of criticality:
+
+### Tier 1: Core Tests (01-02)
+- **01-api-service-tests.spec.ts** - API layer functionality
+- **02-unit-tests.spec.ts** - Utilities, validation, configuration
+
+### Tier 2: Integration Tests (03-05)
+- **03-component-unit-tests.spec.ts** - Component integration
+- **04-user-security.spec.ts** - Authentication & authorization
+- **05-logout-cleanup.spec.ts** - Session cleanup & isolation
+
+### Tier 3: UX Tests (06-08)
+- **06-post-counts.spec.ts** - Data integrity
+- **07-post-interactions.spec.ts** - User interactions
+- **08-user-features.spec.ts** - Complete user workflows
+
+This ensures that if core functionality breaks (API, auth, etc.), you don't waste time testing features that depend on it.
 
 ## Test Files Created/Enhanced
 
-### 1. **unit-tests.spec.ts** (Enhanced)
+### 1. **02-unit-tests.spec.ts** (Enhanced)
 
 - **Added 54+ new integration tests** covering previously untested features
 - **Categories Added:**

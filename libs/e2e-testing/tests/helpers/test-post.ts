@@ -9,15 +9,18 @@ import type { APIRequestContext } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 
+// Read API base URL from environment variables (configured in .env)
 const API_BASE_URL =
-  process.env.TEST_ENV === 'qa' ? 'https://qa-api.vibesapp.net' : 'http://localhost:5001';
+  process.env.PLAYWRIGHT_CONFIG_QA === 'true'
+    ? process.env.QA_BACKEND_BASE
+    : process.env.LOCAL_BACKEND_BASE;
 
 const TEST_LOCATION = { lat: 37.41, lon: -77.46 }; // Richmond, VA
 
 // Helper to get credentials from storage state
-function getCredentials() {
+function getCredentials(storageStateFile: string = 'storageState.json') {
   try {
-    const storageStatePath = path.join(__dirname, '../../storageState.json');
+    const storageStatePath = path.join(__dirname, '../../', storageStateFile);
     const storageState = JSON.parse(fs.readFileSync(storageStatePath, 'utf-8'));
     const pigeonIdCookie = storageState.cookies?.find(
       (c: { name: string }) => c.name === 'pigeonId'
@@ -36,6 +39,11 @@ function getCredentials() {
   }
 }
 
+// Export helper to get credentials for second test user
+export function getSecondUserCredentials() {
+  return getCredentials('storageState2.json');
+}
+
 // Helper to get API headers with authentication
 function getApiHeaders(pigeonIdOverride?: string) {
   const { pigeonId } = getCredentials();
@@ -46,11 +54,22 @@ function getApiHeaders(pigeonIdOverride?: string) {
     );
   }
 
-  return {
+  const headers = {
     'Content-Type': 'application/json',
     'x-api-key': apiKey,
     'x-pigeon-id': pigeonIdOverride || pigeonId,
+    'x-e2e-bypass': 'e2e-test-bypass-secret-token-2024', // E2E test bypass for reCAPTCHA
   };
+
+  // Log bypass header when creating API requests (verbose logging)
+  if (process.env.VERBOSE_E2E_LOGGING === 'true') {
+    console.log('🔓 [E2E Test] API request headers include reCAPTCHA bypass:');
+    console.log('   - Header: x-e2e-bypass');
+    console.log('   - Token: e2e-test-bypass-secret-token-2024');
+    console.log(`   - Pigeon ID: ${pigeonIdOverride || pigeonId}\n`);
+  }
+
+  return headers;
 }
 
 /**
@@ -77,6 +96,7 @@ export async function createTestUser(
       birthMonth: 6,
       sex: 'male',
       location: userData.location || TEST_LOCATION,
+      recaptchaToken: 'bypass', // Required field but bypassed via x-e2e-bypass header
     },
   });
 
@@ -159,21 +179,23 @@ export async function createTestPost(
 ) {
   const { caption = 'Test post for E2E', location = TEST_LOCATION, pigeonId } = options;
 
-  // If a custom pigeonId is provided, create that user first
-  // (S3 endpoint requires a valid user to exist)
+  // Generate a unique pigeonId with timestamp if one is provided
+  // This prevents duplicate key errors when running multiple tests
+  let uniquePigeonId = pigeonId;
   if (pigeonId) {
+    uniquePigeonId = `${pigeonId}-${Date.now()}`;
     await createTestUser(request, {
-      pigeonId,
-      userName: `Test User ${pigeonId.slice(-8)}`,
+      pigeonId: uniquePigeonId,
+      userName: `Test User ${uniquePigeonId.slice(-8)}`,
       location,
     });
   }
 
   // Upload test image to S3 and get the key
-  const imageKey = await uploadTestImage(request, pigeonId);
+  const imageKey = await uploadTestImage(request, uniquePigeonId);
 
   const response = await request.post(`${API_BASE_URL}/api/posts/create`, {
-    headers: getApiHeaders(pigeonId),
+    headers: getApiHeaders(uniquePigeonId),
     data: {
       text: caption,
       image: imageKey,

@@ -7,8 +7,9 @@
 
 import { expect, test } from '@playwright/test';
 
-// API base URL
-const API_BASE_URL = process.env.VITE_API_URL || 'http://localhost:5001/api';
+// API base URL - dynamically set based on config
+const isQAEnvironment = process.env.PLAYWRIGHT_CONFIG_QA === 'true';
+const API_BASE_URL = isQAEnvironment ? process.env.QA_BACKEND_URL : process.env.LOCAL_BACKEND_URL;
 
 test.describe('User Security - Profile Update Authorization', () => {
   test('should prevent updating user profile without authentication', async ({ request }) => {

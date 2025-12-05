@@ -1,0 +1,45 @@
+{
+  "cookies": [
+    {
+      "name": "range",
+      "value": "275",
+      "domain": "qa.vibesapp.net",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "user_location",
+      "value": "%7B%22lat%22%3A37.42%2C%22lon%22%3A-77.46%7D",
+      "domain": "qa.vibesapp.net",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "userId",
+      "value": "test-e2e-user-2-placeholder",
+      "domain": "qa.vibesapp.net",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "pigeonId",
+      "value": "test-e2e-pigeon-2-aa11bb22",
+      "domain": "qa.vibesapp.net",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": []
+}

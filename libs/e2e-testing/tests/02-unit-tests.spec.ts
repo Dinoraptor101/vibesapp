@@ -29,9 +29,16 @@ test.describe('Playwright Configuration Tests', () => {
   });
 
   test('should have chromium project configured', () => {
-    expect(playwrightConfig.projects).toHaveLength(1);
-    expect(playwrightConfig.projects?.[0].name).toBe('chromium');
-    expect(playwrightConfig.projects?.[0].use?.browserName).toBe('chromium');
+    expect(playwrightConfig.projects).toBeDefined();
+    expect(playwrightConfig.projects?.length).toBeGreaterThan(0);
+
+    // Find the chromium project (could be prerequisites or main chromium)
+    const chromiumProject = playwrightConfig.projects?.find(
+      (p) => p.use?.browserName === 'chromium' || p.name === 'chromium'
+    );
+
+    expect(chromiumProject).toBeDefined();
+    expect(chromiumProject?.use?.browserName).toBe('chromium');
   });
 
   test('should have global setup configured', () => {
@@ -201,32 +208,42 @@ test.describe('Integration Tests - Web-V2', () => {
     await expect(submitButton).toBeDisabled(); // Disabled when input is empty
   });
 
-  test('should login with existing user credentials', async ({ page, context }) => {
+  test('should show error state when login fails with invalid credentials', async ({
+    page,
+    context,
+  }) => {
     // Clear session and navigate to login
     await context.clearCookies();
     await page.goto('/login');
 
+    // Use an invalid/non-existent pigeon ID
+    const invalidPigeonId = 'invalid-pigeon-id-12345';
+
     // Fill in pigeon ID
     const pigeonIdInput = page.getByPlaceholder('your pigeon id');
-    await pigeonIdInput.fill('0d536b38-33ce-48c5-958d-5b76015ce228');
+    await pigeonIdInput.fill(invalidPigeonId);
 
     // Submit form
     const submitButton = page.getByRole('button', { name: 'Login' });
     await expect(submitButton).toBeEnabled();
     await submitButton.click();
 
-    // Verify redirect to home page
-    await page.waitForURL('/', { timeout: 10000 });
-    await expect(page).toHaveURL('/');
+    // Wait for and verify error state is displayed
+    // Check for error indicators: shake animation, error message, or alert role
+    const errorIndicators = page.locator(
+      '[class*="shake"], [class*="error"], .error-message, [role="alert"], input[class*="error"]'
+    );
 
-    // Verify user is logged in by checking for user menu (wait for it to be visible)
-    await page.waitForSelector('[data-testid="user-menu-button"]', {
-      timeout: 10000,
-      state: 'visible',
-    });
-    await expect(page.getByTestId('user-menu-button').first()).toBeVisible();
+    // Error should appear within 3 seconds
+    await expect(errorIndicators.first()).toBeVisible({ timeout: 3000 });
+
+    // Verify we're still on the login page (not redirected)
+    await expect(page).toHaveURL(/\/login/);
+
+    // Verify the input field is still visible and editable (can retry)
+    await expect(pigeonIdInput).toBeVisible();
+    await expect(pigeonIdInput).toBeEditable();
   });
-
   test('should navigate to settings and view tabs', async ({ page }) => {
     // Assumes user is already logged in via global setup
     await page.goto('/');
