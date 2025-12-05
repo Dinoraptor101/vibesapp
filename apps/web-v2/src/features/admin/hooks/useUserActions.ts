@@ -122,3 +122,61 @@ export function useBulkDeleteUserPosts() {
     },
   });
 }
+
+export function useBulkDeleteUsers() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (userIds: string[]) => {
+      return await api.delete<{
+        success: boolean;
+        message: string;
+        deletedCount: number;
+        anonymizedPosts: number;
+      }>('/admin/users/bulk', { userIds });
+    },
+    onSuccess: (data) => {
+      toast({
+        title: 'Users Deleted',
+        description: `Deleted ${data.deletedCount} users and anonymized ${data.anonymizedPosts} posts`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-user-posts'] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to delete users',
+        variant: 'destructive',
+      });
+    },
+  });
+}
+
+export function useBulkDeletePostsByUsers() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (userIds: string[]) => {
+      return await api.delete<{ success: boolean; message: string; deletedCount: number }>(
+        '/admin/users/bulk/posts',
+        { userIds }
+      );
+    },
+    onSuccess: (data) => {
+      toast({
+        title: 'Posts Deleted',
+        description: `Deleted ${data.deletedCount} posts from selected users`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-user-posts'] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to delete posts',
+        variant: 'destructive',
+      });
+    },
+  });
+}

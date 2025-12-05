@@ -1,5 +1,5 @@
 import { Loader2 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import api from '@/lib/api';
@@ -17,12 +17,11 @@ export function UsersPage() {
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'banned'>('all');
   const [filterMBTI, setFilterMBTI] = useState('');
 
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  // Total count
   const [totalUsers, setTotalUsers] = useState(0);
 
   // Selection
@@ -31,6 +30,15 @@ export function UsersPage() {
   // Sorting
   const [sortField, setSortField] = useState<string | null>('userName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const mbtiTypes = [
     'INTJ',
@@ -57,12 +65,12 @@ export function UsersPage() {
 
     try {
       const response = (await api.get('/admin/users', {
-        search: searchQuery,
+        search: debouncedSearchQuery,
         filter: filterStatus,
         mbti: filterMBTI,
         location: '',
-        page: currentPage,
-        limit: 100,
+        page: 1,
+        limit: 10000,
       })) as {
         success: boolean;
         users: AdminUser[];
@@ -75,7 +83,6 @@ export function UsersPage() {
       };
 
       setUsers(response.users);
-      setTotalPages(response.pagination.pages);
       setTotalUsers(response.pagination.total);
       setSelectedUserIds([]);
     } catch (err) {
@@ -84,7 +91,7 @@ export function UsersPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [searchQuery, filterStatus, filterMBTI, currentPage]);
+  }, [debouncedSearchQuery, filterStatus, filterMBTI]);
 
   useEffect(() => {
     fetchUsers();
@@ -116,7 +123,7 @@ export function UsersPage() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedUserIds(users.map((u) => u.userId));
+      setSelectedUserIds(sortedUsers.map((u) => u.userId));
     } else {
       setSelectedUserIds([]);
     }
@@ -131,6 +138,50 @@ export function UsersPage() {
     }
   };
 
+  // Client-side sorting
+  const sortedUsers = useMemo(() => {
+    if (!sortField) return users;
+
+    const sorted = [...users].sort((a, b) => {
+      let aValue: any = a[sortField as keyof AdminUser];
+      let bValue: any = b[sortField as keyof AdminUser];
+
+      // Handle undefined/null values
+      if (aValue === undefined || aValue === null) aValue = '';
+      if (bValue === undefined || bValue === null) bValue = '';
+
+      // Handle numeric fields
+      if (
+        sortField === 'postCount' ||
+        sortField === 'flaggedPostCount' ||
+        sortField === 'vibes' ||
+        sortField === 'age' ||
+        sortField === 'masculineFeminineScale'
+      ) {
+        aValue = Number(aValue) || 0;
+        bValue = Number(bValue) || 0;
+      }
+
+      // Handle boolean fields
+      if (sortField === 'isBanned') {
+        aValue = aValue ? 1 : 0;
+        bValue = bValue ? 1 : 0;
+      }
+
+      // Handle string fields (case-insensitive)
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return sorted;
+  }, [users, sortField, sortDirection]);
+
   const handleBulkBan = async () => {
     if (selectedUserIds.length === 0) return;
 
@@ -144,6 +195,46 @@ export function UsersPage() {
     } catch (err) {
       console.error('Error banning users:', err);
       alert('Failed to ban users');
+    }
+  };
+
+  const handleBulkDeletePosts = async () => {
+    if (selectedUserIds.length === 0) return;
+
+    if (
+      !confirm(
+        `Delete ALL posts from ${selectedUserIds.length} selected users? This cannot be undone.`
+      )
+    )
+      return;
+
+    try {
+      await api.delete('/admin/users/bulk/posts', { data: { userIds: selectedUserIds } });
+      setSelectedUserIds([]);
+      await fetchUsers();
+    } catch (err) {
+      console.error('Error deleting posts:', err);
+      alert('Failed to delete posts');
+    }
+  };
+
+  const handleBulkDeleteUsers = async () => {
+    if (selectedUserIds.length === 0) return;
+
+    if (
+      !confirm(
+        `Delete ${selectedUserIds.length} users? Their posts will be anonymized. This cannot be undone.`
+      )
+    )
+      return;
+
+    try {
+      await api.delete('/admin/users/bulk', { data: { userIds: selectedUserIds } });
+      setSelectedUserIds([]);
+      await fetchUsers();
+    } catch (err) {
+      console.error('Error deleting users:', err);
+      alert('Failed to delete users');
     }
   };
 
@@ -216,9 +307,27 @@ export function UsersPage() {
           </span>
 
           {selectedUserIds.length > 0 && (
-            <Button variant="destructive" size="sm" onClick={handleBulkBan} disabled={!isOnline}>
-              Ban Selected
-            </Button>
+            <>
+              <Button variant="destructive" size="sm" onClick={handleBulkBan} disabled={!isOnline}>
+                Ban Selected
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleBulkDeletePosts}
+                disabled={!isOnline}
+              >
+                Delete Posts
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleBulkDeleteUsers}
+                disabled={!isOnline}
+              >
+                Delete Users
+              </Button>
+            </>
           )}
         </div>
 
@@ -257,10 +366,10 @@ export function UsersPage() {
         </div>
       )}
 
-      {!isLoading && !error && users.length > 0 && (
+      {!isLoading && !error && sortedUsers.length > 0 && (
         <div data-testid="users-list">
           <UsersTable
-            users={users}
+            users={sortedUsers}
             selectedUserIds={selectedUserIds}
             onSelectUser={handleSelectUser}
             onSelectAll={handleSelectAll}
@@ -272,46 +381,6 @@ export function UsersPage() {
             sortDirection={sortDirection}
             onSort={handleSort}
           />
-        </div>
-      )}
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2" data-testid="pagination-controls">
-          <Button
-            variant="outline"
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            data-testid="pagination-prev"
-          >
-            Previous
-          </Button>
-
-          <div className="flex items-center gap-2" data-testid="pagination-info">
-            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              const pageNum = currentPage <= 3 ? i + 1 : currentPage + i - 2;
-              if (pageNum > totalPages) return null;
-              return (
-                <Button
-                  key={pageNum}
-                  variant={pageNum === currentPage ? 'primary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setCurrentPage(pageNum)}
-                >
-                  {pageNum}
-                </Button>
-              );
-            })}
-          </div>
-
-          <Button
-            variant="outline"
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            data-testid="pagination-next"
-          >
-            Next
-          </Button>
         </div>
       )}
     </div>
