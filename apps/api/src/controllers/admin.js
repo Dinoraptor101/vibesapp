@@ -209,7 +209,10 @@ const getUsers = async (req, res) => {
     const skip = (page - 1) * limit;
 
     // Build query
-    const query = {};
+    const query = {
+      // Exclude deleted users from admin panel
+      isDeleted: { $ne: true },
+    };
 
     // Search by username
     if (search) {
@@ -1227,6 +1230,119 @@ const cleanupTestData = async (_req, res) => {
   }
 };
 
+// Bulk delete users
+const bulkDeleteUsers = async (req, res) => {
+  const { userIds } = req.body;
+
+  if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'userIds array is required',
+    });
+  }
+
+  try {
+    let totalAnonymizedPosts = 0;
+
+    for (const userId of userIds) {
+      const user = await User.findOne({ userId });
+      if (!user) {
+        console.log(`[Admin] User ${userId} not found, skipping`);
+        continue;
+      }
+
+      // Generate random 4-digit suffix for anonymization
+      const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+      const anonymizedUsername = `deleted-${randomSuffix}`;
+
+      // Anonymize all user's posts
+      const updateResult = await Post.updateMany(
+        { 'user.userId': userId },
+        {
+          $set: {
+            'user.userName': anonymizedUsername,
+            'user.userId': 'deleted-user',
+            'user.userAvatar': '',
+          },
+        }
+      );
+
+      totalAnonymizedPosts += updateResult.modifiedCount;
+
+      // Soft delete user
+      user.isBanned = true;
+      user.bannedAt = new Date();
+      user.isDeleted = true;
+      user.deletedAt = new Date();
+      user.userName = anonymizedUsername;
+      await user.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Deleted ${userIds.length} users`,
+      deletedCount: userIds.length,
+      anonymizedPosts: totalAnonymizedPosts,
+    });
+  } catch (error) {
+    console.error('Error bulk deleting users:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error bulk deleting users',
+      error: error.message,
+    });
+  }
+};
+
+// Bulk delete all posts by selected users
+const bulkDeletePostsByUsers = async (req, res) => {
+  const { userIds } = req.body;
+
+  if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'userIds array is required',
+    });
+  }
+
+  try {
+    let totalDeletedPosts = 0;
+
+    for (const userId of userIds) {
+      const posts = await Post.find({ 'user.userId': userId });
+
+      // Delete images from S3
+      for (const post of posts) {
+        try {
+          await s3.deleteObject({
+            Bucket: process.env.AWS_S3_BUCKET,
+            Key: post.image,
+          });
+        } catch (error) {
+          console.error(`Error deleting image for post ${post._id}:`, error);
+        }
+      }
+
+      // Delete all posts
+      const result = await Post.deleteMany({ 'user.userId': userId });
+      totalDeletedPosts += result.deletedCount;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Deleted ${totalDeletedPosts} posts from ${userIds.length} users`,
+      deletedCount: totalDeletedPosts,
+    });
+  } catch (error) {
+    console.error('Error bulk deleting posts by users:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error bulk deleting posts by users',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   adminLogin,
   updateBalance,
@@ -1239,6 +1355,8 @@ module.exports = {
   deleteUser,
   getUserPosts,
   bulkDeleteUserPosts,
+  bulkDeleteUsers,
+  bulkDeletePostsByUsers,
   getDashboardMetrics,
   getActivityData,
   getSettings,

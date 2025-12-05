@@ -14,6 +14,8 @@ const {
   deleteUser,
   getUserPosts,
   bulkDeleteUserPosts,
+  bulkDeleteUsers,
+  bulkDeletePostsByUsers,
   getDashboardMetrics,
   getActivityData,
   getSettings,
@@ -53,6 +55,12 @@ router.delete('/posts', deletePosts);
 
 // User management routes
 router.get('/users', getUsers);
+
+// Bulk operations (MUST be before parameterized routes to avoid matching :userId)
+router.delete('/users/bulk', bulkDeleteUsers);
+router.delete('/users/bulk/posts', bulkDeletePostsByUsers);
+
+// Individual user routes (parameterized - must come after specific paths)
 router.post('/users/:userId/toggle-ban', toggleBanUser);
 
 // Phase 3.4: Ban user (Strike 4 + hide all posts)
