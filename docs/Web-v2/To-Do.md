@@ -22,6 +22,7 @@
 - [ ] Implement username search - Update `apps/api/src/controllers/searchController.js` to add case-insensitive exact username matching alongside caption search.
 - [ ] Implement hashtag extraction and search - Add hashtag parsing on post creation in `apps/api/src/models/Post.js`, store as lowercase array field, and update search endpoint to query hashtags specifically.
 - [ ] Implement Strike System frontend UI - Build Strike Warning Modal, posting restriction checks, cooldown timer display, and strike history view in Settings consuming existing backend `User.getCurrentRestrictions()` data.
+- [ ] Email notifications for Admin Panel "service is not setup yet"
 
 ### Security & Infrastructure
 - [ ] Track and flag accounts by IP/location - Add IP tracking middleware in `apps/api/src/middleware/` and location clustering logic to detect multiple accounts, store flags in User model, expose in admin dashboard.
