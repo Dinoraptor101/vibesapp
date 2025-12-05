@@ -7,7 +7,7 @@
  * Features:
  * - Platform-specific instructions (iOS Safari vs Android Chrome)
  * - Full-screen modal for clarity
- * - 7-day dismissal period (localStorage)
+ * - 1-day dismissal period (localStorage)
  * - Mobile-only (excludes tablets/desktop)
  * - "Continue in browser" option (small, unobtrusive)
  */
@@ -16,11 +16,10 @@ import { Download, Share, MoreVertical, Plus, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const STORAGE_KEY = 'pwa-install-dismissed';
-const DISMISS_DURATION_DAYS = 7;
+const DISMISS_DURATION_DAYS = 1;
 
-// ⚠️ DEBUG: Uncomment ONE of these lines to test on desktop
+// ⚠️ DEBUG: Uncomment this line to test on desktop
 // const DEBUG_FORCE_PLATFORM: 'ios' | 'android' | null = 'ios';
-// const DEBUG_FORCE_PLATFORM: 'ios' | 'android' | null = 'android';
 const DEBUG_FORCE_PLATFORM: 'ios' | 'android' | null = null; // Normal behavior
 
 /**
