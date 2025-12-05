@@ -7,7 +7,7 @@ const sseManager = require('../handlers/sseManager');
  * Returns activities sorted by newest first
  * Query params:
  * - showRead: 'true' to include read activities (default: false, unread only)
- * - maxAge: hours to look back (default: 48 for read activities)
+ * - maxAge: hours to look back (default: 720 (30 days) for read activities)
  */
 const getActivities = async (req, res) => {
   try {
@@ -21,8 +21,8 @@ const getActivities = async (req, res) => {
     if (showRead !== 'true') {
       filter.isRead = false;
     } else {
-      // If showing read, limit to recent activities (last 48 hours)
-      const maxAge = 48; // hours
+      // If showing read, limit to recent activities (last 30 days)
+      const maxAge = 720; // hours (30 days)
       const cutoffDate = new Date(Date.now() - maxAge * 60 * 60 * 1000);
       filter.createdAt = { $gte: cutoffDate };
     }
