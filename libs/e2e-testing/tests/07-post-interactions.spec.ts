@@ -482,6 +482,7 @@ function getApiHeaders(pigeonId: string) {
     'Content-Type': 'application/json',
     'x-api-key': apiKey,
     'x-pigeon-id': pigeonId,
+    'x-e2e-bypass': 'e2e-test-bypass-secret-token-2024', // E2E test bypass for reCAPTCHA
   };
 }
 
@@ -505,6 +506,7 @@ async function createUserForReporting(
       birthMonth: 6,
       sex: 'male',
       location: userData.location || TEST_LOCATION_API,
+      recaptchaToken: 'bypass', // Required field but bypassed via x-e2e-bypass header
     },
   });
 
