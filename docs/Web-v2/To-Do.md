@@ -1,5 +1,7 @@
 ## 📋 Task Tracker (Generated Dec 3, 2025)
 
+> **🔍 Code Cleanup Required**: See [Code-Cleanup-Report.md](./Code-Cleanup-Report.md) for comprehensive analysis of abandoned code, versioned files, and safe deletion candidates (~780 lines of cleanup identified across 6 files).
+
 ### Required For Release
 - [x] Enhance UserMenu animations - Improve `apps/web-v2/src/components/layout/UserMenu.tsx` with custom CSS transitions or framer-motion overlays beyond current Radix fade-in defaults for smoother menu appearance.
 - [x] Reduce mobile padding on Profile page - Adjust horizontal padding in `apps/web-v2/src/pages/ProfilePage.tsx` specifically for mobile viewports without affecting other pages.
