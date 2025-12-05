@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { S3 } = require('@aws-sdk/client-s3');
 const Post = require('../models/Post');
 const User = require('../models/User');
 const Settings = require('../models/Settings');
@@ -19,15 +18,6 @@ const {
   transformPost,
   getCommentCount,
 } = require('../utils/postTransformer');
-
-// Initialize S3 with correct AWS configuration
-const s3 = new S3({
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  },
-  region: process.env.AWS_REGION,
-});
 
 // Create a post or reply
 const createPost = async (req, res) => {
@@ -489,26 +479,6 @@ const deletePost = async (req, res) => {
   } catch (err) {
     console.error('Error:', err);
     res.status(500).json({ error: err.message });
-  }
-};
-
-const deleteImageFromS3 = async (imageKey) => {
-  if (!imageKey) {
-    console.log('No image to delete');
-    return;
-  }
-
-  const params = {
-    Bucket: process.env.AWS_S3_BUCKET,
-    Key: imageKey,
-  };
-
-  try {
-    await s3.deleteObject(params);
-    console.log('Image deleted from S3');
-  } catch (err) {
-    console.error('Error deleting image from S3:', err);
-    throw err;
   }
 };
 

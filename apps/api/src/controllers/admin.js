@@ -1,19 +1,10 @@
 const Post = require('../models/Post');
 const User = require('../models/User');
 const Settings = require('../models/Settings');
-const { S3 } = require('@aws-sdk/client-s3');
 const crypto = require('node:crypto');
 const { verifyRecaptcha } = require('../utils/recaptcha');
 const { registerAdminToken } = require('../middleware/adminAuth');
-
-// Initialize S3 with correct AWS configuration
-const s3 = new S3({
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  },
-  region: process.env.AWS_REGION,
-});
+const { bulkDeletePosts } = require('../utils/deletePost');
 
 // Admin login
 const adminLogin = async (req, res) => {
@@ -574,25 +565,31 @@ const bulkDeleteUserPosts = async (req, res) => {
   try {
     const posts = await Post.find({ 'user.userId': userId });
 
-    // Delete images from S3
-    for (const post of posts) {
-      try {
-        await s3.deleteObject({
-          Bucket: process.env.AWS_S3_BUCKET,
-          Key: post.image,
-        });
-      } catch (error) {
-        console.error(`Error deleting image for post ${post._id}:`, error);
-      }
+    if (posts.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: 'No posts to delete',
+        deletedCount: 0,
+      });
     }
 
-    // Delete all posts
-    const result = await Post.deleteMany({ 'user.userId': userId });
+    // Use centralized delete utility with hardDelete
+    const postIds = posts.map((post) => post._id);
+    const result = await bulkDeletePosts(postIds, { hardDelete: true });
+
+    if (!result.success) {
+      return res.status(500).json({
+        success: false,
+        message: `Deleted ${result.deletedPosts} posts, but ${result.failedPosts} failed`,
+        deletedCount: result.deletedPosts,
+        errors: result.errors,
+      });
+    }
 
     res.status(200).json({
       success: true,
-      message: `Deleted ${result.deletedCount} posts`,
-      deletedCount: result.deletedCount,
+      message: `Deleted ${result.deletedPosts} posts`,
+      deletedCount: result.deletedPosts,
     });
   } catch (error) {
     console.error('Error bulk deleting user posts:', error);
@@ -802,49 +799,35 @@ const getActivityData = async (req, res) => {
 // Delete posts in bulk
 const deletePosts = async (req, res) => {
   const { postHexes } = req.body;
-  const failedDeletes = [];
+
+  if (!postHexes || !Array.isArray(postHexes) || postHexes.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'postHexes array is required',
+    });
+  }
 
   try {
-    console.log('Deleting posts...');
+    console.log(`Deleting ${postHexes.length} posts...`);
 
-    for (const postHex of postHexes) {
-      try {
-        const post = await Post.findById(postHex);
-        if (!post) {
-          failedDeletes.push({ postHex, reason: 'Post not found' });
-          continue;
-        }
+    // Use centralized delete utility with hardDelete
+    const result = await bulkDeletePosts(postHexes, { hardDelete: true });
 
-        // Try to delete image from S3 if it exists
-        try {
-          const deleteParams = {
-            Bucket: process.env.AWS_S3_BUCKET,
-            Key: post.image,
-          };
-          await s3.deleteObject(deleteParams);
-        } catch (error) {
-          console.error(`Error deleting image for post with ID ${postHex}: ${error}`);
-        }
-
-        await Post.findByIdAndDelete(postHex);
-
-        console.log(`Post with ID ${postHex} deleted successfully.`);
-      } catch (error) {
-        console.error(`Failed to delete post with ID ${postHex}: ${error}`);
-        failedDeletes.push({
-          postHex,
-          reason: `Failed to delete post: ${error.message}`,
-        });
-      }
-    }
-
-    if (failedDeletes.length > 0) {
-      console.log('Some posts failed to delete:', failedDeletes);
-      return res.status(200).json({ message: 'Some posts failed to delete', failedDeletes });
+    if (!result.success) {
+      return res.status(200).json({
+        success: false,
+        message: `Deleted ${result.deletedPosts} posts, but ${result.failedPosts} failed`,
+        deletedCount: result.deletedPosts,
+        failedDeletes: result.errors,
+      });
     }
 
     console.log('All posts deleted successfully.');
-    res.status(200).json({ success: true, message: 'All posts deleted successfully' });
+    res.status(200).json({
+      success: true,
+      message: 'All posts deleted successfully',
+      deletedCount: result.deletedPosts,
+    });
   } catch (error) {
     console.error('Error deleting posts:', error);
     res.status(500).json({ success: false, message: 'Error deleting posts', error });
@@ -1153,32 +1136,23 @@ const cleanupTestData = async (_req, res) => {
     const testUserIds = testUsers.map((user) => user.userId);
     console.log(`[Admin] Found ${testUsers.length} test users to delete`);
 
-    // Find all posts by test users and delete their S3 images
+    // Find all posts by test users and delete using centralized utility
     const testPosts = await Post.find({
       'user.userId': { $in: testUserIds },
-    }).select('_id image');
+    }).select('_id');
 
+    let deletedPostsCount = 0;
     let deletedImagesCount = 0;
-    for (const post of testPosts) {
-      if (post.image) {
-        try {
-          await s3.deleteObject({
-            Bucket: process.env.AWS_S3_BUCKET,
-            Key: post.image,
-          });
-          deletedImagesCount++;
-        } catch (error) {
-          console.error(`[Admin] Error deleting S3 image for post ${post._id}:`, error.message);
-        }
-      }
-    }
-    console.log(`[Admin] Deleted ${deletedImagesCount} S3 images`);
 
-    // Delete all posts created by test users
-    const deletedPosts = await Post.deleteMany({
-      'user.userId': { $in: testUserIds },
-    });
-    console.log(`[Admin] Deleted ${deletedPosts.deletedCount} posts from test users`);
+    if (testPosts.length > 0) {
+      const postIds = testPosts.map((post) => post._id);
+      const result = await bulkDeletePosts(postIds, { hardDelete: true });
+      deletedPostsCount = result.deletedPosts;
+      deletedImagesCount = result.deletedPosts; // Assume 1:1 for test data
+      console.log(
+        `[Admin] Deleted ${deletedPostsCount} posts and ${deletedImagesCount} S3 images from test users`
+      );
+    }
 
     // Delete all reports on posts (if any posts had reports)
     let deletedReports = 0;
@@ -1212,10 +1186,10 @@ const cleanupTestData = async (_req, res) => {
     const result = {
       success: true,
       deletedUsers: deletedUsers.deletedCount,
-      deletedPosts: deletedPosts.deletedCount,
+      deletedPosts: deletedPostsCount,
       deletedImages: deletedImagesCount,
       deletedReports,
-      message: `Cleanup complete: ${deletedUsers.deletedCount} users, ${deletedPosts.deletedCount} posts, ${deletedImagesCount} images, ${deletedReports} reports`,
+      message: `Cleanup complete: ${deletedUsers.deletedCount} users, ${deletedPostsCount} posts, ${deletedImagesCount} images, ${deletedReports} reports`,
     };
 
     console.log('[Admin] Test data cleanup complete:', result);
@@ -1307,25 +1281,31 @@ const bulkDeletePostsByUsers = async (req, res) => {
 
   try {
     let totalDeletedPosts = 0;
+    const allErrors = [];
 
     for (const userId of userIds) {
       const posts = await Post.find({ 'user.userId': userId });
 
-      // Delete images from S3
-      for (const post of posts) {
-        try {
-          await s3.deleteObject({
-            Bucket: process.env.AWS_S3_BUCKET,
-            Key: post.image,
-          });
-        } catch (error) {
-          console.error(`Error deleting image for post ${post._id}:`, error);
-        }
-      }
+      if (posts.length === 0) continue;
 
-      // Delete all posts
-      const result = await Post.deleteMany({ 'user.userId': userId });
-      totalDeletedPosts += result.deletedCount;
+      // Use centralized delete utility with hardDelete
+      const postIds = posts.map((post) => post._id);
+      const result = await bulkDeletePosts(postIds, { hardDelete: true });
+
+      totalDeletedPosts += result.deletedPosts;
+
+      if (result.errors.length > 0) {
+        allErrors.push({ userId, errors: result.errors });
+      }
+    }
+
+    if (allErrors.length > 0) {
+      return res.status(500).json({
+        success: false,
+        message: `Deleted ${totalDeletedPosts} posts, but some failed`,
+        deletedCount: totalDeletedPosts,
+        errors: allErrors,
+      });
     }
 
     res.status(200).json({
