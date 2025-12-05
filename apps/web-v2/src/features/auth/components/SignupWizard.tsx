@@ -348,7 +348,9 @@ export function SignupWizard() {
       console.log('Signup successful, using Pigeon ID from cookie for login');
 
       // Auto-login with the Pigeon ID (now stored in cookie)
-      await login(signupData.pigeonId);
+      // Generate a NEW reCAPTCHA token for login (tokens can only be used once)
+      const loginRecaptchaToken = await handleRecaptchaVerify();
+      await login(signupData.pigeonId, loginRecaptchaToken);
 
       // Navigate to home
       navigate('/');

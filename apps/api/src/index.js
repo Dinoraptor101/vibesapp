@@ -18,7 +18,14 @@ const corsOptions = {
     'https://dist-gamma-cyan.vercel.app', // Vercel QA frontend
   ],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'x-pigeon-id', 'x-admin-token'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'x-api-key',
+    'x-pigeon-id',
+    'x-admin-token',
+    'x-e2e-bypass',
+  ],
   optionsSuccessStatus: 200,
 };
 
