@@ -6,11 +6,18 @@
  */
 
 import { expect, test } from '@playwright/test';
-import { clearAdminSession } from './helpers/admin-auth';
+import { clearAdminSession, loginAsAdmin } from './helpers/admin-auth';
 
-// API base URL - dynamically set based on config
-const isQAEnvironment = process.env.PLAYWRIGHT_CONFIG_QA === 'true';
+// API base URL - determined by environment configuration
+const isQAEnvironment = process.env.ENVIRONMENT === 'qa';
 const API_BASE_URL = isQAEnvironment ? process.env.QA_BACKEND_URL : process.env.LOCAL_BACKEND_URL;
+
+console.log('🔧 Environment Debug:');
+console.log('  ENVIRONMENT:', process.env.ENVIRONMENT);
+console.log('  isQAEnvironment:', isQAEnvironment);
+console.log('  QA_BACKEND_URL:', process.env.QA_BACKEND_URL);
+console.log('  LOCAL_BACKEND_URL:', process.env.LOCAL_BACKEND_URL);
+console.log('  Final API_BASE_URL:', API_BASE_URL);
 
 test.describe('Admin Security - Authentication & Authorization', () => {
   test.beforeEach(async ({ page }) => {
@@ -67,15 +74,20 @@ test.describe('Admin Security - Authentication & Authorization', () => {
     // Login to get valid token
     await loginAsAdmin(page);
 
+    // Wait a moment for token to be properly set
+    await page.waitForTimeout(1000);
+
     // Get admin token from cookies
     const cookies = await page.context().cookies();
     const adminToken = cookies.find((c) => c.name === 'adminToken');
+
     expect(adminToken).toBeDefined();
 
     // Make authenticated request
     const response = await request.get(`${API_BASE_URL}/admin/metrics`, {
       headers: {
         'X-Admin-Token': adminToken?.value || '',
+        'Content-Type': 'application/json',
       },
     });
 
