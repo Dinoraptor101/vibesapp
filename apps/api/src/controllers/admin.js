@@ -1126,15 +1126,35 @@ const cleanupTestData = async (_req, res) => {
   try {
     console.log('[Admin] Starting test data cleanup...');
 
+    // Protected E2E test accounts - NEVER DELETE
+    const protectedUserIds = [
+      process.env.QA_TEST_USER_ID, // lunar-breeze-4302
+      process.env.QA_TEST_USER_2_ID, // VIXEN
+    ].filter(Boolean);
+
+    const protectedPigeonIds = [
+      process.env.QA_TEST_PIGEON_ID,
+      process.env.QA_TEST_PIGEON_2_ID,
+    ].filter(Boolean);
+
     // Find all test users (pigeonId matches test patterns)
     const testUsers = await User.find({
-      pigeonId: {
-        $regex: /^(test-|pigeon-author-|pigeon-reporter-|test-author-|test-reporter-)/i,
-      },
+      $and: [
+        {
+          pigeonId: {
+            $regex: /^(test-|pigeon-author-|pigeon-reporter-|test-author-|test-reporter-)/i,
+          },
+        },
+        // Exclude protected E2E test accounts
+        { userId: { $nin: protectedUserIds } },
+        { pigeonId: { $nin: protectedPigeonIds } },
+      ],
     }).select('userId pigeonId userName');
 
     const testUserIds = testUsers.map((user) => user.userId);
-    console.log(`[Admin] Found ${testUsers.length} test users to delete`);
+    console.log(
+      `[Admin] Found ${testUsers.length} test users to delete (protected: ${protectedUserIds.length})`
+    );
 
     // Find all posts by test users and delete using centralized utility
     const testPosts = await Post.find({
@@ -1175,11 +1195,17 @@ const cleanupTestData = async (_req, res) => {
     }
     console.log(`[Admin] Deleted ${deletedReports} reports from test users`);
 
-    // Delete all test users
+    // Delete all test users (excluding protected accounts)
     const deletedUsers = await User.deleteMany({
-      pigeonId: {
-        $regex: /^(test-|pigeon-author-|pigeon-reporter-|test-author-|test-reporter-)/i,
-      },
+      $and: [
+        {
+          pigeonId: {
+            $regex: /^(test-|pigeon-author-|pigeon-reporter-|test-author-|test-reporter-)/i,
+          },
+        },
+        { userId: { $nin: protectedUserIds } },
+        { pigeonId: { $nin: protectedPigeonIds } },
+      ],
     });
     console.log(`[Admin] Deleted ${deletedUsers.deletedCount} test users`);
 
