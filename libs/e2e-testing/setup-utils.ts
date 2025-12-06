@@ -9,6 +9,14 @@ import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 
 /**
+ * Check if tests are running against QA environment
+ * @returns true if ENVIRONMENT is set to 'qa', false otherwise
+ */
+export function isQAEnvironment(): boolean {
+  return process.env.ENVIRONMENT === 'qa';
+}
+
+/**
  * Load environment variables from .env file
  */
 export function loadEnvVariables(): void {

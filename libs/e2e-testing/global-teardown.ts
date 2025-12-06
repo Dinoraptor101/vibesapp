@@ -8,6 +8,7 @@
  */
 
 import { chromium } from '@playwright/test';
+import { isQAEnvironment } from './setup-utils';
 
 async function globalTeardown() {
   console.log('\n🧹 Starting test cleanup...');
@@ -25,9 +26,8 @@ async function globalTeardown() {
   const page = await context.newPage();
 
   try {
-    // Determine the base URL based on config marker from .env
-    const isQAEnvironment = process.env.PLAYWRIGHT_CONFIG_QA === 'true';
-    const baseURL = isQAEnvironment ? process.env.QA_BACKEND_BASE : process.env.LOCAL_BACKEND_BASE;
+    // Determine the base URL based on environment
+    const baseURL = isQAEnvironment() ? process.env.QA_BACKEND_BASE : process.env.LOCAL_BACKEND_BASE;
 
     // Call the cleanup endpoint
     const response = await page.request.delete(`${baseURL}/api/admin/cleanup-test-data`, {

@@ -7,14 +7,14 @@
 
 import { expect, test } from '@playwright/test';
 import { clearAdminSession, loginAsAdmin } from './helpers/admin-auth';
+import { isQAEnvironment } from '../helpers/test-post';
 
 // API base URL - determined by environment configuration
-const isQAEnvironment = process.env.ENVIRONMENT === 'qa';
-const API_BASE_URL = isQAEnvironment ? process.env.QA_BACKEND_URL : process.env.LOCAL_BACKEND_URL;
+const API_BASE_URL = isQAEnvironment() ? process.env.QA_BACKEND_URL : process.env.LOCAL_BACKEND_URL;
 
 console.log('🔧 Environment Debug:');
 console.log('  ENVIRONMENT:', process.env.ENVIRONMENT);
-console.log('  isQAEnvironment:', isQAEnvironment);
+console.log('  isQAEnvironment:', isQAEnvironment());
 console.log('  QA_BACKEND_URL:', process.env.QA_BACKEND_URL);
 console.log('  LOCAL_BACKEND_URL:', process.env.LOCAL_BACKEND_URL);
 console.log('  Final API_BASE_URL:', API_BASE_URL);
