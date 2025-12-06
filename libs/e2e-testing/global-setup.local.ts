@@ -1,88 +1,57 @@
 // global-setup.local.ts - LOCALHOST ENVIRONMENT SETUP
 import { chromium } from '@playwright/test';
-import * as path from 'path';
-import * as dotenv from 'dotenv';
-import * as fs from 'fs';
+import {
+  loadEnvVariables,
+  fetchUserIdByPigeonId,
+  createAuthCookies,
+  logRecaptchaBypass,
+} from './setup-utils';
 
 // Load environment variables from .env file and inject into process.env
-const envPath = path.join(__dirname, '.env');
-if (fs.existsSync(envPath)) {
-  const envConfig = dotenv.parse(fs.readFileSync(envPath));
-  // Inject all env vars into process.env so they're available to all tests
-  Object.keys(envConfig).forEach((key) => {
-    process.env[key] = envConfig[key];
-  });
-}
+loadEnvVariables();
 
 async function globalSetup() {
   console.log('🔧 Setting up test environment: Localhost (with dev servers)');
-  console.log(`   Cookie domain: localhost`);
-  console.log(`   Secure cookies: false\n`);
+  console.log('   Cookie domain: localhost');
+  console.log('   Secure cookies: false');
+  console.log('   Note: Uses same MongoDB Atlas as QA (shared test users)\n');
+
+  // Fetch userIds dynamically from API (uses same pigeonIds as QA)
+  const apiBase = process.env.LOCAL_BACKEND_BASE as string;
+  const userId1 = await fetchUserIdByPigeonId(process.env.QA_TEST_PIGEON_ID as string, apiBase);
+  const userId2 = await fetchUserIdByPigeonId(process.env.QA_TEST_2_PIGEON_ID as string, apiBase);
 
   const browser = await chromium.launch();
   const context = await browser.newContext();
-  await context.addCookies([
-    {
-      name: 'range',
-      value: '275',
-      domain: 'localhost',
-      path: '/',
-      expires: -1,
-      httpOnly: false,
-      secure: false,
-      sameSite: 'Lax',
-    },
-    {
-      name: 'user_location',
-      value: '%7B%22lat%22%3A37.42%2C%22lon%22%3A-77.46%7D',
-      domain: 'localhost',
-      path: '/',
-      expires: -1,
-      httpOnly: false,
-      secure: false,
-      sameSite: 'Lax',
-    },
-    {
-      name: 'userId',
-      value: 'aa521293-9cfe-4033-8166-c20f13474988',
-      domain: 'localhost',
-      path: '/',
-      expires: -1,
-      httpOnly: false,
-      secure: false,
-      sameSite: 'Lax',
-    },
-    {
-      name: 'pigeonId',
-      value: '0d536b38-33ce-48c5-958d-5b76015ce228',
-      domain: 'localhost',
-      path: '/',
-      expires: -1,
-      httpOnly: false,
-      secure: false,
-      sameSite: 'Lax',
-    },
-    {
-      name: 'e2eBypass',
-      value: 'e2e-test-bypass-secret-token-2024',
-      domain: 'localhost',
-      path: '/',
-      expires: -1,
-      httpOnly: false,
-      secure: false,
-      sameSite: 'Lax',
-    },
-  ]);
 
-  console.log('🔓 reCAPTCHA bypass cookie added:');
-  console.log('   - Cookie name: e2eBypass');
-  console.log('   - Token: e2e-test-bypass-secret-token-2024');
-  console.log('   - Domain: localhost');
-  console.log('   - Purpose: Bypass Google reCAPTCHA verification for E2E tests\n');
+  // Add authentication cookies for user 1
+  const cookies1 = createAuthCookies({
+    domain: 'localhost',
+    secure: false,
+    userId: userId1,
+    pigeonId: process.env.QA_TEST_PIGEON_ID as string,
+  });
+  await context.addCookies(cookies1);
+
+  logRecaptchaBypass('localhost');
 
   await context.storageState({ path: 'storageState.json' });
+
+  // Create second user storage state (for multi-user tests)
+  const context2 = await browser.newContext();
+  const cookies2 = createAuthCookies({
+    domain: 'localhost',
+    secure: false,
+    userId: userId2,
+    pigeonId: process.env.QA_TEST_2_PIGEON_ID as string,
+  });
+  await context2.addCookies(cookies2);
+
+  await context2.storageState({ path: 'storageState2.json' });
+  await context2.close();
+
   await browser.close();
 
-  console.log('✅ Localhost environment setup complete\n');
+  console.log('✅ Localhost environment setup complete (2 users)\n');
 }
 export default globalSetup;
