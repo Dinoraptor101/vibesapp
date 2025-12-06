@@ -3,6 +3,7 @@
  *
  * Manages filter state for the posts feed with mutually exclusive tabs.
  * Phase 4.9 (Nov 17, 2025): Simplified to tab-based filtering
+ * Bug Fix: Uses cached location only, never prompts for GPS
  */
 
 import { useEffect, useState } from 'react';
@@ -11,6 +12,7 @@ import {
   getProximityRadiusMeters,
   PROXIMITY_STORAGE_KEY,
 } from '@/features/settings/constants/proximity';
+import { locationService } from '@/lib/locationService';
 import type { FeedTab } from '../components/FilterBar';
 import type { PostFilters } from '../types';
 
@@ -22,54 +24,9 @@ interface UsePostFiltersReturn {
   hasLocation: boolean;
 }
 
-// Get user's current location from multiple sources
-async function getUserLocation(userProfileLocation?: {
-  latitude: number;
-  longitude: number;
-}): Promise<{ lat: number; lon: number } | null> {
-  // Try browser geolocation first
-  const browserLocation = await new Promise<{ lat: number; lon: number } | null>((resolve) => {
-    if (!navigator.geolocation) {
-      resolve(null);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        resolve({
-          lat: position.coords.latitude,
-          lon: position.coords.longitude,
-        });
-      },
-      (error) => {
-        console.error('Browser geolocation error:', error);
-        resolve(null);
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: 5000,
-        maximumAge: 300000, // 5 minutes
-      }
-    );
-  });
-
-  if (browserLocation) {
-    return browserLocation;
-  }
-
-  // Fall back to user's profile location
-  if (userProfileLocation) {
-    return {
-      lat: userProfileLocation.latitude,
-      lon: userProfileLocation.longitude,
-    };
-  }
-
-  return null;
-}
-
 /**
  * Hook for managing post feed filters with tab-based navigation
+ * Bug Fix: Uses cached location only, never prompts for GPS
  */
 export function usePostFilters(): UsePostFiltersReturn {
   const { user } = useAuth();
@@ -78,14 +35,15 @@ export function usePostFilters(): UsePostFiltersReturn {
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [proximityRadius, setProximityRadius] = useState(getProximityRadiusMeters);
 
-  // Get user location on mount
+  // Get cached user location on mount (never prompts for GPS)
   useEffect(() => {
-    getUserLocation(user?.location).then((location) => {
-      if (location) {
-        setUserLocation(location);
+    // For nearby posts, we just need coordinates (city/state not required)
+    locationService.getCoordinates(user || undefined).then((coordinates) => {
+      if (coordinates) {
+        setUserLocation({ lat: coordinates.lat, lon: coordinates.lon });
       }
     });
-  }, [user?.location]);
+  }, [user]);
 
   // Listen for localStorage changes (when user updates proximity in settings)
   useEffect(() => {

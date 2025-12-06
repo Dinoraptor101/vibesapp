@@ -15,6 +15,7 @@ import { Button } from '@/components/ui-next';
 import { useAuth } from '@/features/auth/context/useAuth';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { cn } from '@/lib/cn';
+import { locationService } from '@/lib/locationService';
 import { uploadImage } from '../api/s3Service';
 import type { ImageFile, UploadProgress } from '../utils/imageUtils';
 import { CaptionArticleToggle, type PostMode } from './CaptionArticleToggle';
@@ -59,53 +60,21 @@ export function CreatePostForm({ onSubmit, isSubmitting = false }: CreatePostFor
   // Get user's stored location as fallback
   const { user } = useAuth();
 
-  // Get location: try browser geolocation first, fallback to user's stored location
+  // Bug Fix: Get cached location only, never prompt for GPS
   useEffect(() => {
-    // Helper to set location from user profile
-    const setUserStoredLocation = () => {
-      if (user?.location) {
-        // User location may have latitude/longitude or lat/lon depending on source
-        const lat =
-          (user.location as { lat?: number; latitude?: number }).lat ??
-          (user.location as { lat?: number; latitude?: number }).latitude;
-        const lon =
-          (user.location as { lon?: number; longitude?: number }).lon ??
-          (user.location as { lon?: number; longitude?: number }).longitude;
-        if (lat && lon) {
-          setLocation({ lat, lon, city: user.location.city });
-          return true;
-        }
-      }
-      return false;
-    };
-
-    // If geolocation not supported, use stored location
-    if (!navigator.geolocation) {
-      console.warn('Geolocation not supported, using stored location');
-      setUserStoredLocation();
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocation({
-          lat: position.coords.latitude,
-          lon: position.coords.longitude,
+    // For post creation, we just need coordinates (city/state optional)
+    locationService.getCoordinates(user || undefined).then((coordinates) => {
+      if (coordinates) {
+        // Try to get full location data for display purposes
+        locationService.getCachedLocation(user || undefined).then((fullLocation) => {
+          setLocation({
+            lat: coordinates.lat,
+            lon: coordinates.lon,
+            city: fullLocation?.city,
+          });
         });
-      },
-      (err) => {
-        console.warn('Could not get browser location:', err.message);
-        // Fallback to user's stored location
-        if (!setUserStoredLocation()) {
-          console.warn('No stored location available');
-        }
-      },
-      {
-        timeout: 5000,
-        maximumAge: 300000, // 5 minutes
-        enableHighAccuracy: false,
       }
-    );
+    });
   }, [user]);
 
   // Auto-switch to article mode when text exceeds threshold (chars or newlines)
