@@ -14,7 +14,7 @@ const {
 const { checkPostingRestrictions } = require('../middleware/strikeEnforcement');
 const pigeonAuth = require('../middleware/pigeonAuth');
 
-router.post('/create', checkPostingRestrictions, createPost);
+router.post('/create', pigeonAuth, checkPostingRestrictions, createPost);
 router.get('/', pigeonAuth, getPosts);
 router.get('/search', searchPosts); // Search must come before /:id to avoid conflict
 router.get('/:id', getPostById);
