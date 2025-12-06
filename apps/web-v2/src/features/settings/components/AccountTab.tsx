@@ -93,7 +93,7 @@ export function AccountTab() {
     if (result) {
       const newCoords = { lat: result.lat, lon: result.lon };
       setLocationCoords(newCoords);
-      setLocationCity(result.city);
+      setLocationCity(result.city || '');
 
       // Auto-save GPS location immediately
       queueUpdate(
@@ -101,7 +101,7 @@ export function AccountTab() {
           location: {
             lat: result.lat,
             lon: result.lon,
-            city: result.city,
+            city: result.city || '',
           },
         },
         {

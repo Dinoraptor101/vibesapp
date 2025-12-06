@@ -6,6 +6,7 @@
 import { MapPin, Send } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocationGPS } from '@/hooks/useLocationGPS';
+import { locationService } from '@/lib/locationService';
 import './LocationStep.css'; // Import shake animation
 
 interface LocationStepProps {
@@ -34,38 +35,67 @@ export function LocationStep({ location, onLocationChange, onCityStateChange }: 
     }
   }, [isGettingLocation]);
 
+  // Restore cached location data when component mounts or location changes
+  useEffect(() => {
+    const restoreCachedLocation = async () => {
+      // If we have coordinates but no display text, try to restore from cache
+      if (location && !displayLocation) {
+        console.log('[LocationStep] Restoring cached location data for coordinates', location);
+
+        const restoration = await locationService.restoreLocationData(location);
+
+        if (restoration.displayText) {
+          console.log('[LocationStep] Found cached location data', restoration);
+          setDisplayLocation(restoration.displayText);
+          setCityName(restoration.displayText); // Also set for manual input
+
+          // Pass city and state to parent
+          if (onCityStateChange) {
+            if (restoration.isComplete && restoration.city && restoration.state) {
+              console.log('[LocationStep] Restoring complete location data');
+              onCityStateChange(restoration.city, restoration.state);
+            } else {
+              console.log('[LocationStep] Cached location incomplete, city/state not restored');
+              // Still try to extract what we have
+              const city = restoration.city || '';
+              const state = restoration.state || '';
+              onCityStateChange(city, state);
+            }
+          }
+        }
+      }
+    };
+
+    restoreCachedLocation();
+  }, [location, displayLocation, onCityStateChange]);
+
   // Auto-detect location on mount (ZEN: minimize interaction)
   useEffect(() => {
     if (!autoAttempted && !location) {
-      handleGetLocation(true); // Pass true for silent auto-detect
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount
+      (async () => {
+        const result = await getGPSLocation();
+        setAutoAttempted(true);
 
-  const handleGetLocation = async (isAutoDetect = false) => {
-    if (!isAutoDetect) {
-      setCityName(''); // Clear manual input when using GPS
-    }
+        if (result) {
+          onLocationChange({ lat: result.lat, lon: result.lon });
 
-    const result = await getGPSLocation();
-    setAutoAttempted(true);
+          // Use the location service to get properly formatted display text
+          const displayText = locationService.getDisplayText(result);
+          setDisplayLocation(displayText);
+          setCityName(displayText);
 
-    if (result) {
-      onLocationChange({ lat: result.lat, lon: result.lon });
-      setDisplayLocation(result.city);
-      // Extract city and state from the result and pass to parent
-      if (onCityStateChange && result.city) {
-        const parts = result.city.split(', ');
-        const city = parts[0] || '';
-        const state = parts[1] || '';
-        onCityStateChange(city, state);
-      }
-      setError('');
-      // ZEN: Show detected location, let user confirm (no auto-advance)
-    } else if (!isAutoDetect) {
-      setError('Unable to get your location. Please enter your city manually.');
+          // Pass city and state to parent
+          if (onCityStateChange) {
+            // For now, just use the city since that's what we reliably get from GPS
+            const city = result.city || '';
+            const state = ''; // Will be enhanced when we get state data
+            onCityStateChange(city, state);
+          }
+          setError('');
+        }
+      })();
     }
-  };
+  }, [autoAttempted, location, getGPSLocation, onLocationChange, onCityStateChange]);
 
   const handleManualLocationSubmit = async () => {
     if (!cityName.trim()) {
