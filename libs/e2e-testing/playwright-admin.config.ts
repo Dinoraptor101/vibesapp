@@ -4,10 +4,13 @@
 import { defineConfig } from '@playwright/test';
 import 'dotenv/config';
 
+// Set environment to local for admin tests
+process.env.ENVIRONMENT = 'local';
+
 console.log('🔍 Playwright Config: ADMIN TESTS ONLY (localhost)');
-console.log(`   baseURL: http://localhost:5173`);
-console.log(`   Servers: ENABLED`);
-console.log(`   Tests: admin/** only\n`);
+console.log('   baseURL: http://localhost:5173');
+console.log('   Servers: ENABLED');
+console.log('   Tests: admin/** only\n');
 
 export default defineConfig({
   testDir: './tests/admin',
