@@ -143,8 +143,8 @@ export function UsersPage() {
     if (!sortField) return users;
 
     const sorted = [...users].sort((a, b) => {
-      let aValue: any = a[sortField as keyof AdminUser];
-      let bValue: any = b[sortField as keyof AdminUser];
+      let aValue: AdminUser[keyof AdminUser] = a[sortField as keyof AdminUser];
+      let bValue: AdminUser[keyof AdminUser] = b[sortField as keyof AdminUser];
 
       // Handle undefined/null values
       if (aValue === undefined || aValue === null) aValue = '';

@@ -133,7 +133,7 @@ export function useBulkDeleteUsers() {
         message: string;
         deletedCount: number;
         anonymizedPosts: number;
-      }>('/admin/users/bulk', { userIds });
+      }>('/admin/users/bulk', { data: { userIds } });
     },
     onSuccess: (data) => {
       toast({
@@ -160,7 +160,7 @@ export function useBulkDeletePostsByUsers() {
     mutationFn: async (userIds: string[]) => {
       return await api.delete<{ success: boolean; message: string; deletedCount: number }>(
         '/admin/users/bulk/posts',
-        { userIds }
+        { data: { userIds } }
       );
     },
     onSuccess: (data) => {
