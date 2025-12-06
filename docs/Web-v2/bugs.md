@@ -44,3 +44,12 @@ When the Activity page is empty, the min-height is still longer than the mobile 
 ## Mobile Horizontal Padding Inconsistency ( could not reproduce on desktop, is this iOS Kiosk mode only? )
 Mobile view horizontal padding was fixed for posts in UserProfile page but the same standards were not applied to PostFeed (Homepage, Nearby, Following) and PostDetailPage. This affects only Mobile View. Like Bluesky, the distance between the image/post cards and the side of the screen should be minimal.
 **Reported:** 5 hours ago
+
+
+## PolarityStep should default to neutral state and next button disabled
+Similar to SexStep. we need a neutral circle state, with disabled button. encouraging users to make a choice rather than pressing the next button subconciously.
+
+## Show Recent hides the Unread
+Show recent should only show read activities
+unread activities should be displayed immeidately.
+once marked as read should disappear into show Recent.
