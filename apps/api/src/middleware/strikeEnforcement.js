@@ -1,6 +1,33 @@
 // Phase 3.4: Strike enforcement middleware
 const User = require('../models/User');
 
+// E2E test bypass token and account IDs
+const E2E_BYPASS_TOKEN = process.env.E2E_BYPASS_TOKEN;
+const E2E_TEST_USER_IDS = [
+  process.env.QA_TEST_USER_ID,
+  process.env.QA_TEST_USER_2_ID, // VIXEN (second test user)
+].filter(Boolean);
+
+/**
+ * Check if this is an E2E test request that should bypass striker system
+ */
+function isE2ETestBypass(req, userId) {
+  const bypassHeader = req.headers['x-e2e-bypass'];
+  const bypassCookie = req.cookies?.e2eBypass;
+  const isTestAccount = E2E_TEST_USER_IDS.includes(userId);
+
+  const hasBypassToken = bypassHeader === E2E_BYPASS_TOKEN || bypassCookie === E2E_BYPASS_TOKEN;
+
+  if (hasBypassToken && isTestAccount) {
+    console.log('✅ [Strike Enforcement] E2E test bypass APPROVED');
+    console.log(`   - User ID: ${userId}`);
+    console.log(`   - Bypass source: ${bypassHeader === E2E_BYPASS_TOKEN ? 'header' : 'cookie'}`);
+    return true;
+  }
+
+  return false;
+}
+
 /**
  * Middleware to check if user can perform posting actions based on strikes
  * Should be applied to routes that create posts, comments, or other content
@@ -13,6 +40,12 @@ const checkPostingRestrictions = async (req, res, next) => {
       return res.status(400).json({
         error: 'Missing user ID',
       });
+    }
+
+    // Check for E2E test bypass
+    if (isE2ETestBypass(req, userId)) {
+      console.log('   - Bypassing striker system checks for E2E test\n');
+      return next();
     }
 
     const user = await User.findOne({ userId });
@@ -63,6 +96,12 @@ const checkCommentRestrictions = async (req, res, next) => {
       return res.status(400).json({
         error: 'Missing user ID',
       });
+    }
+
+    // Check for E2E test bypass
+    if (isE2ETestBypass(req, userId)) {
+      console.log('   - Bypassing striker system checks for E2E test\n');
+      return next();
     }
 
     const user = await User.findOne({ userId });

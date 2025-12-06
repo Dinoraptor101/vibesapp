@@ -44,7 +44,7 @@ async function globalSetup() {
     },
     {
       name: 'userId',
-      value: 'aa521293-9cfe-4033-8166-c20f13474988',
+      value: process.env.QA_TEST_USER_ID,
       domain: 'qa.vibesapp.net',
       path: '/',
       expires: -1,
@@ -54,7 +54,7 @@ async function globalSetup() {
     },
     {
       name: 'pigeonId',
-      value: '0d536b38-33ce-48c5-958d-5b76015ce228',
+      value: process.env.QA_TEST_PIGEON_ID,
       domain: 'qa.vibesapp.net',
       path: '/',
       expires: -1,
@@ -81,9 +81,68 @@ async function globalSetup() {
   console.log('   - Purpose: Bypass Google reCAPTCHA verification for E2E tests\n');
 
   await context.storageState({ path: 'storageState.json' });
+
+  // Create second user storage state (VIXEN)
+  const context2 = await browser.newContext();
+  await context2.addCookies([
+    {
+      name: 'range',
+      value: '275',
+      domain: 'qa.vibesapp.net',
+      path: '/',
+      expires: -1,
+      httpOnly: false,
+      secure: true,
+      sameSite: 'Lax',
+    },
+    {
+      name: 'user_location',
+      value: '%7B%22lat%22%3A37.42%2C%22lon%22%3A-77.46%7D',
+      domain: 'qa.vibesapp.net',
+      path: '/',
+      expires: -1,
+      httpOnly: false,
+      secure: true,
+      sameSite: 'Lax',
+    },
+    {
+      name: 'userId',
+      value: process.env.QA_TEST_USER_2_ID as string,
+      domain: 'qa.vibesapp.net',
+      path: '/',
+      expires: -1,
+      httpOnly: false,
+      secure: true,
+      sameSite: 'Lax',
+    },
+    {
+      name: 'pigeonId',
+      value: process.env.QA_TEST_PIGEON_2_ID as string,
+      domain: 'qa.vibesapp.net',
+      path: '/',
+      expires: -1,
+      httpOnly: false,
+      secure: true,
+      sameSite: 'Lax',
+    },
+    {
+      name: 'e2eBypass',
+      value: 'e2e-test-bypass-secret-token-2024',
+      domain: 'qa.vibesapp.net',
+      path: '/',
+      expires: -1,
+      httpOnly: false,
+      secure: true,
+      sameSite: 'Lax',
+    },
+  ]);
+
+  await context2.storageState({ path: 'storageState2.json' });
+  await context2.close();
+
   await browser.close();
 
-  console.log('✅ QA environment setup complete\n');
+  console.log('✅ QA environment setup complete (2 users)\n');
 }
 
 export default globalSetup;
