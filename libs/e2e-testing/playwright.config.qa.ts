@@ -31,7 +31,7 @@ export default defineConfig({
   },
   retries: 0,
   workers: 2,
-  maxFailures: 3, // Fail-fast: stop after 3 failures to avoid wasting time on broken core
+  // maxFailures: 3, // Removed to see all test failures
   projects: [
     // Setup project: Core API tests must pass before other tests run
     {

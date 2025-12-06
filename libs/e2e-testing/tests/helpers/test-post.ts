@@ -17,6 +17,68 @@ const API_BASE_URL =
 
 const TEST_LOCATION = { lat: 37.41, lon: -77.46 }; // Richmond, VA
 
+// Automation-immune test user constants
+const AUTOMATION_BOTS = {
+  QA: 'test-automation-bot-qa',
+  LOCAL: 'test-automation-bot-local',
+};
+
+// Get the appropriate automation bot for current environment
+function getAutomationBot(): string {
+  return process.env.PLAYWRIGHT_CONFIG_QA === 'true' ? AUTOMATION_BOTS.QA : AUTOMATION_BOTS.LOCAL;
+}
+
+// Store and retrieve automation bot credentials
+function getAutomationBotCredentials(): { pigeonId: string; userId: string } {
+  const botId = getAutomationBot();
+  const credentialsPath = path.join(__dirname, '../../', `${botId}-credentials.json`);
+
+  try {
+    const credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf-8'));
+    return credentials;
+  } catch {
+    // Return the pigeonId for creation, userId will be set after user creation
+    return { pigeonId: botId, userId: '' };
+  }
+}
+
+function saveAutomationBotCredentials(credentials: { pigeonId: string; userId: string }): void {
+  const botId = getAutomationBot();
+  const credentialsPath = path.join(__dirname, '../../', `${botId}-credentials.json`);
+
+  fs.writeFileSync(credentialsPath, JSON.stringify(credentials, null, 2));
+  console.log(`🤖 Saved automation bot credentials for: ${botId}`);
+}
+
+// Ensure automation bot exists and return its credentials
+async function ensureAutomationBot(
+  request: APIRequestContext
+): Promise<{ pigeonId: string; userId: string }> {
+  const credentials = getAutomationBotCredentials();
+
+  // If we have a userId, the bot already exists
+  if (credentials.userId) {
+    return credentials;
+  }
+
+  // Create the automation bot
+  console.log(`🤖 Creating automation bot: ${credentials.pigeonId}`);
+  try {
+    const user = await createTestUser(request, {
+      pigeonId: credentials.pigeonId,
+      userName: `Automation Bot ${process.env.PLAYWRIGHT_CONFIG_QA === 'true' ? 'QA' : 'Local'}`,
+    });
+
+    const fullCredentials = { pigeonId: credentials.pigeonId, userId: user.userId };
+    saveAutomationBotCredentials(fullCredentials);
+    return fullCredentials;
+  } catch (error) {
+    console.error(`Failed to create automation bot: ${error}`);
+    // Return what we have and let the calling function handle the error
+    return credentials;
+  }
+}
+
 // Helper to get credentials from storage state
 function getCredentials(storageStateFile: string = 'storageState.json') {
   try {
@@ -179,23 +241,41 @@ export async function createTestPost(
 ) {
   const { caption = 'Test post for E2E', location = TEST_LOCATION, pigeonId } = options;
 
-  // Generate a unique pigeonId with timestamp if one is provided
-  // This prevents duplicate key errors when running multiple tests
-  let uniquePigeonId = pigeonId;
+  let postCreatorPigeonId: string;
+
   if (pigeonId) {
-    uniquePigeonId = `${pigeonId}-${Date.now()}`;
+    // Use specific pigeonId provided (for special cases)
+    const uniquePigeonId = `${pigeonId}-${Date.now()}`;
     await createTestUser(request, {
       pigeonId: uniquePigeonId,
       userName: `Test User ${uniquePigeonId.slice(-8)}`,
       location,
     });
+    postCreatorPigeonId = uniquePigeonId;
+  } else {
+    // Use automation bot by default (immune to bans/strikes)
+    try {
+      const botCredentials = await ensureAutomationBot(request);
+      postCreatorPigeonId = botCredentials.pigeonId;
+      console.log(`🤖 Using automation bot for post creation: ${postCreatorPigeonId}`);
+    } catch (error) {
+      console.warn(`🤖 Automation bot failed, falling back to unique user: ${error}`);
+      // Fallback: create unique user
+      const fallbackPigeonId = `test-fallback-${Date.now()}`;
+      await createTestUser(request, {
+        pigeonId: fallbackPigeonId,
+        userName: `Fallback User ${fallbackPigeonId.slice(-8)}`,
+        location,
+      });
+      postCreatorPigeonId = fallbackPigeonId;
+    }
   }
 
   // Upload test image to S3 and get the key
-  const imageKey = await uploadTestImage(request, uniquePigeonId);
+  const imageKey = await uploadTestImage(request, postCreatorPigeonId);
 
   const response = await request.post(`${API_BASE_URL}/api/posts/create`, {
-    headers: getApiHeaders(uniquePigeonId),
+    headers: getApiHeaders(postCreatorPigeonId),
     data: {
       text: caption,
       image: imageKey,
@@ -205,6 +285,46 @@ export async function createTestPost(
 
   if (response.status() !== 201) {
     const text = await response.text();
+
+    // If automation bot is banned (shouldn't happen with immunity), try fallback
+    if (response.status() === 403 && text.includes('banned') && !pigeonId) {
+      console.warn('🤖 Automation bot appears banned, trying fallback user...');
+      const fallbackPigeonId = `test-emergency-${Date.now()}`;
+      await createTestUser(request, {
+        pigeonId: fallbackPigeonId,
+        userName: `Emergency User ${fallbackPigeonId.slice(-8)}`,
+        location,
+      });
+
+      const fallbackImageKey = await uploadTestImage(request, fallbackPigeonId);
+      const fallbackResponse = await request.post(`${API_BASE_URL}/api/posts/create`, {
+        headers: getApiHeaders(fallbackPigeonId),
+        data: {
+          text: caption,
+          image: fallbackImageKey,
+          location,
+        },
+      });
+
+      if (fallbackResponse.status() !== 201) {
+        const fallbackText = await fallbackResponse.text();
+        throw new Error(
+          `Failed to create test post (fallback): ${fallbackResponse.status()} ${fallbackText}`
+        );
+      }
+
+      const fallbackData = await fallbackResponse.json();
+      const fallbackPost = fallbackData.post || fallbackData;
+
+      if (!fallbackPost || !fallbackPost._id) {
+        throw new Error(
+          `Invalid post response structure (fallback): ${JSON.stringify(fallbackData)}`
+        );
+      }
+
+      return fallbackPost;
+    }
+
     throw new Error(`Failed to create test post: ${response.status()} ${text}`);
   }
 
@@ -298,19 +418,27 @@ export async function createFlaggedTestPosts(
 
   console.log(`Creating ${count} flagged test posts...`);
 
-  // Create post author
-  const author = await createTestUser(request, {
-    pigeonId: `test-author-${timestamp}`,
-    userName: 'Test Post Author',
-  });
+  // Use automation bot as post author (immune to bans)
+  let authorCredentials: { pigeonId: string; userId: string };
+  try {
+    authorCredentials = await ensureAutomationBot(request);
+    console.log(`🤖 Using automation bot for flagged posts: ${authorCredentials.pigeonId}`);
+  } catch (error) {
+    console.warn(`🤖 Automation bot failed for flagged posts, using unique author: ${error}`);
+    const author = await createTestUser(request, {
+      pigeonId: `test-author-${timestamp}`,
+      userName: 'Test Post Author',
+    });
+    authorCredentials = { pigeonId: author.pigeonId, userId: author.userId };
+  }
 
   // Upload a single test image to reuse
-  const imageKey = await uploadTestImage(request, author.pigeonId);
+  const imageKey = await uploadTestImage(request, authorCredentials.pigeonId);
 
   for (let i = 0; i < count; i++) {
     // Create a post
     const response = await request.post(`${API_BASE_URL}/api/posts/create`, {
-      headers: getApiHeaders(author.pigeonId),
+      headers: getApiHeaders(authorCredentials.pigeonId),
       data: {
         text: `Test flagged post ${i + 1} - created at ${new Date().toISOString()}`,
         image: imageKey,
