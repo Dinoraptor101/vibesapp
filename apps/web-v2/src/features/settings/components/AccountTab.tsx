@@ -64,7 +64,7 @@ export function AccountTab() {
       setMbti(userMbti);
 
       if (!userPolarity || (userPolarity !== 'YIN' && userPolarity !== 'YANG')) {
-        setPolarity('NEUTRAL');
+        setPolarity(null);
         setPolarityError(true);
       } else {
         setPolarity(userPolarity);
@@ -269,7 +269,7 @@ export function AccountTab() {
     if (!isOnline) return;
     if (!user?.userId) {
       console.error('User ID not available');
-      setPolarity('NEUTRAL');
+      setPolarity(null);
       setPolarityError(true);
       return;
     }
@@ -281,7 +281,7 @@ export function AccountTab() {
 
       // Determine new polarity
       let newPolarity: PolarityValue;
-      if (polarity === 'NEUTRAL') {
+      if (polarity === null) {
         newPolarity = 'YANG'; // Default when recovering
       } else {
         newPolarity = serverPolarity === 'YIN' ? 'YANG' : 'YIN';
@@ -295,7 +295,7 @@ export function AccountTab() {
       setPolarityError(false);
     } catch (error) {
       console.error('Failed to update polarity:', error);
-      setPolarity('NEUTRAL');
+      setPolarity(null);
       setPolarityError(true);
     }
   };
