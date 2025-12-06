@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export type PolarityValue = 'YIN' | 'YANG' | 'NEUTRAL';
+export type PolarityValue = 'YIN' | 'YANG' | null;
 
 interface PolarityToggleProps {
   value: PolarityValue;
@@ -38,11 +38,9 @@ export function PolarityToggle({
       }
     } else {
       // Simple toggle handler (for SignupWizard)
-      if (value === 'NEUTRAL') {
-        onChange('YANG'); // Default to YANG when recovering from neutral
-      } else {
-        onChange(value === 'YIN' ? 'YANG' : 'YIN');
-      }
+      // Start with YIN if null, otherwise toggle
+      const newValue = value === null ? 'YIN' : value === 'YIN' ? 'YANG' : 'YIN';
+      onChange(newValue);
     }
   };
 
@@ -65,21 +63,19 @@ export function PolarityToggle({
         }`}
         aria-label={
           ariaLabel ||
-          `Current polarity: ${value === 'NEUTRAL' ? 'Unknown - click to set' : value}${
-            isLoading ? ' (updating...)' : ''
-          }`
+          `Current polarity: ${value || 'None - click to select'}${isLoading ? ' (updating...)' : ''}`
         }
       >
         <span
           className={`absolute inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-lg shadow-lg transition-all duration-300 ease-in-out ${
-            value === 'NEUTRAL'
-              ? 'translate-x-9 from-gray-400 to-gray-500'
-              : value === 'YANG'
-                ? 'translate-x-16 from-orange-400 to-red-500'
-                : 'translate-x-2 from-blue-400 to-purple-500'
+            value === 'YANG'
+              ? 'translate-x-16 from-orange-400 to-red-500'
+              : value === 'YIN'
+                ? 'translate-x-2 from-blue-400 to-purple-500'
+                : 'translate-x-9 from-gray-400 to-gray-500'
           }`}
         >
-          {value === 'NEUTRAL' ? '○' : value === 'YIN' ? '🌙' : '☀️'}
+          {value === 'YIN' ? '🌙' : value === 'YANG' ? '☀️' : '○'}
         </span>
       </button>
 

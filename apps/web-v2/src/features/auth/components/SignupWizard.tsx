@@ -2,7 +2,8 @@ import { Check, Copy, RotateCcw } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useNavigate } from 'react-router-dom';
-import { PolarityToggle, type PolarityValue } from '@/components/ui/PolarityToggle';
+import { BiologicalSexToggle } from '@/components/ui/BiologicalSexToggle';
+import { PolarityToggle } from '@/components/ui/PolarityToggle';
 import { Button, Input, Logo, Textarea } from '@/components/ui-next';
 import { useAuth } from '@/features/auth';
 import { uploadImage } from '@/features/posts/api/s3Service';
@@ -19,7 +20,7 @@ interface SignupData {
   pigeonId: string;
   userName: string;
   mbtiPersonality: string;
-  polarity: PolarityValue;
+  polarity: 'YIN' | 'YANG' | null; // null during signup, required before submission
   location: { lat: number; lon: number } | null;
   city: string;
   state: string;
@@ -27,7 +28,7 @@ interface SignupData {
   bio?: string;
   birthYear: number;
   birthMonth: number;
-  sex: 'Male' | 'Female' | '';
+  sex: 'Male' | 'Female' | null; // null during signup, required before submission
 }
 
 const STEPS = [
@@ -116,14 +117,14 @@ export function SignupWizard() {
     pigeonId: '',
     userName: '',
     mbtiPersonality: '',
-    polarity: 'yang', // Default to yang
+    polarity: null, // User must select
     location: null,
     city: '',
     state: '',
     bio: '',
     birthYear: 0, // User must select
     birthMonth: 0, // User must select
-    sex: '',
+    sex: null, // User must select
   });
 
   const handleGeneratePigeonId = async () => {
@@ -297,8 +298,11 @@ export function SignupWizard() {
       if (!signupData.mbtiPersonality) {
         throw new Error('MBTI type is required');
       }
+      if (!signupData.sex) {
+        throw new Error('Please select your biological sex');
+      }
       if (!signupData.polarity) {
-        throw new Error('Polarity is required');
+        throw new Error('Please select your polarity (Yin or Yang)');
       }
       if (!signupData.location) {
         throw new Error('Location is required');
@@ -313,7 +317,7 @@ export function SignupWizard() {
         userName: signupData.userName,
         birthYear: signupData.birthYear,
         birthMonth: signupData.birthMonth,
-        sex: signupData.sex.toLowerCase(),
+        sex: (signupData.sex || 'other').toLowerCase(),
         location: signupData.location,
         city: signupData.city,
         state: signupData.state,
@@ -332,14 +336,14 @@ export function SignupWizard() {
         userName: signupData.userName,
         birthYear: signupData.birthYear,
         birthMonth: signupData.birthMonth,
-        sex: signupData.sex.toLowerCase() as 'male' | 'female' | 'other',
+        sex: (signupData.sex || 'other').toLowerCase() as 'male' | 'female' | 'other',
         location: {
           lat: signupData.location.lat,
           lon: signupData.location.lon,
           city: signupData.city || undefined,
           state: signupData.state || undefined,
         },
-        polarity: signupData.polarity,
+        polarity: (signupData.polarity || 'yin').toLowerCase() as 'yin' | 'yang',
         mbtiPersonality: signupData.mbtiPersonality,
         profilePictureUrl: signupData.profilePictureUrl,
         bio: signupData.bio || undefined,
@@ -587,35 +591,10 @@ export function SignupWizard() {
             </div>
 
             <div className="space-y-4 sm:space-y-6 rounded-lg border border-border bg-surface-elevated p-4 sm:p-6">
-              <div className="flex items-center justify-center">
-                <span className="w-16 text-right text-sm font-semibold text-text-primary">
-                  FEMALE
-                </span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setSignupData((prev) => ({
-                      ...prev,
-                      sex: prev.sex === 'Male' ? 'Female' : 'Male',
-                    }))
-                  }
-                  className="relative inline-flex h-14 w-28 mx-3 sm:mx-4 items-center rounded-full bg-surface ring-2 ring-border transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-purple focus:ring-offset-2"
-                  aria-label={`Current selection: ${signupData.sex || 'None'}`}
-                >
-                  <span
-                    className={`absolute inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-lg shadow-lg transition-all duration-300 ease-in-out ${
-                      signupData.sex === 'Male'
-                        ? 'translate-x-16 from-blue-400 to-cyan-500'
-                        : signupData.sex === 'Female'
-                          ? 'translate-x-2 from-pink-400 to-rose-500'
-                          : 'translate-x-9 from-gray-300 to-gray-400'
-                    }`}
-                  >
-                    {signupData.sex === 'Male' ? '♂️' : signupData.sex === 'Female' ? '♀️' : '○'}
-                  </span>
-                </button>
-                <span className="w-16 text-left text-sm font-semibold text-text-primary">MALE</span>
-              </div>
+              <BiologicalSexToggle
+                value={signupData.sex}
+                onChange={(value) => setSignupData((prev) => ({ ...prev, sex: value }))}
+              />
 
               <div className="grid grid-cols-2 gap-3 sm:gap-4 text-sm">
                 <div className="space-y-2 rounded-lg bg-surface p-3 sm:p-4">
@@ -674,11 +653,11 @@ export function SignupWizard() {
 
             <div className="space-y-4 sm:space-y-6 rounded-lg border border-border bg-surface-elevated p-4 sm:p-6">
               <PolarityToggle
-                value={signupData.polarity.toUpperCase() as PolarityValue}
+                value={signupData.polarity}
                 onChange={(value) =>
                   setSignupData((prev) => ({
                     ...prev,
-                    polarity: value.toLowerCase() as 'yin' | 'yang',
+                    polarity: value,
                   }))
                 }
               />
@@ -859,6 +838,7 @@ export function SignupWizard() {
                 (currentStep === 4 && (!signupData.birthMonth || !signupData.birthYear)) ||
                 (currentStep === 5 && !signupData.sex) ||
                 (currentStep === 6 && !signupData.mbtiPersonality) ||
+                (currentStep === 7 && !signupData.polarity) ||
                 (currentStep === 8 && !signupData.location)
               }
               className="ml-auto"
