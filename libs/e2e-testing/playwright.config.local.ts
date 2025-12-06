@@ -4,6 +4,9 @@
 import { defineConfig } from '@playwright/test';
 import 'dotenv/config';
 
+// Set environment to local
+process.env.ENVIRONMENT = 'local';
+
 console.log('🔍 Playwright Config: LOCALHOST (with dev servers)');
 console.log(`   baseURL: http://localhost:5173`);
 console.log(`   Servers: ENABLED\n`);
