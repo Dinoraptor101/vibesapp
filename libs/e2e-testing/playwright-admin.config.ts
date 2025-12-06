@@ -24,7 +24,7 @@ export default defineConfig({
   },
   retries: 0,
   workers: 2,
-  maxFailures: 3, // Fail-fast: stop after 5 failures
+  maxFailures: 3, // Fail-fast
   projects: [
     // Setup project: Admin security tests must pass before other admin tests run
     {
