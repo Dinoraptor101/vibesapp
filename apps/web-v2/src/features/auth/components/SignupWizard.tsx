@@ -2,6 +2,7 @@ import { Check, Copy, RotateCcw } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useNavigate } from 'react-router-dom';
+import { PolarityToggle, type PolarityValue } from '@/components/ui/PolarityToggle';
 import { Button, Input, Logo, Textarea } from '@/components/ui-next';
 import { useAuth } from '@/features/auth';
 import { uploadImage } from '@/features/posts/api/s3Service';
@@ -18,7 +19,7 @@ interface SignupData {
   pigeonId: string;
   userName: string;
   mbtiPersonality: string;
-  polarity: 'yin' | 'yang';
+  polarity: PolarityValue;
   location: { lat: number; lon: number } | null;
   city: string;
   state: string;
@@ -672,31 +673,15 @@ export function SignupWizard() {
             </div>
 
             <div className="space-y-4 sm:space-y-6 rounded-lg border border-border bg-surface-elevated p-4 sm:p-6">
-              <div className="flex items-center justify-center gap-3 sm:gap-4">
-                <span className="text-sm font-semibold text-text-primary">YIN</span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setSignupData((prev) => ({
-                      ...prev,
-                      polarity: prev.polarity === 'yin' ? 'yang' : 'yin',
-                    }))
-                  }
-                  className="relative inline-flex h-14 w-28 items-center rounded-full bg-surface ring-2 ring-border transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-purple focus:ring-offset-2"
-                  aria-label={`Current polarity: ${signupData.polarity.toUpperCase()}`}
-                >
-                  <span
-                    className={`absolute inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-lg shadow-lg transition-all duration-300 ease-in-out ${
-                      signupData.polarity === 'yang'
-                        ? 'translate-x-16 from-orange-400 to-red-500'
-                        : 'translate-x-2 from-blue-400 to-purple-500'
-                    }`}
-                  >
-                    {signupData.polarity === 'yin' ? '🌙' : '☀️'}
-                  </span>
-                </button>
-                <span className="text-sm font-semibold text-text-primary">YANG</span>
-              </div>
+              <PolarityToggle
+                value={signupData.polarity.toUpperCase() as PolarityValue}
+                onChange={(value) =>
+                  setSignupData((prev) => ({
+                    ...prev,
+                    polarity: value.toLowerCase() as 'yin' | 'yang',
+                  }))
+                }
+              />
 
               <div className="grid grid-cols-2 gap-3 sm:gap-4 text-sm">
                 <div className="space-y-2 rounded-lg bg-surface p-3 sm:p-4">

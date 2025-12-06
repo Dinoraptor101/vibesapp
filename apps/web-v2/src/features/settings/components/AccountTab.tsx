@@ -3,11 +3,13 @@ import { useEffect, useRef, useState } from 'react';
 import { PigeonIdRegenerator } from '@/components/PigeonIdRegenerator';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { PolarityToggle, type PolarityValue } from '@/components/ui/PolarityToggle';
 import { useAuth } from '@/features/auth/context/useAuth';
 import { uploadImage } from '@/features/posts/api/s3Service';
 import { compressImage } from '@/features/posts/utils/imageUtils';
 import { useLocationGPS } from '@/hooks/useLocationGPS';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import api from '@/lib/api';
 import { getAvatarUrl } from '@/lib/avatarUtils';
 import { useAccountUpdates } from '../hooks/useAccountUpdates';
 
@@ -41,9 +43,10 @@ export function AccountTab() {
   const [mbti, setMbti] = useState(user?.mbtiPersonality || 'INFJ');
   const [locationCity, setLocationCity] = useState('');
   const [locationCoords, setLocationCoords] = useState<{ lat: number; lon: number } | null>(null);
-  const [polarity, setPolarity] = useState<'YIN' | 'YANG'>(
-    (user?.polarity?.toUpperCase() as 'YIN' | 'YANG') || 'YANG'
+  const [polarity, setPolarity] = useState<PolarityValue>(
+    (user?.polarity?.toUpperCase() as PolarityValue) || 'YANG'
   );
+  const [polarityError, setPolarityError] = useState(false);
 
   // UI state
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -55,11 +58,18 @@ export function AccountTab() {
     if (user) {
       const userBio = user.bio || '';
       const userMbti = user.mbtiPersonality || 'INFJ';
-      const userPolarity = (user.polarity?.toUpperCase() as 'YIN' | 'YANG') || 'YANG';
+      const userPolarity = user.polarity?.toUpperCase() as PolarityValue;
 
       setBio(userBio);
       setMbti(userMbti);
-      setPolarity(userPolarity);
+
+      if (!userPolarity || (userPolarity !== 'YIN' && userPolarity !== 'YANG')) {
+        setPolarity('NEUTRAL');
+        setPolarityError(true);
+      } else {
+        setPolarity(userPolarity);
+        setPolarityError(false);
+      }
 
       // Initialize location display (city only for now until backend supports state/country)
       if (user.location) {
@@ -231,24 +241,6 @@ export function AccountTab() {
     }
   };
 
-  // Polarity toggle handler
-  const handlePolarityToggle = () => {
-    if (!isOnline) return; // Prevent action when offline
-    const previousPolarity = polarity;
-    const newPolarity = polarity === 'YIN' ? 'YANG' : 'YIN';
-    setPolarity(newPolarity);
-    queueUpdate(
-      { polarity: newPolarity.toLowerCase() as 'yin' | 'yang' },
-      {
-        onError: (error) => {
-          // ZEN: Silent revert on error, log to console only
-          console.error('Failed to update polarity:', error);
-          setPolarity(previousPolarity);
-        },
-      }
-    );
-  };
-
   // Bio auto-save (onBlur pattern)
   const handleBioBlur = () => {
     if (!isOnline) return; // Prevent action when offline
@@ -269,6 +261,42 @@ export function AccountTab() {
         }
       );
       console.log('Bio auto-saved:', trimmedBio);
+    }
+  };
+
+  // Fetch-first polarity toggle handler
+  const handlePolarityToggle = async () => {
+    if (!isOnline) return;
+    if (!user?.userId) {
+      console.error('User ID not available');
+      setPolarity('NEUTRAL');
+      setPolarityError(true);
+      return;
+    }
+
+    try {
+      // Fetch current state first
+      const currentUser = (await api.get(`/users/${user.userId}/profile`)) as { polarity?: string };
+      const serverPolarity = (currentUser.polarity?.toUpperCase() as PolarityValue) || 'YANG';
+
+      // Determine new polarity
+      let newPolarity: PolarityValue;
+      if (polarity === 'NEUTRAL') {
+        newPolarity = 'YANG'; // Default when recovering
+      } else {
+        newPolarity = serverPolarity === 'YIN' ? 'YANG' : 'YIN';
+      }
+
+      // Update server
+      await api.patch(`/users/${user.userId}`, { polarity: newPolarity.toLowerCase() });
+
+      // Update UI only after success
+      setPolarity(newPolarity);
+      setPolarityError(false);
+    } catch (error) {
+      console.error('Failed to update polarity:', error);
+      setPolarity('NEUTRAL');
+      setPolarityError(true);
     }
   };
 
@@ -497,31 +525,13 @@ export function AccountTab() {
         <div className="block text-sm font-medium text-gray-700 dim:text-gray-200 dark:text-gray-300 mb-2">
           Polarity
         </div>
-        <div className="flex items-center justify-center gap-4">
-          <span className="text-sm font-semibold text-gray-700 dim:text-gray-200 dark:text-gray-300">
-            YIN
-          </span>
-          <button
-            type="button"
-            onClick={handlePolarityToggle}
-            disabled={!isOnline}
-            className="relative inline-flex h-14 w-28 items-center rounded-full bg-gray-100 dim:bg-gray-700 dark:bg-gray-800 ring-2 ring-gray-300 dim:ring-gray-500 dark:ring-gray-600 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label={`Current polarity: ${polarity}`}
-          >
-            <span
-              className={`absolute inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-lg shadow-lg transition-all duration-300 ease-in-out ${
-                polarity === 'YANG'
-                  ? 'translate-x-16 from-orange-400 to-red-500'
-                  : 'translate-x-2 from-blue-400 to-purple-500'
-              }`}
-            >
-              {polarity === 'YIN' ? '🌙' : '☀️'}
-            </span>
-          </button>
-          <span className="text-sm font-semibold text-gray-700 dim:text-gray-200 dark:text-gray-300">
-            YANG
-          </span>
-        </div>
+        <PolarityToggle
+          value={polarity}
+          onChange={setPolarity}
+          onToggle={handlePolarityToggle}
+          disabled={!isOnline}
+          showError={polarityError}
+        />
       </div>
 
       {/* Divider */}
