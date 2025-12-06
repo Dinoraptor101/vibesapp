@@ -243,7 +243,6 @@ test.describe
     const API_BASE_URL = isQAEnvironment()
       ? process.env.QA_BACKEND_URL
       : process.env.LOCAL_BACKEND_URL;
-    const API_KEY = process.env.BACKEND_API_KEY;
 
     test('ADM-STR-009: Should exclude strikes older than 30 days from active count', async ({
       request,
