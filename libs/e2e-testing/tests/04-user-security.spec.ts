@@ -6,10 +6,10 @@
  */
 
 import { expect, test } from '@playwright/test';
+import { isQAEnvironment } from './helpers/test-post';
 
-// API base URL - dynamically set based on config
-const isQAEnvironment = process.env.PLAYWRIGHT_CONFIG_QA === 'true';
-const API_BASE_URL = isQAEnvironment ? process.env.QA_BACKEND_URL : process.env.LOCAL_BACKEND_URL;
+// API base URL - dynamically set based on environment
+const API_BASE_URL = isQAEnvironment() ? process.env.QA_BACKEND_URL : process.env.LOCAL_BACKEND_URL;
 
 test.describe('User Security - Profile Update Authorization', () => {
   test('should prevent updating user profile without authentication', async ({ request }) => {

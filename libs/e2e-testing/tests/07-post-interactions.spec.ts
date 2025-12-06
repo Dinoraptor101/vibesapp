@@ -12,7 +12,7 @@
  */
 
 import { test, expect, type Page, type Locator } from '@playwright/test';
-import { createTestPost } from './helpers/test-post';
+import { createTestPost, isQAEnvironment } from './helpers/test-post';
 
 /**
  * Helper to find a likeable post (a post from another user that has a visible like button).
@@ -600,9 +600,10 @@ test.describe('Report Post - API Tests', () => {
   let postAuthor: { userId: string; pigeonId: string };
 
   test.beforeAll(async ({ request }) => {
-    // Determine API base URL from config marker via .env
-    const isQAEnvironment = process.env.PLAYWRIGHT_CONFIG_QA === 'true';
-    baseURL = isQAEnvironment ? process.env.QA_BACKEND_BASE : process.env.LOCAL_BACKEND_BASE;
+    // Determine API base URL from environment
+    baseURL = (
+      isQAEnvironment() ? process.env.QA_BACKEND_BASE : process.env.LOCAL_BACKEND_BASE
+    ) as string;
 
     // Create post author with unique ID including random suffix to avoid collisions
     const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).substring(7)}`;

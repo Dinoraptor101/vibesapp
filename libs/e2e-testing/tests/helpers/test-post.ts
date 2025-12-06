@@ -8,12 +8,15 @@
 import type { APIRequestContext } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
+import { isQAEnvironment as isQAEnv } from '../../setup-utils';
 
-// Read API base URL from environment variables (configured in .env)
-const API_BASE_URL =
-  process.env.PLAYWRIGHT_CONFIG_QA === 'true'
-    ? process.env.QA_BACKEND_BASE
-    : process.env.LOCAL_BACKEND_BASE;
+// Export utility for other test files
+export { isQAEnvironment } from '../../setup-utils';
+
+// Read API base URL from environment variables
+const API_BASE_URL = isQAEnv()
+  ? process.env.QA_BACKEND_BASE
+  : process.env.LOCAL_BACKEND_BASE;
 
 const TEST_LOCATION = { lat: 37.41, lon: -77.46 }; // Richmond, VA
 
