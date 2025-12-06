@@ -8,12 +8,17 @@ Web-v2 is a complete rewrite of the VibesApp frontend using modern technologies 
 
 ## Documentation Structure
 
+### Core Documentation
 - **[01-current-architecture.md](./01-current-architecture.md)** - Complete technical architecture and technology stack
 - **[02-implemented-features.md](./02-implemented-features.md)** - All features implemented in the rebuild
 - **[03-development-timeline.md](./03-development-timeline.md)** - Phase-by-phase development history
 - **[04-design-system.md](./04-design-system.md)** - UI patterns, components, and design language
 - **[05-testing-strategy.md](./05-testing-strategy.md)** - Testing approach and automation plans
 - **[06-ux-design.md](./06-ux-design.md)** - UX design principles and ZEN philosophy
+- **[07-content-design-standards.md](./07-content-design-standards.md)** - Content guidelines and voice/tone
+
+### Feature Design Specifications
+- **[VIBES-GROWTH-SYSTEM.md](./VIBES-GROWTH-SYSTEM.md)** - Complete design specification for plant-based karma visualization in Settings ("Your Vibe" tab). Includes 5-stage growth progression, number-free design principles, animation specs, content guidelines, and implementation phases. **Status**: Approved for implementation.
 
 ## Key Achievements
 

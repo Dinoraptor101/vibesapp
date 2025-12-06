@@ -1,4 +1,4 @@
-# Known Bugs
+# KNOWN BUGS
 
 ## Location Prompt Cache Issue
 Location is requested every time the app is loaded. The app should attempt to obtain location from cache first, then from the database, and only prompt the user if both attempts fail.
@@ -18,10 +18,6 @@ Settings pages are covered by bottom padding, making content inaccessible.
 (This is similar to the issue we had and fixed in Activities and Post Details page. See how these pages handle it and apply the same solution to the Settings page.)
 **Reported:** 5 hours ago
 
-## Mobile Horizontal Padding Inconsistency
-Mobile view horizontal padding was fixed for posts in UserProfile page but the same standards were not applied to PostFeed (Homepage, Nearby, Following) and PostDetailPage. This affects only Mobile View. Like Bluesky, the distance between the image/post cards and the side of the screen should be minimal.
-**Reported:** 5 hours ago
-
 ## Messages Page Padding Issue
 The Messages page, specifically the conversations list and requests, experience excessive padding on the sides (conversation boxes appear ~50px narrower than they should be, inconsistent with UserProfile Posts and Create Posts standards).
 Same as the bug above (Mobile horizontal padding inconsistency)
@@ -36,6 +32,15 @@ Same as above two bugs
 "Show recent" button in messages is clipping at the top due to iPhone's notch/status bar overlay in Mobile/Kiosk mode.
 **Reported:** 4 minutes ago
 
-## Activity Page Scrollable When Empty
+
+
+-----
+# COULD NOT REPRODUCE
+
+## Activity Page Scrollable When Empty ( could not reproduce, possibly a bug in kiosk ios mode ? )
 When the Activity page is empty, the min-height is still longer than the mobile vertical viewport, making the empty page unnecessarily scrollable, which is unexpected.
 **Reported:** Just now
+
+## Mobile Horizontal Padding Inconsistency ( could not reproduce on desktop, is this iOS Kiosk mode only? )
+Mobile view horizontal padding was fixed for posts in UserProfile page but the same standards were not applied to PostFeed (Homepage, Nearby, Following) and PostDetailPage. This affects only Mobile View. Like Bluesky, the distance between the image/post cards and the side of the screen should be minimal.
+**Reported:** 5 hours ago

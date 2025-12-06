@@ -2,6 +2,8 @@
 
 > **🔍 Code Cleanup Required**: See [Code-Cleanup-Report.md](./Code-Cleanup-Report.md) for comprehensive analysis of abandoned code, versioned files, and safe deletion candidates (~780 lines of cleanup identified across 6 files).
 
+> **🔧 Backend Refactoring (Deferred)**: See [controller-refactoring-summary.md](../controller-refactoring-summary.md) for planned controller modularization. Attempted Dec 5, 2025 but reverted due to middleware chain issues on localhost. Requires comprehensive E2E test coverage before re-attempting.
+
 ### Required For Release
 - [x] Enhance UserMenu animations - Improve `apps/web-v2/src/components/layout/UserMenu.tsx` with custom CSS transitions or framer-motion overlays beyond current Radix fade-in defaults for smoother menu appearance.
 - [x] Reduce mobile padding on Profile page - Adjust horizontal padding in `apps/web-v2/src/pages/ProfilePage.tsx` specifically for mobile viewports without affecting other pages.
@@ -16,7 +18,15 @@
 - [ ] Implement Account Deletion UI - Add "Delete Account" button and confirmation modal in `apps/web-v2/src/components/settings/AccountTab.tsx` that calls existing backend `/api/users/delete-account` endpoint.
 
 ### Core Features (High Priority)
-- [ ] Design and implement Vibes Score (Karma) system - Define scoring algorithm, add database schema to `apps/api/src/models/User.js`, create backend endpoints, and build frontend display components.
+- [ ] **Implement Vibes Growth System UI** - Build "Your Vibe" Settings tab following [VIBES-GROWTH-SYSTEM.md](./VIBES-GROWTH-SYSTEM.md) design specification. Backend karma engine already exists (`apps/api/src/controllers/karma.js`), need to create:
+  1. **Frontend Components**: `YourVibeTab.tsx`, `PlantVisualization.tsx`, `RecentActivityFeed.tsx`, `VibesExplanation.tsx`
+  2. **Backend API**: `GET /api/users/me/vibes-summary` endpoint returning currentVibes, currentStage, progressInStage, recentActivity, dailyMomentum
+  3. **Plant Assets**: 5 SVG plant stages (🌱 Seed → 🌿 Sprout → 🌳 Young Tree → 🌲 Mature Tree → 🌸 Flowering)
+  4. **React Query Hook**: `useVibesSummary()` with 60s cache, WebSocket real-time updates
+  5. **Settings Integration**: Add "Your Vibe 🌱" tab as 3rd position in Settings navigation
+  
+  Design principles: Number-free visualization, organic plant growth metaphor, inline expansions only, ZEN minimalism. See full specification for 5-stage progression, progress ring design, poetic status messages, and grouped activity feed.
+
 - [ ] Refactor comments into separate Comment collection - Create new `Comment` model in `apps/api/src/models/Comment.js`, write migration script to move Posts with `commentOn` field, update `/api/comments` endpoints, and remove comment filtering from feed queries.
 - [ ] Build JSON-based rich text editor - Replace contentEditable in `apps/web-v2/src/components/posts/TextEditor.tsx` with custom JSON document model supporting paragraphs, lists, marks (bold/underline), and reliable input handling.
 - [ ] Implement username search - Update `apps/api/src/controllers/searchController.js` to add case-insensitive exact username matching alongside caption search.
