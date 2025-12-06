@@ -11,7 +11,7 @@ The Web-v2 rebuild was guided by a comprehensive UX philosophy centered on "ZEN 
 #### 1. Auto-Save Pattern
 **Philosophy**: No "Save" buttons - blur to save, silent errors
 - **Why**: Reduces cognitive load and prevents data loss
-- **Implementation**: Form fields auto-save on blur with optimistic UI
+- **Implementation**: Form fields auto-save on blur with fetch-first UI
 - **User Benefit**: Seamless editing without interruption
 - **Technical**: Direct updates with error recovery, functions disabled offline
 
@@ -38,9 +38,18 @@ The Web-v2 rebuild was guided by a comprehensive UX philosophy centered on "ZEN 
 - **< 1 second**: No spinner (too fast to notice)
 - **1-3 seconds**: Show spinner with progress
 - **> 3 seconds**: Show skeleton screens or detailed progress
+- **Fetch-First Pattern**: Always show loading state during server validation
 - **Implementation**: Custom hooks for loading state management
 
-#### 5. Offline-Ready
+#### 5. Fetch-First Updates
+**Philosophy**: Always verify server state before making changes
+- **Why**: Prevents conflicting states and ensures data integrity
+- **Implementation**: GET current state → validate → PATCH update → animate UI
+- **User Benefit**: Reliable state consistency across sessions
+- **Pattern**: No optimistic updates - show loading state during validation
+- **Trade-off**: Slightly slower UX for guaranteed correctness
+
+#### 6. Offline-Ready
 **Philosophy**: Graceful degradation with clear status
 - **Why**: Mobile users often have poor connectivity
 - **Implementation**:
@@ -48,7 +57,7 @@ The Web-v2 rebuild was guided by a comprehensive UX philosophy centered on "ZEN 
   - Connection status indicator ("connecting..." notice)
   - Disabled interactive functions when offline
   - Hidden dynamic content when unavailable
-  - Optimistic UI updates for available features
+  - Fetch-first UI updates for data consistency
 
 #### 6. Character Limits
 **Philosophy**: Show counter only when approaching limit
@@ -328,7 +337,7 @@ const useSmartLoading = (isLoading: boolean, startTime: number) => {
 ### Perceived Performance
 - **Skeleton Screens**: Content-shaped placeholders
 - **Progressive Loading**: Above-the-fold content first
-- **Optimistic Updates**: Immediate UI feedback
+- **Fetch-First Updates**: Server validation before UI changes
 - **Background Processing**: Non-blocking operations
 
 ## Mobile UX Optimization
