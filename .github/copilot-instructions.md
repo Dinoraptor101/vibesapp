@@ -462,3 +462,5 @@ Follow the pattern: `data-testid="{feature}-{element}-{identifier}"`
 - ConversationView uses full-screen fixed layouts—adding generic padding breaks the design, so propose the correct approach instead
 - Recognize when micro-changes aren't appropriate for a feature and communicate the reasoning
 - This restraint and clarity is more valuable than blind execution
+
+**Response brevity:** Keep responses concise (one paragraph) unless the user explicitly requests a summary, detailed explanation, or the task requires extensive context. Focus on actionable information and avoid unnecessary elaboration.
