@@ -14,13 +14,12 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { createTestPost, createTestComment, getSecondUserCredentials } from './helpers/test-post';
+import { createTestPost, createTestComment, getSecondUserCredentials, isQAEnvironment } from './helpers/test-post';
 
 // API base URL (backend server, not frontend) - from .env
-const API_BASE_URL =
-  process.env.PLAYWRIGHT_CONFIG_QA === 'true'
-    ? process.env.QA_BACKEND_BASE
-    : process.env.LOCAL_BACKEND_BASE;
+const API_BASE_URL = isQAEnvironment()
+  ? process.env.QA_BACKEND_BASE
+  : process.env.LOCAL_BACKEND_BASE;
 
 // Storage state contains authenticated user's pigeonId and userId
 import * as fs from 'fs';
