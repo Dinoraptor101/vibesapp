@@ -17,7 +17,7 @@ export default defineConfig({
   fullyParallel: true,
   retries: 1,
   workers: 2,
-  maxFailures: isLocal ? 1 : undefined, // Fail-fast in local, run all in QA
+  // maxFailures: isLocal ? 1 : undefined, // Fail-fast in local, run all in QA
   testIgnore: [
     ...(isLocal ? ['**/offline/**'] : ['**/offline/**']), // Offline tests only work locally (PWA features)
     '**/admin/**', // Admin tests use dedicated playwright-admin.config.ts instead
