@@ -79,6 +79,13 @@ class ApiClient {
         const pigeonId = getCookie('pigeonId');
         if (pigeonId) {
           config.headers['X-Pigeon-Id'] = pigeonId;
+          if (import.meta.env.VITE_DEBUG) {
+            console.log(`[API] Adding pigeonId header: ${pigeonId.substring(0, 8)}...`);
+          }
+        } else {
+          if (import.meta.env.VITE_DEBUG) {
+            console.warn('[API] No pigeonId cookie found - request will be unauthenticated');
+          }
         }
 
         // Add Admin Token from cookie (for admin routes)

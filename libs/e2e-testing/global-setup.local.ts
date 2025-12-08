@@ -35,7 +35,7 @@ async function globalSetup() {
 
   logRecaptchaBypass('localhost');
 
-  await context.storageState({ path: 'storageState.json' });
+  await context.storageState({ path: 'storageState-user1.local.json' });
 
   // Create second user storage state (for multi-user tests)
   const context2 = await browser.newContext();
@@ -47,7 +47,7 @@ async function globalSetup() {
   });
   await context2.addCookies(cookies2);
 
-  await context2.storageState({ path: 'storageState2.json' });
+  await context2.storageState({ path: 'storageState-user2.local.json' });
   await context2.close();
 
   await browser.close();
