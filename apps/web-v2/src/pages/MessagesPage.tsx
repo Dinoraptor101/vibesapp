@@ -53,7 +53,7 @@ export function MessagesPageContent() {
       </div>
 
       {/* Tab Content */}
-      <div className="px-4 pt-4" data-testid="messages-content">
+      <div className="pt-4" data-testid="messages-content">
         {activeTab === 'conversations' ? <ConversationList /> : <DMRequestsList />}
       </div>
     </div>
