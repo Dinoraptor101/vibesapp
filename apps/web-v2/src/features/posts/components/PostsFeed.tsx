@@ -191,15 +191,13 @@ export function PostsFeed({ className, searchQuery }: PostsFeedProps) {
     return (
       <div className={className}>
         {/* Posts Grid */}
-        <div className="p-4">
-          <PostsGrid
-            posts={searchResults}
-            onLike={toggleLike}
-            onReport={handleReport}
-            onDelete={handleDelete}
-            onComment={handleComment}
-          />
-        </div>
+        <PostsGrid
+          posts={searchResults}
+          onLike={toggleLike}
+          onReport={handleReport}
+          onDelete={handleDelete}
+          onComment={handleComment}
+        />
 
         {/* Load more trigger */}
         <div ref={loadMoreRef} className="py-4">
@@ -224,7 +222,7 @@ export function PostsFeed({ className, searchQuery }: PostsFeedProps) {
     return (
       <div className={className}>
         <FilterBar activeTab={activeTab} onTabChange={setActiveTab} />
-        <div className="flex flex-col items-center justify-center py-12 px-4">
+        <div className="flex flex-col items-center justify-center py-12">
           <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
           <h2 className="text-xl font-semibold text-text-primary mb-2">Failed to load posts</h2>
           <p className="text-text-secondary text-center mb-4">
@@ -241,7 +239,7 @@ export function PostsFeed({ className, searchQuery }: PostsFeedProps) {
     return (
       <div className={className}>
         <FilterBar activeTab={activeTab} onTabChange={setActiveTab} />
-        <div className="space-y-4 p-4">
+        <div className="space-y-4">
           <PostSkeleton />
           <PostSkeleton />
           <PostSkeleton />
@@ -255,7 +253,7 @@ export function PostsFeed({ className, searchQuery }: PostsFeedProps) {
     return (
       <div className={className}>
         <FilterBar activeTab={activeTab} onTabChange={setActiveTab} />
-        <div className="flex flex-col items-center justify-center py-12 px-4">
+        <div className="flex flex-col items-center justify-center py-12">
           <div className="text-6xl mb-4">🕊️</div>
           <h2 className="text-xl font-semibold text-text-primary mb-2">No posts yet</h2>
           <p className="text-text-secondary text-center">
@@ -274,15 +272,13 @@ export function PostsFeed({ className, searchQuery }: PostsFeedProps) {
       <FilterBar activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Posts Grid */}
-      <div className="p-4">
-        <PostsGrid
-          posts={posts}
-          onLike={toggleLike}
-          onReport={handleReport}
-          onDelete={handleDelete}
-          onComment={handleComment}
-        />
-      </div>
+      <PostsGrid
+        posts={posts}
+        onLike={toggleLike}
+        onReport={handleReport}
+        onDelete={handleDelete}
+        onComment={handleComment}
+      />
 
       {/* Load more trigger */}
       <div ref={loadMoreRef} className="py-4">
