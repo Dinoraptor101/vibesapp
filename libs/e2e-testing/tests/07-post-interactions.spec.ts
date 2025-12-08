@@ -358,17 +358,13 @@ test.describe('Post Report Functionality', () => {
   });
 
   test('should display report button on posts (except own posts)', async ({ page, request }) => {
-    // Create a test post from another user (not the logged-in user)
-    // Use a unique pigeonId to ensure this post is from a different user
+    // Create a test post (using logged-in user's account)
     await createTestPost(request, {
       caption: 'Test post to verify report button visibility',
-      pigeonId: `test-reporter-${Date.now()}`,
     });
 
-    // Reload to see the new post in feed
-    await page.reload();
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1000);
+    // Wait for post to appear in feed (React Query will update automatically)
+    await page.waitForTimeout(800);
 
     // Wait for posts to load
     const posts = page.locator('article');
@@ -702,25 +698,29 @@ test.describe('Report Post - API Tests', () => {
   });
 
   test('should return 403 when user tries to report own post', async ({ request }) => {
-    const user = await createUserForReporting(request, baseURL, {
+    const reporter = await createUserForReporting(request, baseURL, {
       pigeonId: `pigeon-self-${Date.now()}`,
       userName: 'Self Reporter',
     });
 
     // Create post by this user
     const postResponse = await createPostForReporting(request, baseURL, {
-      userId: user.userId,
-      pigeonId: user.pigeonId,
+      userId: reporter.userId,
+      pigeonId: reporter.pigeonId,
       text: 'My own post',
     });
     const postData = await postResponse.json();
-    const postId = postData.post?._id || postData._id;
+    const postId = postData.post?._id || postData._id || postData.post;
+
+    if (!postId) {
+      throw new Error(`Failed to extract post ID from response: ${JSON.stringify(postData)}`);
+    }
 
     // Try to report own post
     const reportResponse = await reportPostAPI(request, baseURL, {
       postId,
-      userId: user.userId,
-      pigeonId: user.pigeonId,
+      userId: reporter.userId,
+      pigeonId: reporter.pigeonId,
       reason: 'spam',
     });
 
