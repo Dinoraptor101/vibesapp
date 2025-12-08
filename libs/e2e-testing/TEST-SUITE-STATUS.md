@@ -277,7 +277,7 @@ TEST_ENV=qa npm test
 - **Location:** 37.41, -77.46 (Richmond, VA)
 
 ### Authentication
-- Uses `storageState.json` for authenticated sessions
+- Uses `storageState-user1.{local|qa}.json` for authenticated sessions (environment-specific)
 - Global setup script injects cookies (userId, pigeonId, range, user_location)
 
 ## Next Steps

@@ -20,7 +20,7 @@ export default defineConfig({
     headless: true,
     permissions: ['geolocation'],
     geolocation: { latitude: 37.41, longitude: -77.46 },
-    storageState: 'storageState.json',
+    storageState: 'storageState-user1.local.json',
     launchOptions: {
       slowMo: 500,
     },
