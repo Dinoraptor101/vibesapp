@@ -128,11 +128,27 @@ export async function fetchPosts(filters?: PostFilters): Promise<PostsResponse> 
   ```
 - **Middleware Chain**: `pigeonAuth` validates user, `adminAuth` validates admin, `strikeEnforcement` checks moderation restrictions
 
-### 4. Authentication Middleware (`apps/api/src/middleware/pigeonAuth.js`)
-- **pigeonId Cookie**: Validates user identity, sets `req.validatedUserId`
+### 4. Authentication System
+**CRITICAL: pigeonId IS the password.** There are no traditional passwords in VibesApp.
+
+#### Authentication Middleware (`apps/api/src/middleware/pigeonAuth.js`)
+- **pigeonId as Password**: The `pigeonId` (e.g., `lunar-breeze-4302`) is the authentication credential
+  - Frontend sends via `x-pigeon-id` header (set by `apiClient`)
+  - Backend validates against MongoDB User collection
+  - If valid, sets `req.validatedUserId` for downstream handlers
 - **GET Requests**: Allowed without pigeonId for public endpoints
-- **Non-GET Requests**: Require valid pigeonId, validates userId matches request
+- **Non-GET Requests**: Require valid pigeonId in `x-pigeon-id` header
+- **E2E Testing**: Tests use test pigeonIds (e.g., `lunar-breeze-4302`) stored in `.env`
 - **Admin Routes**: Use separate `adminAuth` middleware with `adminToken` cookie
+
+#### How to Authenticate Programmatically:
+```javascript
+// Any request with valid pigeonId in header will authenticate
+fetch('http://localhost:5001/api/posts', {
+  headers: { 'x-pigeon-id': 'lunar-breeze-4302' }
+});
+// pigeonAuth middleware validates pigeonId → grants access
+```
 
 ### 5. State Management Strategy
 - **Server State**: React Query for all API data (posts, users, messages)
