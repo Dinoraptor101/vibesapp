@@ -1,16 +1,25 @@
 // playwright.config.ts - ADAPTIVE CONFIGURATION
-// Reads ENVIRONMENT from .env and configures for 'local' or 'qa'
-// Set ENVIRONMENT=local in .env for localhost testing with dev servers
-// Set ENVIRONMENT=qa in .env for QA environment testing
+// Configure environment here directly (VS Code extension doesn't reliably read .env)
+// Change this value to switch between environments:
+const ENVIRONMENT: 'local' | 'qa' = 'qa';
+
 import { defineConfig } from '@playwright/test';
 import 'dotenv/config';
 
-const environment = process.env.ENVIRONMENT || 'local';
+// Allow .env override if set, but default to the value above
+const environment = process.env.ENVIRONMENT || ENVIRONMENT;
 const isLocal = environment === 'local';
 
-console.log(`🔍 Playwright Config: ${environment.toUpperCase()}`);
-console.log(`   baseURL: ${isLocal ? 'http://localhost:5173' : 'https://qa.vibesapp.net'}`);
-console.log(`   Dev Servers: ${isLocal ? 'ENABLED' : 'DISABLED'}\n`);
+// Use separate storage state files per environment to avoid cookie domain mismatch
+// user1 = primary test user (DontDeleteMeTester), user2 = secondary test user (VIXEN)
+const storageStateFile = isLocal ? 'storageState-user1.local.json' : 'storageState-user1.qa.json';
+
+// Only print config summary in main process (not in workers)
+if (process.env.PLAYWRIGHT_WORKER_INDEX === undefined) {
+  console.log(`🔍 Playwright Config: ${environment.toUpperCase()}`);
+  console.log(`   baseURL: ${isLocal ? 'http://localhost:5173' : 'https://qa.vibesapp.net'}`);
+  console.log(`   Dev Servers: ${isLocal ? 'ENABLED' : 'DISABLED'}\n`);
+}
 
 export default defineConfig({
   testDir: './tests',
@@ -27,7 +36,7 @@ export default defineConfig({
     headless: true,
     permissions: ['geolocation'],
     geolocation: { latitude: 37.41, longitude: -77.46 },
-    storageState: 'storageState.json',
+    storageState: storageStateFile,
     launchOptions: {
       slowMo: 500,
     },
