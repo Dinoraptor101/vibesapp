@@ -38,11 +38,12 @@ export default defineConfig({
       testMatch: '**/01-api-service-tests.spec.ts',
       use: { browserName: 'chromium' },
     },
-    {
-      name: 'chromium',
-      dependencies: ['prerequisites'],
-      use: { browserName: 'chromium' },
-    },
+    // Makes duplicate testing.
+    // {
+    //   name: 'chromium',
+    //   dependencies: ['prerequisites'],
+    //   use: { browserName: 'chromium' },
+    // },
     {
       name: 'core',
       testMatch: ['**/01-*.spec.ts', '**/02-*.spec.ts'],
