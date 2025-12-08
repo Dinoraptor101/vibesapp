@@ -20,7 +20,7 @@ export default defineConfig({
   maxFailures: isLocal ? 1 : undefined, // Fail-fast in local, run all in QA
   testIgnore: [
     ...(isLocal ? ['**/offline/**'] : ['**/offline/**']), // Offline tests only work locally (PWA features)
-    ...(process.env.SKIP_ADMIN === 'true' ? ['**/admin/**'] : []), // Skip admin tests unless explicitly testing admin changes
+    '**/admin/**', // Admin tests use dedicated playwright-admin.config.ts instead
   ],
   use: {
     baseURL: isLocal ? 'http://localhost:5173' : 'https://qa.vibesapp.net',
@@ -59,12 +59,6 @@ export default defineConfig({
       name: 'ux',
       testMatch: ['**/06-*.spec.ts', '**/07-*.spec.ts', '**/08-*.spec.ts'],
       dependencies: ['core', 'integration'],
-      use: { browserName: 'chromium' },
-    },
-    {
-      name: 'admin',
-      testMatch: ['**/admin/**/*.spec.ts'],
-      dependencies: ['core'],
       use: { browserName: 'chromium' },
     },
   ],
