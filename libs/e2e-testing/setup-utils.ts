@@ -48,7 +48,7 @@ export async function fetchUserIdByPigeonId(pigeonId: string, apiBase: string): 
 
   console.log(`🔍 Fetching userId for pigeonId: ${pigeonId}...`);
 
-  const response = await fetch(`${apiBase}/user/login`, {
+  const response = await fetch(`${apiBase}/api/users/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
