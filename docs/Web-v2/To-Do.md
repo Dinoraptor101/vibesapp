@@ -10,6 +10,10 @@
 - [X] Add age/sex honesty advisory - Insert gentle reminder message during signup in `apps/web-v2/src/components/signup/SignupWizard.tsx` or on profile edit encouraging honest demographic information.
 
 
+### Testing & CI/CD
+- [ ] **Add E2E tests to PR checks** - Create GitHub Actions workflow to run Playwright E2E tests on every PR against main branch. Use `playwright.config.local.ts` to test against localhost (fast feedback), auto-start dev servers in CI environment. Catches 95% of issues before merge. Future enhancement: add QA environment tests after manual QA deployment.
+- [ ] **DRY Playwright configs** - Refactor `playwright.config.local.ts` and `playwright.config.qa.ts` to properly extend base config instead of duplicating shared settings. Base config should define `testDir`, `fullyParallel`, `use` defaults, `retries`, `workers`, and `prerequisites` project. Specific configs should only override `baseURL`, `testIgnore`, `maxFailures`, and `webServer`/`globalSetup` differences. Eliminates ~40 lines of duplication per config.
+
 ### UI/UX Polish (Quick Wins)
 - [ ] Fix Activity timestamp caching - Update `formatRelativeTime` in `apps/web-v2/src/utils/dateUtils.ts` to recalculate on component render instead of caching, or reduce React Query staleTime in `useActivities` hook from 60s to prevent stale "X minutes ago" displays.
 - [ ] Add page transition animations - Implement fade/slide transitions in `apps/web-v2/src/components/navigation/PersistentPages.tsx` using framer-motion or CSS transitions for smoother navigation between Home, Activities, CreatePost pages.
