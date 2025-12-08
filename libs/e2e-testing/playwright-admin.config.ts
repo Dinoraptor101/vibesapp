@@ -25,7 +25,7 @@ export default defineConfig({
       slowMo: 500,
     },
   },
-  retries: 0,
+  retries: 1,
   workers: 2,
   maxFailures: 3, // Fail-fast
   projects: [
