@@ -1,23 +1,26 @@
 /**
- * E2E Tests: Admin User Management (Table-Based UI)
+ * E2E Tests: Admin User Management (UX Testing - Read-Only)
+ *
+ * PHILOSOPHY: These tests verify UI behavior, visual feedback, and navigation
+ * WITHOUT executing destructive mutations (ban, delete, bulk operations).
+ * Admin panel can delete user data permanently - we test UX only, not integration.
  *
  * Coverage:
- * - Display list of users in table format
- * - Search users by username
- * - Filter by status (all/active/banned)
- * - Filter by MBTI type
- * - Sort by columns (username, MBTI, polarity, status, posts)
- * - Toggle ban/unban on user
- * - View user details (click username)
- * - View user posts (click post count)
- * - Bulk selection
- * - Bulk ban action
- * - Pagination
- * - Loading and empty states
+ * ✅ Page load and layout
+ * ✅ Search input behavior (typing, debouncing)
+ * ✅ Filter dropdowns (selection changes)
+ * ✅ Sort buttons (click, visual feedback, icon state)
+ * ✅ Checkbox selection (individual, select all, count display)
+ * ✅ Navigation (username → detail page, posts → posts page)
+ * ✅ Button states (enabled/disabled, variants)
+ * ✅ Loading and empty states
+ * ❌ NO actual banning/unbanning (API mutation)
+ * ❌ NO bulk operations (dangerous)
+ * ❌ NO user/post deletion (permanent data loss)
  */
 
 import { test, expect } from '@playwright/test';
-import { loginAsAdmin, clearAdminSession } from './helpers/admin-auth';
+import { loginAsAdmin } from './helpers/admin-auth';
 
 test.describe('User Management - Table View', () => {
   test.beforeEach(async ({ page }) => {
@@ -370,87 +373,47 @@ test.describe('User Management - Actions', () => {
     await expect(page.getByTestId('users-list')).toBeVisible({ timeout: 10000 });
   });
 
-  test('should toggle ban on user (integration)', async ({ page }) => {
-    // Wait for users to load
+  test('should display ban/unban button with correct state (read-only)', async ({ page }) => {
+    // UX TEST ONLY - Verify button exists and shows correct state based on user status
+    // Does NOT execute ban/unban action (data mutation)
+
     const usersList = page.getByTestId('users-list');
     await expect(usersList).toBeVisible({ timeout: 10000 });
 
-    // Get first user ID to track the same user across refetch
     const firstRow = page.locator('[data-testid^="user-row-"]').first();
-    const userId = await firstRow.getAttribute('data-testid');
-    const userIdValue = userId?.replace('user-row-', '');
-
-    // Get button reference
     const toggleBanButton = firstRow.getByTestId('toggle-ban-button');
     await expect(toggleBanButton).toBeVisible();
 
-    // Get initial button state - verify current implementation
-    const initialButtonText = await toggleBanButton.textContent();
-    const initiallyBanning = initialButtonText?.trim() === 'Ban';
+    // Get button text to determine user's current ban status
+    const buttonText = await toggleBanButton.textContent();
+    const userIsBanned = buttonText?.trim() === 'Unban';
+
+    // Verify button shows correct text based on status
+    if (userIsBanned) {
+      expect(buttonText).toContain('Unban');
+      // Verify outline variant for unban action
+      await expect(toggleBanButton).toHaveClass(/outline/);
+    } else {
+      expect(buttonText).toContain('Ban');
+      expect(buttonText).not.toContain('Unban');
+      // Verify destructive variant for ban action
+      await expect(toggleBanButton).toHaveClass(/destructive/);
+    }
 
     // Verify button is enabled when online
     await expect(toggleBanButton).toBeEnabled();
 
-    // Verify button style matches current implementation
-    if (initiallyBanning) {
-      // Should be destructive variant for ban action
-      await expect(toggleBanButton).toHaveClass(/destructive/);
+    // Verify status badge matches button state
+    const statusCell = firstRow.locator('td').nth(6); // Status column (7th column)
+    if (userIsBanned) {
+      await expect(statusCell.getByTestId('user-banned-badge')).toBeVisible();
+      await expect(statusCell.getByText('Banned')).toBeVisible();
     } else {
-      // Should be outline variant for unban action
-      await expect(toggleBanButton).toHaveClass(/outline/);
+      await expect(statusCell.getByText('Active')).toBeVisible();
     }
 
-    // Click to toggle ban status
-    await toggleBanButton.click();
-
-    // Wait for API call to complete (/admin/users/:userId/toggle-ban)
-    await page.waitForTimeout(1000);
-
-    // Wait for table to reload with updated data
-    await expect(usersList).toBeVisible({ timeout: 5000 });
-    await page.waitForTimeout(500);
-
-    // Get fresh reference to the same user row
-    const updatedRow = page.locator(`[data-testid="user-row-${userIdValue}"]`);
-    await expect(updatedRow).toBeVisible({ timeout: 5000 });
-
-    // Get button from updated row
-    const updatedButton = updatedRow.getByTestId('toggle-ban-button');
-    await expect(updatedButton).toBeVisible({ timeout: 5000 });
-
-    // Verify button text and styling changed appropriately
-    const newButtonText = await updatedButton.textContent();
-    if (initiallyBanning) {
-      // Was "Ban", should now be "Unban"
-      expect(newButtonText).toContain('Unban');
-      await expect(updatedButton).toHaveClass(/outline/);
-    } else {
-      // Was "Unban", should now be "Ban"
-      expect(newButtonText).toContain('Ban');
-      expect(newButtonText).not.toContain('Unban');
-      await expect(updatedButton).toHaveClass(/destructive/);
-    }
-
-    // Verify user status badge updated in the status column
-    const statusColumn = updatedRow.locator('td').nth(6); // Status column
-    if (initiallyBanning) {
-      // User should now show as banned
-      await expect(statusColumn.locator('[data-testid="user-banned-badge"]')).toBeVisible();
-    } else {
-      // User should now show as active
-      await expect(statusColumn.locator('.badge:has-text("Active")')).toBeVisible();
-    }
-
-    // Toggle back for cleanup and verify state returns
-    await updatedButton.click();
-    await page.waitForTimeout(1000);
-    await expect(usersList).toBeVisible({ timeout: 5000 });
-
-    // Verify button returned to original state
-    const finalRow = page.locator(`[data-testid="user-row-${userIdValue}"]`);
-    const finalButton = finalRow.getByTestId('toggle-ban-button');
-    const finalButtonText = await finalButton.textContent();
-    expect(finalButtonText).toBe(initialButtonText);
+    // ⚠️ IMPORTANT: Do NOT click the button - this would execute a ban/unban mutation
+    // This test only verifies UI state, not integration behavior
   });
 
   test('should view user details when clicking username', async ({ page }) => {
@@ -561,78 +524,63 @@ test.describe('User Management - Bulk Actions', () => {
     await expect(page.locator('text=/selected/i')).not.toBeVisible();
   });
 
-  test('should show bulk ban button when users selected', async ({ page }) => {
-    // Wait for users to load
+  test('should show bulk action buttons when users selected (read-only)', async ({ page }) => {
+    // UX TEST ONLY - Verify bulk action buttons appear/disappear based on selection
+    // Does NOT execute bulk operations (dangerous data mutations)
+
     const usersList = page.getByTestId('users-list');
     await expect(usersList).toBeVisible({ timeout: 10000 });
 
-    // Initially, bulk ban button should not be visible
+    // Initially, bulk action buttons should not be visible
     const bulkBanButton = page.locator('button:has-text("Ban Selected")');
+    const bulkDeletePostsButton = page.locator('button:has-text("Delete Posts")');
+    const bulkDeleteUsersButton = page.locator('button:has-text("Delete Users")');
+
     await expect(bulkBanButton).not.toBeVisible();
+    await expect(bulkDeletePostsButton).not.toBeVisible();
+    await expect(bulkDeleteUsersButton).not.toBeVisible();
 
     // Select first user
     const firstRow = page.locator('[data-testid^="user-row-"]').first();
     const firstCheckbox = firstRow.locator('input[type="checkbox"]');
     await firstCheckbox.check();
 
-    // Verify bulk ban button appears
+    // Verify all bulk action buttons appear
     await expect(bulkBanButton).toBeVisible();
+    await expect(bulkDeletePostsButton).toBeVisible();
+    await expect(bulkDeleteUsersButton).toBeVisible();
 
-    // Verify button is enabled (when online)
-    const isEnabled = await bulkBanButton.isEnabled();
-    expect(isEnabled).toBe(true);
+    // Verify buttons are enabled (when online)
+    await expect(bulkBanButton).toBeEnabled();
+    await expect(bulkDeletePostsButton).toBeEnabled();
+    await expect(bulkDeleteUsersButton).toBeEnabled();
+
+    // Verify selection count updates
+    await expect(page.locator('text=/1 selected/i')).toBeVisible();
+
+    // Verify buttons have correct destructive styling
+    await expect(bulkBanButton).toHaveClass(/destructive/);
+    await expect(bulkDeletePostsButton).toHaveClass(/destructive/);
+    await expect(bulkDeleteUsersButton).toHaveClass(/destructive/);
 
     // Unselect user
     await firstCheckbox.uncheck();
 
-    // Verify bulk ban button disappears
+    // Verify bulk action buttons disappear
     await expect(bulkBanButton).not.toBeVisible();
-  });
+    await expect(bulkDeletePostsButton).not.toBeVisible();
+    await expect(bulkDeleteUsersButton).not.toBeVisible();
 
-  // TODO: This test should create active test users via API injection instead of relying on existing data
-  test.skip('should perform bulk ban action (with confirmation)', async ({ page }) => {
-    // Wait for users to load
-    const usersList = page.getByTestId('users-list');
-    await expect(usersList).toBeVisible({ timeout: 10000 });
+    // Verify selection count disappears
+    await expect(page.locator('text=/selected/i')).not.toBeVisible();
 
-    // Select first two active users
-    const filterSelect = page.getByTestId('users-filter-select');
-    await filterSelect.selectOption('active');
-    await page.waitForTimeout(500);
-    await expect(usersList).toBeVisible({ timeout: 5000 });
-
-    const rows = page.locator('[data-testid^="user-row-"]');
-    const rowCount = await rows.count();
-
-    // Select first user
-    const firstCheckbox = rows.first().locator('input[type="checkbox"]');
-    await firstCheckbox.check();
-
-    // Select second user if available
-    if (rowCount > 1) {
-      const secondCheckbox = rows.nth(1).locator('input[type="checkbox"]');
-      await secondCheckbox.check();
-    }
-
-    // Set up confirmation dialog handler
-    page.on('dialog', async (dialog) => {
-      expect(dialog.type()).toBe('confirm');
-      expect(dialog.message()).toContain('Ban');
-      await dialog.dismiss(); // Dismiss to avoid actually banning in test
-    });
-
-    // Click bulk ban button
-    const bulkBanButton = page.locator('button:has-text("Ban Selected")');
-    await bulkBanButton.click();
-
-    // Wait a moment for dialog handling
-    await page.waitForTimeout(500);
+    // ⚠️ IMPORTANT: Do NOT click bulk action buttons - they execute dangerous mutations
+    // This test only verifies button visibility and state, not integration behavior
   });
 });
 
 test.describe('User Management - Pagination', () => {
   test.beforeEach(async ({ page }) => {
-    await clearAdminSession(page);
     await loginAsAdmin(page);
     await page.goto('/admin/users');
     // Wait for users list to be visible (SSE keeps connections open)
@@ -702,7 +650,6 @@ test.describe('User Management - Pagination', () => {
 
 test.describe('User Management - Table Features', () => {
   test.beforeEach(async ({ page }) => {
-    await clearAdminSession(page);
     await loginAsAdmin(page);
     await page.goto('/admin/users');
     // Wait for users list to be visible instead of networkidle (which can timeout with large datasets)
