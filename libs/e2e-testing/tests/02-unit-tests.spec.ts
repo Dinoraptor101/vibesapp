@@ -13,7 +13,8 @@ test.describe('Playwright Configuration Tests', () => {
   test('should have correct browser configuration', () => {
     expect(playwrightConfig.use?.baseURL).toBeTruthy();
     expect(playwrightConfig.use?.headless).toBe(true);
-    expect(playwrightConfig.use?.storageState).toBe('storageState.json');
+    // Storage state filename depends on environment (local/qa)
+    expect(playwrightConfig.use?.storageState).toMatch(/^storageState-user1\.(local|qa)\.json$/);
   });
 
   test('should have geolocation permissions configured', () => {

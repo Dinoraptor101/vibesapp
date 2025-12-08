@@ -14,7 +14,12 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { createTestPost, createTestComment, getSecondUserCredentials, isQAEnvironment } from './helpers/test-post';
+import {
+  createTestPost,
+  createTestComment,
+  getSecondUserCredentials,
+  isQAEnvironment,
+} from './helpers/test-post';
 
 // API base URL (backend server, not frontend) - from .env
 const API_BASE_URL = isQAEnvironment()
@@ -28,7 +33,11 @@ import * as path from 'path';
 // Helper to get credentials from storage state
 function getCredentials() {
   try {
-    const storageStatePath = path.join(__dirname, '../storageState.json');
+    // Use environment-specific storage state file
+    const storageStateFile = isQAEnvironment()
+      ? 'storageState-user1.qa.json'
+      : 'storageState-user1.local.json';
+    const storageStatePath = path.join(__dirname, '..', storageStateFile);
     const storageState = JSON.parse(fs.readFileSync(storageStatePath, 'utf-8'));
     const pigeonIdCookie = storageState.cookies?.find(
       (c: { name: string }) => c.name === 'pigeonId'

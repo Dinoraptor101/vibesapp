@@ -14,15 +14,20 @@ import { isQAEnvironment as isQAEnv } from '../../setup-utils';
 export { isQAEnvironment } from '../../setup-utils';
 
 // Read API base URL from environment variables
-const API_BASE_URL = isQAEnv()
-  ? process.env.QA_BACKEND_BASE
-  : process.env.LOCAL_BACKEND_BASE;
+const API_BASE_URL = isQAEnv() ? process.env.QA_BACKEND_BASE : process.env.LOCAL_BACKEND_BASE;
 
 const TEST_LOCATION = { lat: 37.41, lon: -77.46 }; // Richmond, VA
 
+// Helper to get environment-specific storage state filename
+function getStorageStateFile(user: 'user1' | 'user2' = 'user1') {
+  const env = isQAEnv() ? 'qa' : 'local';
+  return `storageState-${user}.${env}.json`;
+}
+
 // Helper to get credentials from storage state
-function getCredentials(storageStateFile: string = 'storageState.json') {
+function getCredentials(user: 'user1' | 'user2' = 'user1') {
   try {
+    const storageStateFile = getStorageStateFile(user);
     const storageStatePath = path.join(__dirname, '../../', storageStateFile);
     const storageState = JSON.parse(fs.readFileSync(storageStatePath, 'utf-8'));
     const pigeonIdCookie = storageState.cookies?.find(
@@ -44,7 +49,7 @@ function getCredentials(storageStateFile: string = 'storageState.json') {
 
 // Export helper to get credentials for second test user
 export function getSecondUserCredentials() {
-  return getCredentials('storageState2.json');
+  return getCredentials('user2');
 }
 
 // Helper to get API headers with authentication
