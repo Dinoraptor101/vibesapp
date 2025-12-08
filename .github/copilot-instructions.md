@@ -14,6 +14,15 @@ Modern humans have lost virtues: friendship, compassion, sacrifice, generosity, 
 
 Every feature decision should be evaluated against: *Does this serve spiritual growth, or distraction?*
 
+### Code as Spiritual Practice
+When writing code for VibesApp, hold this context:
+- How does this feature serve spiritual growth?
+- Does this design choice foster presence or distraction?
+- Does this moderation approach restore or punish?
+- Would this architecture build trust or dependency?
+
+Code is not neutral. Code embodies values. VibesApp's code must embody virtue.
+
 ---
 
 ## Project Overview
