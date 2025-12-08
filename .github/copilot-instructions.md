@@ -1,5 +1,21 @@
 # VibesApp Monorepo - GitHub Copilot Instructions
 
+## Project Purpose
+
+VibesApp exists to **repair the human spirit**. It is not a social network optimised for engagement—it is infrastructure for spiritual reconnection.
+
+Modern humans have lost virtues: friendship, compassion, sacrifice, generosity, courage, kindness. They scroll through global feeds, disconnected from place, from presence, from *here*. VibesApp is designed to bring them back.
+
+### Design Philosophy as Spiritual Practice
+- **"Dumb Frontend, Smart Backend"**: The system handles complexity so humans can *feel*, not think. Trust architecture.
+- **Location-based features**: Anchor users to presence—"These are real people near you. Be *here*, not everywhere."
+- **Graduated moderation**: Restorative, not punitive. Punishment doesn't heal spirit; guidance does.
+- **Vibes system**: Not superficial reactions but genuine spiritual resonance between humans.
+
+Every feature decision should be evaluated against: *Does this serve spiritual growth, or distraction?*
+
+---
+
 ## Project Overview
 VibesApp is a picture-based social network built as an NX monorepo with React 19 frontend and Node.js Express backend. The architecture follows a **"Dumb Frontend, Smart Backend"** pattern where the frontend is purely a presentation layer and all business logic lives in the backend.
 
