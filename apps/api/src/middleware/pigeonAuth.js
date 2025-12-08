@@ -3,8 +3,10 @@ const excludedRoutes = require('./excludedRoutes');
 
 module.exports = async (req, res, next) => {
   // The following routes can be used without Pigeon ID validation
+  console.log(`[pigeonAuth] path: ${req.path} | originalUrl: ${req.originalUrl}`);
+  console.log('[pigeonAuth] Excluded routes:', excludedRoutes);
   if (excludedRoutes.some((route) => req.path.startsWith(route))) {
-    // console.log(`Excluding route from Pigeon ID validation: ${req.path}`);
+    console.log(`✅ Excluding route from Pigeon ID validation: ${req.path}`);
     return next();
   }
 
