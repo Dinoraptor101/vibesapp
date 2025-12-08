@@ -103,12 +103,12 @@ async function transformPostsWithCommentCounts(posts) {
 /**
  * Get comment count for a single post
  * Use this when you need comment count for just one post
- * @param {string} postId - The post ID
+ * @param {ObjectId} postId - The post ID (must be ObjectId, not string)
  * @returns {Promise<number>} Comment count
  */
 async function getCommentCount(postId) {
   const count = await Post.countDocuments({
-    commentOn: postId.toString(),
+    commentOn: postId,
     isDeleted: { $ne: true },
   });
   return count;
