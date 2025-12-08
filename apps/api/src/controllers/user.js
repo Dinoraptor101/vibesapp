@@ -254,7 +254,7 @@ const login = async (req, res) => {
   // Verify reCAPTCHA token (only for POST requests)
   // verifyRecaptcha will handle the case where ENABLE_RECAPTCHA=false
   if (req.method === 'POST') {
-    const recaptchaResult = await verifyRecaptcha(recaptchaToken, 'login');
+    const recaptchaResult = await verifyRecaptcha(recaptchaToken, 'login', req);
     if (!recaptchaResult.success) {
       console.error('reCAPTCHA verification failed:', recaptchaResult.error);
       return res.status(403).json({
