@@ -1,5 +1,6 @@
 // global-setup.local.ts - LOCALHOST ENVIRONMENT SETUP
 import { chromium } from '@playwright/test';
+import * as path from 'path';
 import {
   loadEnvVariables,
   fetchUserIdByPigeonId,
@@ -37,7 +38,7 @@ async function globalSetup() {
 
   logRecaptchaBypass('localhost');
 
-  await context.storageState({ path: './storageState-user1.local.json' });
+  await context.storageState({ path: path.resolve(__dirname, 'storageState-user1.local.json') });
 
   // Create second user storage state (for multi-user tests)
   const context2 = await browser.newContext();
@@ -49,7 +50,7 @@ async function globalSetup() {
   });
   await context2.addCookies(cookies2);
 
-  await context2.storageState({ path: './storageState-user2.local.json' });
+  await context2.storageState({ path: path.resolve(__dirname, 'storageState-user2.local.json') });
   await context2.close();
 
   await browser.close();
