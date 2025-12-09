@@ -8,6 +8,81 @@ import apiClient from '@/lib/api';
 import type { User, LoginResponse, SignupData, SignupResponse } from '@/types';
 import { transformUserData } from '@/utils/transformers';
 
+interface LoginResponse {
+  userId: string;
+  userName: string; // camelCase - consistent with database
+  mbtiPersonality: string;
+  polarity: string;
+  profilePictureUrl?: string;
+  bio?: string;
+  location?: {
+    lat: number;
+    lon: number;
+    city?: string;
+    state?: string;
+  };
+  vibes?: number;
+  createdAt: string;
+  updatedAt: string;
+  lastActiveAt?: string;
+}
+
+interface SignupData {
+  pigeonId: string; // Frontend generates this
+  userName: string;
+  birthYear: number;
+  birthMonth: number;
+  sex: 'male' | 'female' | 'other';
+  location: {
+    lat: number;
+    lon: number;
+    city?: string;
+    state?: string;
+  };
+  polarity: 'yin' | 'yang';
+  mbtiPersonality: string;
+  profilePictureUrl?: string;
+  bio?: string;
+  recaptchaToken?: string; // reCAPTCHA v3 token
+}
+
+interface SignupResponse extends LoginResponse {
+  pigeonId: string; // Only returned on signup
+}
+
+/**
+ * Transform backend user response to frontend User type
+ * Backend may return location as lat/lon OR latitude/longitude depending on endpoint
+ */
+function transformUserData(data: LoginResponse): User {
+  // Handle both location formats: lat/lon (signup) and latitude/longitude (profile)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rawLocation = data.location as any;
+  const location = rawLocation
+    ? {
+        latitude: rawLocation.latitude ?? rawLocation.lat,
+        longitude: rawLocation.longitude ?? rawLocation.lon,
+        city: rawLocation.city,
+        state: rawLocation.state,
+      }
+    : undefined;
+
+  return {
+    _id: data.userId,
+    userId: data.userId, // UUID - business logic identifier
+    userName: data.userName, // camelCase - consistent with database
+    polarity: data.polarity || 'neutral',
+    mbtiPersonality: data.mbtiPersonality,
+    profilePictureUrl: data.profilePictureUrl,
+    bio: data.bio,
+    location,
+    vibes: data.vibes || 0,
+    createdAt: new Date(data.createdAt),
+    updatedAt: new Date(data.updatedAt),
+    lastSeen: data.lastActiveAt ? new Date(data.lastActiveAt) : undefined,
+  };
+}
+
 export const authApi = {
   /**
    * Generate a unique Pigeon ID from the backend

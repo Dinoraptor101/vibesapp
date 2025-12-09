@@ -36,7 +36,8 @@ export function PostsFeed({ className, searchQuery }: PostsFeedProps) {
   const [showSearchLoading, setShowSearchLoading] = useState(false);
 
   // Filter state (tab-based) - only used when NOT searching
-  const { filters, activeTab, setActiveTab, isFiltering, locationChecked } = usePostFilters();
+  const { filters, activeTab, setActiveTab, isFiltering, hasLocation, locationChecked } =
+    usePostFilters();
 
   // Posts data with infinite scroll - only used when NOT searching
   const {
@@ -249,7 +250,7 @@ export function PostsFeed({ className, searchQuery }: PostsFeedProps) {
   }
 
   // No location available for nearby tab (location check complete but failed)
-  if (activeTab === 'nearby' && locationChecked && !locationChecked) {
+  if (activeTab === 'nearby' && locationChecked && !hasLocation) {
     return (
       <div className={className}>
         <FilterBar activeTab={activeTab} onTabChange={setActiveTab} />
