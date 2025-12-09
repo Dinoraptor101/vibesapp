@@ -42,7 +42,7 @@ export function useCreateComment(postId: string) {
         image: '', // Comments don't have images
         user: {
           userId: user?._id || '',
-          userName: user?.username || 'You',
+          userName: user?.userName || 'You',
           birthYear: 2000, // Default values for required fields
           birthMonth: 1,
           sex: 'other',

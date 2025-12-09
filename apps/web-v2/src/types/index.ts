@@ -21,7 +21,7 @@ export type Theme = 'light' | 'dim' | 'dark';
 export interface User {
   _id: string;
   userId: string; // UUID - business logic identifier
-  username: string; // Frontend uses lowercase (transformed from backend's userName)
+  userName: string; // camelCase - consistent with database and backend
   // SECURITY: pigeonId should NEVER be included in API responses
   // It's only stored client-side in cookies for authentication
   polarity: string;

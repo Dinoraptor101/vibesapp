@@ -153,7 +153,7 @@ export function ConversationView() {
         >
           <Avatar
             src={otherUser?.profilePictureUrl}
-            alt={otherUser?.username || 'User'}
+            alt={otherUser?.userName || 'User'}
             size="md"
             data-testid="conversation-avatar"
           />
@@ -164,7 +164,7 @@ export function ConversationView() {
                 className="font-semibold text-gray-900 dim:text-gray-100 dark:text-white"
                 data-testid="conversation-username"
               >
-                {otherUser?.username || 'Unknown'}
+                {otherUser?.userName || 'Unknown'}
               </h2>
               {otherUser?.mbtiPersonality && (
                 <Badge variant="brand" size="sm">
@@ -242,7 +242,7 @@ export function ConversationView() {
                   message={message}
                   isCurrentUser={message.senderId === user?._id}
                   otherUserAvatar={otherUser?.profilePictureUrl}
-                  otherUserName={otherUser?.username}
+                  otherUserName={otherUser?.userName}
                   shouldAnimate={shouldAnimate}
                 />
               );

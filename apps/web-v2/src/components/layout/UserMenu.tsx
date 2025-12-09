@@ -57,8 +57,8 @@ export function UserMenu({ isActive = false, icon }: UserMenuProps) {
           {icon || (
             <Avatar
               src={getAvatarUrl(user.profilePictureUrl)}
-              alt={user.username}
-              name={user.username}
+              alt={user.userName}
+              name={user.userName}
               size="md"
             />
           )}
@@ -75,7 +75,7 @@ export function UserMenu({ isActive = false, icon }: UserMenuProps) {
         >
           {/* User Info */}
           <div className="px-3 py-2 border-b border-border">
-            <p className="text-sm font-semibold text-text-primary truncate">{user.username}</p>
+            <p className="text-sm font-semibold text-text-primary truncate">{user.userName}</p>
             <p className="text-xs text-text-tertiary">{user.mbtiPersonality}</p>
           </div>
 

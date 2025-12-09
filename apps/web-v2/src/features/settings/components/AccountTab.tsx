@@ -400,7 +400,7 @@ export function AccountTab() {
           >
             <Avatar
               src={getAvatarUrl(user?.profilePictureUrl)}
-              alt={user?.username || 'User'}
+              alt={user?.userName || 'User'}
               size="xl"
             />
           </button>
@@ -546,7 +546,7 @@ export function AccountTab() {
         {user && (
           <PigeonIdRegenerator
             userId={user.userId}
-            userName={user.username}
+            userName={user.userName}
             context="user"
             isOnline={isOnline}
           />

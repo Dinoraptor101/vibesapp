@@ -56,8 +56,8 @@ export function DMRequestCard({ request }: DMRequestCardProps) {
       <div className="mb-3 flex items-start gap-3">
         <Avatar
           src={sender.profilePictureUrl}
-          alt={sender.username}
-          name={sender.username}
+          alt={sender.userName}
+          name={sender.userName}
           size="md"
           data-testid="requester-avatar"
         />
@@ -65,7 +65,7 @@ export function DMRequestCard({ request }: DMRequestCardProps) {
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-text-primary" data-testid="requester-username">
-              {sender.username}
+              {sender.userName}
             </span>
             {sender.mbtiPersonality && (
               <Badge variant="brand" size="sm">
