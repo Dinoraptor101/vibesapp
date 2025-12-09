@@ -1,7 +1,7 @@
 // ===== USER TYPES =====
 export interface IUserData {
   _id: string;
-  username: string;
+  userName: string;
   polarity: string;
   mbtiPersonality: string;
   profilePictureUrl?: string;
@@ -115,7 +115,7 @@ export interface ILocation {
 // ===== AUTHENTICATION TYPES =====
 export interface IAuthUser {
   id: string;
-  username: string;
+  userName: string;
   email?: string;
   token: string;
   refreshToken?: string;
@@ -123,12 +123,12 @@ export interface IAuthUser {
 }
 
 export interface ILoginRequest {
-  username: string;
+  userName: string;
   password: string;
 }
 
 export interface IRegisterRequest {
-  username: string;
+  userName: string;
   email: string;
   password: string;
   confirmPassword: string;

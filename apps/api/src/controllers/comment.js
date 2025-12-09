@@ -98,7 +98,7 @@ exports.createComment = async (req, res) => {
           type: 'comment_reply',
           actor: {
             userId: user.userId,
-            username: user.userName,
+            userName: user.userName,
             avatar: user.profilePictureUrl,
           },
           target: {
@@ -124,7 +124,7 @@ exports.createComment = async (req, res) => {
           type: 'comment',
           actor: {
             userId: user.userId,
-            username: user.userName,
+            userName: user.userName,
             avatar: user.profilePictureUrl,
           },
           target: {

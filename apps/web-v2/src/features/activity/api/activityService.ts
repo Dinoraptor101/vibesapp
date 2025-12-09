@@ -17,10 +17,10 @@ function transformActivity(backendActivity: BackendActivity): Activity {
   const actor = {
     userId:
       backendActivity.actor?.userId || backendActivity.userId || backendActivity.authorUserId || '',
-    username:
-      backendActivity.actor?.username ||
-      backendActivity.username ||
-      backendActivity.authorUsername ||
+    userName:
+      backendActivity.actor?.userName ||
+      backendActivity.userName ||
+      backendActivity.authorUserName ||
       'unknown',
     avatar: backendActivity.actor?.avatar || undefined,
   };

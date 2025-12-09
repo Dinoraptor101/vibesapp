@@ -150,7 +150,7 @@ const createPost = async (req, res) => {
               type: 'following_post',
               actor: {
                 userId: user.userId,
-                username: user.userName,
+                userName: user.userName,
                 avatar: user.profilePictureUrl,
               },
               target: {
@@ -193,7 +193,7 @@ const createPost = async (req, res) => {
               type: 'nearby_post',
               actor: {
                 userId: user.userId,
-                username: user.userName,
+                userName: user.userName,
                 avatar: user.profilePictureUrl,
               },
               target: {
@@ -607,7 +607,7 @@ const likePost = async (req, res) => {
         type: 'reaction',
         actor: {
           userId: user.userId,
-          username: user.userName,
+          userName: user.userName,
           avatar: user.profilePictureUrl,
         },
         target: {
@@ -746,7 +746,7 @@ const reportPost = async (req, res) => {
         type: 'post_hidden',
         actor: {
           userId: 'system',
-          username: 'VibesApp',
+          userName: 'VibesApp',
           avatar: null,
         },
         target: {
@@ -946,7 +946,7 @@ const reactToPost = async (req, res) => {
         type: 'reaction',
         actor: {
           userId: user.userId,
-          username: user.userName,
+          userName: user.userName,
           avatar: user.profilePictureUrl,
         },
         target: {

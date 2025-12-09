@@ -55,46 +55,46 @@ function getActivityIcon(type: Activity['type']) {
  * We differentiate by checking if there's a thumbnail (image) - photos have thumbnails, comments don't.
  */
 function getActivityMessage(activity: Activity): string {
-  const username = `@${activity.actor.username}`;
+  const userName = `@${activity.actor.userName}`;
   // Determine if this is a photo (has thumbnail) or comment (no thumbnail)
   const isPhoto = !!activity.target?.thumbnail;
 
   switch (activity.type) {
     case 'new_follower':
-      return `${username} followed you`;
+      return `${userName} followed you`;
     case 'following_post':
-      return isPhoto ? `${username} posted a photo` : `${username} posted a comment`;
+      return isPhoto ? `${userName} posted a photo` : `${userName} posted a comment`;
     case 'nearby_post':
-      return isPhoto ? `${username} posted nearby` : `${username} commented nearby`;
+      return isPhoto ? `${userName} posted nearby` : `${userName} commented nearby`;
     case 'comment':
-      return `${username} commented on your post`;
+      return `${userName} commented on your post`;
     case 'comment_reply':
-      return `${username} replied to your comment`;
+      return `${userName} replied to your comment`;
     case 'reaction':
       // Check if it's a comment or post reaction
       if (activity.target?.type === 'comment') {
         return activity.groupCount && activity.groupCount > 1
           ? `${activity.groupCount} people liked your comment`
-          : `${username} liked your comment`;
+          : `${userName} liked your comment`;
       }
       return activity.groupCount && activity.groupCount > 1
         ? `${activity.groupCount} people liked your post`
-        : `${username} liked your post`;
+        : `${userName} liked your post`;
     case 'post_hidden':
       return 'Your post was hidden by community reports';
     // Legacy types
     case 'dm_request':
-      return `${username} sent you a message request`;
+      return `${userName} sent you a message request`;
     case 'dm_message':
-      return `${username} sent you a message`;
+      return `${userName} sent you a message`;
     case 'post_yang':
       return activity.groupCount && activity.groupCount > 1
         ? `${activity.groupCount} people liked your post`
-        : `${username} liked your post`;
+        : `${userName} liked your post`;
     case 'post_yin':
       return activity.groupCount && activity.groupCount > 1
         ? `${activity.groupCount} people disliked your post`
-        : `${username} disliked your post`;
+        : `${userName} disliked your post`;
     default:
       return 'New activity';
   }
@@ -186,7 +186,7 @@ function ActivityCardComponent({ activity, onMarkAsRead }: ActivityCardProps) {
       {activity.actor.userId && activity.type !== 'post_hidden' && (
         <Avatar
           src={activity.actor.avatar}
-          alt={activity.actor.username}
+          alt={activity.actor.userName}
           size="md"
           className="flex-shrink-0"
         />
