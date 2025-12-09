@@ -192,7 +192,7 @@ Changed root package.json:
 ### Post-Deployment
 - [x] Test with real production user credentials
 - [x] Verify posts display with usernames
-- [ ] Check that images load (CDN) (user badge did not load, ? appears on feed.)
+- [x] Check that images load (CDN) (user badge did not load, ? appears on feed.)
 - [ ] Test messaging works
 - [ ] Verify SSE connections establish
 - [ ] Check admin panel functions
@@ -280,6 +280,21 @@ curl -s "https://api.vibesapp.net/api/users/$USER_ID" \
    - Running migration script ≠ verifying it worked
    - Always query database after migration to confirm
    - Check API responses, not just database fields
+
+6. **GitHub Pages Custom Domain Gets Cleared**
+   - `gh-pages` deploys wipe the custom domain setting unless `CNAME` file exists
+   - Solution: Add `CNAME` file containing `vibesapp.net` to `apps/web-v2/public/`
+   - This gets copied to `dist/` during build and preserves custom domain
+
+7. **GitHub Pages Deployment Cannot Use GitHub CLI**
+   - GitHub CLI (`gh`) cannot push to `gh-pages` branch directly
+   - Must use `npx gh-pages -d apps/web-v2/dist` (the npm package, not GitHub CLI)
+   - The `gh-pages` npm package handles orphan branch creation and force-push
+
+8. **Vite Base Path for GitHub Pages**
+   - With custom domain (`vibesapp.net`): use default base `/`
+   - Without custom domain (using `username.github.io/repo`): use `--base=/repo/`
+   - Build command: `npm run build` (default) or `npx vite build --base=/vibesapp/`
 
 ---
 
