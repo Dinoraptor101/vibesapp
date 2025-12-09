@@ -175,24 +175,24 @@ Changed root package.json:
 ## Deployment Checklist
 
 ### Pre-Deployment
-- [ ] Run migrations on production database first
-- [ ] Backup production database
-- [ ] Test build command locally: `npm run build`
-- [ ] Test start command locally: `NODE_ENV=production npm start`
-- [ ] Verify environment variables match between GitHub Secrets and Heroku Config Vars
-- [ ] Check that Procfile exists and is correct
-- [ ] Ensure package.json `start` script doesn't point to `dev`
+- [x] Run migrations on production database first
+- [x] Backup production database
+- [x] Test build command locally: `npm run build`
+- [x] Test start command locally: `NODE_ENV=production npm start`
+- [x] Verify environment variables match between GitHub Secrets and Heroku Config Vars
+- [x] Check that Procfile exists and is correct
+- [x] Ensure package.json `start` script doesn't point to `dev`
 
 ### During Deployment
-- [ ] Monitor Heroku logs: `heroku logs --tail --app vibesapp`
-- [ ] Check build output for errors
-- [ ] Verify dyno starts: `heroku ps --app vibesapp`
-- [ ] Test API health endpoint: `curl https://api.vibesapp.net/api/health`
+- [x] Monitor Heroku logs: `heroku logs --tail --app vibesapp`
+- [x] Check build output for errors
+- [x] Verify dyno starts: `heroku ps --app vibesapp`
+- [x] Test API health endpoint: `curl https://api.vibesapp.net/api/health`
 
 ### Post-Deployment
-- [ ] Test with real production user credentials
-- [ ] Verify posts display with usernames
-- [ ] Check that images load (CDN)
+- [x] Test with real production user credentials
+- [x] Verify posts display with usernames
+- [ ] Check that images load (CDN) (user badge did not load, ? appears on feed.)
 - [ ] Test messaging works
 - [ ] Verify SSE connections establish
 - [ ] Check admin panel functions

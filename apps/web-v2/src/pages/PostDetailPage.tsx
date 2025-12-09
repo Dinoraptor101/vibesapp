@@ -33,7 +33,7 @@ export function PostDetailPageContent({ postId: propPostId }: PostDetailPageCont
   const postId = propPostId || paramPostId;
   const navigate = useNavigate();
   const { post, isLoading, isError, error } = usePost(postId || '');
-  const [replyTo, setReplyTo] = useState<{ id: string; username: string } | undefined>();
+  const [replyTo, setReplyTo] = useState<{ id: string; userName: string } | undefined>();
 
   const createComment = useCreateComment(postId || '');
   const toggleLike = useToggleLike();
@@ -84,8 +84,8 @@ export function PostDetailPageContent({ postId: propPostId }: PostDetailPageCont
     }
   };
 
-  const handleReply = (commentId: string, username: string) => {
-    setReplyTo({ id: commentId, username });
+  const handleReply = (commentId: string, userName: string) => {
+    setReplyTo({ id: commentId, userName });
   };
 
   const handleCancelReply = () => {

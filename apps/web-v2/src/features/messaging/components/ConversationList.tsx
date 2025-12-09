@@ -92,7 +92,7 @@ export function ConversationList() {
               <div className={isClosed ? 'grayscale' : ''}>
                 <Avatar
                   src={otherUser?.profilePictureUrl}
-                  alt={otherUser?.username || 'User'}
+                  alt={otherUser?.userName || 'User'}
                   size="md"
                 />
               </div>
@@ -110,7 +110,7 @@ export function ConversationList() {
                     className="font-semibold text-gray-900 dim:text-gray-100 dark:text-white"
                     data-testid="conversation-username"
                   >
-                    {otherUser?.username || 'Unknown'}
+                    {otherUser?.userName || 'Unknown'}
                   </span>
                   {otherUser?.mbtiPersonality && (
                     <Badge variant="brand" size="sm">
