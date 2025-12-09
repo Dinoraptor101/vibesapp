@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const { adminAuth } = require('../middleware/adminAuth');
-const apiKeyAuth = require('../middleware/apiKey');
 const {
   adminLogin,
   updateBalance,
@@ -26,11 +25,27 @@ const {
   cleanupTestData,
 } = require('../controllers/admin');
 
+// Middleware to validate E2E bypass token (for test cleanup only)
+const e2eBypassAuth = (req, res, next) => {
+  const bypassToken = req.headers['x-e2e-bypass'];
+  const expectedToken = process.env.E2E_BYPASS_TOKEN;
+
+  if (!expectedToken) {
+    return res.status(500).json({ error: 'Server configuration error: E2E_BYPASS_TOKEN not set' });
+  }
+
+  if (bypassToken && bypassToken === expectedToken) {
+    return next();
+  }
+
+  return res.status(403).json({ error: 'Forbidden: Invalid E2E bypass token' });
+};
+
 // Admin login (no auth required)
 router.post('/login', adminLogin);
 
-// Test data cleanup (API key auth only - for E2E tests)
-router.delete('/cleanup-test-data', apiKeyAuth, cleanupTestData);
+// Test data cleanup (E2E bypass token required - for automated tests only)
+router.delete('/cleanup-test-data', e2eBypassAuth, cleanupTestData);
 
 // ALL routes below require admin authentication
 router.use(adminAuth);

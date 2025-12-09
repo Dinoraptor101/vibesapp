@@ -144,8 +144,10 @@ async function uploadTestImage(request: APIRequestContext, pigeonId?: string): P
 
   const s3Data = await s3Response.json();
 
-  // Log the actual response for debugging
-  console.log('S3 Response:', JSON.stringify(s3Data, null, 2));
+  // Log the actual response for debugging (local only)
+  if (!process.env.CI) {
+    console.log('S3 Response:', JSON.stringify(s3Data, null, 2));
+  }
 
   const { url, key } = s3Data;
 
@@ -203,7 +205,9 @@ export async function createTestPost(
     // Use main test account (has striker bypass)
     const { pigeonId: mainPigeonId } = getCredentials();
     postCreatorPigeonId = mainPigeonId;
-    console.log(`🧪 Using main test account for post creation: ${postCreatorPigeonId}`);
+    if (!process.env.CI) {
+      console.log(`🧪 Using main test account for post creation: ${postCreatorPigeonId}`);
+    }
   }
 
   // Upload test image to S3 and get the key
@@ -316,7 +320,9 @@ export async function createFlaggedTestPosts(
   // Use main test account as post author (has striker bypass)
   const { pigeonId: mainPigeonId, userId: mainUserId } = getCredentials();
   const authorCredentials = { pigeonId: mainPigeonId, userId: mainUserId };
-  console.log(`🧪 Using main test account for flagged posts: ${authorCredentials.pigeonId}`);
+  if (!process.env.CI) {
+    console.log(`🧪 Using main test account for flagged posts: ${authorCredentials.pigeonId}`);
+  }
 
   // Upload a single test image to reuse
   const imageKey = await uploadTestImage(request, authorCredentials.pigeonId);

@@ -11,10 +11,12 @@ import {
 loadEnvVariables();
 
 async function globalSetup() {
-  console.log('🔧 Setting up test environment: Localhost (with dev servers)');
-  console.log('   Cookie domain: localhost');
-  console.log('   Secure cookies: false');
-  console.log('   Note: Uses same MongoDB Atlas as QA (shared test users)\n');
+  if (!process.env.CI) {
+    console.log('🔧 Setting up test environment: Localhost (with dev servers)');
+    console.log('   Cookie domain: localhost');
+    console.log('   Secure cookies: false');
+    console.log('   Note: Uses same MongoDB Atlas as QA (shared test users)\n');
+  }
 
   // Fetch userIds dynamically from API (uses same pigeonIds as QA)
   const apiBase = process.env.LOCAL_BACKEND_BASE as string;
@@ -52,6 +54,8 @@ async function globalSetup() {
 
   await browser.close();
 
-  console.log('✅ Localhost environment setup complete (2 users)\n');
+  if (!process.env.CI) {
+    console.log('✅ Localhost environment setup complete (2 users)\n');
+  }
 }
 export default globalSetup;

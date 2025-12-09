@@ -46,7 +46,9 @@ export async function fetchUserIdByPigeonId(pigeonId: string, apiBase: string): 
     throw new Error('BACKEND_API_KEY environment variable is not set');
   }
 
-  console.log(`🔍 Fetching userId for pigeonId: ${pigeonId}...`);
+  if (!process.env.CI) {
+    console.log(`🔍 Fetching userId for pigeonId: ${pigeonId}...`);
+  }
 
   const response = await fetch(`${apiBase}/api/users/login`, {
     method: 'POST',
@@ -70,7 +72,9 @@ export async function fetchUserIdByPigeonId(pigeonId: string, apiBase: string): 
     throw new Error(`API response missing userId for pigeonId ${pigeonId}`);
   }
 
-  console.log(`✓ Fetched userId: ${userData.userId}\n`);
+  if (!process.env.CI) {
+    console.log(`✓ Fetched userId: ${userData.userId}\n`);
+  }
   return userData.userId;
 }
 
@@ -145,11 +149,13 @@ export function createAuthCookies(config: CookieConfig) {
  * Log reCAPTCHA bypass information
  */
 export function logRecaptchaBypass(domain: string): void {
-  console.log('🔓 reCAPTCHA bypass cookie added:');
-  console.log('   - Cookie name: e2eBypass');
-  console.log('   - Token: e2e-test-bypass-secret-token-2024');
-  console.log(`   - Domain: ${domain}`);
-  console.log('   - Purpose: Bypass Google reCAPTCHA verification for E2E tests\n');
+  if (!process.env.CI) {
+    console.log('🔓 reCAPTCHA bypass cookie added:');
+    console.log('   - Cookie name: e2eBypass');
+    console.log('   - Token: e2e-test-bypass-secret-token-2024');
+    console.log(`   - Domain: ${domain}`);
+    console.log('   - Purpose: Bypass Google reCAPTCHA verification for E2E tests\n');
+  }
 }
 
 interface SetupUserConfig {

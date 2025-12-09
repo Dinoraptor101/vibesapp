@@ -29,15 +29,30 @@ libs/*/dist/
 libs/*/build/
 
 # ===== Environment Files =====
-# Local environment files
+# CRITICAL: NEVER commit actual .env files with secrets!
+# Keep only .env.example files for templates
+
+# All .env files except .env.example
+.env
 .env.local
+.env.development
 .env.development.local
+.env.test
 .env.test.local
+.env.production
 .env.production.local
 
-# App-specific environment files (keep .env.example for templates)
+# App-specific environment files
 apps/*/.env
 apps/*/.env.local
+apps/*/.env.development
+apps/*/.env.test
+apps/*/.env.production
+libs/*/.env
+libs/*/.env.local
+
+# Keep .env.example files (these are safe templates)
+!**/.env.example
 
 # ===== Testing =====
 # Test results and reports
@@ -113,7 +128,6 @@ testem.log
 *.backup
 *.bak
 *.tmp
-libs/e2e-testing/.env
 
 # Database backups (NEVER COMMIT)
 backups/
