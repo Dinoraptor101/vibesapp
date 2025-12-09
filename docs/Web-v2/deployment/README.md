@@ -1,16 +1,62 @@
-# QA Deployment Documentation
+# Deployment Documentation
 
-> **Status**: ✅ DEPLOYED (November 27, 2025)
+> **Last Updated**: December 9, 2025
 
-## Live Environment
+## Infrastructure Overview
 
-| Component | Platform | URL |
-|-----------|----------|-----|
-| **Frontend** | Vercel | https://qa.vibesapp.net |
-| **Backend** | Heroku | https://logosil-backend-a8355253628c.herokuapp.com |
-| **Database** | MongoDB Atlas | QA cluster |
+| Environment | Component | Platform | URL / Remote |
+|-------------|-----------|----------|--------------|
+| **Production** | Backend | Heroku (`vibesapp`) | `git push heroku main` |
+| **Production** | Frontend | GitHub Pages | https://vibesapp.net |
+| **QA** | Backend | Heroku (`logosil-backend`) | `git push heroku-backend main` |
+| **QA** | Frontend | Vercel | https://qa.vibesapp.net |
 
-## Architecture
+### Git Remotes
+
+```bash
+heroku          → https://git.heroku.com/vibesapp.git          # Production backend
+heroku-backend  → https://git.heroku.com/logosil-backend.git   # QA backend  
+origin          → https://github.com/Dinoraptor101/vibesapp.git
+```
+
+---
+
+## Production Deployment
+
+### Backend (Heroku - vibesapp)
+
+```bash
+# From main branch
+git push heroku main
+
+# Or from a feature/hotfix branch directly
+git push heroku your-branch:main
+```
+
+### Frontend (GitHub Pages)
+
+The production frontend deploys automatically via GitHub Actions when pushing to main.
+
+---
+
+## QA Deployment
+
+### Quick Deployment (Recommended)
+
+```bash
+# Deploy both frontend and backend to QA
+npm run deploy:qa
+
+# Deploy only backend
+npm run deploy:qa:api
+
+# Deploy only frontend (builds automatically)
+npm run deploy:qa:web
+```
+
+---
+
+## QA Architecture
 
 ```
 ┌─────────────────────┐         ┌─────────────────────┐
@@ -25,6 +71,8 @@
                                 │    (QA Cluster)     │
                                 └─────────────────────┘
 ```
+
+---
 
 ## Deployment Process
 
@@ -141,6 +189,9 @@ The following files in this directory were created for the original Heroku-based
 | `QA-DEPLOYMENT-PLAN.md` | Outdated (was for dual-Heroku setup) |
 | `QA-DEPLOYMENT-TRACKER.md` | Outdated |
 | `QA-DEPLOYMENT-PROMPT.md` | Outdated |
+
+### Deleted Services
+- `logosil-frontend` (Heroku) — V1 QA frontend, replaced by Vercel (deleted December 9, 2025)
 
 ## Related Documentation
 
