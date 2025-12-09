@@ -1162,7 +1162,7 @@ This ensures AI agents can pick up exactly where you left off!
   - **Code Quality:**
     - Removed ALL hardcoded URLs (localhost:5001, CloudFront, etc.)
     - Environment-first architecture: All URLs from .env variables
-    - Added FRONTEND_URL, VITE_API_URL, VITE_CDN_URL, VITE_GEOCODING_URL, VITE_PLACEHOLDER_IMAGE_URL
+    - Added FRONTEND_URL, VITE_API_URL, VITE_CDN_URL, VITE_GEOCODING_URL, 
     - Fail-fast validation: App throws error if required env vars missing
   - **Documentation:**
     - Documented ZEN philosophy in REBUILD-UI-PATTERNS.md
