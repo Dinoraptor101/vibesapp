@@ -17,8 +17,8 @@ const isLocal = environment === 'local';
 // Storage state files are created in libs/e2e-testing by global setup
 const storageStateFile = isLocal ? 'storageState-user1.local.json' : 'storageState-user1.qa.json';
 
-// Only print config summary in main process (not in workers)
-if (process.env.PLAYWRIGHT_WORKER_INDEX === undefined) {
+// Only print config summary in main process (not in workers) and not in CI
+if (process.env.PLAYWRIGHT_WORKER_INDEX === undefined && !process.env.CI) {
   console.log(`🔍 Playwright Config: ${environment.toUpperCase()}`);
   console.log(`   baseURL: ${isLocal ? 'http://localhost:5173' : 'https://qa.vibesapp.net'}`);
   console.log(`   Dev Servers: ${isLocal ? 'ENABLED' : 'DISABLED'}\n`);

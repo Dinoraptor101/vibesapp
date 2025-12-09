@@ -193,8 +193,10 @@ test.describe('Integration Tests - Web-V2', () => {
     // Debug: Log cookies at start of each test
     const cookies = await context.cookies();
     const pigeonId = cookies.find((c) => c.name === 'pigeonId');
-    console.log(`\n[Test] Starting test with pigeonId: ${pigeonId?.value || 'NOT SET'}`);
-    console.log(`[Test] Total cookies: ${cookies.length}`);
+    if (!process.env.CI) {
+      console.log(`\n[Test] Starting test with pigeonId: ${pigeonId?.value || 'NOT SET'}`);
+      console.log(`[Test] Total cookies: ${cookies.length}`);
+    }
 
     await page.goto('/');
   });
