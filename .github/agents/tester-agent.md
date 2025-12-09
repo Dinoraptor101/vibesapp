@@ -246,6 +246,19 @@ Rerun the exact same test command to confirm fix.
 2. Update test expectation to match production
 3. **Only if production is wrong:** Fix API response
 
+### Pattern: `Expected: 1, Received: 2` (or similar count mismatches)
+**Default Diagnosis:** Test using exact equality for counts that can change due to parallel tests
+**Solution:**
+1. Use `toBeGreaterThanOrEqual()` instead of `toBe()` for counts that can increase
+2. Tests verify *the system works correctly*, not *exact counts*
+```typescript
+// ❌ WRONG: Flaky if parallel tests add more data
+expect(commentCount).toBe(1);
+
+// ✅ CORRECT: Verifies increment happened
+expect(commentCount).toBeGreaterThanOrEqual(expectedCount);
+```
+
 ### Pattern: `Timeout 30000ms exceeded`
 **Default Diagnosis:** Test not waiting for element properly
 **Solution:**
