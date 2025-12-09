@@ -21,25 +21,58 @@ VibesApp uses a **layered authentication system** with distinct mechanisms for d
 
 ### 1. Public Routes (No Auth Required)
 
-Routes accessible without authentication:
+Routes accessible without authentication are defined in two separate exclusion lists:
+
+#### API Key Exclusions (`excludedRoutesApiKey.js`)
+Routes excluded from API key validation (all browser-facing routes):
 
 ```javascript
-// apps/api/src/middleware/excludedRoutes.js
+// apps/api/src/middleware/excludedRoutesApiKey.js
 [
-  '/api/admin',              // Uses adminAuth instead
-  '/api/users/create',       // Signup
-  '/api/users/login',        // Login
-  '/api/recaptcha',          // CAPTCHA verification
-  '/api/issues/createIssue', // Bug reports
-  '/api/health',             // Health checks
+  '/api/admin',       // Admin token auth
+  '/api/users/',      // pigeonAuth validates
+  '/api/posts',       // pigeonAuth validates
+  '/api/comments',    // pigeonAuth validates
+  '/api/reactions',   // pigeonAuth validates
+  '/api/messages',    // pigeonAuth validates
+  '/api/messaging',   // pigeonAuth validates
+  '/api/dm',          // pigeonAuth validates
+  '/api/dm-requests', // pigeonAuth validates
+  '/api/activities',  // pigeonAuth validates
+  '/api/s3',          // pigeonAuth validates
+  '/api/recaptcha',   // Public
+  '/api/issues/createIssue', // Public
+  '/api/health',      // Public
+  '/api/sse',         // Query param auth
 ]
 ```
 
+#### PigeonAuth Exclusions (`excludedRoutesPigeonAuth.js`)
+Routes excluded from user authentication (truly public or alternative auth):
+
+```javascript
+// apps/api/src/middleware/excludedRoutesPigeonAuth.js
+[
+  '/api/admin',           // Admin token auth instead
+  '/api/users/create',    // Public signup
+  '/api/users/login',     // Public login
+  '/api/recaptcha',       // Public reCAPTCHA
+  '/api/issues/createIssue', // Public issue reporting
+  '/api/health',          // Public health check
+]
+```
+
+**Why Two Lists?**
+- **API key** = Server-to-server trust (browser never sends it)
+- **pigeonAuth** = User identity validation (browser sends pigeonId)
+- Never conflate the two - they serve different purposes
+
 **Flow:**
 ```
-Browser → GET /api/health → [excludedRoutes check] → ✅ Allow
-Browser → POST /api/users/create → [excludedRoutes check] → ✅ Allow
-Browser → POST /api/users/login → [excludedRoutes check] → ✅ Allow
+Browser → GET /api/health → [apiKey: excluded] → [pigeonAuth: excluded] → ✅ Allow
+Browser → POST /api/users/create → [apiKey: excluded] → [pigeonAuth: excluded] → ✅ Allow
+Browser → POST /api/users/login → [apiKey: excluded] → [pigeonAuth: excluded] → ✅ Allow
+Browser → GET /api/users/:userId → [apiKey: excluded] → [pigeonAuth: validates] → ✅ Allow (if valid pigeonId)
 ```
 
 ### 2. Authenticated Routes (pigeonId Required)

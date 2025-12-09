@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const excludedRoutes = require('./excludedRoutes');
+const excludedRoutes = require('./excludedRoutesPigeonAuth');
 
 module.exports = async (req, res, next) => {
   // The following routes can be used without Pigeon ID validation

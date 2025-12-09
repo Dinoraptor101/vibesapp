@@ -202,7 +202,18 @@ test.describe('Integration Tests - Web-V2', () => {
       console.log(`[Test] Total cookies: ${cookies.length}`);
     }
 
+    // CRITICAL: Wait for AuthProvider to finish initialization
+    // AuthProvider reads cookies then makes API call to validate session via GET /users/{userId}
+    // Set up the promise BEFORE navigation so we catch the request
+    const authResponsePromise = page.waitForResponse(
+      (response) => response.url().includes('/users/') && response.status() === 200,
+      { timeout: 10000 }
+    );
+
     await page.goto('/');
+
+    // Wait for auth to complete before test proceeds
+    await authResponsePromise;
   });
 
   test('should display login page with zen minimal design', async ({ page, context }) => {
@@ -260,10 +271,7 @@ test.describe('Integration Tests - Web-V2', () => {
   });
   test('should navigate to settings and view tabs', async ({ page }) => {
     // Assumes user is already logged in via global setup
-    await page.goto('/');
-
-    // Fail if redirected to login (auth not loaded from storageState)
-    await expect(page).toHaveURL('/', { timeout: 5000 });
+    // beforeEach has already navigated to '/' and waited for auth to complete
 
     // Open user menu
     await page.getByTestId('user-menu-button').first().click();
