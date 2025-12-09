@@ -135,6 +135,16 @@ UserSchema.set('toJSON', {
     ret.username = ret.userName;
     delete ret.userName;
 
+    // Transform location field names: lat/lon → latitude/longitude (frontend expectation)
+    if (ret.location) {
+      ret.location = {
+        latitude: ret.location.lat,
+        longitude: ret.location.lon,
+        city: ret.location.city || null,
+        state: ret.location.state || null,
+      };
+    }
+
     return ret;
   },
 });
@@ -148,6 +158,16 @@ UserSchema.set('toObject', {
     // Transform field names to match frontend (lowercase/consistent)
     ret.username = ret.userName;
     delete ret.userName;
+
+    // Transform location field names: lat/lon → latitude/longitude (frontend expectation)
+    if (ret.location) {
+      ret.location = {
+        latitude: ret.location.lat,
+        longitude: ret.location.lon,
+        city: ret.location.city || null,
+        state: ret.location.state || null,
+      };
+    }
 
     return ret;
   },
