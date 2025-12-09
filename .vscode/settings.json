@@ -1,0 +1,48 @@
+{
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "notebook.formatOnSave.enabled": true,
+  "editor.formatOnPaste": true,
+  "editor.formatOnType": true,
+  "github-actions.workflows.pinned.workflows": [
+    ".github/workflows/deploy.yml",
+    ".github/workflows/build.yml",
+    ".github/workflows/code-quality.yml"
+  ],
+  "git.promptToSaveFilesBeforeCommit": "staged",
+  "biome.lsp.bin": "./node_modules/@biomejs/biome/bin/biome",
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "typescript.suggest.autoImports": true,
+  "eslint.workingDirectories": ["apps/api"],
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "files.associations": {
+    "*.env": "properties"
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/build": true,
+    "**/dist": true,
+    "**/.nx": true
+  },
+  "remote.autoForwardPortsFallback": 0
+}

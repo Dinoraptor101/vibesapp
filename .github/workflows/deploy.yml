@@ -1,0 +1,61 @@
+name: Deploy to GitHub Pages on PR Merge
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+jobs:
+  deploy:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    environment: github-pages
+    concurrency: deploy # Cancel other pending deployments
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GIT_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Cache Node.js modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Web-V2
+        working-directory: apps/web-v2
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_CDN_URL: ${{ vars.VITE_CDN_URL }}
+          VITE_BACKEND_API_KEY: ${{ secrets.VITE_BACKEND_API_KEY }}
+          VITE_S3_BUCKET: ${{ vars.VITE_S3_BUCKET }}
+          VITE_S3_REGION: ${{ vars.VITE_S3_REGION }}
+          VITE_GEOCODING_URL: ${{ vars.VITE_GEOCODING_URL }}
+          VITE_ENABLE_RECAPTCHA: ${{ vars.VITE_ENABLE_RECAPTCHA }}
+          VITE_RECAPTCHA_SITE_KEY: ${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
+          VITE_USE_SSE: ${{ vars.VITE_USE_SSE }}
+          VITE_DEBUG: ${{ vars.VITE_DEBUG }}
+        run: npm run build
+
+      - name: Deploy to GitHub Pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+        run: |
+          git config user.email "digitals.organization101@gmail.com"
+          git config user.name "Dinoraptor101"
+          git remote set-url origin "https://${GITHUB_TOKEN}@github.com/Dinoraptor101/vibesapp.git"
+          npx gh-pages -d apps/web-v2/dist
