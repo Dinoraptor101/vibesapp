@@ -1,5 +1,6 @@
 // global-setup.ts - QA ENVIRONMENT SETUP (DEFAULT)
 import { chromium } from '@playwright/test';
+import * as path from 'path';
 import {
   loadEnvVariables,
   fetchUserIdByPigeonId,
@@ -34,7 +35,7 @@ async function globalSetup() {
 
   logRecaptchaBypass('qa.vibesapp.net');
 
-  await context.storageState({ path: './storageState-user1.qa.json' });
+  await context.storageState({ path: path.resolve(__dirname, 'storageState-user1.qa.json') });
 
   // Create second user storage state (VIXEN)
   const context2 = await browser.newContext();
@@ -46,7 +47,7 @@ async function globalSetup() {
   });
   await context2.addCookies(cookies2);
 
-  await context2.storageState({ path: './storageState-user2.qa.json' });
+  await context2.storageState({ path: path.resolve(__dirname, 'storageState-user2.qa.json') });
   await context2.close();
 
   await browser.close();

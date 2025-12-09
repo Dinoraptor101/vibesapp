@@ -27,7 +27,9 @@ async function globalTeardown() {
 
   try {
     // Determine the base URL based on environment
-    const baseURL = isQAEnvironment() ? process.env.QA_BACKEND_BASE : process.env.LOCAL_BACKEND_BASE;
+    const baseURL = isQAEnvironment()
+      ? process.env.QA_BACKEND_BASE
+      : process.env.LOCAL_BACKEND_BASE;
 
     // Call the cleanup endpoint
     const response = await page.request.delete(`${baseURL}/api/admin/cleanup-test-data`, {

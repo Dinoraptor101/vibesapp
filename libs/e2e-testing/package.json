@@ -10,7 +10,9 @@
     "test-headed": "xvfb-run npx playwright test --headed",
     "test:qa:headed": "npx playwright test --headed",
     "test:local:headed": "npx playwright test --config=playwright.config.local.ts --headed",
-    "test:admin:headed": "npx playwright test --config=playwright-admin.config.ts --headed"
+    "test:admin:headed": "npx playwright test --config=playwright-admin.config.ts --headed",
+    "format": "biome format --write .",
+    "format:check": "biome format ."
   },
   "keywords": [],
   "author": "",

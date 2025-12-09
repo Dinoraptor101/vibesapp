@@ -7,6 +7,7 @@ const ENVIRONMENT: 'local' | 'qa' = 'local';
 
 import { defineConfig } from '@playwright/test';
 import 'dotenv/config';
+import * as path from 'path';
 
 // Allow .env override if set, but default to the value above
 const environment = process.env.ENVIRONMENT || ENVIRONMENT;
@@ -15,7 +16,11 @@ const isLocal = environment === 'local';
 // Use separate storage state files per environment to avoid cookie domain mismatch
 // user1 = primary test user (DontDeleteMeTester), user2 = secondary test user (VIXEN)
 // Storage state files are created in libs/e2e-testing by global setup
-const storageStateFile = isLocal ? 'storageState-user1.local.json' : 'storageState-user1.qa.json';
+// Use absolute paths to ensure consistent resolution in CI
+const storageStateFile = path.resolve(
+  __dirname,
+  isLocal ? 'storageState-user1.local.json' : 'storageState-user1.qa.json'
+);
 
 // Only print config summary in main process (not in workers) and not in CI
 if (process.env.PLAYWRIGHT_WORKER_INDEX === undefined && !process.env.CI) {

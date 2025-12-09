@@ -105,6 +105,21 @@ Each feature is self-contained with its own:
 - **Error Handling**: Global error boundaries
 - **Loading States**: Suspense and skeleton components
 
+### Authentication System
+> **📖 See [AUTHENTICATION-ARCHITECTURE.md](../AUTHENTICATION-ARCHITECTURE.md)** for complete authentication flow documentation.
+
+**Core Mechanism:** Cookie-based authentication via `pigeonId`
+- Browser stores `pigeonId` + `userId` cookies (10-year expiry)
+- `apiClient` adds `X-Pigeon-Id` header to every request
+- Backend `pigeonAuth` middleware validates against User collection
+- Protected routes redirect to `/login` if cookie missing
+
+**Security:**
+- ✅ `pigeonId` stored in HTTP cookies (not localStorage - prevents XSS)
+- ✅ No API keys sent from browser (removed for security)
+- ✅ Server validates every request against database
+- ✅ HTTPS-only in production (encrypted transmission)
+
 ## API Design Principles
 
 ### Dumb Frontend, Smart Backend
