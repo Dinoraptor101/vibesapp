@@ -1134,7 +1134,7 @@ const cleanupTestData = async (_req, res) => {
 
     const protectedPigeonIds = [
       process.env.QA_TEST_PIGEON_ID,
-      process.env.QA_TEST_PIGEON_2_ID,
+      process.env.QA_TEST_2_PIGEON_ID,
     ].filter(Boolean);
 
     // Find all test users (pigeonId matches test patterns)

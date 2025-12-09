@@ -50,12 +50,8 @@ async function deletePostWithImage(postId, options = {}) {
     // Step 1: Delete S3 image FIRST (if exists and not skipped)
     if (!skipS3 && imageKey && imageKey.trim() !== '') {
       try {
-        // Validate S3 key format (should contain path separator)
-        if (!imageKey.includes('/')) {
-          console.warn(`[deletePost] Invalid S3 key format: ${imageKey}`);
-          // Continue anyway - might be valid
-        }
-
+        // S3 keys can be flat (no path separator) or hierarchical (with /)
+        // Both formats are valid - no validation needed
         await s3.deleteObject({
           Bucket: process.env.AWS_S3_BUCKET,
           Key: imageKey,

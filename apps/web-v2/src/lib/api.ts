@@ -42,7 +42,6 @@ export interface ApiError {
 
 class ApiClient {
   private client: AxiosInstance;
-  private apiKey: string | undefined;
 
   constructor(baseURL: string) {
     // Get base URL from environment or use provided
@@ -60,7 +59,9 @@ class ApiClient {
       },
     });
 
-    this.apiKey = import.meta.env.VITE_BACKEND_API_KEY;
+    // SECURITY: Do NOT use VITE_BACKEND_API_KEY in browser
+    // API key is for server-to-server auth only (internal microservices)
+    // Browser auth uses pigeonId cookie via pigeonAuth middleware
 
     // Setup interceptors
     this.setupInterceptors();
@@ -70,12 +71,16 @@ class ApiClient {
     // Request interceptor - Add auth headers
     this.client.interceptors.request.use(
       (config) => {
-        // Add API key if available
-        if (this.apiKey) {
-          config.headers['X-Api-Key'] = this.apiKey;
-        }
+        // SECURITY FIX: Never send API key from browser
+        // It would expose the key in DevTools and allow attackers to bypass auth
+        // The apiKey middleware checks for this header, but since excludedRoutes
+        // includes most public routes, browser requests work without it
+        // Only internal server-to-server requests need X-Api-Key
+        // if (this.apiKey) {
+        //   config.headers['X-Api-Key'] = this.apiKey;
+        // }
 
-        // Add Pigeon ID from cookie
+        // Add Pigeon ID from cookie (primary browser auth mechanism)
         const pigeonId = getCookie('pigeonId');
         if (pigeonId) {
           config.headers['X-Pigeon-Id'] = pigeonId;

@@ -35,7 +35,6 @@ jobs:
         env:
           VITE_API_URL: ${{ vars.VITE_API_URL }}
           VITE_CDN_URL: ${{ vars.VITE_CDN_URL }}
-          VITE_BACKEND_API_KEY: ${{ secrets.VITE_BACKEND_API_KEY }}
           VITE_S3_BUCKET: ${{ vars.VITE_S3_BUCKET }}
           VITE_S3_REGION: ${{ vars.VITE_S3_REGION }}
           VITE_GEOCODING_URL: ${{ vars.VITE_GEOCODING_URL }}
@@ -44,3 +43,119 @@ jobs:
           VITE_USE_SSE: ${{ vars.VITE_USE_SSE }}
           VITE_DEBUG: ${{ vars.VITE_DEBUG }}
         run: npm run build
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Cache Node.js modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Cache Playwright Browsers
+        id: playwright-cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+        working-directory: libs/e2e-testing
+
+      - name: Install Playwright system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+        working-directory: libs/e2e-testing
+
+      - name: Run E2E Tests (Localhost)
+        working-directory: libs/e2e-testing
+        env:
+          # Environment Control
+          ENVIRONMENT: local
+          NODE_ENV: test
+          CI: true
+          
+          # Server Configuration
+          PORT: 5001
+          FRONTEND_URL: http://localhost:5173
+          
+          # API URLs
+          LOCAL_BACKEND_BASE: http://localhost:5001
+          LOCAL_BACKEND_URL: http://localhost:5001/api
+          LOCAL_FRONTEND_URL: http://localhost:5173
+          LOCAL_COOKIE_DOMAIN: localhost
+          
+          # Database
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          
+          # AWS S3
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          CLOUDFRONT_URL: ${{ secrets.CLOUDFRONT_URL }}
+          
+          # API Security
+          API_KEY: ${{ secrets.API_KEY }}
+          BACKEND_API_KEY: ${{ secrets.API_KEY }}
+          
+          # reCAPTCHA
+          RECAPTCHA_SECRET: ${{ secrets.RECAPTCHA_SECRET }}
+          ENABLE_RECAPTCHA: false
+          
+          # Test User Credentials
+          QA_TEST_PIGEON_ID: ${{ secrets.QA_TEST_PIGEON_ID }}
+          QA_TEST_2_PIGEON_ID: ${{ secrets.QA_TEST_2_PIGEON_ID }}
+          E2E_BYPASS_TOKEN: ${{ secrets.E2E_BYPASS_TOKEN }}
+          
+          # Admin
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          
+          # Frontend Environment Variables (VITE_)
+          VITE_API_URL: http://localhost:5001/api
+          VITE_CDN_URL: ${{ secrets.CLOUDFRONT_URL }}
+          VITE_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          VITE_S3_REGION: ${{ secrets.AWS_REGION }}
+          VITE_GEOCODING_URL: ${{ vars.VITE_GEOCODING_URL }}
+          VITE_ENABLE_RECAPTCHA: false
+          VITE_RECAPTCHA_SITE_KEY: ${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
+          VITE_USE_SSE: false
+          VITE_DEBUG: false
+        run: npx playwright test
+
+      - name: Upload Playwright Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: libs/e2e-testing/playwright-report/
+          retention-days: 7
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: libs/e2e-testing/test-results/
+          retention-days: 7
