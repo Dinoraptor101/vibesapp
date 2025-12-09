@@ -214,3 +214,52 @@ export interface AdminUser {
   isOnline?: boolean;
   lastActive?: string;
 }
+
+// Auth API Types
+
+export interface BackendLocation {
+  // Backend may return either format depending on endpoint
+  lat?: number;
+  lon?: number;
+  latitude?: number;
+  longitude?: number;
+  city?: string;
+  state?: string;
+}
+
+export interface LoginResponse {
+  userId: string;
+  userName: string;
+  mbtiPersonality: string;
+  polarity: string;
+  profilePictureUrl?: string;
+  bio?: string;
+  location?: BackendLocation;
+  vibes?: number;
+  createdAt: string;
+  updatedAt: string;
+  lastActiveAt?: string;
+}
+
+export interface SignupData {
+  pigeonId: string;
+  userName: string;
+  birthYear: number;
+  birthMonth: number;
+  sex: 'male' | 'female' | 'other';
+  location: {
+    lat: number;
+    lon: number;
+    city?: string;
+    state?: string;
+  };
+  polarity: 'yin' | 'yang';
+  mbtiPersonality: string;
+  profilePictureUrl?: string;
+  bio?: string;
+  recaptchaToken?: string;
+}
+
+export interface SignupResponse extends LoginResponse {
+  pigeonId: string;
+}
