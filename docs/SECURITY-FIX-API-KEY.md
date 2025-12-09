@@ -42,6 +42,8 @@ This violated the principle of separation of concerns - browser auth should use 
 
 ## Authentication Architecture
 
+> **📖 See [AUTHENTICATION-ARCHITECTURE.md](./AUTHENTICATION-ARCHITECTURE.md)** for comprehensive documentation of the entire authentication system.
+
 ### Before (Vulnerable)
 ```
 Browser → [X-Api-Key: exposed_key] → API
@@ -53,7 +55,14 @@ Browser → [X-Api-Key: exposed_key] → API
 ```
 Browser → [Cookie: pigeonId] → pigeonAuth → API ✅
 E2E Tests → [X-E2E-Bypass: secret_token] → e2eBypassAuth → Cleanup endpoint ✅
+Server-to-Server → [X-Api-Key: secret_key] → apiKey → Internal API ✅
 ```
+
+**Key Changes:**
+1. **Removed `VITE_BACKEND_API_KEY`** - No longer bundled in frontend JavaScript
+2. **Browser uses `pigeonId` cookies** - Session-based auth via `pigeonAuth` middleware
+3. **API_KEY is server-only** - For internal microservice communication
+4. **E2E cleanup uses dedicated token** - `X-E2E-Bypass` header with `E2E_BYPASS_TOKEN`
 
 ## Migration Checklist
 
