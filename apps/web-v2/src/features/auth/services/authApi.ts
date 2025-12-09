@@ -9,7 +9,7 @@ import type { User } from '@/types';
 
 interface LoginResponse {
   userId: string;
-  username: string; // Backend now returns 'username' (transformed in Mongoose)
+  userName: string; // camelCase - consistent with database
   mbtiPersonality: string;
   polarity: string;
   profilePictureUrl?: string;
@@ -57,7 +57,7 @@ function transformUserData(data: LoginResponse): User {
   return {
     _id: data.userId,
     userId: data.userId, // UUID - business logic identifier
-    username: data.username, // Already normalized by backend
+    userName: data.userName, // camelCase - consistent with database
     polarity: data.polarity || 'neutral',
     mbtiPersonality: data.mbtiPersonality,
     profilePictureUrl: data.profilePictureUrl,

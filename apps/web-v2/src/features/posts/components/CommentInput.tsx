@@ -15,7 +15,7 @@ interface CommentInputProps {
   placeholder?: string;
   replyTo?: {
     id: string;
-    username: string;
+    userName: string;
   };
   onCancelReply?: () => void;
   disabled?: boolean;
@@ -114,7 +114,7 @@ export function CommentInput({
       {replyTo && (
         <div className="flex items-center justify-between px-3 py-2 bg-surface-secondary rounded-lg">
           <span className="text-sm text-text-secondary">
-            Replying to <span className="text-brand font-medium">@{replyTo.username}</span>
+            Replying to <span className="text-brand font-medium">@{replyTo.userName}</span>
           </span>
           <button
             type="button"

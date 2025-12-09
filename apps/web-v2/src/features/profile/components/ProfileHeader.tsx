@@ -47,8 +47,8 @@ export function ProfileHeader({
       <div className="flex items-start gap-4">
         <Avatar
           src={getAvatarUrl(profile.profilePictureUrl)}
-          alt={profile.username}
-          name={profile.username}
+          alt={profile.userName}
+          name={profile.userName}
           size="xl"
         />
 
@@ -56,7 +56,7 @@ export function ProfileHeader({
           {/* Username */}
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-gray-900 dim:text-gray-100 dark:text-white">
-              @{profile.username}
+              @{profile.userName}
             </h1>
           </div>
 

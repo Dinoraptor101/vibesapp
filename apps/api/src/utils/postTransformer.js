@@ -36,7 +36,7 @@ function transformPost(post, options = {}) {
     text: postObj.text || null,
     image: postObj.image || null,
     blurPlaceholder: postObj.blurPlaceholder || null,
-    user: postObj.user,
+    user: postObj.user, // userName stays as-is (camelCase is our standard)
     reactions: postObj.reactions || [],
     likeCount,
     commentCount,
