@@ -4,6 +4,43 @@
 
 The Web-v2 testing strategy follows a comprehensive pyramid approach with 60% unit tests, 30% component tests, and 10% end-to-end tests. The goal is to achieve >80% code coverage with fast, reliable test execution.
 
+## Critical E2E Testing Rules
+
+### MANDATORY: Use Test Data IDs Only
+
+**ALL E2E tests MUST use `data-testid` attributes. NEVER use CSS selectors, class names, or aria-labels.**
+
+```typescript
+// ✅ CORRECT
+const likeButton = page.getByTestId('post-like-button');
+await expect(likeButton).toBeVisible();
+
+// ❌ WRONG - NO CSS selectors!
+const likeButton = page.locator('button[aria-label*="Like"]');
+const likeButton = page.locator('.like-btn');
+```
+
+**See `/libs/e2e-testing/TEST-DATA-ID-STANDARDS.md` for complete guidelines.**
+
+### MANDATORY: Create Proper Test Data
+
+**Always create test posts from the correct user context:**
+- Like/Report buttons: Create posts from **OTHER** users
+- Delete buttons: Use posts from the **LOGGED-IN** user
+
+```typescript
+// ✅ CORRECT - Create post from second user
+const user2 = getSecondUserCredentials();
+await createTestPost(request, {
+  caption: 'Test post',
+  pigeonId: user2.pigeonId, // Different user!
+});
+
+// ❌ WRONG - Assuming logged-in user's posts have like buttons (they don't!)
+await page.goto('/');
+const likeButton = page.getByTestId('post-like-button'); // Fails!
+```
+
 ## Testing Pyramid
 
 ### Unit Tests (60%)

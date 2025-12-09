@@ -170,11 +170,8 @@ test.describe('Post Counts - Feed Display', () => {
 
     const firstPost = posts.first();
 
-    // Like button should be visible (has heart icon)
-    // Aria-label includes the like count: "Like post (X likes)" or "Unlike post (X likes)"
-    const heartButton = firstPost.locator(
-      'button[aria-label*="Like"], button[aria-label*="Unlike"]'
-    );
+    // Like button should be visible (using test-data-id)
+    const heartButton = firstPost.getByTestId('post-like-button');
     await expect(heartButton).toBeVisible();
 
     // Verify aria-label contains count info
@@ -200,9 +197,8 @@ test.describe('Post Counts - Feed Display', () => {
 
     const firstPost = posts.first();
 
-    // Comment link should be visible (it's a Link, not button)
-    // Aria-label: "View comments (X)"
-    const commentLink = firstPost.locator('a[aria-label*="View comments"]');
+    // Comment link should be visible (using test-data-id)
+    const commentLink = firstPost.getByTestId('post-comment-link');
     await expect(commentLink).toBeVisible();
 
     // Verify aria-label contains count info

@@ -270,6 +270,7 @@ function PostCardComponent({
                 type="button"
                 onClick={handleLike}
                 disabled={isLiking}
+                data-testid="post-like-button"
                 className={`flex items-center gap-1.5 transition-colors duration-200 group ${
                   isLiking
                     ? 'opacity-50 cursor-not-allowed'
@@ -295,6 +296,7 @@ function PostCardComponent({
             {/* Comment - navigates to post detail */}
             <Link
               to={`/post/${post._id}`}
+              data-testid="post-comment-link"
               className="flex items-center gap-1.5 text-text-secondary hover:text-brand-purple transition-colors duration-200 group"
               aria-label={`View comments (${post.commentCount})`}
             >
@@ -309,6 +311,7 @@ function PostCardComponent({
               <button
                 type="button"
                 onClick={handleReport}
+                data-testid="post-report-button"
                 className="flex items-center gap-1.5 text-text-secondary hover:text-warning transition-colors duration-200 group ml-auto"
                 aria-label="Report post"
               >
@@ -326,6 +329,7 @@ function PostCardComponent({
                 onTouchStart={handleDeleteMouseDown}
                 onTouchEnd={handleDeleteMouseUp}
                 disabled={isDeleting}
+                data-testid="post-delete-button"
                 className={`relative flex items-center gap-1.5 transition-colors duration-200 group ml-auto ${
                   isDeleting
                     ? 'opacity-50 cursor-not-allowed text-text-secondary'
