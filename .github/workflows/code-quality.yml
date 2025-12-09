@@ -32,11 +32,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Biome linting
-        run: npm run lint:ci
+      - name: Lint Web-V2 (ESLint + Biome)
+        working-directory: apps/web-v2
+        run: npm run lint
 
-      - name: Check TypeScript types
+      - name: Lint API (ESLint)
+        working-directory: apps/api
+        run: npm run lint
+
+      - name: Check TypeScript types (Web-V2)
+        working-directory: apps/web-v2
         run: npx tsc --noEmit
 
-      - name: Format check with Biome
-        run: npx biome format src/
+      - name: Format check (Web-V2)
+        working-directory: apps/web-v2
+        run: npm run format:check
