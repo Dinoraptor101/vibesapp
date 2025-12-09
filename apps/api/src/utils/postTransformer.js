@@ -32,11 +32,13 @@ function transformPost(post, options = {}) {
 
   // Normalize user object field names to match frontend expectations
   // Transform userName → username (embedded user data doesn't go through User model serializer)
-  const user = postObj.user ? {
-    ...postObj.user,
-    username: postObj.user.username || postObj.user.userName,
-  } : postObj.user;
-  
+  const user = postObj.user
+    ? {
+        ...postObj.user,
+        username: postObj.user.username || postObj.user.userName,
+      }
+    : postObj.user;
+
   // Remove userName if it exists (avoid duplicates)
   if (user && user.userName) {
     delete user.userName;
