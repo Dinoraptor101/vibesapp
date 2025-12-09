@@ -12,6 +12,7 @@ const isLocal = environment === 'local';
 
 // Use separate storage state files per environment to avoid cookie domain mismatch
 // user1 = primary test user (DontDeleteMeTester), user2 = secondary test user (VIXEN)
+// Storage state files are created in libs/e2e-testing by global setup
 const storageStateFile = isLocal ? 'storageState-user1.local.json' : 'storageState-user1.qa.json';
 
 // Only print config summary in main process (not in workers)

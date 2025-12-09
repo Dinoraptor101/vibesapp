@@ -46,7 +46,10 @@ test-automation/test-results/
 test-automation/playwright-report/
 libs/e2e-testing/test-results/
 libs/e2e-testing/playwright-report/
-storageState.json
+
+# Playwright storage state files (authentication cookies)
+storageState*.json
+libs/e2e-testing/storageState*.json
 
 # Coverage
 /coverage

@@ -51,9 +51,21 @@ interface SignupResponse extends LoginResponse {
 
 /**
  * Transform backend user response to frontend User type
- * Backend now returns normalized field names, so minimal transformation needed
+ * Backend may return location as lat/lon OR latitude/longitude depending on endpoint
  */
 function transformUserData(data: LoginResponse): User {
+  // Handle both location formats: lat/lon (signup) and latitude/longitude (profile)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rawLocation = data.location as any;
+  const location = rawLocation
+    ? {
+        latitude: rawLocation.latitude ?? rawLocation.lat,
+        longitude: rawLocation.longitude ?? rawLocation.lon,
+        city: rawLocation.city,
+        state: rawLocation.state,
+      }
+    : undefined;
+
   return {
     _id: data.userId,
     userId: data.userId, // UUID - business logic identifier
@@ -62,14 +74,7 @@ function transformUserData(data: LoginResponse): User {
     mbtiPersonality: data.mbtiPersonality,
     profilePictureUrl: data.profilePictureUrl,
     bio: data.bio,
-    location: data.location
-      ? {
-          latitude: data.location.lat,
-          longitude: data.location.lon,
-          city: data.location.city,
-          state: data.location.state,
-        }
-      : undefined,
+    location,
     vibes: data.vibes || 0,
     createdAt: new Date(data.createdAt),
     updatedAt: new Date(data.updatedAt),

@@ -6,7 +6,7 @@
  * Supports search mode to display global search results.
  */
 
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2, MapPinOff } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui-next';
@@ -36,7 +36,8 @@ export function PostsFeed({ className, searchQuery }: PostsFeedProps) {
   const [showSearchLoading, setShowSearchLoading] = useState(false);
 
   // Filter state (tab-based) - only used when NOT searching
-  const { filters, activeTab, setActiveTab, isFiltering, hasLocation } = usePostFilters();
+  const { filters, activeTab, setActiveTab, isFiltering, hasLocation, locationChecked } =
+    usePostFilters();
 
   // Posts data with infinite scroll - only used when NOT searching
   const {
@@ -235,7 +236,7 @@ export function PostsFeed({ className, searchQuery }: PostsFeedProps) {
   }
 
   // Loading state (initial load) OR location being determined for nearby tab
-  if (isLoading || (activeTab === 'nearby' && !hasLocation)) {
+  if (isLoading || (activeTab === 'nearby' && !locationChecked)) {
     return (
       <div className={className}>
         <FilterBar activeTab={activeTab} onTabChange={setActiveTab} />
@@ -243,6 +244,23 @@ export function PostsFeed({ className, searchQuery }: PostsFeedProps) {
           <PostSkeleton />
           <PostSkeleton />
           <PostSkeleton />
+        </div>
+      </div>
+    );
+  }
+
+  // No location available for nearby tab (location check complete but failed)
+  if (activeTab === 'nearby' && locationChecked && !hasLocation) {
+    return (
+      <div className={className}>
+        <FilterBar activeTab={activeTab} onTabChange={setActiveTab} />
+        <div className="flex flex-col items-center justify-center py-12">
+          <MapPinOff className="w-16 h-16 text-gray-400 dim:text-gray-500 dark:text-gray-600 mb-4" />
+          <h2 className="text-xl font-semibold text-text-primary mb-2">Location unavailable</h2>
+          <p className="text-text-secondary text-center max-w-sm">
+            We couldn't determine your location. Please update your location in Settings to see
+            nearby posts.
+          </p>
         </div>
       </div>
     );

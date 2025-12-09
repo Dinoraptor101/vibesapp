@@ -484,6 +484,9 @@ Follow the pattern: `data-testid="{feature}-{element}-{identifier}"`
 - **Test IDs**: Follow pattern `{feature}-{element}-{action/id}`
 - **Storage State**: Tests inherit auth from `storageState.json`
 - **Idempotent**: Tests should work in any order, clean up after themselves
+- **Parallel-Safe Assertions**: Use `toBeGreaterThanOrEqual()` instead of exact equality for counts that could increase due to parallel test execution. Tests verify *the system works correctly*, not *exact counts*.
+  - ✅ `expect(commentCount).toBeGreaterThanOrEqual(expectedCount)` — verifies increment happened
+  - ❌ `expect(commentCount).toBe(1)` — flaky if parallel tests add more comments
 
 ### State Management Rules
 - **Server State**: React Query ONLY (not Zustand)

@@ -191,7 +191,8 @@ export async function createTestPost(
 
   if (pigeonId) {
     // Use specific pigeonId provided (for special cases)
-    const uniquePigeonId = `${pigeonId}-${Date.now()}`;
+    // Add random suffix to avoid collisions in parallel tests
+    const uniquePigeonId = `${pigeonId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     await createTestUser(request, {
       pigeonId: uniquePigeonId,
       userName: `Test User ${uniquePigeonId.slice(-8)}`,

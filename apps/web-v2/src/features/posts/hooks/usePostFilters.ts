@@ -22,6 +22,7 @@ interface UsePostFiltersReturn {
   setActiveTab: (tab: FeedTab) => void;
   isFiltering: boolean;
   hasLocation: boolean;
+  locationChecked: boolean; // True once location check is complete (success or failure)
 }
 
 /**
@@ -33,6 +34,7 @@ export function usePostFilters(): UsePostFiltersReturn {
   const [activeTab, setActiveTab] = useState<FeedTab>('nearby');
   const [filters, setFilters] = useState<PostFilters>({});
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
+  const [locationChecked, setLocationChecked] = useState(false);
   const [proximityRadius, setProximityRadius] = useState(getProximityRadiusMeters);
 
   // Get cached user location on mount (never prompts for GPS)
@@ -42,6 +44,7 @@ export function usePostFilters(): UsePostFiltersReturn {
       if (coordinates) {
         setUserLocation({ lat: coordinates.lat, lon: coordinates.lon });
       }
+      setLocationChecked(true); // Mark check as complete regardless of result
     });
   }, [user]);
 
@@ -103,5 +106,6 @@ export function usePostFilters(): UsePostFiltersReturn {
     setActiveTab,
     isFiltering,
     hasLocation: !!userLocation,
+    locationChecked,
   };
 }
