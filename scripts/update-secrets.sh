@@ -156,8 +156,6 @@ gh secret set RECAPTCHA_SECRET --body "$RECAPTCHA_SECRET" --repo "$GITHUB_REPO"
 gh secret set VITE_RECAPTCHA_SITE_KEY --body "$VITE_RECAPTCHA_SITE_KEY" --repo "$GITHUB_REPO"
 gh secret set QA_TEST_PIGEON_ID --body "$QA_TEST_PIGEON_ID" --repo "$GITHUB_REPO"
 gh secret set QA_TEST_2_PIGEON_ID --body "$QA_TEST_2_PIGEON_ID" --repo "$GITHUB_REPO"
-gh secret set E2E_BYPASS_TOKEN --body "$E2E_BYPASS_TOKEN" --repo "$GITHUB_REPO"
-gh secret set ADMIN_PASSWORD --body "$ADMIN_PASSWORD" --repo "$GITHUB_REPO"
 
 echo "✅ GitHub Secrets updated"
 echo ""
