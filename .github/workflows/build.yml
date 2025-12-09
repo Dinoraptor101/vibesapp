@@ -145,7 +145,7 @@ jobs:
         run: npx playwright test
 
       - name: Upload Playwright Report
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
@@ -153,7 +153,7 @@ jobs:
           retention-days: 7
 
       - name: Upload Test Results
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
