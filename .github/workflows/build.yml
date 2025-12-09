@@ -89,6 +89,7 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           CLOUDFRONT_URL: ${{ secrets.CLOUDFRONT_URL }}
           API_KEY: ${{ secrets.API_KEY }}
+          BACKEND_API_KEY: ${{ secrets.API_KEY }}
           RECAPTCHA_SECRET: ${{ secrets.RECAPTCHA_SECRET }}
           ENABLE_RECAPTCHA: false
           
