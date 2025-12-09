@@ -12,7 +12,9 @@
     "format:check": "biome format src/",
     "check": "biome check src/ --write",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "cleanup:activities": "node scripts/cleanupActivities.js"
+    "cleanup:activities": "node scripts/cleanupActivities.js",
+    "deploy": "git push heroku HEAD:main",
+    "deploy:qa": "git push heroku-backend HEAD:main"
   },
   "keywords": [],
   "author": "",

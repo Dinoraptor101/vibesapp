@@ -11,7 +11,9 @@
     "format": "biome format --write .",
     "format:check": "biome format .",
     "organize-imports": "biome check --write --unsafe .",
-    "precommit": "npm run format && npm run lint && npm run build"
+    "precommit": "npm run format && npm run lint && npm run build",
+    "deploy": "echo 'Production frontend deploys via GitHub Pages (push to main)'",
+    "deploy:qa": "npm run build && cd dist && vercel --prod"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
