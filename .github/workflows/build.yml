@@ -44,3 +44,86 @@ jobs:
           VITE_USE_SSE: ${{ vars.VITE_USE_SSE }}
           VITE_DEBUG: ${{ vars.VITE_DEBUG }}
         run: npm run build
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Cache Node.js modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: libs/e2e-testing
+
+      - name: Run E2E Tests (Localhost)
+        working-directory: libs/e2e-testing
+        env:
+          # Environment variables for localhost testing
+          ENVIRONMENT: local
+          LOCAL_BACKEND_BASE: http://localhost:5001
+          
+          # Backend environment variables (MongoDB, AWS, etc.)
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
+          AWS_S3_REGION: ${{ secrets.AWS_S3_REGION }}
+          CLOUDFRONT_URL: ${{ secrets.CLOUDFRONT_URL }}
+          API_KEY: ${{ secrets.API_KEY }}
+          RECAPTCHA_SECRET: ${{ secrets.RECAPTCHA_SECRET }}
+          ENABLE_RECAPTCHA: false
+          
+          # Frontend environment variables
+          VITE_API_URL: http://localhost:5001
+          VITE_CDN_URL: ${{ secrets.CLOUDFRONT_URL }}
+          VITE_BACKEND_API_KEY: ${{ secrets.API_KEY }}
+          VITE_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET_NAME }}
+          VITE_S3_REGION: ${{ secrets.AWS_S3_REGION }}
+          VITE_GEOCODING_URL: ${{ vars.VITE_GEOCODING_URL }}
+          VITE_ENABLE_RECAPTCHA: false
+          VITE_RECAPTCHA_SITE_KEY: ${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
+          VITE_USE_SSE: false
+          VITE_DEBUG: false
+          
+          # Test user credentials
+          QA_TEST_PIGEON_ID: ${{ secrets.QA_TEST_PIGEON_ID }}
+          QA_TEST_2_PIGEON_ID: ${{ secrets.QA_TEST_2_PIGEON_ID }}
+          
+          # CI flag for server management
+          CI: true
+        run: npx playwright test
+
+      - name: Upload Playwright Report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: libs/e2e-testing/playwright-report/
+          retention-days: 7
+
+      - name: Upload Test Results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: libs/e2e-testing/test-results/
+          retention-days: 7
