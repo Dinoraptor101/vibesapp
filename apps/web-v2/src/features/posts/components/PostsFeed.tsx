@@ -254,14 +254,16 @@ export function PostsFeed({ className, searchQuery }: PostsFeedProps) {
     return (
       <div className={className}>
         <FilterBar activeTab={activeTab} onTabChange={setActiveTab} />
-        <div className="flex flex-col items-center justify-center py-12">
+        <button
+          type="button"
+          onClick={() => navigate('/settings?tab=account')}
+          className="flex flex-col items-center justify-center py-12 w-full hover:opacity-80 transition-opacity cursor-pointer"
+        >
           <MapPinOff className="w-16 h-16 text-gray-400 dim:text-gray-500 dark:text-gray-600 mb-4" />
-          <h2 className="text-xl font-semibold text-text-primary mb-2">Location unavailable</h2>
-          <p className="text-text-secondary text-center max-w-sm">
-            We couldn't determine your location. Please update your location in Settings to see
-            nearby posts.
+          <p className="text-text-secondary text-center max-w-sm px-4">
+            Add your location in <span className="underline">Settings → Account</span>.
           </p>
-        </div>
+        </button>
       </div>
     );
   }
