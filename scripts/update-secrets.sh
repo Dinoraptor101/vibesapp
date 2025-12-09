@@ -112,7 +112,6 @@ cd apps/web-v2
 
 # Remove existing env vars first (Vercel doesn't have update, only add/remove)
 echo "  Removing old env vars..."
-vercel env rm VITE_BACKEND_API_KEY production --yes 2>/dev/null || true
 vercel env rm VITE_CDN_URL production --yes 2>/dev/null || true
 vercel env rm VITE_S3_BUCKET production --yes 2>/dev/null || true
 vercel env rm VITE_S3_REGION production --yes 2>/dev/null || true
@@ -121,9 +120,10 @@ vercel env rm VITE_ENABLE_RECAPTCHA production --yes 2>/dev/null || true
 vercel env rm VITE_USE_SSE production --yes 2>/dev/null || true
 vercel env rm VITE_DEBUG production --yes 2>/dev/null || true
 vercel env rm VITE_MAINTENANCE_MODE production --yes 2>/dev/null || true
+# SECURITY FIX: Remove VITE_BACKEND_API_KEY from Vercel (was exposing server API key)
+vercel env rm VITE_BACKEND_API_KEY production --yes 2>/dev/null || true
 
 echo "  Adding new env vars..."
-echo "$VITE_BACKEND_API_KEY" | vercel env add VITE_BACKEND_API_KEY production
 echo "$VITE_CDN_URL" | vercel env add VITE_CDN_URL production
 echo "$VITE_S3_BUCKET" | vercel env add VITE_S3_BUCKET production
 echo "$VITE_S3_REGION" | vercel env add VITE_S3_REGION production
@@ -132,6 +132,7 @@ echo "true" | vercel env add VITE_ENABLE_RECAPTCHA production
 echo "true" | vercel env add VITE_USE_SSE production
 echo "false" | vercel env add VITE_DEBUG production
 echo "false" | vercel env add VITE_MAINTENANCE_MODE production
+# SECURITY FIX: Do NOT add VITE_BACKEND_API_KEY - API key should never be in browser
 
 cd ../..
 
@@ -149,7 +150,8 @@ gh secret set AWS_S3_BUCKET --body "$AWS_S3_BUCKET" --repo "$GITHUB_REPO"
 gh secret set AWS_REGION --body "$AWS_REGION" --repo "$GITHUB_REPO"
 gh secret set CLOUDFRONT_URL --body "$CLOUDFRONT_URL" --repo "$GITHUB_REPO"
 gh secret set API_KEY --body "$API_KEY" --repo "$GITHUB_REPO"
-gh secret set VITE_BACKEND_API_KEY --body "$API_KEY" --repo "$GITHUB_REPO"
+# SECURITY FIX: Do NOT set VITE_BACKEND_API_KEY - API key should never be in browser
+# gh secret set VITE_BACKEND_API_KEY --body "$API_KEY" --repo "$GITHUB_REPO"
 gh secret set RECAPTCHA_SECRET --body "$RECAPTCHA_SECRET" --repo "$GITHUB_REPO"
 gh secret set VITE_RECAPTCHA_SITE_KEY --body "$VITE_RECAPTCHA_SITE_KEY" --repo "$GITHUB_REPO"
 gh secret set QA_TEST_PIGEON_ID --body "$QA_TEST_PIGEON_ID" --repo "$GITHUB_REPO"

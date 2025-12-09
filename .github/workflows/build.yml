@@ -35,7 +35,6 @@ jobs:
         env:
           VITE_API_URL: ${{ vars.VITE_API_URL }}
           VITE_CDN_URL: ${{ vars.VITE_CDN_URL }}
-          VITE_BACKEND_API_KEY: ${{ secrets.VITE_BACKEND_API_KEY }}
           VITE_S3_BUCKET: ${{ vars.VITE_S3_BUCKET }}
           VITE_S3_REGION: ${{ vars.VITE_S3_REGION }}
           VITE_GEOCODING_URL: ${{ vars.VITE_GEOCODING_URL }}
@@ -136,7 +135,6 @@ jobs:
           # Frontend Environment Variables (VITE_)
           VITE_API_URL: http://localhost:5001/api
           VITE_CDN_URL: ${{ secrets.CLOUDFRONT_URL }}
-          VITE_BACKEND_API_KEY: ${{ secrets.API_KEY }}
           VITE_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
           VITE_S3_REGION: ${{ secrets.AWS_REGION }}
           VITE_GEOCODING_URL: ${{ vars.VITE_GEOCODING_URL }}
