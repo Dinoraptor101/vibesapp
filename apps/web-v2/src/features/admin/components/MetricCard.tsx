@@ -46,7 +46,7 @@ export function MetricCard({
                 className={`text-2xl font-bold ${variantColors[variant]}`}
                 data-testid="metric-card-value"
               >
-                {value.toLocaleString()}
+                {typeof value === 'number' ? value.toLocaleString() : value}
               </h3>
               {trend && (
                 <Badge
