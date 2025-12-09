@@ -85,12 +85,18 @@ export default defineConfig({
         url: 'http://localhost:5001/api/health',
         timeout: 120000,
         reuseExistingServer: !process.env.CI,
+        env: Object.fromEntries(
+          Object.entries(process.env).filter(([_, v]) => v !== undefined)
+        ) as Record<string, string>,
       },
       {
         command: 'cd ../../apps/web-v2 && npm run dev',
         url: 'http://localhost:5173',
         timeout: 120000,
         reuseExistingServer: !process.env.CI,
+        env: Object.fromEntries(
+          Object.entries(process.env).filter(([_, v]) => v !== undefined)
+        ) as Record<string, string>,
       },
     ],
   }),
