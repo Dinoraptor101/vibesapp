@@ -609,7 +609,7 @@ const toggleFollow = async (req, res) => {
           type: 'new_follower',
           actor: {
             userId: followerUser.userId,
-            username: followerUser.userName,
+            userName: followerUser.userName,
             avatar: followerUser.profilePictureUrl,
           },
           target: {

@@ -38,7 +38,7 @@ export interface Activity {
   // Actor who triggered the activity
   actor: {
     userId: string;
-    username: string;
+    userName: string;
     avatar?: string;
   };
 
@@ -66,7 +66,7 @@ export interface Activity {
   groupActors?: Array<{
     // First 3-5 actors in group
     userId: string;
-    username: string;
+    userName: string;
     avatar?: string;
   }>;
 }
@@ -86,7 +86,7 @@ export interface BackendActivity {
   // New unified structure (from Activity model)
   actor?: {
     userId: string;
-    username: string;
+    userName: string;
     avatar?: string;
   };
   target?: {
@@ -98,13 +98,13 @@ export interface BackendActivity {
 
   // Legacy fields (for backward compatibility with old activity types)
   post?: string; // MongoDB ObjectId
-  authorUsername?: string;
-  username?: string;
+  authorUserName?: string;
+  userName?: string;
   userId?: string;
   replyPost?: string;
   originalPosterId?: string;
   watcherUserId?: string;
-  watcherUsername?: string;
+  watcherUserName?: string;
   authorUserId?: string;
   messageId?: string;
   groupChatId?: string;

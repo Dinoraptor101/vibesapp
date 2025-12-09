@@ -34,7 +34,7 @@ const activitySchema = new mongoose.Schema({
       required: true,
       ref: 'User',
     },
-    username: {
+    userName: {
       type: String,
       required: true,
     },
