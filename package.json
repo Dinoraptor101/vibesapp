@@ -13,7 +13,7 @@
     "start": "npm run dev",
     "start:web-v2": "cd apps/web-v2 && npm run dev",
     "start:api": "cd apps/api && npm run dev",
-    "build": "nx build api",
+    "build": "echo 'No build step required for Node.js backend'",
     "build:web-v2": "cd apps/web-v2 && npm run build",
     "build:api": "cd apps/api && npm run build",
     "test": "nx test api",
