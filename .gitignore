@@ -111,3 +111,6 @@ testem.log
 *.bak
 *.tmp
 libs/e2e-testing/.env
+
+# Database backups (NEVER COMMIT)
+backups/
