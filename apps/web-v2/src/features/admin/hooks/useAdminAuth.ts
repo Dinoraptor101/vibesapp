@@ -1,0 +1,15 @@
+/**
+ * Admin Authentication Hook
+ * Provides access to admin auth context
+ */
+
+import { useContext } from 'react';
+import { AdminAuthContext } from '../context/AdminAuthContext';
+
+export function useAdminAuth() {
+  const context = useContext(AdminAuthContext);
+  if (!context) {
+    throw new Error('useAdminAuth must be used within AdminAuthProvider');
+  }
+  return context;
+}

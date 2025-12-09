@@ -1,0 +1,55 @@
+{
+  "cookies": [
+    {
+      "name": "range",
+      "value": "275",
+      "domain": "qa.vibesapp.net",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "user_location",
+      "value": "%7B%22lat%22%3A37.42%2C%22lon%22%3A-77.46%7D",
+      "domain": "qa.vibesapp.net",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "userId",
+      "value": "ad15b888-dc64-4b07-acca-b534e963afb4",
+      "domain": "qa.vibesapp.net",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "pigeonId",
+      "value": "ad15b888-dc64-4b07-acca-b534e963afb4",
+      "domain": "qa.vibesapp.net",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "e2eBypass",
+      "value": "e2e-test-bypass-secret-token-2024",
+      "domain": "qa.vibesapp.net",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": []
+}

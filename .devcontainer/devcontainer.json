@@ -1,0 +1,43 @@
+{
+  "name": "VibesApp Monorepo Dev",
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "forwardPorts": [5173, 5001],
+  "portsAttributes": {
+    "5173": {
+      "label": "Frontend (web-v2)",
+      "onAutoForward": "notify"
+    },
+    "5001": {
+      "label": "Backend (api)",
+      "onAutoForward": "notify"
+    }
+  },
+  "postCreateCommand": "npm install -g heroku vercel && npm ci && npm run install:deps && npx playwright install chromium --with-deps",
+  "postAttachCommand": "echo '✅ VibesApp dev environment ready! Heroku CLI installed.' && echo 'Run: npm run dev (frontend + backend) or npm run start:web-v2 / npm run start:api'",
+  "containerEnv": {
+    "NODE_ENV": "development",
+    "PORT": "5001",
+    "VITE_PORT": "5173"
+  },
+  "remoteEnv": {
+    "NODE_ENV": "development"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-docker",
+        "MongoDB.mongodb-vscode",
+        "ms-vscode.remote-explorer",
+        "bradlc.vscode-tailwindcss",
+        "Vue.volar"
+      ],
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"]
+      }
+    }
+  }
+}

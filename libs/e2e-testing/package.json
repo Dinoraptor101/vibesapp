@@ -1,0 +1,25 @@
+{
+  "name": "test-automation",
+  "version": "0.20.1",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:qa": "npx playwright test",
+    "test:local": "npx playwright test --config=playwright.config.local.ts",
+    "test:admin": "npx playwright test --config=playwright-admin.config.ts",
+    "test-headed": "xvfb-run npx playwright test --headed",
+    "test:qa:headed": "npx playwright test --headed",
+    "test:local:headed": "npx playwright test --config=playwright.config.local.ts --headed",
+    "test:admin:headed": "npx playwright test --config=playwright-admin.config.ts --headed"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "dotenv": "^17.2.3",
+    "nyc": "^17.0.0",
+    "playwright": "^1.56.1"
+  }
+}

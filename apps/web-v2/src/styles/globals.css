@@ -1,0 +1,284 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  /* Light theme semantic tokens (default) */
+  :root,
+  body {
+    /* Navigation heights for layout spacing */
+    --top-nav-height: 72px;
+    --bottom-nav-height: calc(5.5rem + env(safe-area-inset-bottom, 0px)); /* 88px + iOS safe area */
+    --surface: #f8f8f8;
+    --surface-elevated: #ffffff;
+    --surface-hover: rgba(0, 0, 0, 0.05);
+    --text-primary: #000000;
+    --text-secondary: rgba(0, 0, 0, 0.7);
+    --text-tertiary: #595959;
+    --border: #e0e0e0;
+    --background: #f8f8f8;
+    --foreground: #000000;
+
+    /* Glass effect tokens - Light theme */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+
+    /* MBTI category colors - Light theme */
+    --mbti-analyst-bg: #faf5ff;
+    --mbti-analyst-border: #e9d5ff;
+    --mbti-analyst-hover: #f3e8ff;
+    --mbti-diplomat-bg: #f0fdf4;
+    --mbti-diplomat-border: #bbf7d0;
+    --mbti-diplomat-hover: #dcfce7;
+    --mbti-sentinel-bg: #eff6ff;
+    --mbti-sentinel-border: #bfdbfe;
+    --mbti-sentinel-hover: #dbeafe;
+    --mbti-explorer-bg: #fffbeb;
+    --mbti-explorer-border: #fde68a;
+    --mbti-explorer-hover: #fef3c7;
+  }
+
+  body {
+    @apply bg-light-bg text-light-text;
+    font-family:
+      -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  }
+
+  /* Dim theme semantic tokens */
+  body.dim {
+    @apply bg-dim-bg text-dim-text;
+    --surface: #333333;
+    --surface-elevated: #424242;
+    --surface-hover: rgba(255, 255, 255, 0.1);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.8);
+    --text-tertiary: #dcdcdc;
+    --border: #555555;
+    --background: #333333;
+    --foreground: #ffffff;
+
+    /* Glass effect tokens - Dim theme */
+    --glass-bg: rgba(66, 66, 66, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.15);
+
+    /* MBTI category colors - Dim theme */
+    --mbti-analyst-bg: rgba(139, 92, 246, 0.15);
+    --mbti-analyst-border: rgba(139, 92, 246, 0.3);
+    --mbti-analyst-hover: rgba(139, 92, 246, 0.25);
+    --mbti-diplomat-bg: rgba(34, 197, 94, 0.15);
+    --mbti-diplomat-border: rgba(34, 197, 94, 0.3);
+    --mbti-diplomat-hover: rgba(34, 197, 94, 0.25);
+    --mbti-sentinel-bg: rgba(59, 130, 246, 0.15);
+    --mbti-sentinel-border: rgba(59, 130, 246, 0.3);
+    --mbti-sentinel-hover: rgba(59, 130, 246, 0.25);
+    --mbti-explorer-bg: rgba(251, 191, 36, 0.15);
+    --mbti-explorer-border: rgba(251, 191, 36, 0.3);
+    --mbti-explorer-hover: rgba(251, 191, 36, 0.25);
+  }
+
+  /* Dark theme semantic tokens */
+  body.dark {
+    @apply bg-dark-bg text-dark-text;
+    --surface: #000000;
+    --surface-elevated: #1a1a1a;
+    --surface-hover: rgba(255, 255, 255, 0.1);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.8);
+    --text-tertiary: rgba(255, 255, 255, 0.6);
+    --border: #333333;
+    --background: #000000;
+    --foreground: #ffffff;
+
+    /* Glass effect tokens - Dark theme */
+    --glass-bg: rgba(26, 26, 26, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
+
+    /* MBTI category colors - Dark theme */
+    --mbti-analyst-bg: rgba(139, 92, 246, 0.2);
+    --mbti-analyst-border: rgba(139, 92, 246, 0.4);
+    --mbti-analyst-hover: rgba(139, 92, 246, 0.3);
+    --mbti-diplomat-bg: rgba(34, 197, 94, 0.2);
+    --mbti-diplomat-border: rgba(34, 197, 94, 0.4);
+    --mbti-diplomat-hover: rgba(34, 197, 94, 0.3);
+    --mbti-sentinel-bg: rgba(59, 130, 246, 0.2);
+    --mbti-sentinel-border: rgba(59, 130, 246, 0.4);
+    --mbti-sentinel-hover: rgba(59, 130, 246, 0.3);
+    --mbti-explorer-bg: rgba(251, 191, 36, 0.2);
+    --mbti-explorer-border: rgba(251, 191, 36, 0.4);
+    --mbti-explorer-hover: rgba(251, 191, 36, 0.3);
+  }
+}
+
+/* Mobile: No top nav padding needed, only bottom nav */
+@media (max-width: 767px) {
+  :root,
+  body {
+    --top-nav-height: 0px;
+  }
+}
+
+/* Desktop: No bottom nav padding needed, only top nav */
+@media (min-width: 768px) {
+  :root,
+  body {
+    --bottom-nav-height: 0px;
+  }
+}
+
+@layer utilities {
+  /* Glass effect utility - use for frosted glass UI elements */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--glass-shadow);
+  }
+
+  /* Safe area inset for iOS notched devices */
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Focus visible utilities */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2;
+  }
+
+  /* Smooth transitions */
+  .transition-base {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  .transition-fast {
+    @apply transition-all duration-150 ease-in-out;
+  }
+
+  .transition-slow {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  /* Hover lift animation - ZEN: Subtle, purposeful */
+  .hover-lift {
+    @apply transition-transform duration-200 ease-out;
+  }
+
+  .hover-lift:hover {
+    @apply -translate-y-0.5;
+  }
+
+  /* Respect reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .hover-lift {
+      @apply transition-none;
+    }
+    .hover-lift:hover {
+      @apply translate-y-0;
+    }
+  }
+
+  /* Text overflow utilities */
+  .text-truncate {
+    @apply overflow-hidden text-ellipsis whitespace-nowrap;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Respect user's motion preferences (ZEN accessibility) */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-slide-fade-in {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Notification shake animation for nav icons */
+  @keyframes notification-shake {
+    0% {
+      transform: rotate(0deg) scale(1);
+      filter: drop-shadow(0 0 0 transparent);
+    }
+    10% {
+      transform: rotate(-10deg) scale(1.2);
+      filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.6));
+    }
+    20% {
+      transform: rotate(10deg) scale(1.2);
+      filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.7));
+    }
+    30% {
+      transform: rotate(-8deg) scale(1.18);
+      filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.6));
+    }
+    40% {
+      transform: rotate(8deg) scale(1.15);
+      filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.5));
+    }
+    50% {
+      transform: rotate(-5deg) scale(1.12);
+      filter: drop-shadow(0 0 5px rgba(139, 92, 246, 0.4));
+    }
+    60% {
+      transform: rotate(5deg) scale(1.08);
+      filter: drop-shadow(0 0 4px rgba(139, 92, 246, 0.3));
+    }
+    70% {
+      transform: rotate(-3deg) scale(1.05);
+      filter: drop-shadow(0 0 3px rgba(139, 92, 246, 0.2));
+    }
+    80% {
+      transform: rotate(2deg) scale(1.02);
+      filter: drop-shadow(0 0 2px rgba(139, 92, 246, 0.1));
+    }
+    90% {
+      transform: rotate(-1deg) scale(1.01);
+      filter: drop-shadow(0 0 1px rgba(139, 92, 246, 0.05));
+    }
+    100% {
+      transform: rotate(0deg) scale(1);
+      filter: drop-shadow(0 0 0 transparent);
+    }
+  }
+
+  .animate-notification-shake {
+    animation: notification-shake 1s ease-out;
+    transform-origin: top center;
+  }
+
+  /* Respect reduced motion for shake animation */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-notification-shake {
+      animation: none;
+    }
+  }
+}
+
+/* Hide reCAPTCHA badge - we show our own disclosure text per Google ToS */
+.grecaptcha-badge {
+  visibility: hidden !important;
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@vibesapp/contracts",
+  "version": "0.20.1",
+  "description": "API contract definitions for VibesApp",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "lint": "echo 'No linting configured yet'",
+    "test": "echo 'No tests configured yet'"
+  },
+  "dependencies": {
+    "@vibesapp/shared": "*"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.5"
+  },
+  "peerDependencies": {}
+}

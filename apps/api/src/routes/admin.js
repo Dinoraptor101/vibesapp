@@ -1,0 +1,82 @@
+const express = require('express');
+const router = express.Router();
+const { adminAuth } = require('../middleware/adminAuth');
+const apiKeyAuth = require('../middleware/apiKey');
+const {
+  adminLogin,
+  updateBalance,
+  deletePosts,
+  getFlaggedPosts,
+  dismissReports,
+  getUsers,
+  toggleBanUser,
+  regeneratePassword,
+  deleteUser,
+  getUserPosts,
+  bulkDeleteUserPosts,
+  bulkDeleteUsers,
+  bulkDeletePostsByUsers,
+  getDashboardMetrics,
+  getActivityData,
+  getSettings,
+  updateSettings,
+  getReportedPosts,
+  restorePost,
+  banUser,
+  cleanupTestData,
+} = require('../controllers/admin');
+
+// Admin login (no auth required)
+router.post('/login', adminLogin);
+
+// Test data cleanup (API key auth only - for E2E tests)
+router.delete('/cleanup-test-data', apiKeyAuth, cleanupTestData);
+
+// ALL routes below require admin authentication
+router.use(adminAuth);
+
+// Update Vibes balance
+router.put('/vibes', updateBalance);
+
+// Get flagged posts (legacy - dislike system)
+router.get('/flagged-posts', getFlaggedPosts);
+
+// Phase 3.4: Get reported posts (community reports)
+router.get('/reported-posts', getReportedPosts);
+
+// Phase 3.4: Restore post (unhide + remove strike)
+router.post('/posts/:postId/restore', restorePost);
+
+// Dismiss reports for a post
+router.post('/posts/:postId/dismiss-reports', dismissReports);
+
+// Delete posts in bulk
+router.delete('/posts', deletePosts);
+
+// User management routes
+router.get('/users', getUsers);
+
+// Bulk operations (MUST be before parameterized routes to avoid matching :userId)
+router.delete('/users/bulk', bulkDeleteUsers);
+router.delete('/users/bulk/posts', bulkDeletePostsByUsers);
+
+// Individual user routes (parameterized - must come after specific paths)
+router.post('/users/:userId/toggle-ban', toggleBanUser);
+
+// Phase 3.4: Ban user (Strike 4 + hide all posts)
+router.post('/users/:userId/ban', banUser);
+
+router.post('/users/:userId/regenerate-password', regeneratePassword);
+router.delete('/users/:userId', deleteUser);
+router.get('/users/:userId/posts', getUserPosts);
+router.delete('/users/:userId/posts', bulkDeleteUserPosts);
+
+// Analytics routes
+router.get('/metrics', getDashboardMetrics);
+router.get('/activity', getActivityData);
+
+// Settings routes
+router.get('/settings', getSettings);
+router.put('/settings', updateSettings);
+
+module.exports = router;

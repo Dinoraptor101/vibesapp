@@ -1,0 +1,248 @@
+/**
+ * PersistentPages Component
+ *
+ * Keeps main navigation pages mounted at all times to preserve state.
+ * Pages slide horizontally based on navigation order, creating a native app feel.
+ *
+ * Benefits:
+ * - Preserves scroll position when navigating between pages
+ * - Preserves form state (e.g., draft posts, search queries)
+ * - Preserves chat state and message drafts
+ * - Instant page transitions with no loading
+ */
+
+import { useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
+import { OfflineIndicator } from '@/components/shared/OfflineIndicator';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { ActivityPageContent } from '@/pages/ActivityPage';
+import { CreatePostPageContent } from '@/pages/CreatePostPage';
+import { HomePageContent } from '@/pages/HomePage';
+import { MessagesPageContent } from '@/pages/MessagesPage';
+import { PostDetailPageContent } from '@/pages/PostDetailPage';
+import { ProfilePageContent } from '@/pages/ProfilePage';
+import { SettingsPageContent } from '@/pages/SettingsPage';
+import { BottomNav } from './BottomNav';
+import { TopNav } from './TopNav';
+
+// Define the order of persistent pages (left to right)
+// PostDetail is at the end as a slide-over from any page
+const PERSISTENT_PAGES = [
+  { path: '/profile', Component: ProfilePageContent, key: 'profile' }, // Profile to the left of home
+  { path: '/', Component: HomePageContent, key: 'home' },
+  { path: '/activity', Component: ActivityPageContent, key: 'activity' },
+  { path: '/create-post', Component: CreatePostPageContent, key: 'create-post' },
+  { path: '/messages', Component: MessagesPageContent, key: 'messages' },
+  { path: '/settings', Component: SettingsPageContent, key: 'settings' },
+] as const;
+
+// Get the index of a path in the persistent pages array
+function getPageIndex(pathname: string): number {
+  const exactIndex = PERSISTENT_PAGES.findIndex((p) => p.path === pathname);
+  if (exactIndex !== -1) return exactIndex;
+
+  // Check if it's a profile path (/profile/:userId)
+  if (isProfilePath(pathname)) {
+    return PERSISTENT_PAGES.findIndex((p) => p.key === 'profile');
+  }
+
+  return -1;
+}
+
+// Check if path is a post detail page
+function isPostDetailPath(pathname: string): boolean {
+  return pathname.startsWith('/post/');
+}
+
+// Extract post ID from path
+function getPostIdFromPath(pathname: string): string | null {
+  if (!isPostDetailPath(pathname)) return null;
+  const parts = pathname.split('/');
+  return parts[2] || null;
+}
+
+// Check if path is a profile page
+function isProfilePath(pathname: string): boolean {
+  return pathname.startsWith('/profile/');
+}
+
+// Extract user ID from profile path
+function getProfileUserIdFromPath(pathname: string): string | null {
+  if (!isProfilePath(pathname)) return null;
+  const parts = pathname.split('/');
+  return parts[2] || null;
+}
+
+export function PersistentPages() {
+  const location = useLocation();
+  const { isOnline } = useNetworkStatus();
+  const currentIndex = getPageIndex(location.pathname);
+  const isPostDetail = isPostDetailPath(location.pathname);
+  const currentPostId = getPostIdFromPath(location.pathname);
+  const currentProfileUserId = getProfileUserIdFromPath(location.pathname);
+  const scrollContainerRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const postDetailRef = useRef<HTMLDivElement | null>(null);
+
+  // Track the last main page index (for returning from post detail)
+  const lastMainPageIndex = useRef(0);
+
+  // Track which pages have been visited (to know if we should restore scroll)
+  const visitedPages = useRef<Set<number>>(new Set([1])); // Home (index 1) is visited by default
+
+  // Store scroll positions when navigating away
+  const scrollPositions = useRef<number[]>(PERSISTENT_PAGES.map(() => 0));
+
+  // Track previous post ID to detect changes
+  const prevPostIdRef = useRef<string | null>(null);
+
+  // Update last main page when on a main page
+  useEffect(() => {
+    if (currentIndex >= 0) {
+      lastMainPageIndex.current = currentIndex;
+    }
+  }, [currentIndex]);
+
+  // Save scroll position when leaving a page, mark new page as visited
+  useEffect(() => {
+    // Save scroll positions for all pages except current
+    scrollContainerRefs.current.forEach((container, index) => {
+      if (container && index !== currentIndex) {
+        scrollPositions.current[index] = container.scrollTop;
+      }
+    });
+
+    // Mark current page as visited
+    if (currentIndex >= 0) {
+      visitedPages.current.add(currentIndex);
+    }
+  }, [currentIndex]);
+
+  // Restore scroll position when returning to a previously visited page
+  // For first-time visits, scroll starts at 0 (default)
+  useEffect(() => {
+    if (currentIndex >= 0) {
+      const container = scrollContainerRefs.current[currentIndex];
+      if (container) {
+        // Use requestAnimationFrame to ensure DOM is ready
+        requestAnimationFrame(() => {
+          // Only restore if we've visited this page before
+          if (visitedPages.current.has(currentIndex)) {
+            container.scrollTop = scrollPositions.current[currentIndex];
+          } else {
+            // First visit - ensure we're at the top
+            container.scrollTop = 0;
+          }
+        });
+      }
+    }
+  }, [currentIndex]);
+
+  // Reset post detail scroll when post ID changes
+  useEffect(() => {
+    if (isPostDetail && postDetailRef.current && currentPostId !== prevPostIdRef.current) {
+      postDetailRef.current.scrollTop = 0;
+      prevPostIdRef.current = currentPostId;
+    }
+  }, [isPostDetail, currentPostId]);
+
+  // If we're not on a persistent page or post detail, don't render
+  if (currentIndex === -1 && !isPostDetail) {
+    return null;
+  }
+
+  // Determine which main page to show (current or last visited when on post detail)
+  const activeMainIndex = currentIndex >= 0 ? currentIndex : lastMainPageIndex.current;
+
+  return (
+    <div className="min-h-screen bg-surface flex flex-col">
+      {/* Top Navigation (Desktop) - Fixed position */}
+      <TopNav />
+
+      {/* Mobile Offline Indicator */}
+      {!isOnline && (
+        <div className="md:hidden fixed top-4 left-1/2 -translate-x-1/2 z-50 glass px-4 py-2 rounded-full border border-border">
+          <OfflineIndicator />
+        </div>
+      )}
+
+      {/* Main Content - Horizontal sliding pages */}
+      {/* The inner absolute containers use md:top-[var(--top-nav-height)] for fixed TopNav on desktop */}
+      <main className="flex-1 overflow-hidden relative">
+        {/* Main persistent pages */}
+        <div
+          className="absolute inset-x-0 top-0 bottom-0 md:top-[var(--top-nav-height)] flex transition-transform duration-300 ease-out"
+          style={{
+            width: `${PERSISTENT_PAGES.length * 100}%`,
+            transform: `translateX(-${activeMainIndex * (100 / PERSISTENT_PAGES.length)}%)`,
+          }}
+        >
+          {PERSISTENT_PAGES.map((page, index) => {
+            const PageComponent = page.Component;
+            const isActive = index === activeMainIndex && !isPostDetail;
+
+            return (
+              <div
+                key={page.key}
+                ref={(el) => {
+                  scrollContainerRefs.current[index] = el;
+                }}
+                className="h-full overflow-y-auto overscroll-contain"
+                style={{
+                  width: `${100 / PERSISTENT_PAGES.length}%`,
+                  paddingBottom: 'var(--bottom-nav-height)',
+                }}
+                inert={!isActive ? true : undefined}
+                aria-hidden={!isActive}
+              >
+                {/* Standard content wrapper: consistent padding + width */}
+                <div className="pt-8 px-4 max-w-2xl mx-auto">
+                  {/* Pass userId prop to ProfilePageContent */}
+                  {page.key === 'profile' ? (
+                    <PageComponent userId={currentProfileUserId || undefined} />
+                  ) : (
+                    <PageComponent />
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Post Detail - Slides in from right as overlay */}
+        <div
+          className={`absolute inset-x-0 top-0 bottom-0 md:top-[var(--top-nav-height)] bg-surface transition-transform duration-300 ease-out ${
+            isPostDetail ? 'translate-x-0' : 'translate-x-full'
+          }`}
+          aria-hidden={!isPostDetail}
+          inert={!isPostDetail ? true : undefined}
+        >
+          <div
+            ref={postDetailRef}
+            className="h-full overflow-y-auto overscroll-contain"
+            style={{ paddingBottom: 'var(--bottom-nav-height)' }}
+          >
+            {/* Standard content wrapper: consistent padding + width */}
+            <div className="pt-8 px-4 max-w-2xl mx-auto">
+              {currentPostId ? (
+                <PostDetailPageContent postId={currentPostId} />
+              ) : (
+                /* Skeleton placeholder when no postId */
+                <div className="animate-pulse">
+                  <div className="h-8 w-20 bg-surface-elevated rounded mb-4" />
+                  <div className="aspect-square bg-surface-elevated rounded-lg mb-4" />
+                  <div className="space-y-3">
+                    <div className="h-4 bg-surface-elevated rounded w-3/4" />
+                    <div className="h-4 bg-surface-elevated rounded w-1/2" />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Bottom Navigation (Mobile) */}
+      <BottomNav />
+    </div>
+  );
+}
