@@ -39,19 +39,9 @@ if [ ! -f "$WORKSPACE_ROOT/package.json" ]; then
     exit 1
 fi
 
-# Safety check - ensure we're on the right branch
+# Show current branch (informational only - QA can deploy from any branch)
 CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 echo -e "${CYAN}📍 Current branch: ${CURRENT_BRANCH}${NC}"
-
-if [ "$CURRENT_BRANCH" != "rebuilding-front-end" ] && [ "$CURRENT_BRANCH" != "main" ]; then
-    echo -e "${YELLOW}⚠️  Warning: You're not on 'rebuilding-front-end' or 'main' branch.${NC}"
-    read -p "Continue anyway? (y/N) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "Deployment cancelled."
-        exit 1
-    fi
-fi
 
 # Function to deploy frontend
 deploy_frontend() {
