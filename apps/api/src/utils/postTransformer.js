@@ -30,13 +30,25 @@ function transformPost(post, options = {}) {
   // Use provided commentCount or default to 0 (caller should provide it)
   const commentCount = options.commentCount ?? postObj.commentCount ?? 0;
 
+  // Normalize user object field names to match frontend expectations
+  // Transform userName → username (embedded user data doesn't go through User model serializer)
+  const user = postObj.user ? {
+    ...postObj.user,
+    username: postObj.user.username || postObj.user.userName,
+  } : postObj.user;
+  
+  // Remove userName if it exists (avoid duplicates)
+  if (user && user.userName) {
+    delete user.userName;
+  }
+
   return {
     ...postObj,
     _id: postObj._id,
     text: postObj.text || null,
     image: postObj.image || null,
     blurPlaceholder: postObj.blurPlaceholder || null,
-    user: postObj.user,
+    user,
     reactions: postObj.reactions || [],
     likeCount,
     commentCount,
