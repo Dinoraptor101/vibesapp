@@ -1,7 +1,7 @@
 // playwright.config.ts - ADAPTIVE CONFIGURATION
 // Configure environment here directly (VS Code extension doesn't reliably read .env)
 // Change this value to switch between environments:
-// Keep this in sync with .env file above
+// Keep this in sync with libs/e2e-testing/.env file
 // Keep this as 'local' in SourceCode for build pipelines test automation
 const ENVIRONMENT: 'local' | 'qa' = 'local';
 
