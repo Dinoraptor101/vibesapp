@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { submitFeedback } from '../api/feedbackService';
 import { APP_VERSION } from '@/lib/constants';
 import type { Priority } from '../types';
@@ -10,10 +10,13 @@ export function FeedbackForm({ onSuccess }: { onSuccess: () => void }) {
   const [type, setType] = useState<'bug' | 'feature'>('bug');
   const [priority, setPriority] = useState<Priority>('medium');
   const [screenshotUrl, setScreenshotUrl] = useState<string>();
+  const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: submitFeedback,
     onSuccess: () => {
+      // Invalidate feedback list to show newly submitted feedback
+      queryClient.invalidateQueries({ queryKey: ['feedback'] });
       onSuccess();
       // Reset form
       setTitle('');

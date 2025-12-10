@@ -32,11 +32,18 @@ const submitFeedback = async (req, res) => {
     });
   }
 
+  // Validate priority if provided
+  if (priority && !PRIORITY_MAP[priority]) {
+    return res.status(400).json({
+      error: 'Invalid priority. Must be one of: critical, high, medium, low',
+    });
+  }
+
   // Build labels array
   const labels = [FEEDBACK_LABEL, type];
 
   // Add priority label if provided (triggers sync-project-priority.yml workflow)
-  if (priority && PRIORITY_MAP[priority]) {
+  if (priority) {
     labels.push(PRIORITY_MAP[priority]);
   }
 
@@ -123,7 +130,8 @@ const listFeedback = async (req, res) => {
           ? 'bug'
           : 'feature',
         priority,
-        status: issue.state, // 'open' or 'closed'
+        // GitHub API: issue.state is always 'open' or 'closed', which matches FeedbackItem.status type ('open' | 'closed') in the frontend.
+        status: issue.state,
         description: issue.body,
         createdAt: issue.created_at,
         closedAt: issue.closed_at,
