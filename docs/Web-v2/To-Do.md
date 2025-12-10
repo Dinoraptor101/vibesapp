@@ -9,8 +9,8 @@
 ---
 
 ### Testing & CI/CD
-- [ ] Add E2E tests to PR checks - Create GitHub Actions workflow for Playwright on every PR
-- [ ] DRY Playwright configs - Refactor to extend base config, eliminate ~40 lines duplication
+- [x] Add E2E tests to PR checks - Create GitHub Actions workflow for Playwright on every PR
+- [x] DRY Playwright configs - Refactor to extend base config, eliminate ~40 lines duplication
 
 ### UI/UX Polish
 - [ ] Implement Account Deletion UI - Add "Delete Account" button in Settings
@@ -29,6 +29,7 @@
 - [ ] Email notifications for Admin Panel
 
 ### Security & Infrastructure
+- [ ] Resolve security issue where API token is leaking in devtools ( weird )
 - [ ] Track/flag accounts by IP/location - Detect multiple accounts via middleware
 - [ ] Audit MongoDB Atlas security - Review access, encryption, IP whitelist, rate limiting
 - [ ] Implement data encryption layer - Encrypt PII before storage
@@ -36,26 +37,11 @@
 - [ ] Research OAuth integration - Google/Facebook OpenID Connect
 
 ### Future Features
-- [ ] Build group chat invite system - Add friends to existing conversations
-- [ ] Design regional moderation - City-based groups with verified moderators
-- [ ] Build Personal Growth Tracker - MBTI-driven with strength/rounding paths
-- [ ] Design Wu-Wei Flow Score - Compassionate/frugal/humble action scoring
-- [ ] Implement daily post cap - Enforce limit with friendly UI message
-
----
-
-## Ideas & Philosophy
-
-**Vibes Growth System** - Number-free visualization with organic plant growth metaphor (🌱→🌿→🌳→🌲→🌸)
-
-**Personal Growth Tracker (Carrot Principle)** - MBTI-driven platform with Strength Path (double down on strengths) or Rounding Path (develop balanced personality)
-
-**Wu-Wei Flow Score** - Replace punishment with harmony tracking via compassionate comments, frugal shares, humble actions
-
-**Regional Group Chats** - City-based public spaces moderated by verified residents, creating neighborhood-like gatherings
-
-**OAuth Enforcement** - Google/Facebook auth to enforce 1 person = 1 account policy
-
-**Anti-Materialism** - Combat luxury flexing via geo-tagged everyday photos, "Treasure Challenges" rewarding simple local shares
-
-**Daily Post Caps** - Enforce frugality through post limits while allowing unlimited comments/messages
+- [ ] Vibes Growth System - Number-free visualization with plant growth metaphor (🌱→🌿→🌳→🌲→🌸)
+- [ ] Personal Growth Tracker (Carrot) - MBTI-driven with Strength/Rounding paths
+- [ ] Wu-Wei Flow Score - Harmony tracking via compassionate/frugal/humble actions
+- [ ] Regional Group Chats - City-based spaces moderated by verified residents
+- [ ] Group Chat Invites - Add friends to existing conversations
+- [ ] OAuth Enforcement - Google/Facebook auth for 1 person = 1 account
+- [ ] Anti-Materialism Features - "Treasure Challenges" rewarding simple local shares
+- [ ] Daily Post Caps - Enforce frugality through post limits
