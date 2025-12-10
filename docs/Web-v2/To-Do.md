@@ -1,14 +1,12 @@
 ## 📋 Task Tracker
 
-> **🔍 Code Cleanup Required**: See [development-log/Code-Cleanup-Report.md](./development-log/Code-Cleanup-Report.md) for ~780 lines of clet coverage before re-attempting.
+> **🔍 Code Cleanup Required**: See [development-log/Code-Cleanup-Report.md](./development-log/Code-Cleanup-Report.md) for ~780 lines of cleanup identified across 6 files.
+
+> **🔧 Backend Refactoring (Deferred)**: See [controller-refactoring-summary.md](../controller-refactoring-summary.md). Requires comprehensive E2E test coverage before re-attempting.
 
 > **✅ Completed Tasks**: See [development-log/completed-dec-2025.md](./development-log/completed-dec-2025.md) for UI/UX polish, infrastructure, and security fixes completed in December 2025.
 
 ---
-
-### Testing & CI/CD
-- [x] Add E2E tests to PR checks - Create GitHub Actions workflow for Playwright on every PR
-- [x] DRY Playwright configs - Refactor to extend base config, eliminate ~40 lines duplication
 
 ### UI/UX Polish
 - [ ] Update initial loading animation and login screen with gradient background
