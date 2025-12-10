@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { submitFeedback } from '../api/feedbackService';
+import { APP_VERSION } from '@/lib/constants';
 import type { Priority } from '../types';
-
-const APP_VERSION = '2.0.0'; // Match SupportTab version
 
 export function FeedbackForm({ onSuccess }: { onSuccess: () => void }) {
   const [title, setTitle] = useState('');

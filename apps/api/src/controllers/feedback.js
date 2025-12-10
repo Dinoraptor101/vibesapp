@@ -73,7 +73,12 @@ ${screenshotUrl ? `**Screenshot:** ![screenshot](${screenshotUrl})` : ''}
       issueNumber: response.data.number,
     });
   } catch (error) {
-    console.error('GitHub API error:', error);
+    console.error('GitHub API error submitting feedback:', {
+      error: error.message,
+      user: user.userName,
+      type,
+      title: title.substring(0, 50), // Log first 50 chars only
+    });
     res.status(500).json({ error: 'Failed to submit feedback' });
   }
 };
@@ -81,12 +86,17 @@ ${screenshotUrl ? `**Screenshot:** ![screenshot](${screenshotUrl})` : ''}
 // List all feedback issues
 const listFeedback = async (req, res) => {
   try {
+    // Support pagination via query params
+    const page = parseInt(req.query.page) || 1;
+    const perPage = Math.min(parseInt(req.query.per_page) || 100, 100); // Max 100
+    
     const response = await octokit.rest.issues.listForRepo({
       owner: REPO_OWNER,
       repo: REPO_NAME,
       labels: FEEDBACK_LABEL,
       state: 'all',
-      per_page: 100,
+      per_page: perPage,
+      page: page,
       sort: 'created',
       direction: 'desc',
     });
@@ -122,7 +132,9 @@ const listFeedback = async (req, res) => {
 
     res.json({ feedback });
   } catch (error) {
-    console.error('GitHub API error:', error);
+    console.error('GitHub API error fetching feedback:', {
+      error: error.message,
+    });
     res.status(500).json({ error: 'Failed to fetch feedback' });
   }
 };

@@ -2,9 +2,8 @@ import { ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { APP_VERSION } from '@/lib/constants';
 import { getBuildVersion } from '@/utils/versionCheck';
-
-const APP_VERSION = '2.0.0';
 const FEEDBACK_URL = 'https://t.me/Dnegai';
 const FEEDBACK_INTERNAL_PATH = '/feedback';
 
