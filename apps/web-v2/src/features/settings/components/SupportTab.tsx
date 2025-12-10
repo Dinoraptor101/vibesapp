@@ -6,6 +6,7 @@ import { getBuildVersion } from '@/utils/versionCheck';
 
 const APP_VERSION = '2.0.0';
 const FEEDBACK_URL = 'https://t.me/Dnegai';
+const FEEDBACK_INTERNAL_PATH = '/feedback';
 
 export function SupportTab() {
   const [buildVersion, setBuildVersion] = useState<string | null>(null);
@@ -18,6 +19,10 @@ export function SupportTab() {
   }, []);
 
   const handleFeedbackClick = () => {
+    navigate(FEEDBACK_INTERNAL_PATH);
+  };
+
+  const handleTelegramClick = () => {
     window.open(FEEDBACK_URL, '_blank', 'noopener,noreferrer');
   };
 
@@ -28,14 +33,25 @@ export function SupportTab() {
         <h3 className="text-sm font-medium text-gray-700 dim:text-gray-200 dark:text-gray-300 mb-3">
           Help & Feedback
         </h3>
-        <Button
-          onClick={handleFeedbackClick}
-          variant="secondary"
-          className="w-full justify-between"
-        >
-          <span>Send Feedback</span>
-          <ExternalLink className="w-4 h-4" />
-        </Button>
+        <div className="space-y-2">
+          <Button
+            onClick={handleFeedbackClick}
+            variant="secondary"
+            className="w-full justify-start"
+            data-testid="support-feedback-button"
+          >
+            Submit Feedback or Report Bug
+          </Button>
+          <Button
+            onClick={handleTelegramClick}
+            variant="secondary"
+            className="w-full justify-between"
+            data-testid="support-telegram-button"
+          >
+            <span>Contact via Telegram</span>
+            <ExternalLink className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
       {/* Divider */}
