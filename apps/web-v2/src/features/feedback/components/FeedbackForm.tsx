@@ -3,6 +3,7 @@ import { Upload, X } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { uploadImage } from '@/features/posts/api/s3Service';
 import { APP_VERSION } from '@/lib/constants';
+import { getBuildVersion } from '@/utils/versionCheck';
 import { submitFeedback } from '../api/feedbackService';
 import type { Priority } from '../types';
 import { FeedbackTypeToggle } from './FeedbackTypeToggle';
@@ -49,6 +50,7 @@ export function FeedbackForm({ onSuccess }: { onSuccess: () => void }) {
       priority: type === 'feature' ? 'medium' : (priority as Exclude<Priority, ''>),
       screenshotUrl,
       appVersion: APP_VERSION,
+      buildVersion: getBuildVersion() || 'Unknown',
       userAgent: navigator.userAgent,
     });
   };

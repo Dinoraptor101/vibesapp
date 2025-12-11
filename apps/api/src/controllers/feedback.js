@@ -42,12 +42,12 @@ const submitFeedback = async (req, res) => {
     labels.push(PRIORITY_MAP[priority]);
   }
 
-  // Construct full screenshot URL if S3 key provided
+  // Construct full CloudFront URL for screenshot if S3 key provided
   let screenshotMarkdown = '';
   if (screenshotUrl) {
-    const CDN_URL = process.env.CDN_URL || 'https://cdn.vibesapp.net';
-    const fullScreenshotUrl = `${CDN_URL}/${screenshotUrl}`;
-    screenshotMarkdown = `\n![VibesApp screenshot](${fullScreenshotUrl})`;
+    const CLOUDFRONT_URL = process.env.CLOUDFRONT_URL || 'https://d1pegm4swremw5.cloudfront.net';
+    const fullScreenshotUrl = `${CLOUDFRONT_URL}/${screenshotUrl}`;
+    screenshotMarkdown = `\n\n![screenshot](${fullScreenshotUrl})`;
   }
 
   // Build issue body with metadata
@@ -58,6 +58,7 @@ const submitFeedback = async (req, res) => {
 **User:** ${user.userName || 'Unknown'}  
 **Priority:** ${priority ? priority.charAt(0).toUpperCase() + priority.slice(1) : 'Not set'}  
 **App Version:** ${req.body.appVersion || 'Unknown'}  
+**Build ID:** ${req.body.buildVersion || 'Unknown'}  
 **Device:** ${req.body.userAgent || 'Unknown'}  
 **Timestamp:** ${new Date().toISOString()}`;
 

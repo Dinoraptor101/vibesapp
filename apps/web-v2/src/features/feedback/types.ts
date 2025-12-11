@@ -18,5 +18,6 @@ export interface SubmitFeedbackRequest {
   priority: Exclude<Priority, ''>;
   screenshotUrl?: string;
   appVersion: string;
+  buildVersion: string;
   userAgent: string;
 }
