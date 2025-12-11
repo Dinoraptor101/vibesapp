@@ -37,7 +37,7 @@ export function useCreateComment(postId: string) {
       // Invalidate comment cache to refetch with real server data
       // No optimistic updates - fetch-first pattern prevents flash
       queryClient.invalidateQueries({ queryKey: ['comments', postId] });
-      
+
       // Update post comment count
       queryClient.invalidateQueries({ queryKey: ['post', postId] });
       queryClient.invalidateQueries({ queryKey: ['posts'] });
