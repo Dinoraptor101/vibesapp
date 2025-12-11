@@ -21,18 +21,20 @@ export function FeedbackTypeToggle({
 
   return (
     <div className={`flex items-center justify-center gap-4 ${className}`}>
+      {/* Left label - Bug */}
       <span
-        className="text-sm font-semibold text-red-600 dark:text-red-400 dim:text-red-400"
+        className="text-sm font-semibold text-red-600 dark:text-red-400 dim:text-red-400 w-16 text-right"
         data-testid="feedback-type-bug"
       >
         Bug
       </span>
 
+      {/* Toggle button - centered */}
       <button
         type="button"
         onClick={handleClick}
         disabled={disabled}
-        className="relative inline-flex h-14 w-24 items-center rounded-full bg-white dark:bg-gray-800 dim:bg-gray-800 ring-2 ring-gray-300 dark:ring-gray-600 dim:ring-gray-600 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+        className="relative inline-flex h-14 w-24 items-center rounded-full bg-white dark:bg-gray-800 dim:bg-gray-800 ring-2 ring-gray-300 dark:ring-gray-600 dim:ring-gray-600 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden flex-shrink-0"
         aria-label={`Current type: ${value === 'bug' ? 'Bug Report' : 'Feature Request'}`}
         data-testid="feedback-type-toggle"
       >
@@ -48,8 +50,9 @@ export function FeedbackTypeToggle({
         </span>
       </button>
 
+      {/* Right label - Feature */}
       <span
-        className="text-sm font-semibold text-blue-600 dark:text-blue-400 dim:text-blue-400"
+        className="text-sm font-semibold text-blue-600 dark:text-blue-400 dim:text-blue-400 w-16 text-left"
         data-testid="feedback-type-feature"
       >
         Feature
