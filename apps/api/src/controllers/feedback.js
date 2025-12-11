@@ -80,7 +80,7 @@ const submitFeedback = async (req, res) => {
     const response = await octokit.rest.issues.create({
       owner: REPO_OWNER,
       repo: REPO_NAME,
-      title: `[${type === 'bug' ? '🐛 Bug' : '✨ Feature'}] ${title}`,
+      title: `[${type === 'bug' ? '🪲 Bug' : '🦋 Feature'}] ${title}`,
       body,
       labels,
     });
@@ -176,7 +176,7 @@ const listFeedback = async (req, res) => {
 
       return {
         id: issue.number,
-        title: issue.title.replace(/^\[(🐛 Bug|✨ Feature)\]\s*/, ''), // Strip prefix
+        title: issue.title.replace(/^\[(?:🪲 Bug|🦋 Feature)\]\s*/, ''), // Strip prefix
         description: cleanDescription,
         type,
         priority,
@@ -214,7 +214,7 @@ const addComment = async (req, res) => {
     return res.status(400).json({ error: 'Comment cannot be empty' });
   }
 
-  const formattedComment = `💬 **Comment via VibesApp**\n**User:** ${user.userName || 'Unknown'}\n\n${comment}`;
+  const formattedComment = `**@${user.userName || 'Unknown'}** ${comment}`;
 
   try {
     await octokit.rest.issues.createComment({

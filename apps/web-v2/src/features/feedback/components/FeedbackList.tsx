@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { MessageSquare, ThumbsUp } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ExternalLink, MessageSquare, ThumbsUp } from 'lucide-react';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -24,6 +25,26 @@ const PRIORITY_ICONS: Record<NonEmptyPriority, string> = {
   medium: '🟡',
   low: '🟢',
 };
+
+// Skeleton loader component
+function SkeletonCard() {
+  return (
+    <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 dim:bg-gray-800 border-gray-300 dark:border-gray-600 dim:border-gray-600 animate-pulse">
+      <div className="flex items-start gap-2">
+        <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 dim:bg-gray-700 rounded" />
+        <div className="flex-1 space-y-2">
+          <div className="h-5 bg-gray-200 dark:bg-gray-700 dim:bg-gray-700 rounded w-3/4" />
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 dim:bg-gray-700 rounded w-1/4" />
+        </div>
+        <div className="h-6 w-16 bg-gray-200 dark:bg-gray-700 dim:bg-gray-700 rounded" />
+      </div>
+      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 dim:border-gray-700 flex gap-3">
+        <div className="h-8 w-20 bg-gray-200 dark:bg-gray-700 dim:bg-gray-700 rounded" />
+        <div className="h-8 w-16 bg-gray-200 dark:bg-gray-700 dim:bg-gray-700 rounded" />
+      </div>
+    </div>
+  );
+}
 
 export function FeedbackList() {
   const queryClient = useQueryClient();
@@ -61,17 +82,35 @@ export function FeedbackList() {
 
   if (isLoading) {
     return (
-      <div className="text-center py-8 text-gray-500 dark:text-gray-400 dim:text-gray-400">
-        Loading...
+      <div className="space-y-3">
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <motion.div
+      className="space-y-3"
+      initial="hidden"
+      animate="visible"
+      variants={{
+        visible: {
+          transition: {
+            staggerChildren: 0.06,
+          },
+        },
+      }}
+    >
       {feedback?.map((item) => (
-        <div
+        <motion.div
           key={item.id}
+          variants={{
+            hidden: { opacity: 0, y: 20 },
+            visible: { opacity: 1, y: 0 },
+          }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
           className={
             'border rounded-lg p-4 bg-white dark:bg-gray-800 ' +
             'dim:bg-gray-800 border-gray-300 dark:border-gray-600 dim:border-gray-600'
@@ -114,16 +153,26 @@ export function FeedbackList() {
           </button>
 
           {/* Expanded description */}
-          {expandedId === item.id && (
-            <div
-              className="mt-4 pt-4 border-t text-sm text-gray-700 dark:text-gray-300 dim:text-gray-300 border-gray-200 dark:border-gray-700 dim:border-gray-700 prose prose-sm dark:prose-invert dim:prose-invert max-w-none"
-              data-testid={`feedback-description-${item.id}`}
-            >
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {item.description || 'No description'}
-              </ReactMarkdown>
-            </div>
-          )}
+          <AnimatePresence>
+            {expandedId === item.id && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="overflow-hidden"
+              >
+                <div
+                  className="mt-4 pt-4 border-t text-sm text-gray-700 dark:text-gray-300 dim:text-gray-300 border-gray-200 dark:border-gray-700 dim:border-gray-700 prose prose-sm dark:prose-invert dim:prose-invert max-w-none"
+                  data-testid={`feedback-description-${item.id}`}
+                >
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {item.description || 'No description'}
+                  </ReactMarkdown>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Actions */}
           <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 dim:border-gray-700">
@@ -131,7 +180,7 @@ export function FeedbackList() {
               onClick={() => meTooMutation.mutate(item.id)}
               variant="ghost"
               size="sm"
-              className={`gap-1.5 text-xs ${shakeUpvote === item.id ? 'animate-notification-shake' : ''} ${item.hasMeToo ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`gap-1.5 text-xs transition-all duration-200 hover:scale-105 active:scale-95 ${shakeUpvote === item.id ? 'animate-notification-shake' : ''} ${item.hasMeToo ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={meTooMutation.isPending || item.hasMeToo}
               data-testid={`me-too-button-${item.id}`}
             >
@@ -142,53 +191,82 @@ export function FeedbackList() {
               onClick={() => setCommentingOn(commentingOn === item.id ? null : item.id)}
               variant="ghost"
               size="sm"
-              className={`gap-1.5 text-xs ${shakeComment === item.id ? 'animate-notification-shake' : ''}`}
+              className={`gap-1.5 text-xs transition-all duration-200 hover:scale-105 active:scale-95 ${shakeComment === item.id ? 'animate-notification-shake' : ''}`}
               data-testid={`comment-button-${item.id}`}
             >
               <MessageSquare className="w-3.5 h-3.5" />
               <span>{item.commentCount}</span>
             </Button>
+            <a
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-auto"
+              title="View on GitHub"
+              data-testid={`github-link-${item.id}`}
+            >
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1.5 text-xs h-8 w-8 p-0 transition-all duration-200 hover:scale-110 active:scale-95"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span className="sr-only">View on GitHub</span>
+              </Button>
+            </a>
           </div>
 
           {/* Comment input */}
-          {commentingOn === item.id && (
-            <div className="mt-3 space-y-2">
-              <textarea
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Add your comment..."
-                className="w-full p-2 text-sm border rounded-lg bg-white dark:bg-gray-900 dim:bg-gray-900 border-gray-300 dark:border-gray-600 dim:border-gray-600 text-gray-900 dark:text-gray-100 dim:text-gray-100"
-                rows={3}
-                data-testid={`comment-textarea-${item.id}`}
-              />
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => {
-                    if (commentText.trim()) {
-                      commentMutation.mutate({ issueNumber: item.id, comment: commentText });
-                    }
-                  }}
-                  size="sm"
-                  disabled={!commentText.trim() || commentMutation.isPending}
-                  data-testid={`submit-comment-button-${item.id}`}
-                >
-                  Submit
-                </Button>
-                <Button
-                  onClick={() => {
-                    setCommentingOn(null);
-                    setCommentText('');
-                  }}
-                  variant="ghost"
-                  size="sm"
-                  data-testid={`cancel-comment-button-${item.id}`}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
+          <AnimatePresence>
+            {commentingOn === item.id && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25, ease: 'easeInOut' }}
+                className="overflow-hidden"
+              >
+                <div className="mt-3 space-y-2">
+                  <textarea
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    placeholder="Add your comment..."
+                    className="w-full p-2 text-sm border rounded-lg bg-white dark:bg-gray-900 dim:bg-gray-900 border-gray-300 dark:border-gray-600 dim:border-gray-600 text-gray-900 dark:text-gray-100 dim:text-gray-100"
+                    rows={3}
+                    data-testid={`comment-textarea-${item.id}`}
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => {
+                        if (commentText.trim()) {
+                          commentMutation.mutate({ issueNumber: item.id, comment: commentText });
+                        }
+                      }}
+                      size="sm"
+                      disabled={!commentText.trim() || commentMutation.isPending}
+                      className="transition-all duration-200 hover:scale-105 active:scale-95"
+                      data-testid={`submit-comment-button-${item.id}`}
+                    >
+                      Submit
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setCommentingOn(null);
+                        setCommentText('');
+                      }}
+                      variant="ghost"
+                      size="sm"
+                      className="transition-all duration-200 hover:scale-105 active:scale-95"
+                      data-testid={`cancel-comment-button-${item.id}`}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
       ))}
 
       {feedback?.length === 0 && (
@@ -196,6 +274,6 @@ export function FeedbackList() {
           No feedback submitted yet. Be the first!
         </p>
       )}
-    </div>
+    </motion.div>
   );
 }
