@@ -53,7 +53,7 @@ export function SettingsPageContent() {
           </button>
           <button
             type="button"
-            data-testid="privacy-section"
+            data-testid="support-section"
             onClick={() => setActiveTab('support')}
             className={`px-4 py-3 font-medium text-sm relative ${
               activeTab === 'support'

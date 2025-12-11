@@ -286,7 +286,7 @@ test.describe('Integration Tests - Web-V2', () => {
     // Verify settings tabs are visible
     await expect(page.getByTestId('account-section')).toBeVisible();
     await expect(page.getByTestId('preferences-section')).toBeVisible();
-    await expect(page.getByTestId('privacy-section')).toBeVisible();
+    await expect(page.getByTestId('support-section')).toBeVisible();
   });
 
   test('should display and interact with account settings', async ({ page }) => {

@@ -66,6 +66,23 @@ This document lists all `data-testid` attributes referenced in the test suite. U
 'account-username'          // Username display
 'account-pigeon-id'         // Pigeon ID display
 'account-created-date'      // Account creation date
+
+// Support Tab
+'support-section'           // Support section tab button
+'support-tab-content'       // Support tab content container
+'support-telegram-button'   // Telegram support button
+
+// Feedback Form (in Support Tab)
+'feedback-type-bug'         // Bug type label
+'feedback-type-feature'     // Feature type label
+'feedback-type-toggle'      // Toggle button between bug/feature
+'feedback-priority-select'  // Priority dropdown (bug reports only)
+'feedback-title-input'      // Title input field
+'feedback-description-input' // Description textarea
+'feedback-screenshot-input' // Screenshot upload input (bug reports only)
+'feedback-submit-button'    // Submit feedback button
+'feedback-success-message'  // Success message after submission
+'feedback-error-message'    // Error message on submission failure
 ```
 
 ## Theme Switching

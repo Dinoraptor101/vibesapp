@@ -2,9 +2,10 @@ import { ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { FeedbackForm } from '@/features/feedback/components/FeedbackForm';
+import { APP_VERSION } from '@/lib/constants';
 import { getBuildVersion } from '@/utils/versionCheck';
 
-const APP_VERSION = '2.0.0';
 const FEEDBACK_URL = 'https://t.me/Dnegai';
 
 export function SupportTab() {
@@ -17,25 +18,32 @@ export function SupportTab() {
     setBuildVersion(version);
   }, []);
 
-  const handleFeedbackClick = () => {
+  const handleTelegramClick = () => {
     window.open(FEEDBACK_URL, '_blank', 'noopener,noreferrer');
   };
 
   return (
     <div className="p-4 space-y-6">
-      {/* Help & Feedback */}
+      {/* Feedback Form */}
       <div>
         <h3 className="text-sm font-medium text-gray-700 dim:text-gray-200 dark:text-gray-300 mb-3">
           Help & Feedback
         </h3>
-        <Button
-          onClick={handleFeedbackClick}
-          variant="secondary"
-          className="w-full justify-between"
-        >
-          <span>Send Feedback</span>
-          <ExternalLink className="w-4 h-4" />
-        </Button>
+        <div className="space-y-3">
+          <FeedbackForm onSuccess={() => {}} />
+          <div className="flex items-center justify-end pt-3">
+            <Button
+              onClick={handleTelegramClick}
+              variant="ghost"
+              size="sm"
+              className="text-xs gap-1"
+              data-testid="support-telegram-button"
+            >
+              <span>Message us on Telegram</span>
+              <ExternalLink className="w-3 h-3" />
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Divider */}

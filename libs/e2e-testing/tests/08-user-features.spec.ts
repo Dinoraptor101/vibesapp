@@ -26,7 +26,7 @@ test.describe('Account Settings and Preferences', () => {
     // Verify main settings tabs are visible
     await expect(page.getByTestId('account-section')).toBeVisible();
     await expect(page.getByTestId('preferences-section')).toBeVisible();
-    await expect(page.getByTestId('privacy-section')).toBeVisible();
+    await expect(page.getByTestId('support-section')).toBeVisible();
 
     // Verify account tab content is shown by default
     await expect(page.getByTestId('account-tab-content')).toBeVisible();
@@ -191,6 +191,135 @@ test.describe('Account Settings and Preferences', () => {
 
     // Check for Pigeon ID display (in font-mono container)
     await expect(page.locator('.font-mono span.font-bold')).toBeVisible();
+  });
+
+  test('should display support tab with feedback form and legal links', async ({ page }) => {
+    // Navigate to Support section
+    await page.getByTestId('support-section').click();
+    await expect(page.getByTestId('support-tab-content')).toBeVisible();
+
+    // Verify Help & Feedback section header
+    await expect(page.getByText('Help & Feedback')).toBeVisible();
+
+    // Verify FeedbackForm elements are present (without submitting)
+    // Check feedback type toggle (Bug/Feature)
+    await expect(page.getByTestId('feedback-type-bug')).toBeVisible();
+    await expect(page.getByTestId('feedback-type-feature')).toBeVisible();
+
+    // Check title input
+    const titleInput = page.getByTestId('feedback-title-input');
+    await expect(titleInput).toBeVisible();
+    await expect(titleInput).toBeEditable();
+    await expect(titleInput).toHaveAttribute('maxlength', '50');
+
+    // Check description input
+    const descriptionInput = page.getByTestId('feedback-description-input');
+    await expect(descriptionInput).toBeVisible();
+    await expect(descriptionInput).toBeEditable();
+    await expect(descriptionInput).toHaveAttribute('maxlength', '500');
+
+    // Check priority select (visible for bug type by default)
+    await expect(page.getByTestId('feedback-priority-select')).toBeVisible();
+
+    // Check submit button exists (should be disabled initially)
+    const submitButton = page.getByTestId('feedback-submit-button');
+    await expect(submitButton).toBeVisible();
+    await expect(submitButton).toBeDisabled();
+
+    // Verify Telegram button
+    await expect(page.getByTestId('support-telegram-button')).toBeVisible();
+    await expect(page.getByTestId('support-telegram-button')).toHaveText(/Message us on Telegram/);
+
+    // Verify Legal section
+    await expect(page.getByText('Legal')).toBeVisible();
+    await expect(page.getByRole('button', { name: /Terms of Service/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Privacy Policy/ })).toBeVisible();
+
+    // Verify App Version section
+    await expect(page.getByText(/App Version:/)).toBeVisible();
+    await expect(page.getByText(/Build ID:/)).toBeVisible();
+  });
+
+  test('should toggle between bug and feature feedback types', async ({ page }) => {
+    // Navigate to Support section
+    await page.getByTestId('support-section').click();
+
+    // Default is bug type - priority should be visible
+    await expect(page.getByTestId('feedback-priority-select')).toBeVisible();
+
+    // Switch to feature type by clicking the toggle button
+    await page.getByTestId('feedback-type-toggle').click();
+
+    // Priority should be hidden for feature requests
+    await expect(page.getByTestId('feedback-priority-select')).not.toBeVisible();
+
+    // Switch back to bug type
+    await page.getByTestId('feedback-type-toggle').click();
+
+    // Priority should be visible again
+    await expect(page.getByTestId('feedback-priority-select')).toBeVisible();
+  });
+
+  test('should validate feedback form fields without submitting', async ({ page }) => {
+    // Navigate to Support section
+    await page.getByTestId('support-section').click();
+
+    const titleInput = page.getByTestId('feedback-title-input');
+    const descriptionInput = page.getByTestId('feedback-description-input');
+    const prioritySelect = page.getByTestId('feedback-priority-select');
+    const submitButton = page.getByTestId('feedback-submit-button');
+
+    // Initially disabled
+    await expect(submitButton).toBeDisabled();
+
+    // Fill title (but too short - less than 5 chars)
+    await titleInput.fill('Bug');
+    await expect(submitButton).toBeDisabled();
+
+    // Fill title with valid length (5-50 chars)
+    await titleInput.fill('Valid title here');
+    await expect(submitButton).toBeDisabled(); // Still needs description
+
+    // Fill description (but too short - less than 100 chars)
+    await descriptionInput.fill('Short description');
+    await expect(submitButton).toBeDisabled();
+
+    // Fill description with valid length (100-500 chars)
+    const validDescription =
+      'This is a detailed description that meets the minimum character requirement of one hundred characters for the feedback form to be valid and ready for submission';
+    await descriptionInput.fill(validDescription);
+    await expect(submitButton).toBeDisabled(); // Still needs priority for bug type
+
+    // Select priority
+    await prioritySelect.selectOption('medium');
+
+    // Now form should be valid and button enabled
+    await expect(submitButton).toBeEnabled();
+
+    // Clear form to restore initial state (don't submit)
+    await titleInput.clear();
+    await descriptionInput.clear();
+    await prioritySelect.selectOption('');
+    await expect(submitButton).toBeDisabled();
+  });
+
+  test('should navigate to terms and privacy from support tab', async ({ page }) => {
+    // Navigate to Support section
+    await page.getByTestId('support-section').click();
+
+    // Click Terms of Service button
+    await page.getByRole('button', { name: /Terms of Service/ }).click();
+    await page.waitForURL('**/terms', { timeout: 5000 });
+    await expect(page).toHaveURL(/\/terms/);
+
+    // Navigate back to settings
+    await page.goto('/settings');
+    await page.getByTestId('support-section').click();
+
+    // Click Privacy Policy button
+    await page.getByRole('button', { name: /Privacy Policy/ }).click();
+    await page.waitForURL('**/privacy', { timeout: 5000 });
+    await expect(page).toHaveURL(/\/privacy/);
   });
 });
 
