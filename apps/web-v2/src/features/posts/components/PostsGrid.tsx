@@ -8,8 +8,30 @@
  * Desktop: 2 columns
  */
 
+import { motion } from 'framer-motion';
 import type { Post } from '../types';
 import { PostCard } from './PostCard';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.06,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.3,
+    },
+  },
+};
 
 interface PostsGridProps {
   posts: Post[];
@@ -21,17 +43,23 @@ interface PostsGridProps {
 
 export function PostsGrid({ posts, onLike, onReport, onDelete, onComment }: PostsGridProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <motion.div
+      className="grid grid-cols-1 md:grid-cols-2 gap-4"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {posts.map((post) => (
-        <PostCard
-          key={post._id}
-          post={post}
-          onLike={onLike}
-          onReport={onReport}
-          onDelete={onDelete}
-          onComment={onComment}
-        />
+        <motion.div key={post._id} variants={itemVariants}>
+          <PostCard
+            post={post}
+            onLike={onLike}
+            onReport={onReport}
+            onDelete={onDelete}
+            onComment={onComment}
+          />
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }

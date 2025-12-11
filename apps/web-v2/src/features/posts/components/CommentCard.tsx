@@ -4,6 +4,7 @@
  * Displays an individual comment with user info, text, heart button, and reply button.
  */
 
+import { motion } from 'framer-motion';
 import { Heart, MessageCircle } from 'lucide-react';
 import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -82,14 +83,6 @@ function CommentCardComponent({ comment, onHeart, onReply, className }: CommentC
           <span className="text-text-tertiary text-xs whitespace-nowrap">
             {formatRelativeTime(new Date(comment.createdAt))}
           </span>
-
-          {/* Syncing Badge for optimistic comments */}
-          {comment._id.startsWith('temp-') && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-hover text-text-tertiary text-xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-              Syncing...
-            </span>
-          )}
         </div>
 
         {/* Comment Text */}
@@ -101,9 +94,11 @@ function CommentCardComponent({ comment, onHeart, onReply, className }: CommentC
         <div className="flex items-center gap-4">
           {/* Heart Button - Hidden for own comments */}
           {onHeart && !isOwnComment && (
-            <button
+            <motion.button
               type="button"
               onClick={() => onHeart(comment._id, userHasHearted)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               className={cn(
                 'flex items-center gap-1 text-xs transition-colors',
                 userHasHearted
@@ -114,19 +109,21 @@ function CommentCardComponent({ comment, onHeart, onReply, className }: CommentC
             >
               <Heart className={cn('w-4 h-4', userHasHearted && 'fill-current')} />
               {heartCount > 0 && <span>{heartCount}</span>}
-            </button>
+            </motion.button>
           )}
 
           {/* Reply Button */}
           {onReply && (
-            <button
+            <motion.button
               type="button"
               onClick={() => onReply(comment._id, comment.user.userName)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               className="flex items-center gap-1 text-xs text-text-tertiary hover:text-brand transition-colors"
             >
               <MessageCircle className="w-4 h-4" />
               <span>Reply</span>
-            </button>
+            </motion.button>
           )}
         </div>
 
