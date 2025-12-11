@@ -1,16 +1,18 @@
 const { Octokit } = require('octokit');
 
-// Validate GITHUB_PAT is present
-if (!process.env.GITHUB_PAT) {
-  throw new Error(
-    'GITHUB_PAT environment variable is required for feedback system. Please set it in your .env file with a GitHub Personal Access Token that has "repo" scope.'
+// Validate GITHUB_PAT is present (only required in production/development, not in tests)
+if (!process.env.GITHUB_PAT && process.env.NODE_ENV !== 'test') {
+  console.warn(
+    'GITHUB_PAT environment variable is not set. Feedback system will not work. Please set it in your .env file with a GitHub Personal Access Token that has "repo" scope.'
   );
 }
 
-// Initialize Octokit with GitHub PAT from environment
-const octokit = new Octokit({
-  auth: process.env.GITHUB_PAT,
-});
+// Initialize Octokit with GitHub PAT from environment (if available)
+const octokit = process.env.GITHUB_PAT
+  ? new Octokit({
+      auth: process.env.GITHUB_PAT,
+    })
+  : null;
 
 // Repository configuration - use env vars if available, fall back to defaults
 const REPO_OWNER = process.env.GITHUB_REPO_OWNER || 'Dinoraptor101';

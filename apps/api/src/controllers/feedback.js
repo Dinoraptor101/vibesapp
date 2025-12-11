@@ -10,6 +10,14 @@ const PRIORITY_MAP = {
 
 // Create a new feedback issue
 const submitFeedback = async (req, res) => {
+  // Check if GitHub integration is available
+  if (!octokit) {
+    console.warn('Feedback submission attempted but GITHUB_PAT is not configured');
+    return res.status(503).json({
+      error: 'Feedback system is temporarily unavailable',
+    });
+  }
+
   const { title, description, type, priority, screenshotUrl } = req.body;
   const user = req.user; // From pigeonAuth middleware
 
