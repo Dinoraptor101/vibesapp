@@ -4,13 +4,11 @@ import type { FeedbackItem, SubmitFeedbackRequest } from '../types';
 export async function submitFeedback(
   data: SubmitFeedbackRequest
 ): Promise<{ issueNumber: number }> {
-  const response = await apiClient.post('/feedback/submit', data);
+  const response = await apiClient.post<{ issueNumber: number }>('/feedback/submit', data);
   return response;
 }
 
 export async function listFeedback(): Promise<FeedbackItem[]> {
-  const response = await apiClient.get<{ feedback: FeedbackItem[] }>(
-    '/feedback/list'
-  );
+  const response = await apiClient.get<{ feedback: FeedbackItem[] }>('/feedback/list');
   return response.feedback;
 }

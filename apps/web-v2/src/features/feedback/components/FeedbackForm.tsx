@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { submitFeedback } from '../api/feedbackService';
 import { APP_VERSION } from '@/lib/constants';
+import { submitFeedback } from '../api/feedbackService';
 import type { Priority } from '../types';
 
 export function FeedbackForm({ onSuccess }: { onSuccess: () => void }) {
@@ -131,13 +132,19 @@ export function FeedbackForm({ onSuccess }: { onSuccess: () => void }) {
       </button>
 
       {mutation.isSuccess && (
-        <p className="text-green-600 dark:text-green-400 dim:text-green-400" data-testid="feedback-success-message">
+        <p
+          className="text-green-600 dark:text-green-400 dim:text-green-400"
+          data-testid="feedback-success-message"
+        >
           Thanks! We'll look into it.
         </p>
       )}
 
       {mutation.isError && (
-        <p className="text-red-600 dark:text-red-400 dim:text-red-400" data-testid="feedback-error-message">
+        <p
+          className="text-red-600 dark:text-red-400 dim:text-red-400"
+          data-testid="feedback-error-message"
+        >
           Failed to submit feedback. Please try again.
         </p>
       )}
