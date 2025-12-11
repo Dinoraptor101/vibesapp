@@ -1,12 +1,31 @@
+import { useNavigate } from 'react-router-dom';
+import { ChevronLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { FeedbackForm } from '../components/FeedbackForm';
 import { FeedbackList } from '../components/FeedbackList';
 
 export function FeedbackPage() {
+  const navigate = useNavigate();
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100 dim:text-gray-100">
-        Feedback & Support
-      </h1>
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-6">
+        <Button
+          onClick={() => navigate('/settings')}
+          variant="ghost"
+          size="sm"
+          className="h-10 w-10 p-0 min-h-[44px] min-w-[44px]"
+        >
+          <ChevronLeft className="h-5 w-5" />
+          <span className="sr-only">Back to settings</span>
+        </Button>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dim:text-gray-100">
+            Feedback & Support
+          </h1>
+        </div>
+      </div>
       <p className="text-gray-600 dark:text-gray-400 dim:text-gray-400 mb-6">
         Is your concern already reported? Check existing submissions below.
       </p>

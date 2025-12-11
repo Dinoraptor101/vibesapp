@@ -91,7 +91,7 @@ export function FeedbackList() {
             }}
           >
             <div className="flex items-start gap-2">
-              <span className="text-lg">{item.type === 'bug' ? '🐛' : '✨'}</span>
+              <span className="text-lg">{item.type === 'bug' ? '🪲' : '🦋'}</span>
               <div className="flex-1 min-w-0">
                 <h3 className="font-medium text-gray-900 dark:text-gray-100 dim:text-gray-100">
                   {item.title}
