@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { MessageSquare, ThumbsUp } from 'lucide-react';
 import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
 import { addComment, meToo, listFeedback } from '../api/feedbackService';
 import type { FeedbackItem } from '../types';
@@ -107,16 +109,6 @@ export function FeedbackList() {
                     {PRIORITY_ICONS[item.priority as NonEmptyPriority]} {item.priority}
                   </span>
                 )}
-                <span
-                  className={`text-xs px-2 py-1 rounded whitespace-nowrap ${
-                    item.status === 'open'
-                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 dim:bg-yellow-900 dim:text-yellow-200'
-                      : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 dim:bg-green-900 dim:text-green-200'
-                  }`}
-                  data-testid={`feedback-status-${item.id}`}
-                >
-                  {item.status}
-                </span>
               </div>
             </div>
           </button>
@@ -124,10 +116,12 @@ export function FeedbackList() {
           {/* Expanded description */}
           {expandedId === item.id && (
             <div
-              className="mt-4 pt-4 border-t text-sm whitespace-pre-wrap text-gray-700 dark:text-gray-300 dim:text-gray-300 border-gray-200 dark:border-gray-700 dim:border-gray-700"
+              className="mt-4 pt-4 border-t text-sm text-gray-700 dark:text-gray-300 dim:text-gray-300 border-gray-200 dark:border-gray-700 dim:border-gray-700 prose prose-sm dark:prose-invert dim:prose-invert max-w-none"
               data-testid={`feedback-description-${item.id}`}
             >
-              {item.description?.split(/^\\s*---\\s*$/m)[0] || 'No description'}
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {item.description || 'No description'}
+              </ReactMarkdown>
             </div>
           )}
 

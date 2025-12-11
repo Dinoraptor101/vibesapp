@@ -121,7 +121,7 @@ const listFeedback = async (req, res) => {
       owner: REPO_OWNER,
       repo: REPO_NAME,
       labels: FEEDBACK_LABEL,
-      state: 'all', // Include both open and closed issues
+      state: 'open', // Only show open issues to public
       sort: 'created',
       direction: 'desc',
       per_page: 100,
@@ -162,10 +162,22 @@ const listFeedback = async (req, res) => {
         hasMeToo = meTooContent.includes(`userId:${userId}`);
       }
 
+      // Strip Me Too list and submitter metadata from description
+      let cleanDescription = body
+        .replace(/<!-- ME_TOO_LIST_START -->[\s\S]*?<!-- ME_TOO_LIST_END -->/g, '')
+        .replace(/<!-- SUBMITTER_METADATA_START -->[\s\S]*?<!-- SUBMITTER_METADATA_END -->/g, '')
+        .trim();
+
+      // Remove everything from "---" followed by "**Submitted via VibesApp**" onwards
+      const submittedViaIndex = cleanDescription.indexOf('---\n**Submitted via VibesApp**');
+      if (submittedViaIndex !== -1) {
+        cleanDescription = cleanDescription.substring(0, submittedViaIndex).trim();
+      }
+
       return {
         id: issue.number,
         title: issue.title.replace(/^\[(🐛 Bug|✨ Feature)\]\s*/, ''), // Strip prefix
-        description: issue.body || '',
+        description: cleanDescription,
         type,
         priority,
         status: issue.state, // 'open' or 'closed'
@@ -202,7 +214,7 @@ const addComment = async (req, res) => {
     return res.status(400).json({ error: 'Comment cannot be empty' });
   }
 
-  const formattedComment = `💬 **Comment via VibesApp**\n**User:** ${user.userName || 'Unknown'}\n**Timestamp:** ${new Date().toISOString()}\n\n${comment}`;
+  const formattedComment = `💬 **Comment via VibesApp**\n**User:** ${user.userName || 'Unknown'}\n\n${comment}`;
 
   try {
     await octokit.rest.issues.createComment({
