@@ -1,9 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { listFeedback } from '../api/feedbackService';
-import type { Priority } from '../types';
+import type { FeedbackItem } from '../types';
 
-const PRIORITY_COLORS: Record<Priority, string> = {
+type NonEmptyPriority = 'critical' | 'high' | 'medium' | 'low';
+
+const PRIORITY_COLORS: Record<NonEmptyPriority, string> = {
   critical:
     'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 dim:bg-red-900 dim:text-red-200',
   high: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 dim:bg-orange-900 dim:text-orange-200',
@@ -12,7 +14,7 @@ const PRIORITY_COLORS: Record<Priority, string> = {
   low: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 dim:bg-green-900 dim:text-green-200',
 };
 
-const PRIORITY_ICONS: Record<Priority, string> = {
+const PRIORITY_ICONS: Record<NonEmptyPriority, string> = {
   critical: '🔴',
   high: '🟠',
   medium: '🟡',
@@ -20,7 +22,7 @@ const PRIORITY_ICONS: Record<Priority, string> = {
 };
 
 export function FeedbackList() {
-  const { data: feedback, isLoading } = useQuery({
+  const { data: feedback, isLoading } = useQuery<FeedbackItem[]>({
     queryKey: ['feedback'],
     queryFn: listFeedback,
   });
@@ -62,10 +64,10 @@ export function FeedbackList() {
             </h3>
             {item.priority && (
               <span
-                className={`text-xs px-2 py-1 rounded ${PRIORITY_COLORS[item.priority]}`}
+                className={`text-xs px-2 py-1 rounded ${PRIORITY_COLORS[item.priority as NonEmptyPriority]}`}
                 data-testid={`feedback-priority-${item.id}`}
               >
-                {PRIORITY_ICONS[item.priority]} {item.priority}
+                {PRIORITY_ICONS[item.priority as NonEmptyPriority]} {item.priority}
               </span>
             )}
             <span

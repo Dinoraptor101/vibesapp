@@ -21,7 +21,10 @@ export function FeedbackTypeToggle({
 
   return (
     <div className={`flex items-center justify-center gap-4 ${className}`}>
-      <span className="text-sm font-semibold text-red-600 dark:text-red-400 dim:text-red-400">
+      <span
+        className="text-sm font-semibold text-red-600 dark:text-red-400 dim:text-red-400"
+        data-testid="feedback-type-bug"
+      >
         Bug
       </span>
 
@@ -45,7 +48,10 @@ export function FeedbackTypeToggle({
         </span>
       </button>
 
-      <span className="text-sm font-semibold text-blue-600 dark:text-blue-400 dim:text-blue-400">
+      <span
+        className="text-sm font-semibold text-blue-600 dark:text-blue-400 dim:text-blue-400"
+        data-testid="feedback-type-feature"
+      >
         Feature
       </span>
     </div>
