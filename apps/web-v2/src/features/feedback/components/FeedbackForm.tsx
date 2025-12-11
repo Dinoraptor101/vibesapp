@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Upload, X } from 'lucide-react';
+import { CheckCircle, Upload, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { uploadImage } from '@/features/posts/api/s3Service';
 import { APP_VERSION } from '@/lib/constants';
@@ -32,13 +32,7 @@ export function FeedbackForm({ onSuccess }: { onSuccess: () => void }) {
       // Invalidate feedback list to show newly submitted feedback
       queryClient.invalidateQueries({ queryKey: ['feedback'] });
       onSuccess();
-      // Reset form
-      setTitle('');
-      setDescription('');
-      setType('bug');
-      setPriority('');
-      setScreenshotUrl(undefined);
-      setScreenshotFile(null);
+      // Don't reset form - let success state show
     },
   });
 
@@ -89,6 +83,25 @@ export function FeedbackForm({ onSuccess }: { onSuccess: () => void }) {
       }
     }
   };
+
+  // Show success state instead of form
+  if (mutation.isSuccess) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 space-y-4">
+        <div className="w-16 h-16 rounded-full bg-green-500/10 dim:bg-green-500/20 dark:bg-green-500/20 flex items-center justify-center">
+          <CheckCircle className="w-8 h-8 text-green-500 dim:text-green-400 dark:text-green-400" />
+        </div>
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-gray-900 dim:text-gray-100 dark:text-gray-100">
+            Thanks! We'll look into it.
+          </h3>
+          <p className="text-sm text-gray-600 dim:text-gray-300 dark:text-gray-400 mt-1">
+            We've received your feedback
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -230,15 +243,6 @@ export function FeedbackForm({ onSuccess }: { onSuccess: () => void }) {
       >
         {mutation.isPending ? 'Submitting...' : 'Submit Feedback'}
       </button>
-
-      {mutation.isSuccess && (
-        <p
-          className="text-base text-green-600 dark:text-green-400 dim:text-green-400"
-          data-testid="feedback-success-message"
-        >
-          Thanks! We'll look into it.
-        </p>
-      )}
 
       {mutation.isError && (
         <p
