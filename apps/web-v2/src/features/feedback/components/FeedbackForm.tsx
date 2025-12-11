@@ -4,6 +4,7 @@ import { submitFeedback } from '../api/feedbackService';
 import { APP_VERSION } from '@/lib/constants';
 import { submitFeedback } from '../api/feedbackService';
 import type { Priority } from '../types';
+import { FeedbackTypeToggle } from './FeedbackTypeToggle';
 
 export function FeedbackForm({ onSuccess }: { onSuccess: () => void }) {
   const [title, setTitle] = useState('');
@@ -43,37 +44,16 @@ export function FeedbackForm({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Type Selection */}
-      <div className="flex gap-4">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="radio"
-            value="bug"
-            checked={type === 'bug'}
-            onChange={() => setType('bug')}
-            className="cursor-pointer"
-            data-testid="feedback-type-bug"
-          />
-          <span>🐛 Bug Report</span>
-        </label>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="radio"
-            value="feature"
-            checked={type === 'feature'}
-            onChange={() => setType('feature')}
-            className="cursor-pointer"
-            data-testid="feedback-type-feature"
-          />
-          <span>✨ Feature Request</span>
-        </label>
+      {/* Type Selection - Toggle Style */}
+      <div>
+        <FeedbackTypeToggle value={type} onChange={setType} />
       </div>
 
       {/* Priority Selection */}
       <div>
         <label
           htmlFor="priority-select"
-          className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100 dim:text-gray-100"
+          className="block text-base font-medium mb-2 text-gray-900 dark:text-gray-100 dim:text-gray-100"
         >
           Priority
         </label>
@@ -81,7 +61,7 @@ export function FeedbackForm({ onSuccess }: { onSuccess: () => void }) {
           id="priority-select"
           value={priority}
           onChange={(e) => setPriority(e.target.value as Priority)}
-          className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 dim:bg-gray-800 text-gray-900 dark:text-gray-100 dim:text-gray-100 border-gray-300 dark:border-gray-600 dim:border-gray-600"
+          className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 dim:bg-gray-800 text-base text-gray-900 dark:text-gray-100 dim:text-gray-100 border-gray-300 dark:border-gray-600 dim:border-gray-600"
           data-testid="feedback-priority-select"
         >
           <option value="critical">🔴 Critical - App is broken/unusable</option>
@@ -99,7 +79,7 @@ export function FeedbackForm({ onSuccess }: { onSuccess: () => void }) {
         onChange={(e) => setTitle(e.target.value)}
         maxLength={100}
         required
-        className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 dim:bg-gray-800 text-gray-900 dark:text-gray-100 dim:text-gray-100 border-gray-300 dark:border-gray-600 dim:border-gray-600"
+        className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 dim:bg-gray-800 text-base text-gray-900 dark:text-gray-100 dim:text-gray-100 border-gray-300 dark:border-gray-600 dim:border-gray-600"
         data-testid="feedback-title-input"
       />
 
@@ -114,7 +94,7 @@ export function FeedbackForm({ onSuccess }: { onSuccess: () => void }) {
         onChange={(e) => setDescription(e.target.value)}
         rows={6}
         required
-        className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 dim:bg-gray-800 text-gray-900 dark:text-gray-100 dim:text-gray-100 border-gray-300 dark:border-gray-600 dim:border-gray-600"
+        className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 dim:bg-gray-800 text-base text-gray-900 dark:text-gray-100 dim:text-gray-100 border-gray-300 dark:border-gray-600 dim:border-gray-600"
         data-testid="feedback-description-input"
       />
 
@@ -125,7 +105,7 @@ export function FeedbackForm({ onSuccess }: { onSuccess: () => void }) {
       <button
         type="submit"
         disabled={mutation.isPending}
-        className="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white rounded-lg transition-colors"
+        className="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white text-base font-medium rounded-lg transition-colors"
         data-testid="feedback-submit-button"
       >
         {mutation.isPending ? 'Submitting...' : 'Submit Feedback'}
@@ -133,7 +113,7 @@ export function FeedbackForm({ onSuccess }: { onSuccess: () => void }) {
 
       {mutation.isSuccess && (
         <p
-          className="text-green-600 dark:text-green-400 dim:text-green-400"
+          className="text-base text-green-600 dark:text-green-400 dim:text-green-400"
           data-testid="feedback-success-message"
         >
           Thanks! We'll look into it.
@@ -142,7 +122,7 @@ export function FeedbackForm({ onSuccess }: { onSuccess: () => void }) {
 
       {mutation.isError && (
         <p
-          className="text-red-600 dark:text-red-400 dim:text-red-400"
+          className="text-base text-red-600 dark:text-red-400 dim:text-red-400"
           data-testid="feedback-error-message"
         >
           Failed to submit feedback. Please try again.

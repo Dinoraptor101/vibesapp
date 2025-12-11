@@ -4,8 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { APP_VERSION } from '@/lib/constants';
 import { getBuildVersion } from '@/utils/versionCheck';
+import { FeedbackForm } from '@/features/feedback/components/FeedbackForm';
+import { toast } from 'sonner';
+
 const FEEDBACK_URL = 'https://t.me/Dnegai';
-const FEEDBACK_INTERNAL_PATH = '/feedback';
 
 export function SupportTab() {
   const [buildVersion, setBuildVersion] = useState<string | null>(null);
@@ -17,39 +19,35 @@ export function SupportTab() {
     setBuildVersion(version);
   }, []);
 
-  const handleFeedbackClick = () => {
-    navigate(FEEDBACK_INTERNAL_PATH);
-  };
-
   const handleTelegramClick = () => {
     window.open(FEEDBACK_URL, '_blank', 'noopener,noreferrer');
   };
 
+  const handleFeedbackSuccess = () => {
+    toast.success('Feedback submitted! Thank you for helping improve VibesApp.');
+  };
+
   return (
     <div className="p-4 space-y-6">
-      {/* Help & Feedback */}
+      {/* Feedback Form */}
       <div>
         <h3 className="text-sm font-medium text-gray-700 dim:text-gray-200 dark:text-gray-300 mb-3">
           Help & Feedback
         </h3>
-        <div className="space-y-2">
-          <Button
-            onClick={handleFeedbackClick}
-            variant="secondary"
-            className="w-full justify-start"
-            data-testid="support-feedback-button"
-          >
-            Submit Feedback or Report Bug
-          </Button>
-          <Button
-            onClick={handleTelegramClick}
-            variant="secondary"
-            className="w-full justify-between"
-            data-testid="support-telegram-button"
-          >
-            <span>Contact via Telegram</span>
-            <ExternalLink className="w-4 h-4" />
-          </Button>
+        <div className="space-y-3">
+          <FeedbackForm onSuccess={handleFeedbackSuccess} />
+          <div className="flex items-center justify-end pt-3">
+            <Button
+              onClick={handleTelegramClick}
+              variant="ghost"
+              size="sm"
+              className="text-xs gap-1"
+              data-testid="support-telegram-button"
+            >
+              <span>Message us on Telegram</span>
+              <ExternalLink className="w-3 h-3" />
+            </Button>
+          </div>
         </div>
       </div>
 
