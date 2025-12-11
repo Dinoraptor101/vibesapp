@@ -2,9 +2,9 @@ import { ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { FeedbackForm } from '@/features/feedback/components/FeedbackForm';
 import { APP_VERSION } from '@/lib/constants';
 import { getBuildVersion } from '@/utils/versionCheck';
-import { FeedbackForm } from '@/features/feedback/components/FeedbackForm';
 
 const FEEDBACK_URL = 'https://t.me/Dnegai';
 
@@ -22,10 +22,6 @@ export function SupportTab() {
     window.open(FEEDBACK_URL, '_blank', 'noopener,noreferrer');
   };
 
-  const handleFeedbackSuccess = () => {
-    // Success message is displayed inline in the form
-  };
-
   return (
     <div className="p-4 space-y-6">
       {/* Feedback Form */}
@@ -34,7 +30,7 @@ export function SupportTab() {
           Help & Feedback
         </h3>
         <div className="space-y-3">
-          <FeedbackForm onSuccess={handleFeedbackSuccess} />
+          <FeedbackForm onSuccess={() => {}} />
           <div className="flex items-center justify-end pt-3">
             <Button
               onClick={handleTelegramClick}

@@ -1,9 +1,9 @@
 import { useMutation } from '@tanstack/react-query';
-import { useState, useRef } from 'react';
 import { Upload, X } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { uploadImage } from '@/features/posts/api/s3Service';
 import { APP_VERSION } from '@/lib/constants';
 import { submitFeedback } from '../api/feedbackService';
-import { uploadImage } from '@/features/posts/api/s3Service';
 import type { Priority } from '../types';
 import { FeedbackTypeToggle } from './FeedbackTypeToggle';
 

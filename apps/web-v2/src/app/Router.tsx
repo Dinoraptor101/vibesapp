@@ -22,7 +22,6 @@ import {
   UsersPage,
 } from '@/features/admin';
 import { AuthProvider, LoginPage, ProtectedRoute, SignupPage } from '@/features/auth';
-import { FeedbackPage } from '@/features/feedback';
 import { ConversationPage } from '@/pages/ConversationPage';
 import { PrivacyPage } from '@/pages/PrivacyPage';
 import { ReportPostPage } from '@/pages/ReportPostPage';
@@ -123,14 +122,6 @@ function AppShell() {
           element={
             <ProtectedRoute>
               <PrivacyPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/feedback"
-          element={
-            <ProtectedRoute>
-              <FeedbackPage />
             </ProtectedRoute>
           }
         />
