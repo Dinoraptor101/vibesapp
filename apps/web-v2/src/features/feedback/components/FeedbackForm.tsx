@@ -1,6 +1,6 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Upload, X } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { useRef, useState } from 'react';
 import { uploadImage } from '@/features/posts/api/s3Service';
 import { APP_VERSION } from '@/lib/constants';
 import { getBuildVersion } from '@/utils/versionCheck';
@@ -18,6 +18,7 @@ export function FeedbackForm({ onSuccess }: { onSuccess: () => void }) {
   const [screenshotUploading, setScreenshotUploading] = useState(false);
   const [screenshotError, setScreenshotError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
 
   // Validation checks
   const isTitleValid = title.length >= 5 && title.length <= 50;
