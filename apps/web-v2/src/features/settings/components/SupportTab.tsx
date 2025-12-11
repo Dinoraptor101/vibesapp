@@ -2,7 +2,6 @@ import { ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { FeedbackForm } from '@/features/feedback/components/FeedbackForm';
 import { APP_VERSION } from '@/lib/constants';
 import { getBuildVersion } from '@/utils/versionCheck';
 
@@ -24,34 +23,29 @@ export function SupportTab() {
 
   return (
     <div className="p-4 space-y-6">
-      {/* Feedback Form */}
+      {/* Feedback Link */}
       <div>
         <h3 className="text-sm font-medium text-gray-700 dim:text-gray-200 dark:text-gray-300 mb-3">
           Help & Feedback
         </h3>
-        <div className="space-y-3">
-          <FeedbackForm onSuccess={() => {}} />
-          <div className="flex items-center justify-between pt-3">
-            <Button
-              onClick={() => navigate('/feedback')}
-              variant="ghost"
-              size="sm"
-              className="text-xs"
-              data-testid="view-all-submissions-button"
-            >
-              View All Submissions
-            </Button>
-            <Button
-              onClick={handleTelegramClick}
-              variant="ghost"
-              size="sm"
-              className="text-xs gap-1"
-              data-testid="support-telegram-button"
-            >
-              <span>Message us on Telegram</span>
-              <ExternalLink className="w-3 h-3" />
-            </Button>
-          </div>
+        <div className="space-y-2">
+          <Button
+            onClick={() => navigate('/feedback')}
+            variant="secondary"
+            className="w-full justify-start"
+            data-testid="submit-feedback-button"
+          >
+            Submit Bug or Feature Request
+          </Button>
+          <Button
+            onClick={handleTelegramClick}
+            variant="secondary"
+            className="w-full justify-start gap-2"
+            data-testid="support-telegram-button"
+          >
+            <span>Message us on Telegram</span>
+            <ExternalLink className="w-4 h-4" />
+          </Button>
         </div>
       </div>
 

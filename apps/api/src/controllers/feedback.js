@@ -63,12 +63,18 @@ const submitFeedback = async (req, res) => {
 
 ---
 **Submitted via VibesApp**  
+**User ID:** ${user._id}  
 **User:** ${user.userName || 'Unknown'}  
 **Priority:** ${priority ? priority.charAt(0).toUpperCase() + priority.slice(1) : 'Not set'}  
 **App Version:** ${req.body.appVersion || 'Unknown'}  
 **Build ID:** ${req.body.buildVersion || 'Unknown'}  
 **Device:** ${req.body.userAgent || 'Unknown'}  
-**Timestamp:** ${new Date().toISOString()}`;
+**Timestamp:** ${new Date().toISOString()}
+
+---
+**Me Too:**  
+<!-- ME_TOO_LIST_START -->
+<!-- ME_TOO_LIST_END -->`;
 
   try {
     const response = await octokit.rest.issues.create({
@@ -108,6 +114,8 @@ const listFeedback = async (req, res) => {
     });
   }
 
+  const userId = req.validatedUserId; // From pigeonAuth middleware
+
   try {
     const response = await octokit.rest.issues.listForRepo({
       owner: REPO_OWNER,
@@ -128,7 +136,10 @@ const listFeedback = async (req, res) => {
           : label.name?.startsWith('priority:')
       );
       const priority = priorityLabel
-        ? (typeof priorityLabel === 'string' ? priorityLabel : priorityLabel.name).replace('priority:', '')
+        ? (typeof priorityLabel === 'string' ? priorityLabel : priorityLabel.name).replace(
+            'priority:',
+            ''
+          )
         : 'medium';
 
       // Determine type from labels
@@ -137,6 +148,20 @@ const listFeedback = async (req, res) => {
       );
       const type = hasFeatureLabel ? 'feature' : 'bug';
 
+      // Count +1 reactions (thumbs up)
+      const upvotes = issue.reactions?.['+1'] || 0;
+      const commentCount = issue.comments || 0;
+
+      // Parse Me Too list from issue body
+      const body = issue.body || '';
+      const meTooMatch = body.match(/<!-- ME_TOO_LIST_START -->([\s\S]*?)<!-- ME_TOO_LIST_END -->/);
+      let hasMeToo = false;
+      if (meTooMatch && userId) {
+        const meTooContent = meTooMatch[1];
+        // Check if userId appears in the Me Too list
+        hasMeToo = meTooContent.includes(`userId:${userId}`);
+      }
+
       return {
         id: issue.number,
         title: issue.title.replace(/^\[(🐛 Bug|✨ Feature)\]\s*/, ''), // Strip prefix
@@ -144,6 +169,9 @@ const listFeedback = async (req, res) => {
         type,
         priority,
         status: issue.state, // 'open' or 'closed'
+        upvotes,
+        commentCount,
+        hasMeToo,
         createdAt: issue.created_at,
         updatedAt: issue.updated_at,
         url: issue.html_url,
@@ -154,9 +182,120 @@ const listFeedback = async (req, res) => {
   } catch (error) {
     console.error('GitHub API error listing feedback:', {
       error: error.message,
+      stack: error.stack,
     });
     res.status(500).json({ error: 'Failed to list feedback' });
   }
 };
 
-module.exports = { submitFeedback, listFeedback };
+// Add comment to an issue
+const addComment = async (req, res) => {
+  if (!octokit) {
+    return res.status(503).json({ error: 'Feedback system is temporarily unavailable' });
+  }
+
+  const { issueNumber } = req.params;
+  const { comment } = req.body;
+  const user = req.user;
+
+  if (!comment || comment.trim().length === 0) {
+    return res.status(400).json({ error: 'Comment cannot be empty' });
+  }
+
+  const formattedComment = `💬 **Comment via VibesApp**\n**User:** ${user.userName || 'Unknown'}\n**Timestamp:** ${new Date().toISOString()}\n\n${comment}`;
+
+  try {
+    await octokit.rest.issues.createComment({
+      owner: REPO_OWNER,
+      repo: REPO_NAME,
+      issue_number: Number(issueNumber),
+      body: formattedComment,
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('GitHub API error adding comment:', {
+      error: error.message,
+      user: user.userName,
+      issueNumber,
+    });
+    res.status(500).json({ error: 'Failed to add comment' });
+  }
+};
+
+// Add "Me Too" to an issue (reaction + update description)
+const meToo = async (req, res) => {
+  if (!octokit) {
+    return res.status(503).json({ error: 'Feedback system is temporarily unavailable' });
+  }
+
+  const { issueNumber } = req.params;
+  const user = req.user;
+  const userId = req.validatedUserId;
+
+  if (!userId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  try {
+    // Get current issue
+    const issue = await octokit.rest.issues.get({
+      owner: REPO_OWNER,
+      repo: REPO_NAME,
+      issue_number: Number(issueNumber),
+    });
+
+    const currentBody = issue.data.body || '';
+
+    // Check if user already in Me Too list
+    const meTooMatch = currentBody.match(
+      /<!-- ME_TOO_LIST_START -->([\s\S]*?)<!-- ME_TOO_LIST_END -->/
+    );
+
+    if (meTooMatch?.[1]?.includes(`userId:${userId}`)) {
+      return res.status(400).json({ error: 'Already added Me Too' });
+    }
+
+    // Add user to Me Too list
+    const meTooEntry = `\n- ${user.userName || 'Unknown'} (userId:${userId}) - ${new Date().toISOString()}`;
+    let newBody;
+
+    if (meTooMatch) {
+      // Me Too list exists, append to it
+      const existingList = meTooMatch[1];
+      newBody = currentBody.replace(
+        /<!-- ME_TOO_LIST_START -->([\s\S]*?)<!-- ME_TOO_LIST_END -->/,
+        `<!-- ME_TOO_LIST_START -->${existingList}${meTooEntry}\n<!-- ME_TOO_LIST_END -->`
+      );
+    } else {
+      // No Me Too list, add it
+      newBody = `${currentBody}\n\n---\n**Me Too:**  \n<!-- ME_TOO_LIST_START -->${meTooEntry}\n<!-- ME_TOO_LIST_END -->`;
+    }
+
+    // Update issue body
+    await octokit.rest.issues.update({
+      owner: REPO_OWNER,
+      repo: REPO_NAME,
+      issue_number: Number(issueNumber),
+      body: newBody,
+    });
+
+    // Add +1 reaction
+    await octokit.rest.reactions.createForIssue({
+      owner: REPO_OWNER,
+      repo: REPO_NAME,
+      issue_number: Number(issueNumber),
+      content: '+1',
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('GitHub API error adding Me Too:', {
+      error: error.message,
+      issueNumber,
+    });
+    res.status(500).json({ error: 'Failed to add Me Too' });
+  }
+};
+
+module.exports = { submitFeedback, listFeedback, meToo, addComment };

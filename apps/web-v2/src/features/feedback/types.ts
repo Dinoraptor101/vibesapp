@@ -5,8 +5,12 @@ export interface FeedbackItem {
   priority: 'critical' | 'high' | 'medium' | 'low' | null;
   status: 'open' | 'closed';
   description: string;
+  upvotes: number;
+  commentCount: number;
+  hasMeToo: boolean;
   createdAt: string;
-  closedAt: string | null;
+  updatedAt: string;
+  url: string;
 }
 
 export type Priority = 'critical' | 'high' | 'medium' | 'low' | '';
