@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { APP_VERSION } from '@/lib/constants';
 import { getBuildVersion } from '@/utils/versionCheck';
 import { FeedbackForm } from '@/features/feedback/components/FeedbackForm';
-import { toast } from 'sonner';
 
 const FEEDBACK_URL = 'https://t.me/Dnegai';
 
@@ -24,7 +23,7 @@ export function SupportTab() {
   };
 
   const handleFeedbackSuccess = () => {
-    toast.success('Feedback submitted! Thank you for helping improve VibesApp.');
+    // Success message is displayed inline in the form
   };
 
   return (

@@ -1,9 +1,4 @@
-const {
-  octokit,
-  REPO_OWNER,
-  REPO_NAME,
-  FEEDBACK_LABEL,
-} = require('../config/github');
+const { octokit, REPO_OWNER, REPO_NAME, FEEDBACK_LABEL } = require('../config/github');
 
 // Priority mapping: user-friendly → GitHub label
 const PRIORITY_MAP = {
@@ -47,11 +42,16 @@ const submitFeedback = async (req, res) => {
     labels.push(PRIORITY_MAP[priority]);
   }
 
-  // Build issue body with metadata
-  const body = `
-${description}
+  // Construct full screenshot URL if S3 key provided
+  let screenshotMarkdown = '';
+  if (screenshotUrl) {
+    const CDN_URL = process.env.CDN_URL || 'https://cdn.vibesapp.net';
+    const fullScreenshotUrl = `${CDN_URL}/${screenshotUrl}`;
+    screenshotMarkdown = `\n![VibesApp screenshot](${fullScreenshotUrl})`;
+  }
 
-${screenshotUrl ? `**Screenshot:** ![screenshot](${screenshotUrl})` : ''}
+  // Build issue body with metadata
+  const body = `${description}${screenshotMarkdown}
 
 ---
 **Submitted via VibesApp**  
@@ -59,8 +59,7 @@ ${screenshotUrl ? `**Screenshot:** ![screenshot](${screenshotUrl})` : ''}
 **Priority:** ${priority ? priority.charAt(0).toUpperCase() + priority.slice(1) : 'Not set'}  
 **App Version:** ${req.body.appVersion || 'Unknown'}  
 **Device:** ${req.body.userAgent || 'Unknown'}  
-**Timestamp:** ${new Date().toISOString()}
-`;
+**Timestamp:** ${new Date().toISOString()}`;
 
   try {
     const response = await octokit.rest.issues.create({
@@ -96,7 +95,7 @@ const listFeedback = async (req, res) => {
     // Support pagination via query params
     const page = parseInt(req.query.page) || 1;
     const perPage = Math.min(parseInt(req.query.per_page) || 100, 100); // Max 100
-    
+
     const response = await octokit.rest.issues.listForRepo({
       owner: REPO_OWNER,
       repo: REPO_NAME,

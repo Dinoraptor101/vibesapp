@@ -9,13 +9,13 @@ export interface FeedbackItem {
   closedAt: string | null;
 }
 
-export type Priority = 'critical' | 'high' | 'medium' | 'low';
+export type Priority = 'critical' | 'high' | 'medium' | 'low' | '';
 
 export interface SubmitFeedbackRequest {
   title: string;
   description: string;
   type: 'bug' | 'feature';
-  priority: Priority;
+  priority: Exclude<Priority, ''>;
   screenshotUrl?: string;
   appVersion: string;
   userAgent: string;

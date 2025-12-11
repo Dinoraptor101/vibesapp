@@ -37,8 +37,8 @@ export function FeedbackTypeToggle({
         <span
           className={`absolute inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-xl shadow-lg transition-all duration-300 ease-in-out ${
             value === 'feature'
-              ? 'translate-x-12 from-blue-400 to-indigo-500'
-              : 'translate-x-2 from-red-400 to-orange-500'
+              ? 'translate-x-12 from-blue-300 to-indigo-500'
+              : 'translate-x-2 from-red-300 to-orange-500'
           }`}
         >
           {value === 'bug' ? '🪲' : '🦋'}
