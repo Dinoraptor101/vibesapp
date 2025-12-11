@@ -98,4 +98,65 @@ const submitFeedback = async (req, res) => {
   }
 };
 
-module.exports = { submitFeedback };
+// List all feedback issues
+const listFeedback = async (req, res) => {
+  // Check if GitHub integration is available
+  if (!octokit) {
+    console.warn('Feedback list attempted but GITHUB_PAT is not configured');
+    return res.status(503).json({
+      error: 'Feedback system is temporarily unavailable',
+    });
+  }
+
+  try {
+    const response = await octokit.rest.issues.listForRepo({
+      owner: REPO_OWNER,
+      repo: REPO_NAME,
+      labels: FEEDBACK_LABEL,
+      state: 'all', // Include both open and closed issues
+      sort: 'created',
+      direction: 'desc',
+      per_page: 100,
+    });
+
+    // Transform GitHub issues to frontend-friendly format
+    const feedback = response.data.map((issue) => {
+      // Extract priority from labels (priority:high, priority:critical, etc.)
+      const priorityLabel = issue.labels.find((label) =>
+        typeof label === 'string'
+          ? label.startsWith('priority:')
+          : label.name?.startsWith('priority:')
+      );
+      const priority = priorityLabel
+        ? (typeof priorityLabel === 'string' ? priorityLabel : priorityLabel.name).replace('priority:', '')
+        : 'medium';
+
+      // Determine type from labels
+      const hasFeatureLabel = issue.labels.some((label) =>
+        typeof label === 'string' ? label === 'feature' : label.name === 'feature'
+      );
+      const type = hasFeatureLabel ? 'feature' : 'bug';
+
+      return {
+        id: issue.number,
+        title: issue.title.replace(/^\[(🐛 Bug|✨ Feature)\]\s*/, ''), // Strip prefix
+        description: issue.body || '',
+        type,
+        priority,
+        status: issue.state, // 'open' or 'closed'
+        createdAt: issue.created_at,
+        updatedAt: issue.updated_at,
+        url: issue.html_url,
+      };
+    });
+
+    res.json({ feedback });
+  } catch (error) {
+    console.error('GitHub API error listing feedback:', {
+      error: error.message,
+    });
+    res.status(500).json({ error: 'Failed to list feedback' });
+  }
+};
+
+module.exports = { submitFeedback, listFeedback };

@@ -31,7 +31,16 @@ export function SupportTab() {
         </h3>
         <div className="space-y-3">
           <FeedbackForm onSuccess={() => {}} />
-          <div className="flex items-center justify-end pt-3">
+          <div className="flex items-center justify-between pt-3">
+            <Button
+              onClick={() => navigate('/feedback')}
+              variant="ghost"
+              size="sm"
+              className="text-xs"
+              data-testid="view-all-submissions-button"
+            >
+              View All Submissions
+            </Button>
             <Button
               onClick={handleTelegramClick}
               variant="ghost"
