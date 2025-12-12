@@ -29,7 +29,9 @@ jobs:
           path: |
             ~/.npm
             node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          # Hash all lock files (root + workspaces) to detect any dependency changes
+          # This ensures cache invalidates when any package.json/package-lock.json in monorepo changes
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json', 'apps/*/package-lock.json', 'libs/*/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
