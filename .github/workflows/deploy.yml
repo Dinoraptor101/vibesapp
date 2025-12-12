@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: github-pages
     concurrency: deploy # Cancel other pending deployments
+    timeout-minutes: 25
 
     steps:
       - name: Checkout code
