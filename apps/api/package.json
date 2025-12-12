@@ -14,7 +14,7 @@
     "precommit": "npm run format && npm run lint",
     "test": "echo \"Error: no test specified\" && exit 1",
     "cleanup:activities": "node scripts/cleanupActivities.js",
-    "deploy:prod": "npm run precommit && git push heroku HEAD:main",
+    "deploy:prod": "npm run precommit && git push heroku HEAD:main --force",
     "deploy:qa": "npm run precommit && git push heroku-backend HEAD:main"
   },
   "keywords": [],
