@@ -193,7 +193,7 @@ test.describe('Account Settings and Preferences', () => {
     await expect(page.locator('.font-mono span.font-bold')).toBeVisible();
   });
 
-  test('should display support tab with feedback form and legal links', async ({ page }) => {
+  test('should display support tab with feedback button and legal links', async ({ page }) => {
     // Navigate to Support section
     await page.getByTestId('support-section').click();
     await expect(page.getByTestId('support-tab-content')).toBeVisible();
@@ -201,30 +201,10 @@ test.describe('Account Settings and Preferences', () => {
     // Verify Help & Feedback section header
     await expect(page.getByText('Help & Feedback')).toBeVisible();
 
-    // Verify FeedbackForm elements are present (without submitting)
-    // Check feedback type toggle (Bug/Feature)
-    await expect(page.getByTestId('feedback-type-bug')).toBeVisible();
-    await expect(page.getByTestId('feedback-type-feature')).toBeVisible();
-
-    // Check title input
-    const titleInput = page.getByTestId('feedback-title-input');
-    await expect(titleInput).toBeVisible();
-    await expect(titleInput).toBeEditable();
-    await expect(titleInput).toHaveAttribute('maxlength', '50');
-
-    // Check description input
-    const descriptionInput = page.getByTestId('feedback-description-input');
-    await expect(descriptionInput).toBeVisible();
-    await expect(descriptionInput).toBeEditable();
-    await expect(descriptionInput).toHaveAttribute('maxlength', '500');
-
-    // Check priority select (visible for bug type by default)
-    await expect(page.getByTestId('feedback-priority-select')).toBeVisible();
-
-    // Check submit button exists (should be disabled initially)
-    const submitButton = page.getByTestId('feedback-submit-button');
-    await expect(submitButton).toBeVisible();
-    await expect(submitButton).toBeDisabled();
+    // Verify "Submit Bug or Feature Request" button
+    const feedbackButton = page.getByTestId('submit-feedback-button');
+    await expect(feedbackButton).toBeVisible();
+    await expect(feedbackButton).toHaveText(/Submit Bug or Feature Request/);
 
     // Verify Telegram button
     await expect(page.getByTestId('support-telegram-button')).toBeVisible();
@@ -240,67 +220,32 @@ test.describe('Account Settings and Preferences', () => {
     await expect(page.getByText(/Build ID:/)).toBeVisible();
   });
 
-  test('should toggle between bug and feature feedback types', async ({ page }) => {
+  test('should navigate to feedback page from support tab', async ({ page }) => {
     // Navigate to Support section
     await page.getByTestId('support-section').click();
 
-    // Default is bug type - priority should be visible
-    await expect(page.getByTestId('feedback-priority-select')).toBeVisible();
+    // Click "Submit Bug or Feature Request" button
+    await page.getByTestId('submit-feedback-button').click();
 
-    // Switch to feature type by clicking the toggle button
-    await page.getByTestId('feedback-type-toggle').click();
-
-    // Priority should be hidden for feature requests
-    await expect(page.getByTestId('feedback-priority-select')).not.toBeVisible();
-
-    // Switch back to bug type
-    await page.getByTestId('feedback-type-toggle').click();
-
-    // Priority should be visible again
-    await expect(page.getByTestId('feedback-priority-select')).toBeVisible();
+    // Should navigate to feedback page
+    await page.waitForURL('**/feedback', { timeout: 5000 });
+    await expect(page).toHaveURL(/\/feedback/);
   });
 
-  test('should validate feedback form fields without submitting', async ({ page }) => {
+  test('should have telegram button with correct link', async ({ page }) => {
     // Navigate to Support section
     await page.getByTestId('support-section').click();
 
-    const titleInput = page.getByTestId('feedback-title-input');
-    const descriptionInput = page.getByTestId('feedback-description-input');
-    const prioritySelect = page.getByTestId('feedback-priority-select');
-    const submitButton = page.getByTestId('feedback-submit-button');
+    // Verify Telegram button is clickable
+    const telegramButton = page.getByTestId('support-telegram-button');
+    await expect(telegramButton).toBeVisible();
+    await expect(telegramButton).toBeEnabled();
 
-    // Initially disabled
-    await expect(submitButton).toBeDisabled();
+    // Verify button text
+    await expect(telegramButton).toHaveText(/Message us on Telegram/);
 
-    // Fill title (but too short - less than 5 chars)
-    await titleInput.fill('Bug');
-    await expect(submitButton).toBeDisabled();
-
-    // Fill title with valid length (5-50 chars)
-    await titleInput.fill('Valid title here');
-    await expect(submitButton).toBeDisabled(); // Still needs description
-
-    // Fill description (but too short - less than 100 chars)
-    await descriptionInput.fill('Short description');
-    await expect(submitButton).toBeDisabled();
-
-    // Fill description with valid length (100-500 chars)
-    const validDescription =
-      'This is a detailed description that meets the minimum character requirement of one hundred characters for the feedback form to be valid and ready for submission';
-    await descriptionInput.fill(validDescription);
-    await expect(submitButton).toBeDisabled(); // Still needs priority for bug type
-
-    // Select priority
-    await prioritySelect.selectOption('medium');
-
-    // Now form should be valid and button enabled
-    await expect(submitButton).toBeEnabled();
-
-    // Clear form to restore initial state (don't submit)
-    await titleInput.clear();
-    await descriptionInput.clear();
-    await prioritySelect.selectOption('');
-    await expect(submitButton).toBeDisabled();
+    // Verify ExternalLink icon is present
+    await expect(telegramButton.locator('svg.lucide-external-link')).toBeVisible();
   });
 
   test('should navigate to terms and privacy from support tab', async ({ page }) => {
