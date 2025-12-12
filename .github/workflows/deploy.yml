@@ -7,12 +7,15 @@ on:
     types:
       - closed
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   deploy:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     environment: github-pages
-    concurrency: deploy # Cancel other pending deployments
     timeout-minutes: 25
 
     steps:
