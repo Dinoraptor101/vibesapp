@@ -59,9 +59,7 @@ function GitHubPagesRedirectHandler() {
         setTimeout(() => sessionStorage.removeItem('redirectHandled'), 100);
       }
     }
-    // Note: location.pathname is in the dependency array to ensure the effect re-runs
-    // when the pathname changes. While the logic only executes on '/', this ensures
-    // the redirect is handled whenever the user navigates back to the root path.
+    // location.pathname is included to satisfy exhaustive-deps and ensure the effect has the current pathname.
   }, [navigate, location.pathname]);
 
   return null;
