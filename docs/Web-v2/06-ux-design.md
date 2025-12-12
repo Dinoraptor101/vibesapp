@@ -35,19 +35,29 @@ The Web-v2 rebuild was guided by a comprehensive UX philosophy centered on "ZEN 
 
 #### 4. Loading Rules
 **Philosophy**: Smart loading states based on duration
-- **< 1 second**: No spinner (too fast to notice)
-- **1-3 seconds**: Show spinner with progress
+- **< 1 second**: No indicator (too fast to notice)
+- **1-3 seconds**: Show PageLoader (logo fade animation)
 - **> 3 seconds**: Show skeleton screens or detailed progress
 - **Fetch-First Pattern**: Always show loading state during server validation
-- **Implementation**: Custom hooks for loading state management
+- **Implementation**: 
+  - `<PageLoader />` for page-level loads (includes automatic 1-second Zen delay)
+  - `<Skeleton />` for content placeholders (manual 1-second delay via useState/useEffect)
+  - VibesApp logo with fade animation (opacity 0→1→0, 1.5s loop) replaces generic spinners
+- **Critical Anti-Pattern**: Empty state messages ("Be the first to comment!") must ALSO wait 1 second
+  - ❌ **Bad**: Show empty state immediately → flashes during fast loads → appears/disappears/reappears
+  - ✅ **Good**: Return `null` during initial load until 1-second delay passes → empty state only shows if truly empty
+  - **Example**: CommentList checks `if (isLoading && !showSkeleton) return null;` before rendering empty state
 
 #### 5. Fetch-First Updates
 **Philosophy**: Always verify server state before making changes
 - **Why**: Prevents conflicting states and ensures data integrity
-- **Implementation**: GET current state → validate → PATCH update → animate UI
+- **Implementation**: POST to server → wait for response → invalidate cache → refetch with real data
 - **User Benefit**: Reliable state consistency across sessions
-- **Pattern**: No optimistic updates - show loading state during validation
+- **Pattern**: No optimistic updates - wait for server confirmation
 - **Trade-off**: Slightly slower UX for guaranteed correctness
+- **Example**: Comment creation doesn't show temporary comment - waits for server, then refetches list
+  - ❌ **Bad (Optimistic)**: Show temp comment → flash when real one replaces it → visual noise
+  - ✅ **Good (Fetch-First)**: Submit → brief pause → real comment appears from server → no flash
 
 #### 6. Offline-Ready
 **Philosophy**: Graceful degradation with clear status
@@ -217,6 +227,35 @@ Support Tab:
 └── Privacy Policy
 ```
 
+#### PageLoader Component
+```typescript
+// Centralized page-level loading indicator
+import { PageLoader } from '@/components/ui-next';
+
+// Usage in pages
+function PostDetailPage() {
+  const { data: post, isLoading } = usePost(postId);
+  
+  if (isLoading) {
+    return <PageLoader />; // Automatic 1-second Zen delay
+  }
+  
+  return <PostDetail post={post} />;
+}
+
+// Features:
+// - VibesApp logo with fade animation (opacity 0→1→0, 1.5s infinite loop)
+// - Automatic 1-second delay (prevents flash on fast loads <1s)
+// - Size variants: sm (48px), md (64px), lg (96px)
+// - Accessible with role="status" and screen reader labels
+// - Replaces generic Loader2 spinners for brand consistency
+
+// Why logo instead of spinner:
+// 1. Brand reinforcement - users see VibesApp identity during loading
+// 2. Spiritual consistency - calm fade vs mechanical spin
+// 3. Distinguishes app loading from inline component loading (which uses skeletons)
+```
+
 ## Accessibility First Design
 
 ### Screen Reader Optimization
@@ -322,14 +361,57 @@ const handleProximityChange = (newRange: number) => {
 
 ### Loading States
 ```typescript
-// Smart loading based on duration
-const useSmartLoading = (isLoading: boolean, startTime: number) => {
-  const duration = Date.now() - startTime;
+// Page-level loading with automatic Zen delay
+import { PageLoader } from '@/components/ui-next';
 
-  if (duration < 1000) return null; // Too fast, no indicator
-  if (duration < 3000) return <Spinner />; // Show spinner
-  return <Skeleton />; // Show detailed placeholder
-};
+if (isLoading) {
+  return <PageLoader />; // Shows logo after 1s delay
+}
+
+// Content-level loading with manual Zen delay
+import { useState, useEffect } from 'react';
+
+function CommentList({ isLoading, data }) {
+  const [showSkeleton, setShowSkeleton] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading || data) {
+      setShowSkeleton(false);
+      return;
+    }
+    const timer = setTimeout(() => setShowSkeleton(true), 1000);
+    return () => clearTimeout(timer);
+  }, [isLoading, data]);
+
+  // Loading state - show skeleton after delay
+  if (isLoading && !data && showSkeleton) {
+    return <CommentSkeleton />;
+  }
+
+  // CRITICAL: Don't show empty state during initial load
+  // Prevents "Be the first to comment!" from flashing
+  if (isLoading && !showSkeleton) {
+    return null; // Silent during <1s loads
+  }
+
+  // Empty state - only shows if truly empty after load completes
+  if (comments.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p>Be the first to comment!</p>
+      </div>
+    );
+  }
+
+  // ... render content
+}
+```
+
+**Why empty states need delays:**
+- Empty state messages are content, not loading indicators
+- Showing them immediately causes: appears → disappears (loading) → reappears (truly empty)
+- This flashing violates Zen principle of silence over noise
+- Solution: Return `null` during fast loads, only show empty state after delay passes
 ```
 
 ## Performance UX

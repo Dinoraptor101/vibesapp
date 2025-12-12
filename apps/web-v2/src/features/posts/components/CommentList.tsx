@@ -4,7 +4,8 @@
  * Container for comments with infinite scroll, loading states, and empty state.
  */
 
-import { useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui-next/Button';
 import { cn } from '@/lib/cn';
 import { useComments } from '../hooks/useComments';
@@ -12,6 +13,27 @@ import { useHeartComment } from '../hooks/useHeartComment';
 import type { Post } from '../types';
 import { CommentCard } from './CommentCard';
 import { CommentSkeleton } from './CommentSkeleton';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 10, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.25,
+    },
+  },
+};
 
 interface CommentListProps {
   postId: string;
@@ -33,8 +55,26 @@ export function CommentList({ postId, onReply, className }: CommentListProps) {
 
   const heartComment = useHeartComment(postId);
 
+  // Zen loading principle: delay skeleton display by 1 second
+  const [showSkeleton, setShowSkeleton] = useState(false);
+
   // Intersection observer for infinite scroll
   const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  // Zen: Wait 1 second before showing loading skeleton
+  // biome-ignore lint/correctness/useExhaustiveDependencies: setShowSkeleton is a state setter
+  useEffect(() => {
+    if (!isLoading || data) {
+      setShowSkeleton(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setShowSkeleton(true);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [isLoading, data]);
 
   useEffect(() => {
     if (!loadMoreRef.current || !hasNextPage || isFetchingNextPage) return;
@@ -114,8 +154,8 @@ export function CommentList({ postId, onReply, className }: CommentListProps) {
     onReply?.(comment._id, comment.user.userName);
   };
 
-  // Loading state
-  if (isLoading) {
+  // Loading state - Zen principle: only show skeleton if loading takes >1 second
+  if (isLoading && !data && showSkeleton) {
     return (
       <div className={cn('space-y-1', className)}>
         <CommentSkeleton />
@@ -123,6 +163,12 @@ export function CommentList({ postId, onReply, className }: CommentListProps) {
         <CommentSkeleton />
       </div>
     );
+  }
+
+  // Zen principle: Don't show empty state during initial load or if delay hasn't passed
+  // Prevents "Be the first to comment!" from flashing during fast loads
+  if (isLoading && !showSkeleton) {
+    return null; // Silent during <1s loads
   }
 
   // Error state
@@ -151,14 +197,20 @@ export function CommentList({ postId, onReply, className }: CommentListProps) {
 
   // Comments list
   return (
-    <div className={cn('space-y-1 overflow-visible', className)}>
+    <motion.div
+      className={cn('space-y-1 overflow-visible', className)}
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {threadedComments.map((comment) => (
-        <CommentCard
-          key={comment._id}
-          comment={comment}
-          onHeart={handleHeart}
-          onReply={() => handleReply(comment)}
-        />
+        <motion.div key={comment._id} variants={itemVariants}>
+          <CommentCard
+            comment={comment}
+            onHeart={handleHeart}
+            onReply={() => handleReply(comment)}
+          />
+        </motion.div>
       ))}
 
       {/* Load more trigger */}
@@ -178,6 +230,6 @@ export function CommentList({ postId, onReply, className }: CommentListProps) {
       {!hasNextPage && threadedComments.length > 5 && (
         <p className="text-center text-text-tertiary text-sm py-4">You've reached the end!</p>
       )}
-    </div>
+    </motion.div>
   );
 }

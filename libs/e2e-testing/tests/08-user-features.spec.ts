@@ -26,7 +26,7 @@ test.describe('Account Settings and Preferences', () => {
     // Verify main settings tabs are visible
     await expect(page.getByTestId('account-section')).toBeVisible();
     await expect(page.getByTestId('preferences-section')).toBeVisible();
-    await expect(page.getByTestId('privacy-section')).toBeVisible();
+    await expect(page.getByTestId('support-section')).toBeVisible();
 
     // Verify account tab content is shown by default
     await expect(page.getByTestId('account-tab-content')).toBeVisible();
@@ -191,6 +191,80 @@ test.describe('Account Settings and Preferences', () => {
 
     // Check for Pigeon ID display (in font-mono container)
     await expect(page.locator('.font-mono span.font-bold')).toBeVisible();
+  });
+
+  test('should display support tab with feedback button and legal links', async ({ page }) => {
+    // Navigate to Support section
+    await page.getByTestId('support-section').click();
+    await expect(page.getByTestId('support-tab-content')).toBeVisible();
+
+    // Verify Help & Feedback section header
+    await expect(page.getByText('Help & Feedback')).toBeVisible();
+
+    // Verify "Submit Bug or Feature Request" button
+    const feedbackButton = page.getByTestId('submit-feedback-button');
+    await expect(feedbackButton).toBeVisible();
+    await expect(feedbackButton).toHaveText(/Submit Bug or Feature Request/);
+
+    // Verify Telegram button
+    await expect(page.getByTestId('support-telegram-button')).toBeVisible();
+    await expect(page.getByTestId('support-telegram-button')).toHaveText(/Message us on Telegram/);
+
+    // Verify Legal section
+    await expect(page.getByText('Legal')).toBeVisible();
+    await expect(page.getByRole('button', { name: /Terms of Service/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Privacy Policy/ })).toBeVisible();
+
+    // Verify App Version section
+    await expect(page.getByText(/App Version:/)).toBeVisible();
+    await expect(page.getByText(/Build ID:/)).toBeVisible();
+  });
+
+  test('should navigate to feedback page from support tab', async ({ page }) => {
+    // Navigate to Support section
+    await page.getByTestId('support-section').click();
+
+    // Click "Submit Bug or Feature Request" button
+    await page.getByTestId('submit-feedback-button').click();
+
+    // Should navigate to feedback page
+    await page.waitForURL('**/feedback', { timeout: 5000 });
+    await expect(page).toHaveURL(/\/feedback/);
+  });
+
+  test('should have telegram button with correct link', async ({ page }) => {
+    // Navigate to Support section
+    await page.getByTestId('support-section').click();
+
+    // Verify Telegram button is clickable
+    const telegramButton = page.getByTestId('support-telegram-button');
+    await expect(telegramButton).toBeVisible();
+    await expect(telegramButton).toBeEnabled();
+
+    // Verify button text
+    await expect(telegramButton).toHaveText(/Message us on Telegram/);
+
+    // Verify ExternalLink icon is present
+    await expect(telegramButton.locator('svg.lucide-external-link')).toBeVisible();
+  });
+
+  test('should navigate to terms and privacy from support tab', async ({ page }) => {
+    // Navigate to Support section
+    await page.getByTestId('support-section').click();
+
+    // Click Terms of Service button
+    await page.getByRole('button', { name: /Terms of Service/ }).click();
+    await page.waitForURL('**/terms', { timeout: 5000 });
+    await expect(page).toHaveURL(/\/terms/);
+
+    // Navigate back to settings
+    await page.goto('/settings');
+    await page.getByTestId('support-section').click();
+
+    // Click Privacy Policy button
+    await page.getByRole('button', { name: /Privacy Policy/ }).click();
+    await page.waitForURL('**/privacy', { timeout: 5000 });
+    await expect(page).toHaveURL(/\/privacy/);
   });
 });
 

@@ -5,6 +5,7 @@
  * Submit via Enter key or Send button (modern UX pattern).
  */
 
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send } from 'lucide-react';
 import { type ChangeEvent, type KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
@@ -111,21 +112,31 @@ export function CommentInput({
   return (
     <div className={cn('space-y-2', className)}>
       {/* Reply indicator */}
-      {replyTo && (
-        <div className="flex items-center justify-between px-3 py-2 bg-surface-secondary rounded-lg">
-          <span className="text-sm text-text-secondary">
-            Replying to <span className="text-brand font-medium">@{replyTo.userName}</span>
-          </span>
-          <button
-            type="button"
-            onClick={handleCancelReply}
-            className="p-1 hover:bg-surface-tertiary rounded transition-colors"
-            aria-label="Cancel reply"
+      <AnimatePresence>
+        {replyTo && (
+          <motion.div
+            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+            animate={{ opacity: 1, height: 'auto', marginBottom: 8 }}
+            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="flex items-center justify-between px-3 py-2 bg-surface-secondary rounded-lg"
           >
-            <X className="w-4 h-4 text-text-tertiary" />
-          </button>
-        </div>
-      )}
+            <span className="text-sm text-text-secondary">
+              Replying to <span className="text-brand font-medium">@{replyTo.userName}</span>
+            </span>
+            <motion.button
+              type="button"
+              onClick={handleCancelReply}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="p-1 hover:bg-surface-tertiary rounded transition-colors"
+              aria-label="Cancel reply"
+            >
+              <X className="w-4 h-4 text-text-tertiary" />
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Textarea */}
       <div className="relative">
@@ -151,20 +162,22 @@ export function CommentInput({
         />
 
         {/* Send Button */}
-        <button
+        <motion.button
           type="button"
           onClick={handleSubmit}
           disabled={disabled || !isOnline || !value.trim()}
+          whileHover={value.trim() ? { scale: 1.1 } : {}}
+          whileTap={value.trim() ? { scale: 0.9 } : {}}
           className={cn(
             'absolute top-1/2 -translate-y-1/2 right-2 p-2 rounded-lg transition-all flex items-center justify-center -mt-0.5',
             'hover:bg-surface-tertiary',
-            value.trim() ? 'text-brand hover:scale-110' : 'text-text-tertiary cursor-not-allowed'
+            value.trim() ? 'text-brand' : 'text-text-tertiary cursor-not-allowed'
           )}
           aria-label="Send comment"
           title={!isOnline ? 'Connect to internet to comment' : undefined}
         >
           <Send className="w-5 h-5" />
-        </button>
+        </motion.button>
 
         {/* Character count (only show when approaching limit) */}
         {showCharCount && (

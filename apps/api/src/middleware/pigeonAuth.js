@@ -34,8 +34,9 @@ module.exports = async (req, res, next) => {
       return res.status(403).json({ error: 'Forbidden: Invalid Pigeon ID' });
     }
 
-    // Attach the validated userId to the request object
+    // Attach the validated userId and user object to the request object
     req.validatedUserId = user.userId;
+    req.user = user;
 
     // For non-GET requests, check if the request's userId matches the validated userId
     if (req.method !== 'GET') {

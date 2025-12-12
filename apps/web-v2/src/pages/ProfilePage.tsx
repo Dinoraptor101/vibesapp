@@ -3,10 +3,10 @@
  */
 
 import { ArrowLeft } from 'lucide-react';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout';
-import { Button, Spinner } from '@/components/ui-next';
+import { Button, PageLoader } from '@/components/ui-next';
 import { useAuth } from '@/features/auth';
 import { useDMRequestStatus } from '@/features/messaging/hooks/useDMRequestStatus';
 import { ProfileHeader } from '@/features/profile/components/ProfileHeader';
@@ -28,20 +28,9 @@ const ProfilePageContentInner = memo(function ProfilePageContentInner({
   const userId = propUserId || paramUserId;
   const { user: currentUser } = useAuth();
   const navigate = useNavigate();
-  const [showLoading, setShowLoading] = useState(false);
 
   const { data: profile, isLoading, isError, error } = useProfile(userId);
   const { data: dmStatus } = useDMRequestStatus(userId);
-
-  // ZEN: Wait 1 second before showing loading spinner (avoid flash)
-  useEffect(() => {
-    if (isLoading) {
-      const timer = setTimeout(() => setShowLoading(true), 1000);
-      return () => clearTimeout(timer);
-    } else {
-      setShowLoading(false);
-    }
-  }, [isLoading]);
 
   // ZEN: Log errors to console only, never show to user
   useEffect(() => {
@@ -84,15 +73,9 @@ const ProfilePageContentInner = memo(function ProfilePageContentInner({
     return null;
   }
 
-  // ZEN: Show loading only after 1 second delay (avoid flash for fast loads)
-  if (isLoading && showLoading) {
-    return (
-      <div>
-        <div className="flex items-center justify-center py-12">
-          <Spinner size="lg" />
-        </div>
-      </div>
-    );
+  // ZEN: PageLoader includes 1-second delay internally
+  if (isLoading) {
+    return <PageLoader />;
   }
 
   // ZEN: If no profile data, show nothing (Transparency)

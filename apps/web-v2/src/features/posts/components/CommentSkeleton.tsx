@@ -4,6 +4,7 @@
  * Loading placeholder for comments.
  */
 
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/cn';
 
 interface CommentSkeletonProps {
@@ -12,7 +13,17 @@ interface CommentSkeletonProps {
 
 export function CommentSkeleton({ className }: CommentSkeletonProps) {
   return (
-    <div className={cn('flex gap-3 py-3', className)}>
+    <motion.div
+      initial={{ opacity: 0.6 }}
+      animate={{ opacity: 1 }}
+      transition={{
+        duration: 0.8,
+        repeat: Number.POSITIVE_INFINITY,
+        repeatType: 'reverse',
+        ease: 'easeInOut',
+      }}
+      className={cn('flex gap-3 py-3', className)}
+    >
       {/* Avatar skeleton */}
       <div className="w-10 h-10 rounded-full bg-surface-secondary animate-pulse mt-1" />
 
@@ -36,6 +47,6 @@ export function CommentSkeleton({ className }: CommentSkeletonProps) {
           <div className="h-4 w-12 bg-surface-secondary rounded animate-pulse" />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
