@@ -65,7 +65,7 @@ export const API_ENDPOINTS = {
 // ===== APP CONSTANTS =====
 export const APP_CONFIG = {
   NAME: 'VibesApp',
-  VERSION: '0.20.1',
+  VERSION: '0.21.0',
   DESCRIPTION: 'Picture based social network',
   HOMEPAGE: 'https://vibesapp.net',
 

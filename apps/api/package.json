@@ -1,6 +1,6 @@
 {
   "name": "vibesapp-backend",
-  "version": "0.20.1",
+  "version": "0.21.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -11,10 +11,11 @@
     "format": "biome format --write src/",
     "format:check": "biome format src/",
     "check": "biome check src/ --write",
+    "precommit": "npm run format && npm run lint",
     "test": "echo \"Error: no test specified\" && exit 1",
     "cleanup:activities": "node scripts/cleanupActivities.js",
-    "deploy": "git push heroku HEAD:main",
-    "deploy:qa": "git push heroku-backend HEAD:main"
+    "deploy:prod": "npm run precommit && git push heroku HEAD:main --force",
+    "deploy:qa": "npm run precommit && git push heroku-backend HEAD:main"
   },
   "keywords": [],
   "author": "",
@@ -32,6 +33,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "mongoose": "^8.4.1",
+    "octokit": "^5.0.5",
     "socket.io": "^4.7.5",
     "ws": "^8.17.0"
   },
