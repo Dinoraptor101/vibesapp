@@ -7,6 +7,7 @@ on:
 jobs:
   sync-priority:
     runs-on: ubuntu-latest
+    environment: github-pages
     steps:
       - name: Sync Priority Field
         uses: actions/github-script@v7
