@@ -7,6 +7,7 @@ on:
 jobs:
   bulk-sync:
     runs-on: ubuntu-latest
+    environment: github-pages
     steps:
       - name: Bulk Sync All Priority Labels to Project
         uses: actions/github-script@v7
