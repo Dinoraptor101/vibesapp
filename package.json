@@ -62,6 +62,9 @@
     "concurrently": "^9.2.1",
     "nx": "22.0.2"
   },
+  "optionalDependencies": {
+    "@nx/nx-linux-x64-gnu": "22.0.2"
+  },
   "workspaces": [
     "apps/*",
     "libs/*"

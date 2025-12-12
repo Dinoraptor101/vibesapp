@@ -37,6 +37,9 @@ jobs:
 
       - name: Install dependencies
         timeout-minutes: 15
+        env:
+          NX_DAEMON: false
+          NX_SKIP_NX_CACHE: true
         run: npm ci --loglevel=verbose
 
       - name: Build Web-V2
@@ -85,6 +88,9 @@ jobs:
             ${{ runner.os }}-playwright-
 
       - name: Install dependencies
+        env:
+          NX_DAEMON: false
+          NX_SKIP_NX_CACHE: true
         run: npm ci
 
       - name: Install Playwright Browsers
