@@ -1,36 +1,32 @@
 # CI/CD Cache Strategy
 
-## Monorepo Lock File Hashing
+## Single Root Lock File (npm Workspaces)
 
-This document explains how the CI/CD cache is configured and why. **Update this if you change cache configuration.**
+This document explains how the CI/CD cache is configured. **Update this if you change cache configuration.**
 
-### The Problem
+### Architecture
 
-VibesApp is an NX monorepo with multiple lock files:
-- `package-lock.json` (root)
-- `apps/web-v2/package-lock.json`
-- `apps/api/package-lock.json`
-- `libs/shared/package-lock.json`
-- Plus any future workspace lock files
+VibesApp is an NX monorepo using **npm workspaces** with a single `package-lock.json` at root:
 
-**Original issue:** Using a glob pattern like `**/package-lock.json` caused:
-1. The glob matched ALL lock files
-2. The cache key changed every run (order-dependent hashing)
-3. Cache always missed, forcing full re-downloads of 1000+ packages
-4. npm ci took 6-10 minutes instead of <2 minutes with cache
+```json
+// package.json
+{
+  "workspaces": ["apps/*", "libs/*"]
+}
+```
 
-### The Solution
+All dependencies are hoisted to root `node_modules/`. Individual `apps/*/package.json` files declare dependencies, but npm resolves everything into the single root lock file.
 
-**Cache key:** All lock files hashed together into single stable key:
+### Cache Key (Simple)
+
 ```yaml
-key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json', 'apps/*/package-lock.json', 'libs/*/package-lock.json') }}
+key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
 ```
 
 **Why this works:**
-- Explicitly lists all lock file patterns (no glob surprises)
-- Hashes them in deterministic order
-- Cache key is stable unless ANY lock file changes (self-healing)
-- Cache invalidates correctly when dependencies change
+- Single lock file = single hash = single cache
+- All jobs share the same cache key
+- Cache invalidates when any dependency changes
 
 **Restore fallback:**
 ```yaml
@@ -38,19 +34,18 @@ restore-keys:
   - ${{ runner.os }}-node-
 ```
 
-If exact cache misses, falls back to any `Linux-node-*` cache. This bridges gaps during rapid dependency changes.
+If exact cache misses, falls back to any `Linux-node-*` cache.
 
 ### Cache Paths
 
 ```yaml
-path: |
-  ~/.npm          # npm registry metadata cache
-  node_modules    # installed packages (fastest restoration)
+path: ~/.npm
 ```
 
-**Why both?**
-- `~/.npm`: Faster npm ci if partial cache exists
-- `node_modules`: Instant restoration if packages already cached
+**Why just `~/.npm`?**
+- Registry metadata cache enables fast `npm ci`
+- `node_modules` not cached (symlinks + platform issues in containers)
+- `npm ci` rebuilds from cached registry quickly
 
 ### Workflow Configuration
 
@@ -70,61 +65,34 @@ All workflows queue sequentially to prevent resource contention during cache pop
 
 ### Timeout Strategy
 
-**Updated: 2025-12-12** (After dependency cleanup: removed aws-sdk v2, OpenTelemetry, socket.io, ws)
+**Updated: 2025-12-12** (After simplification + dependency cleanup)
 
 - **Job timeout:** 30 min (build), 35 min (deploy/code-quality)
 - **npm ci timeout:** 15 minutes
 
-**Why 15 minutes?**
-- After dependency cleanup: -146 packages removed
-- Cache hit ratio: ~58% (42% miss rate still significant)
-- Cold install (cache miss): can take 8-12 minutes with 42% miss rate
-- Warm install (cache hit): 2-4 minutes
-- 15 min timeout handles worst-case scenarios while allowing cache to build
-- **Important:** GitHub Actions saves partial cache even if workflow times out
-
-**Previous settings (before 2025-12-12):**
-- Job timeout: 20 min (build), 25 min (deploy), 15 min (code-quality)
-- npm ci timeout: 5 minutes
-- These were too aggressive for 42% cache miss rate
-
-### Future-Proofing
-
-**If you add a new workspace with `package-lock.json`:**
-
-1. Update all three workflow files to include the new pattern
-2. Example: If adding `packages/my-workspace/package-lock.json`:
-   ```yaml
-   key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json', 'apps/*/package-lock.json', 'libs/*/package-lock.json', 'packages/*/package-lock.json') }}
-   ```
-
-3. Add a comment noting the new workspace
-
-**Prevention:** This strategy self-heals—if you update any lock file, the cache key changes and builds fresh cache. No manual cache clearing needed.
+With single lock file and unified cache key, expect near 100% hit rate after first run.
 
 ### Testing the Cache
 
-**First run (cache population / 100% miss):**
-- Expect 100+ "cache miss" entries
-- npm ci takes 8-12 minutes
-- Cache is saved in background
+**First run (cache population):**
+- Cache miss (expected)
+- npm ci downloads from registry
+- Cache saved on completion
 
-**Optimal run (cache hits / 58% hit rate current):**
-- Expect ~60% "cache hit" entries, ~40% misses
-- npm ci takes 2-4 minutes
-- Partial restoration from cache
+**Subsequent runs (cache hit):**
+- Single cache key across all jobs
+- npm ci uses cached registry metadata
+- Should complete in 2-4 minutes
 
-**Full cache hit (rarely achieved):**
-- 100% cache hit entries
-- npm ci takes <2 minutes
-- All packages restored from cache
+If you see repeated misses:
+- Did `package-lock.json` change? (expected miss, then hit)
+- Check GitHub Actions cache list for stale entries
 
-If you see misses on run 2+, something broke. Check:
-- Did you change any `package-lock.json`? (expected miss)
-- Did you add a new workspace? (need to update hashFiles)
-- Did you change the cache key pattern? (verify all patterns included)
+### Historical Note
+
+**2025-12-12 Fix:** Previously used complex multi-pattern hash that was inconsistent across jobs (glob `**/` vs explicit paths). This caused 50/50 hit/miss ratio due to duplicate cache entries. Simplified to single `hashFiles('package-lock.json')` since npm workspaces uses one lock file.
 
 ### References
 
 - GitHub Actions Cache: https://github.com/actions/cache
-- NX Monorepo docs: https://nx.dev/
+- npm Workspaces: https://docs.npmjs.com/cli/v10/using-npm/workspaces
