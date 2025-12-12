@@ -50,9 +50,13 @@ function GitHubPagesRedirectHandler() {
     // Only run on the root path
     if (location.pathname === '/') {
       const redirectPath = sessionStorage.getItem('redirectPath');
-      if (redirectPath) {
+      const redirectHandled = sessionStorage.getItem('redirectHandled');
+      if (redirectPath && !redirectHandled) {
+        sessionStorage.setItem('redirectHandled', 'true');
         sessionStorage.removeItem('redirectPath');
         navigate('/' + redirectPath, { replace: true });
+        // Clear handled flag after navigation to allow future legitimate redirects
+        setTimeout(() => sessionStorage.removeItem('redirectHandled'), 100);
       }
     }
   }, [navigate, location.pathname]);
