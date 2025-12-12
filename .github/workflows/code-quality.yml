@@ -31,6 +31,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Install dependencies
+        timeout-minutes: 5
         run: npm ci
 
       - name: Lint Web-V2 (ESLint + Biome)

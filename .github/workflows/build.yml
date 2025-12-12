@@ -29,6 +29,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Install dependencies
+        timeout-minutes: 5
         run: npm ci
 
       - name: Build Web-V2
