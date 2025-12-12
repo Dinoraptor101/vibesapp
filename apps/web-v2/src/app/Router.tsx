@@ -55,6 +55,9 @@ function GitHubPagesRedirectHandler() {
         navigate('/' + redirectPath, { replace: true });
       }
     }
+    // Note: location.pathname is in the dependency array to ensure the effect re-runs
+    // when the pathname changes. While the logic only executes on '/', this ensures
+    // the redirect is handled whenever the user navigates back to the root path.
   }, [navigate, location.pathname]);
 
   return null;
