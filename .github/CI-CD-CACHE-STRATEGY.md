@@ -70,14 +70,23 @@ All workflows queue sequentially to prevent resource contention during cache pop
 
 ### Timeout Strategy
 
-- **Job timeout:** 20 min (build), 25 min (deploy), 15 min (code-quality)
-- **npm ci timeout:** 5 minutes
+**Updated: 2025-12-12** (After dependency cleanup: removed aws-sdk v2, OpenTelemetry, socket.io, ws)
 
-**Why 5 minutes?**
-- Legitimate cold install (no cache): ~4 minutes
-- +1 minute buffer for network variance
-- Fails fast on network hangs
+- **Job timeout:** 30 min (build), 35 min (deploy/code-quality)
+- **npm ci timeout:** 15 minutes
+
+**Why 15 minutes?**
+- After dependency cleanup: -146 packages removed
+- Cache hit ratio: ~58% (42% miss rate still significant)
+- Cold install (cache miss): can take 8-12 minutes with 42% miss rate
+- Warm install (cache hit): 2-4 minutes
+- 15 min timeout handles worst-case scenarios while allowing cache to build
 - **Important:** GitHub Actions saves partial cache even if workflow times out
+
+**Previous settings (before 2025-12-12):**
+- Job timeout: 20 min (build), 25 min (deploy), 15 min (code-quality)
+- npm ci timeout: 5 minutes
+- These were too aggressive for 42% cache miss rate
 
 ### Future-Proofing
 
@@ -95,13 +104,18 @@ All workflows queue sequentially to prevent resource contention during cache pop
 
 ### Testing the Cache
 
-**First run (cache population):**
+**First run (cache population / 100% miss):**
 - Expect 100+ "cache miss" entries
-- npm ci takes 6-10 minutes
+- npm ci takes 8-12 minutes
 - Cache is saved in background
 
-**Second run (cache hits):**
-- Expect 100+ "cache hit" entries
+**Optimal run (cache hits / 58% hit rate current):**
+- Expect ~60% "cache hit" entries, ~40% misses
+- npm ci takes 2-4 minutes
+- Partial restoration from cache
+
+**Full cache hit (rarely achieved):**
+- 100% cache hit entries
 - npm ci takes <2 minutes
 - All packages restored from cache
 
