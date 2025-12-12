@@ -30,7 +30,7 @@ jobs:
 
       - name: Install dependencies
         timeout-minutes: 5
-        run: npm ci
+        run: npm ci --loglevel=verbose
 
       - name: Build Web-V2
         working-directory: apps/web-v2
