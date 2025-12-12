@@ -16,7 +16,7 @@ jobs:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     environment: github-pages
-    timeout-minutes: 25
+    timeout-minutes: 35
 
     steps:
       - name: Checkout code
@@ -42,7 +42,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Install dependencies
-        timeout-minutes: 5
+        timeout-minutes: 15
         run: npm ci --loglevel=verbose
 
       - name: Build Web-V2
