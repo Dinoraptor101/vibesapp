@@ -49,6 +49,7 @@
     "version:patch": "node scripts/update-version.js patch",
     "version:minor": "node scripts/update-version.js minor",
     "version:major": "node scripts/update-version.js major",
+    "version:qa": "node scripts/update-version.js patch && npm run deploy:qa",
     "install:deps": "cd apps/api && npm install --ignore-scripts && cd ../web-v2 && npm install --ignore-scripts",
     "postinstall": "if [ \"$SKIP_POSTINSTALL\" != \"true\" ]; then npm run install:deps; fi"
   },
