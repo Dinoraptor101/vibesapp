@@ -6,7 +6,16 @@
  * to preserve state and scroll position across navigation.
  */
 
-import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import {
+  BrowserRouter,
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom';
 import { PersistentPages } from '@/components/layout/PersistentPages';
 import { isPersistentPage } from '@/components/layout/persistentPagesUtils';
 import {
@@ -28,6 +37,28 @@ import { PrivacyPage } from '@/pages/PrivacyPage';
 import { ReportPostPage } from '@/pages/ReportPostPage';
 import { SendDMRequestPage } from '@/pages/SendDMRequestPage';
 import { TermsPage } from '@/pages/TermsPage';
+
+/**
+ * GitHub Pages SPA Redirect Handler
+ * Restores the original path after a 404 redirect from GitHub Pages
+ */
+function GitHubPagesRedirectHandler() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Only run on the root path
+    if (location.pathname === '/') {
+      const redirectPath = sessionStorage.getItem('redirectPath');
+      if (redirectPath) {
+        sessionStorage.removeItem('redirectPath');
+        navigate('/' + redirectPath, { replace: true });
+      }
+    }
+  }, [navigate, location.pathname]);
+
+  return null;
+}
 
 /**
  * Admin Layout Wrapper with Outlet for nested routes
@@ -159,6 +190,7 @@ export function Router() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <GitHubPagesRedirectHandler />
         <AppShell />
       </AuthProvider>
     </BrowserRouter>
