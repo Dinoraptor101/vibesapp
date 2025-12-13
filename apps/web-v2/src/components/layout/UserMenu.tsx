@@ -43,7 +43,7 @@ export function UserMenu({ isActive = false, icon }: UserMenuProps) {
         <button
           type="button"
           data-testid="user-menu-button"
-          className={`focus:outline-none transition-all ${icon ? '' : 'rounded-full'} ${
+          className={`focus:outline-none transition-all ${icon ? '' : 'rounded-full w-12 h-12'} ${
             isActive
               ? icon
                 ? 'text-brand-purple'

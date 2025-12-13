@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>VibesApp - Reconnecting...</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 1rem;
+        text-align: center;
+      }
+
+      .container {
+        max-width: 28rem;
+      }
+
+      h1 {
+        font-size: 4rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+      }
+
+      p {
+        font-size: 1.125rem;
+        line-height: 1.75;
+        opacity: 0.95;
+        margin-bottom: 0.5rem;
+      }
+
+      .breathe {
+        animation: breathe 2s ease-in-out infinite;
+      }
+
+      @keyframes breathe {
+        0%, 100% { opacity: 0.95; }
+        50% { opacity: 0.7; }
+      }
+    </style>
+    <script>
+      // GitHub Pages SPA redirect workaround
+      // Store the path and redirect to the root, where the router will handle it
+      const path = window.location.pathname.slice(1);
+      if (path) {
+        sessionStorage.setItem('redirectPath', path + window.location.search);
+      }
+      window.location.replace(window.location.pathname.replace(/404\.html$/, ''));
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>✨</h1>
+      <p class="breathe">Reconnecting you...</p>
+      <p style="font-size: 0.875rem; opacity: 0.8;">You're right where you need to be.</p>
+    </div>
+  </body>
+</html>

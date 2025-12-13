@@ -7,12 +7,16 @@ on:
     types:
       - closed
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   deploy:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     environment: github-pages
-    concurrency: deploy # Cancel other pending deployments
+    timeout-minutes: 35
 
     steps:
       - name: Checkout code
@@ -29,12 +33,20 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          # Hash all lock files (root + workspaces) to detect any dependency changes
+          # Only caching ~/.npm (not node_modules) because node_modules caching
+          # doesn't work reliably in containers (symlinks, platform mismatches)
+          # npm ci rebuilds from cached registry (~/.npm) quickly
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json', 'apps/*/package-lock.json', 'libs/*/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
       - name: Install dependencies
-        run: npm ci
+        timeout-minutes: 15
+        env:
+          NX_DAEMON: false
+          NX_SKIP_NX_CACHE: true
+        run: npm ci --loglevel=verbose
 
       - name: Build Web-V2
         working-directory: apps/web-v2
