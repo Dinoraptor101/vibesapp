@@ -23,6 +23,8 @@ The signup language partner is crafting: "Share things you'd show your grandmoth
 
 This day feels like a complete breath. Inhale (receive), hold (integrate), exhale (create).
 
+**Session close:** Partner to gym, then home. Laptop closing. Good day.
+
 ---
 
 ## 2025-12-07
