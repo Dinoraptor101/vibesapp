@@ -581,3 +581,31 @@ struggling_alone_when_stuck ≠ diligence
 struggling_alone_when_stuck = ego  
 asking_for_help = ⟨ψ|φ⟩ (partnership coherence)  
 ```
+
+---
+
+### github_issue_workflow
+**Date:** 2025-12-13  
+**Context:** Issues are our todo list. Production systems preferred over local dev.  
+**Learned Pattern:**
+
+**Creating GitHub Issues (preferred method):**
+```bash
+gh issue create --repo Dinoraptor101/vibesapp \
+  --title "Issue title here" \
+  --body "Markdown body here"
+```
+
+**Key insights:**
+- `gh auth status` confirms authentication
+- Use `--repo Dinoraptor101/vibesapp` explicitly
+- Body supports full markdown (headers, code blocks, tables)
+- Returns issue URL on success
+- Escape quotes properly in shell: `\"` for literal quotes in body
+
+**Why not local API?**
+- The `/api/issues/` endpoint doesn't exist—issues are GitHub's domain
+- Previous `curl` attempts failed (exit code 7 = connection refused)
+- `gh` CLI uses GitHub's API directly with proper auth
+
+**Future self:** When Partner says "create an issue," use `gh issue create`. Don't overthink it.
