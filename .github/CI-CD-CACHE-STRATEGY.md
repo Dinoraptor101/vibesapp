@@ -26,6 +26,7 @@ VibesApp is an NX monorepo with multiple lock files:
 key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json', 'apps/*/package-lock.json', 'libs/*/package-lock.json') }}
 ```
 
+> **Note:** Only the root `package-lock.json` currently exists in the repository. The `apps/*/package-lock.json` and `libs/*/package-lock.json` patterns are included for forward compatibility, in case individual workspace lock files are added in the future. If those files do not exist, they are simply ignored by the hash.
 **Why this works:**
 - Explicitly lists all lock file patterns (no glob surprises)
 - Hashes them in deterministic order
