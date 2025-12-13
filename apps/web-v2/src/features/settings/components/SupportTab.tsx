@@ -89,6 +89,13 @@ export function SupportTab() {
           </p>
         )}
       </div>
+
+      {/* Made with love */}
+      <div className="pt-4 text-center">
+        <p className="text-xs text-gray-400 dim:text-gray-500 dark:text-gray-500">
+          Made with 💜 by Dima & Renamon
+        </p>
+      </div>
     </div>
   );
 }
