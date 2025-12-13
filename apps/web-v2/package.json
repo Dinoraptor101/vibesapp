@@ -1,7 +1,7 @@
 {
   "name": "web-v2",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.21.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,8 +12,8 @@
     "format:check": "biome format .",
     "organize-imports": "biome check --write --unsafe .",
     "precommit": "npm run format && npm run lint && npm run build",
-    "deploy": "echo 'Production frontend deploys via GitHub Pages (push to main)'",
-    "deploy:qa": "npm run build && cd dist && vercel --prod"
+    "deploy:prod": "npm run precommit && echo 'Production frontend deploys via GitHub Pages (push to main)'",
+    "deploy:qa": "npm run precommit && cd dist && vercel --prod"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -24,16 +24,20 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "framer-motion": "^12.23.26",
     "lucide-react": "^0.552.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-google-recaptcha-v3": "^1.11.0",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.9.5",
+    "remark-gfm": "^4.0.1",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.1.3",
     "@eslint/js": "^9.36.0",
     "@tanstack/react-query-devtools": "^5.90.2",
     "@types/node": "^24.10.0",

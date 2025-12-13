@@ -1,6 +1,6 @@
 # VibesApp Monorepo 🚀
 
-[![Version](https://img.shields.io/badge/version-0.20.1-blue.svg)](https://github.com/Dinoraptor101/vibesapp)
+[![Version](https://img.shields.io/badge/version-0.22.0-blue.svg)](https://github.com/Dinoraptor101/vibesapp)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 > A picture-based social network built with React and Node.js in a modern NX monorepo architecture.

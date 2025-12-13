@@ -4,12 +4,13 @@
  * Displays a single post with full details, comments, and interactions.
  */
 
-import { ArrowLeft, Loader2, MessageCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowLeft, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout';
-import { Button } from '@/components/ui-next';
+import { Button, PageLoader } from '@/components/ui-next';
 import {
   CommentInput,
   CommentList,
@@ -97,11 +98,7 @@ export function PostDetailPageContent({ postId: propPostId }: PostDetailPageCont
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-purple" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (isError || !post) {
@@ -141,15 +138,21 @@ export function PostDetailPageContent({ postId: propPostId }: PostDetailPageCont
 
             return (
               <>
-                <PostCard
-                  post={post}
-                  onLike={handleLike}
-                  onReport={handleReport}
-                  onDelete={handleDelete}
-                  onComment={handleComment}
-                  hideCaption={showFullCaptionSection}
-                  disableLink
-                />
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                >
+                  <PostCard
+                    post={post}
+                    onLike={handleLike}
+                    onReport={handleReport}
+                    onDelete={handleDelete}
+                    onComment={handleComment}
+                    hideCaption={showFullCaptionSection}
+                    disableLink
+                  />
+                </motion.div>
 
                 {/* Full Caption Section - Only shown when caption exceeds 100 chars (≈2 lines) */}
                 {showFullCaptionSection && (

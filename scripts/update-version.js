@@ -18,7 +18,7 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 const VERSION_FILES = [
   // Package.json files
   'package.json',
-  'apps/web/package.json',
+  'apps/web-v2/package.json',
   'apps/api/package.json',
   'libs/shared/package.json',
   'libs/contracts/package.json',
@@ -26,9 +26,9 @@ const VERSION_FILES = [
 
   // Code files with hardcoded versions
   {
-    file: 'apps/web/src/App.tsx',
-    pattern: /const VERSION = ['"][^'"]+['"];/,
-    replacement: (version) => `const VERSION = '${version}';`,
+    file: 'apps/web-v2/src/lib/constants.ts',
+    pattern: /export const APP_VERSION = ['"][^'"]+['"];/,
+    replacement: (version) => `export const APP_VERSION = '${version}';`,
   },
   {
     file: 'libs/shared/src/lib/constants.ts',

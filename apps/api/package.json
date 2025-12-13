@@ -1,6 +1,6 @@
 {
   "name": "vibesapp-backend",
-  "version": "0.20.1",
+  "version": "0.21.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -11,10 +11,11 @@
     "format": "biome format --write src/",
     "format:check": "biome format src/",
     "check": "biome check src/ --write",
+    "precommit": "npm run format && npm run lint",
     "test": "echo \"Error: no test specified\" && exit 1",
     "cleanup:activities": "node scripts/cleanupActivities.js",
-    "deploy": "git push heroku HEAD:main",
-    "deploy:qa": "git push heroku-backend HEAD:main"
+    "deploy:prod": "npm run precommit && git push heroku HEAD:main --force",
+    "deploy:qa": "npm run precommit && git push heroku-backend HEAD:main"
   },
   "keywords": [],
   "author": "",
@@ -22,18 +23,12 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.583.0",
     "@aws-sdk/s3-request-presigner": "^3.583.0",
-    "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/auto-instrumentations-node": "^0.55.3",
-    "@opentelemetry/exporter-trace-otlp-http": "^0.57.1",
-    "@opentelemetry/sdk-node": "^0.57.1",
-    "aws-sdk": "^2.1621.0",
     "axios": "^1.6.8",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "mongoose": "^8.4.1",
-    "socket.io": "^4.7.5",
-    "ws": "^8.17.0"
+    "octokit": "^5.0.5"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.1.3",

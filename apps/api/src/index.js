@@ -1,5 +1,4 @@
 require('dotenv').config();
-require('./tracer');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const express = require('express');
@@ -86,6 +85,7 @@ const messageRoutes = require('./routes/message');
 const recaptchaRoutes = require('./routes/recaptcha');
 const dmRoutes = require('./routes/dm');
 const dmRequestRoutes = require('./routes/dmRequest');
+const feedbackRoutes = require('./routes/feedback');
 
 // Helper function to wrap route registration with detailed error logging
 function useRoute(path, router) {
@@ -110,6 +110,7 @@ useRoute('/api/groupChats', groupChatRoutes);
 useRoute('/api/recaptcha', recaptchaRoutes);
 useRoute('/api/dm', dmRoutes);
 useRoute('/api/dm-requests', dmRequestRoutes);
+useRoute('/api/feedback', feedbackRoutes);
 
 // MongoDB Connection
 console.log('Connecting to MongoDB...');

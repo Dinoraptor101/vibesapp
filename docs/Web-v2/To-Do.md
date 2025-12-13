@@ -1,182 +1,113 @@
-## 📋 Task Tracker (Generated Dec 3, 2025)
+## 📋 Task Tracker
 
-> **🔍 Code Cleanup Required**: See [Code-Cleanup-Report.md](./Code-Cleanup-Report.md) for comprehensive analysis of abandoned code, versioned files, and safe deletion candidates (~780 lines of cleanup identified across 6 files).
+> **🔍 Code Cleanup Required**: See [development-log/Code-Cleanup-Report.md](./development-log/Code-Cleanup-Report.md) for ~780 lines of cleanup identified across 6 files.
 
-> **🔧 Backend Refactoring (Deferred)**: See [controller-refactoring-summary.md](../controller-refactoring-summary.md) for planned controller modularization. Attempted Dec 5, 2025 but reverted due to middleware chain issues on localhost. Requires comprehensive E2E test coverage before re-attempting.
-
-### Required For Release
-- [x] Enhance UserMenu animations - Improve `apps/web-v2/src/components/layout/UserMenu.tsx` with custom CSS transitions or framer-motion overlays beyond current Radix fade-in defaults for smoother menu appearance.
-- [x] Reduce mobile padding on Profile page - Adjust horizontal padding in `apps/web-v2/src/pages/ProfilePage.tsx` specifically for mobile viewports without affecting other pages.
-- [X] Add age/sex honesty advisory - Insert gentle reminder message during signup in `apps/web-v2/src/components/signup/SignupWizard.tsx` or on profile edit encouraging honest demographic information.
+> **🔧 Backend Refactoring (Deferred)**: See [controller-refactoring-summary.md](../controller-refactoring-summary.md). Requires comprehensive E2E test coverage before re-attempting.
 
 
-### Testing & CI/CD
-- [ ] **Add E2E tests to PR checks** - Create GitHub Actions workflow to run Playwright E2E tests on every PR against main branch. Use `playwright.config.local.ts` to test against localhost (fast feedback), auto-start dev servers in CI environment. Catches 95% of issues before merge. Future enhancement: add QA environment tests after manual QA deployment.
-- [ ] **DRY Playwright configs** - Refactor `playwright.config.local.ts` and `playwright.config.qa.ts` to properly extend base config instead of duplicating shared settings. Base config should define `testDir`, `fullyParallel`, `use` defaults, `retries`, `workers`, and `prerequisites` project. Specific configs should only override `baseURL`, `testIgnore`, `maxFailures`, and `webServer`/`globalSetup` differences. Eliminates ~40 lines of duplication per config.
+### UI/UX Polish
+- [ ] Update initial loading animation and login screen with gradient background
+- [ ] Implement Account Deletion UI - Add "Delete Account" button in Settings
+- [ ] Implement browser notifications - Add Web Notifications API respecting user preferences
+- [ ] Add page transition animations - Implement fade/slide for smoother navigation
+- [ ] Add message arrival sound - Audio notification when messages arrive
 
-### UI/UX Polish (Quick Wins)
-- [ ] Fix Activity timestamp caching - Update `formatRelativeTime` in `apps/web-v2/src/utils/dateUtils.ts` to recalculate on component render instead of caching, or reduce React Query staleTime in `useActivities` hook from 60s to prevent stale "X minutes ago" displays.
-- [ ] Add page transition animations - Implement fade/slide transitions in `apps/web-v2/src/components/navigation/PersistentPages.tsx` using framer-motion or CSS transitions for smoother navigation between Home, Activities, CreatePost pages.
-- [ ] Implement browser notifications for activities - Add Web Notifications API integration to `apps/web-v2/src/hooks/useActivities.ts` that triggers native browser notifications when new activities arrive, respecting user's activity configuration preferences.
-- [ ] Add message arrival sound notification - Integrate audio playback in `apps/web-v2/src/contexts/SocketContext.tsx` when new messages arrive via Socket.IO events.
-- [ ] Implement Account Deletion UI - Add "Delete Account" button and confirmation modal in `apps/web-v2/src/components/settings/AccountTab.tsx` that calls existing backend `/api/users/delete-account` endpoint.
+### Core Features
+- [ ] Implement Strike System frontend - Warning modal, cooldown timer, history view
+- [ ] Implement Vibes Growth System UI - Build "Your Vibe" Settings tab per VIBES-GROWTH-SYSTEM.md
+- [ ] Implement username search - Add case-insensitive exact username matching
+- [ ] Implement hashtag extraction/search - Parse hashtags, store as array, enable queries
+- [ ] Daily Post Caps - Enforce frugality through post limits
+- [ ] Build JSON-based rich text editor - Replace contentEditable with JSON document model
+- [ ] Refactor comments into Comment collection - Separate model, migrate data, update endpoints
+- [ ] Email notifications for Admin Panel
 
-### Core Features (High Priority)
-- [ ] **Implement Vibes Growth System UI** - Build "Your Vibe" Settings tab following [VIBES-GROWTH-SYSTEM.md](./VIBES-GROWTH-SYSTEM.md) design specification. Backend karma engine already exists (`apps/api/src/controllers/karma.js`), need to create:
+### Security & Infrastructure
+- [ ] PRIORITY: Resolve security issue where API token is leaking in devtools
+- [ ] Track/flag accounts by IP/location - Detect multiple accounts via middleware
+- [ ] Audit MongoDB Atlas security - Review access, encryption, IP whitelist, rate limiting
+- [ ] Implement data encryption layer - Encrypt PII before storage
+- [ ] Restrict location requests - Only GPS during signup/Settings, cache elsewhere
+- [ ] Research OAuth integration - Google/Facebook OpenID Connect
+
+### Future Features
+- [ ] Vibes Growth System - Number-free visualization with plant growth metaphor (🌱→🌿→🌳→🌲→🌸)
+- [ ] Personal Growth Tracker (Carrot) - MBTI-driven with Strength/Rounding paths
+- [ ] Wu-Wei Flow Score - Harmony tracking via compassionate/frugal/humble actions
+- [ ] Regional Group Chats - City-based spaces moderated by verified residents
+- [ ] Group Chat Invites - Add friends to existing conversations
+- [ ] OAuth Enforcement - Google/Facebook auth for 1 person = 1 account
+- [ ] Anti-Materialism Features - "Treasure Challenges" rewarding simple local shares
+
+---
+
+## 📖 Reference Details
+
+### UI/UX Polish (Detailed)
+- **Account Deletion UI**: Add "Delete Account" button and confirmation modal in `apps/web-v2/src/components/settings/AccountTab.tsx` that calls existing backend `/api/users/delete-account` endpoint.
+- **Browser Notifications**: Add Web Notifications API integration to `apps/web-v2/src/hooks/useActivities.ts` that triggers native browser notifications when new activities arrive, respecting user's activity configuration preferences.
+- **Vibes Growth System UI**: Build "Your Vibe" Settings tab following [VIBES-GROWTH-SYSTEM.md](./VIBES-GROWTH-SYSTEM.md) design specification. Backend karma engine already exists (`apps/api/src/controllers/karma.js`), need to create:
   1. **Frontend Components**: `YourVibeTab.tsx`, `PlantVisualization.tsx`, `RecentActivityFeed.tsx`, `VibesExplanation.tsx`
   2. **Backend API**: `GET /api/users/me/vibes-summary` endpoint returning currentVibes, currentStage, progressInStage, recentActivity, dailyMomentum
   3. **Plant Assets**: 5 SVG plant stages (🌱 Seed → 🌿 Sprout → 🌳 Young Tree → 🌲 Mature Tree → 🌸 Flowering)
   4. **React Query Hook**: `useVibesSummary()` with 60s cache, WebSocket real-time updates
   5. **Settings Integration**: Add "Your Vibe 🌱" tab as 3rd position in Settings navigation
-  
-  Design principles: Number-free visualization, organic plant growth metaphor, inline expansions only, ZEN minimalism. See full specification for 5-stage progression, progress ring design, poetic status messages, and grouped activity feed.
+- **Urgent UI/UX Polish (Dec 2, 2025)**:
+  - Fix "Moment" timestamp caching issue - Activities show cached timestamps until page refresh
+  - User Menu smooth animations - Add fade/slide transitions
+  - Reduce mobile padding on Profile page - iPhone screen width is narrow
+  - Add age/sex honesty advisory - Gentle message about accuracy
+  - Build ethos messaging system - Keep as placeholder for now
 
-- [ ] Refactor comments into separate Comment collection - Create new `Comment` model in `apps/api/src/models/Comment.js`, write migration script to move Posts with `commentOn` field, update `/api/comments` endpoints, and remove comment filtering from feed queries.
-- [ ] Build JSON-based rich text editor - Replace contentEditable in `apps/web-v2/src/components/posts/TextEditor.tsx` with custom JSON document model supporting paragraphs, lists, marks (bold/underline), and reliable input handling.
-- [ ] Implement username search - Update `apps/api/src/controllers/searchController.js` to add case-insensitive exact username matching alongside caption search.
-- [ ] Implement hashtag extraction and search - Add hashtag parsing on post creation in `apps/api/src/models/Post.js`, store as lowercase array field, and update search endpoint to query hashtags specifically.
-- [ ] Implement Strike System frontend UI - Build Strike Warning Modal, posting restriction checks, cooldown timer display, and strike history view in Settings consuming existing backend `User.getCurrentRestrictions()` data.
-- [ ] Email notifications for Admin Panel "service is not setup yet"
+### Core Features (Detailed)
+- **Refactor Comments into Separate Collection** - Currently comments stored as Posts with `commentOn` field. Create dedicated `Comment` model in `apps/api/src/models/Comment.js` with fields: `_id`, `postId`, `userId`, `text`, `replyToCommentId`, `reactions[]`, `reports[]`, `createdAt`, `isDeleted`. Write migration script to move Posts with `commentOn` to new collection. Update `/api/comments` endpoints and remove comment filtering from feed queries. (Est: 2-3 hours)
 
-### Security & Infrastructure
-- [ ] Track and flag accounts by IP/location - Add IP tracking middleware in `apps/api/src/middleware/` and location clustering logic to detect multiple accounts, store flags in User model, expose in admin dashboard.
-- [ ] Audit and enhance MongoDB Atlas security - Review API access patterns, implement connection string encryption, enable IP whitelist, add rate limiting middleware in `apps/api/src/middleware/rateLimiter.js`.
-- [ ] Implement data encryption layer - Add encryption for PII (location, identification) in `apps/api/src/utils/encryption.js`, encrypt before storage in database, decrypt on retrieval.
-- [ ] Restrict location requests to signup and Settings - Remove browser GPS calls from `apps/web-v2/src/hooks/useLocation.ts` everywhere except SignupWizard and Settings AccountTab, use cached database location for all other features.
-- [ ] Research and integrate OAuth (Google/Facebook) authentication - Replace current JWT auth with OpenID Connect providers to prevent multiple accounts per person, update `apps/api/src/middleware/authMiddleware.js`.
+- **Build JSON-based Rich Text Editor** - Replace contentEditable in `apps/web-v2/src/components/posts/TextEditor.tsx` with proper JSON document model supporting paragraphs, lists, marks (bold/underline), and reliable input handling. Define node types, operations (insertText, deleteText, splitBlock, toggleMark, wrapInList), and rendering layer. (Est: 2-4 weeks)
 
-### Future Features (Long-term)
-- [ ] Build group chat invite system - Implement invite flow in Messages section allowing users to add friends to existing conversations, update `apps/api/src/models/GroupChat.js` schema.
-- [ ] Design regional group chat moderation system - Create city-based public groups with verified resident moderators, add moderation tools in admin dashboard.
-- [ ] Build Personal Growth Tracker (Carrot Principle) - Replace traditional gamification with an MBTI-driven growth platform:
-  1. **MBTI Integration**: Derive user strengths and weaknesses from MBTI personality type
-  2. **Growth Path Selection**: Allow users to choose between two paths:
-     - **Strength Path**: Double down on existing strengths with targeted challenges
-     - **Rounding Path**: Work on weaknesses to develop a more balanced personality
-  3. **Actionable Goals**: Translate selected growth paths into daily trackable goals
-  4. **Daily Progress Tracking**: UI for logging daily progress toward selected goals
-  5. **Community Reinforcement**: Leverage local community aspects to reinforce goal achievement using ADKAR change management approach
-  6. **Database Schema**: Add to `apps/api/src/models/User.js` for MBTI type, growth path, goals, and progress tracking
-  7. **Frontend Components**: Build goal dashboard, daily tracking interface, and progress analytics in `apps/web-v2/src/components/growth/`
-  
-  *Note: The "Stick" principle is handled by the Strike System (already implemented backend)*
-  
-- [ ] Design Wu-Wei Flow Score mechanism - Define scoring rules (compassionate comments, frugal shares, humble actions), explore small LLM integration for automated scoring, create database schema.
-- [ ] Implement daily post cap - Add post count tracking per user per day in backend, enforce limit in `apps/api/src/controllers/postController.js`, show friendly UI message when limit reached.
+- **Implement Username Search** - Update `apps/api/src/controllers/searchController.js` to add case-insensitive exact username matching alongside caption search.
 
-### Notes
+- **Implement Hashtag Extraction & Search** - Add hashtag parsing on post creation in `apps/api/src/models/Post.js`, store as lowercase array field, update search endpoint to query hashtags specifically.
+
+- **Implement Strike System Frontend UI** - Build Strike Warning Modal, posting restriction checks, cooldown timer display, and strike history view in Settings consuming existing backend `User.getCurrentRestrictions()` data. Display: strike count (X/3), violation reason, cooldown duration, appeal information. Backend returns `canPost`, `canComment`, `strikeCount`, `cooldownEnd` - just consume in frontend.
+
+### Security & Infrastructure (Detailed)
+- **Data Encryption Layer** - Add encryption for PII (location, identification) in `apps/api/src/utils/encryption.js`, encrypt before storage in database, decrypt on retrieval.
+
+- **Track/Flag Accounts by IP/Location** - Add IP tracking middleware in `apps/api/src/middleware/` and location clustering logic to detect multiple accounts, store flags in User model, expose in admin dashboard.
+
+- **Audit MongoDB Atlas Security** - Review API access patterns, implement connection string encryption, enable IP whitelist, add rate limiting middleware in `apps/api/src/middleware/rateLimiter.js`.
+
+- **Restrict Location Requests** - Remove browser GPS calls from `apps/web-v2/src/hooks/useLocation.ts` everywhere except SignupWizard and Settings AccountTab, use cached database location for all other features. Prevents constant GPS tracking and respects user privacy.
+
+- **Research OAuth Integration** - Replace current auth with Google/Facebook OpenID Connect providers to enforce 1 user per account policy, update `apps/api/src/middleware/authMiddleware.js`.
+
+### Future Features (Detailed)
+- **Personal Growth Tracker (Carrot Principle)**: MBTI-driven platform with Strength/Rounding paths, actionable daily goals, progress tracking, community reinforcement via ADKAR approach. Add to `apps/api/src/models/User.js` for MBTI type, growth path, goals. Build dashboard in `apps/web-v2/src/components/growth/`.
+
+- **Wu-Wei Flow Score Mechanism**: Replace punitive carrots/sticks with fluid "Flow Score" tracking effortless harmony. Users gain points for compassionate comments, frugal shares, humble actions. Low scorers receive gentle prompts, redemption via "Sinner Circles" for open dialogue. Explore small LLM integration for automated scoring. No punishments, focus on natural alignment with ethos.
+
+- **Regional Group Chats**: City-based public groups with verified resident moderators. Goal is to create spaces that feel like gathering with neighbors rather than shouting into crowds.
+
+- **Group Chat Invite System**: Implement invite flow in Messages section allowing users to add friends to existing conversations, update `apps/api/src/models/GroupChat.js` schema.
+
+- **Anti-Materialism Safeguards**: Combat materialism by limiting posts to geo-tagged photos of everyday life (no luxury flexing), AI nudging toward "simple shares", introduce "Treasure Challenges" based on Dao De Jing, reward visibility boosts rather than tokens. Implement "Duality Views" pairing opposing local opinions without upvote wars.
+
+### Technical Notes
 - ✅ Birth date collection already exists in SignupWizard Step 4 (year/month selectors with validation)
+- ✅ Vibes Score (Karma engine) backend exists in `apps/api/src/controllers/karma.js`
+- ✅ Strike System backend fully implemented with restrictions and cooldowns
 - Comments refactoring should happen before Activity system improvements
 - Rich text editor should happen before daily post caps
+- 1-person-per-account policy should use OAuth enforcement (best practice)
 
----
-
-## 🔥 Urgent UI/UX Polish (Dec 2, 2025)
-
-- **Fix "Moment" timestamp caching issue** - Activities show cached timestamps (e.g., "7 minutes ago") until page refresh reveals actual time (7 hours ago). Need real-time or proper cache invalidation.
-
-- **Smooth page transitions** - Add easing/fade when navigating between Home, Activities, Create Post, etc. Currently feels abrupt.
-
-- **User Menu smooth animations** - Menu appears/disappears instantly. Add fade or slide transition for pleasant open/close experience.
-
-- **Browser notifications for Activities** - Whatever appears in Activities feed should trigger native browser notifications (governed by existing activity configuration).
-
-- **Reduce mobile padding on Profile page** - iPhone screen width is narrow, left/right padding on user profile page is too large. Other pages are fine, don't standardize.
-
-- **Add age/sex honesty advisory** - Gentle message advising users to be honest about age and sex to avoid unpleasant interactions (not threatening, just helpful).
-
-- **Build ethos messaging system** - (Keep as placeholder, will refine later)
-
-- **Add message arrival sound** - Currently no audio notification when new message arrives. Add generic pleasant sound.
-
-- **Implement Account Deletion UI** - Design and implement a user-facing "Delete Account" button in Settings that allows users to permanently delete their account. Backend should handle full account deletion (or anonymization) including renaming their posts to "deleted-xxx" and removing personal data while preserving content for community context.
-
----
-
-## 🎯 High Priority Features
-
-- We are yet to implement a Vibes Score (Karma engine) into Web-V2 and how to better represent it
-
-- **Refactor Comments into Separate Collection** - Currently comments are stored as Posts with a `commentOn` field. This causes architectural issues:
-  1. **Problem**: Every feed query needs to filter out comments (`!post.commentOn`), activity notifications can't easily distinguish photos from comments, schema bloat (comments carry unused fields like `proximal_users`), Posts collection grows 10-100x faster than needed.
-  2. **Solution**: Create dedicated `Comment` model/collection with fields: `_id`, `postId` (ref to parent Post), `userId`, `text`, `replyToCommentId` (for nested replies), `reactions[]`, `reports[]`, `createdAt`, `isDeleted`.
-  3. **Migration**: Write script to move existing `Post` documents with `commentOn` to new `Comment` collection, update references.
-  4. **API Changes**: `/api/comments/:postId` already exists - just needs to query new collection. Feed endpoints no longer need comment filtering.
-  5. **Activity System**: Can use dedicated `comment` activity type without ambiguity.
-  
-  Estimated: 2-3 hours refactor + testing. This is proper data modeling that prevents future bugs.
-
-- **Build In-House JSON-Based Rich Text Editor** - Replace current contentEditable + execCommand approach (deprecated, unreliable) with a proper JSON document model:
-  1. **Document Model**: Define node types (paragraph, bulletList, listItem, text) with optional marks (bold, underline)
-  2. **Operations/Commands**: insertText, deleteText, splitBlock, toggleMark, wrapInList, unwrapFromList - each transforms JSON predictably
-  3. **Rendering Layer**: JSON model → React components → DOM with cursor/selection sync
-  4. **Input Handling**: Keyboard events → operations, paste handling, IME support
-  5. **Serialization**: JSON ↔ HTML conversion for storage compatibility
-  
-  This fixes bullet points, nested lists, and eliminates browser inconsistencies. Estimated: 2-4 weeks focused work. No external dependencies - we own it forever.
-
-- **Enhanced Search Functionality** - Currently search only finds posts by caption text. Need to implement:
-  1. **Search by Username** - Exact match (case-insensitive). Searching "kindness" should find all posts by user "Kindness", but "kind" should NOT match "kindness".
-  2. **Hashtag Extraction & Search** - Extract hashtags from post captions on creation, store as lowercase array field. Searching `#travel` should specifically query the hashtags field. All hashtags stored in lowercase for consistency.
-  3. Update search placeholder to "Search posts, users, or hashtags..."
-
-- We need a technology approach that will enforce 1 user per account policy... maybe we can track users created using the exact same location or the exact same IP, and flag them with a unique identifier, and then group them under the User Management Admin Dashboard
-
-- We should consider how secure our database is from hacking we do use Atlas MongoDB but is our API access to it best in class? 
-
-- Security Upgrade (Encryption) in the future is needed, can't risk the locations of people being shared, especially if we start collecting real identification in the future, that stuff should probably be encrypted when stored in DB ( PII, financial info, passwords, and location data ). that means building an encryption layer....
-
-- **Location Data Privacy Enhancement** - Location data should be obtained from cache or database only, NOT from browser GPS on every action. Location should only be requested from browser using the location component tool in two places:
-  1. During signup (initial account creation)
-  2. In Settings > Account Tab (when user manually updates location)
-  This prevents constant GPS tracking, respects user privacy, and reduces battery drain. All other features (posts, nearby users, etc.) should use the cached location from user's profile in the database. 
-
-- **Add birth date collection step to signup process** - Currently SignupWizard has `birthYear` and `birthMonth` fields with default values (defaults to 20 years old, month 1), but there's NO UI step where users actually input their birth date. Need to add a dedicated signup step (probably between steps 3-4) where users select their birth month and year. This is important for age verification and profile completeness.
-
-- **Implement Strike System Frontend UI** - The backend has a complete graduated consequence system (strikes, 24h cooldowns, permanent bans) but there's NO frontend interface to display it to users. Need to implement:
-  1. **Strike Warning Modal** - Shows when user opens app after receiving a strike, displays strike count (X/3), violation reason, cooldown duration, and links to community guidelines
-  2. **Posting Restriction Checks** - Prevent posting/commenting during cooldown periods, show user-friendly error messages
-  3. **Cooldown Timer Display** - Show countdown timer when user tries to post during restriction
-  4. **Strike History in Settings** - Display active strikes, reasons, and expiration dates (30-day sliding window)
-  5. **Banned User Screen** - Full-screen modal for Strike 4 (permanent ban) with appeal information
-  Backend API already returns `canPost`, `canComment`, `strikeCount`, and `cooldownEnd` from `User.getCurrentRestrictions()` method - just need to consume it in the frontend.
-
-- Return of the group chats, they're awesome but they have to provide a big coverage so... two solutions (both of these are just ideas because Telegram already exists for private convos, but public group chats largely depend on the community joining... so far group chats SUCK! can we make a version that doesn't suck? I don't know... Facebook tried and failed LOL. a lot of this depends on cultivating the ethos of encouraging people to use proper language and be kind. )
-1. Create the grouped (conversations) where people invite more of their friends into the conversation. 
-2. **Regional groups organized and moderated by verified residents of each city**. The goal is to create spaces that feel more like gathering with neighbors than shouting into a crowd. <--- this sounds awesome!
+### Deployment Checklist
+- Verify Heroku CLI installed (`heroku --version`)
+- Connect GitHub to Heroku apps via Dashboard
+- Upload environment variables to both dynos
+- Run database migration scripts via Heroku CLI
+- Trigger deployments
+- Verify everything works
 
 
-Wu-Wei Scoring Mechanism (Idea and Theory)
-- **Wu-Wei Scoring Mechanism**: Replace punitive carrots/sticks with a fluid "Flow Score" that tracks effortless harmony. Users gain points for:
-  1. **Compassionate Comments**: Supportive replies that foster understanding.
-  2. **Frugal Shares**: Sharing local, non-commercial tips (e.g., free events).
-  3. **Humble Actions**: Anonymous acts of kindness or yielding in discussions.
+-------  more details here.
 
-  There are no punishments. Instead, low scorers receive gentle prompts like "Embrace humility: share without seeking likes," which fade as users naturally align with the ethos. Redemption is facilitated through "Sinner Circles," opt-in local groups for open dialogue where all voices coexist without blocks, promoting acceptance and balance in the spirit of Daoist non-interference.
-
-  Hmm: I cannot be the person decising which comment is compasionate and which post is frugal, or which actions (deeds with real life impact) translate to humble actions, maybe a small LLM can do this?
-  -----
-
-
-## Anti-Materialism Safeguards (Important)
-Combat materialism by limiting posts to geo-tagged photos of everyday life (no luxury flexing via filters or ads), with AI nudging users toward "simple shares" like neighborhood walks or communal meals. Introduce "Treasure Challenges": daily quests based on Dao De Jing, e.g., "Practice frugality: recommend a free local resource," rewarding with visibility boosts in local feeds rather than tokens. Political dogma dissolves through "Duality Views," pairing opposing local opinions side-by-side without upvote wars, encouraging wu wei reflection over debate.​
----- possible but we don't do algorithims, we need a simple organic approach to this. incuring Wu-Wei reflection over debate?? interesting. difficult... gotta think about this more...---
-
-Some ideas to embody DAOIST principles
-Tech Basics: Use GPS for hyper-local (1-5km) feeds; cap daily posts to enforce frugality. - ​ (By ZipCode sounds like a better idea ), I like daily post caps. but allow comments and messages with no limits.
-
-Launch MVP: Test in Chesterfield, VA, with your LLC, focusing on picture posts + Flow prompts. - hmm maybe. we already enforce pictures and have no filters.
-
-Growth: Partner with kindness apps for cross-promos, avoiding VC greed. Measure success by real-world meetups, not DAUs.​ - Kindess Apps? maybe build my own kindness elements into this one? what does Personal Grown social network look like?
-
-## Idea to avoid multiple accounts per person
-Enforce registering using a popular Social Network OpenID like Google or Facebook.
-
-## HUMAN ROLE (DEPLOYMENT TO QA)
-(BACKUP MONGODB Databases for QA and PROD)
-Verify Heroku CLI installed (heroku --version)
-Connect GitHub to Heroku apps via Dashboard
-Upload environment variables to both dynos
-Run database migration scripts via Heroku CLI
-Trigger deployments
-Verify everything works

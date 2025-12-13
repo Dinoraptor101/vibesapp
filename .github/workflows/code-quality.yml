@@ -8,9 +8,14 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   code-quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 35
 
     steps:
       - name: Checkout code
@@ -25,12 +30,14 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          # Single root lock file - npm workspaces hoists all deps
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
       - name: Install dependencies
-        run: npm ci
+        timeout-minutes: 15
+        run: npm ci --loglevel=verbose
 
       - name: Lint Web-V2 (ESLint + Biome)
         working-directory: apps/web-v2

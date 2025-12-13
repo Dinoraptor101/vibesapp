@@ -8,6 +8,7 @@
  * - Image is not clickable; only comment button navigates to detail
  */
 
+import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, Heart, Flag, Trash2 } from 'lucide-react';
 import { useState, memo, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -175,22 +176,28 @@ function PostCardComponent({
         <Link to={`/post/${post._id}`} className="block">
           <div className="relative aspect-square bg-surface-alt overflow-hidden">
             {/* Blur placeholder - shown while loading */}
-            {!imageLoaded && post.blurPlaceholder && (
-              <img
-                src={post.blurPlaceholder}
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover blur-xl scale-110"
-                aria-hidden="true"
-              />
-            )}
+            <AnimatePresence>
+              {!imageLoaded && post.blurPlaceholder && (
+                <motion.img
+                  initial={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  src={post.blurPlaceholder}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover blur-xl scale-110"
+                  aria-hidden="true"
+                />
+              )}
+            </AnimatePresence>
 
             {/* Actual image */}
-            <img
+            <motion.img
+              initial={{ opacity: 0 }}
+              animate={{ opacity: imageLoaded ? 1 : 0 }}
+              transition={{ duration: 0.3 }}
               src={imageUrl}
               alt={post.text || 'Post image'}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${
-                imageLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
+              className="w-full h-full object-cover"
               loading="lazy"
               onLoad={() => setImageLoaded(true)}
               onError={() => {
@@ -214,22 +221,28 @@ function PostCardComponent({
         <div className="block">
           <div className="relative aspect-square bg-surface-alt overflow-hidden">
             {/* Blur placeholder - shown while loading */}
-            {!imageLoaded && post.blurPlaceholder && (
-              <img
-                src={post.blurPlaceholder}
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover blur-xl scale-110"
-                aria-hidden="true"
-              />
-            )}
+            <AnimatePresence>
+              {!imageLoaded && post.blurPlaceholder && (
+                <motion.img
+                  initial={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  src={post.blurPlaceholder}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover blur-xl scale-110"
+                  aria-hidden="true"
+                />
+              )}
+            </AnimatePresence>
 
             {/* Actual image */}
-            <img
+            <motion.img
+              initial={{ opacity: 0 }}
+              animate={{ opacity: imageLoaded ? 1 : 0 }}
+              transition={{ duration: 0.3 }}
               src={imageUrl}
               alt={post.text || 'Post image'}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${
-                imageLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
+              className="w-full h-full object-cover"
               loading="lazy"
               onLoad={() => setImageLoaded(true)}
               onError={() => {
@@ -266,11 +279,13 @@ function PostCardComponent({
           <div className="flex items-center gap-4 mt-3">
             {/* Like (Heart) */}
             {canReport && (
-              <button
+              <motion.button
                 type="button"
                 onClick={handleLike}
                 disabled={isLiking}
                 data-testid="post-like-button"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 className={`flex items-center gap-1.5 transition-colors duration-200 group ${
                   isLiking
                     ? 'opacity-50 cursor-not-allowed'
@@ -290,38 +305,42 @@ function PostCardComponent({
                   } ${isLiking ? 'animate-pulse' : ''}`}
                 />
                 {likes > 0 && <span className="text-sm font-medium">{likes}</span>}
-              </button>
+              </motion.button>
             )}
 
             {/* Comment - navigates to post detail */}
-            <Link
-              to={`/post/${post._id}`}
-              data-testid="post-comment-link"
-              className="flex items-center gap-1.5 text-text-secondary hover:text-brand-purple transition-colors duration-200 group"
-              aria-label={`View comments (${post.commentCount})`}
-            >
-              <MessageSquare className="w-5 h-5 transition-transform duration-200" />
-              {post.commentCount > 0 && (
-                <span className="text-sm font-medium">{post.commentCount}</span>
-              )}
-            </Link>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link
+                to={`/post/${post._id}`}
+                data-testid="post-comment-link"
+                className="flex items-center gap-1.5 text-text-secondary hover:text-brand-purple transition-colors duration-200 group"
+                aria-label={`View comments (${post.commentCount})`}
+              >
+                <MessageSquare className="w-5 h-5 transition-transform duration-200" />
+                {post.commentCount > 0 && (
+                  <span className="text-sm font-medium">{post.commentCount}</span>
+                )}
+              </Link>
+            </motion.div>
 
             {/* Report (only if not author) */}
             {canReport && (
-              <button
+              <motion.button
                 type="button"
                 onClick={handleReport}
                 data-testid="post-report-button"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 className="flex items-center gap-1.5 text-text-secondary hover:text-warning transition-colors duration-200 group ml-auto"
                 aria-label="Report post"
               >
                 <Flag className="w-4 h-4 transition-transform duration-200" />
-              </button>
+              </motion.button>
             )}
 
             {/* Delete (only if owner) - Hold to confirm */}
             {isOwner && (
-              <button
+              <motion.button
                 type="button"
                 onMouseDown={handleDeleteMouseDown}
                 onMouseUp={handleDeleteMouseUp}
@@ -330,6 +349,8 @@ function PostCardComponent({
                 onTouchEnd={handleDeleteMouseUp}
                 disabled={isDeleting}
                 data-testid="post-delete-button"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 className={`relative flex items-center gap-1.5 transition-colors duration-200 group ml-auto ${
                   isDeleting
                     ? 'opacity-50 cursor-not-allowed text-text-secondary'
@@ -364,7 +385,7 @@ function PostCardComponent({
                     </svg>
                   )}
                 </div>
-              </button>
+              </motion.button>
             )}
           </div>
         )}

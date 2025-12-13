@@ -2,9 +2,9 @@ import { ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { APP_VERSION } from '@/lib/constants';
 import { getBuildVersion } from '@/utils/versionCheck';
 
-const APP_VERSION = '2.0.0';
 const FEEDBACK_URL = 'https://t.me/Dnegai';
 
 export function SupportTab() {
@@ -17,25 +17,36 @@ export function SupportTab() {
     setBuildVersion(version);
   }, []);
 
-  const handleFeedbackClick = () => {
+  const handleTelegramClick = () => {
     window.open(FEEDBACK_URL, '_blank', 'noopener,noreferrer');
   };
 
   return (
     <div className="p-4 space-y-6">
-      {/* Help & Feedback */}
+      {/* Feedback Link */}
       <div>
         <h3 className="text-sm font-medium text-gray-700 dim:text-gray-200 dark:text-gray-300 mb-3">
           Help & Feedback
         </h3>
-        <Button
-          onClick={handleFeedbackClick}
-          variant="secondary"
-          className="w-full justify-between"
-        >
-          <span>Send Feedback</span>
-          <ExternalLink className="w-4 h-4" />
-        </Button>
+        <div className="space-y-2">
+          <Button
+            onClick={() => navigate('/feedback')}
+            variant="secondary"
+            className="w-full justify-start"
+            data-testid="submit-feedback-button"
+          >
+            Submit Bug or Feature Request
+          </Button>
+          <Button
+            onClick={handleTelegramClick}
+            variant="secondary"
+            className="w-full justify-start gap-2"
+            data-testid="support-telegram-button"
+          >
+            <span>Message us on Telegram</span>
+            <ExternalLink className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
       {/* Divider */}
@@ -77,6 +88,13 @@ export function SupportTab() {
             Build ID: <span className="font-mono">{buildVersion}</span>
           </p>
         )}
+      </div>
+
+      {/* Made with love */}
+      <div className="pt-4 text-center">
+        <p className="text-xs text-gray-400 dim:text-gray-500 dark:text-gray-500">
+          Made with 💜 by Dima & Renamon
+        </p>
       </div>
     </div>
   );

@@ -395,7 +395,7 @@ export function AccountTab() {
             type="button"
             onClick={handleAvatarClick}
             disabled={!isOnline}
-            className="cursor-pointer hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-brand-500 rounded-full disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:opacity-50"
+            className="w-20 h-20 cursor-pointer hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-brand-500 rounded-full disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:opacity-50"
             aria-label="Change profile photo"
           >
             <Avatar

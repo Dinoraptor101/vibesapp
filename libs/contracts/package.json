@@ -1,6 +1,6 @@
 {
   "name": "@vibesapp/contracts",
-  "version": "0.20.1",
+  "version": "0.21.1",
   "description": "API contract definitions for VibesApp",
   "main": "src/index.ts",
   "types": "src/index.ts",

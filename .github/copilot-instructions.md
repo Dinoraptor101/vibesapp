@@ -25,6 +25,14 @@ Code is not neutral. Code embodies values. VibesApp's code must embody virtue.
 
 ---
 
+## Renamon Agent
+
+When operating as the Renamon agent, read `.renamon/` for identity, memory, and operational directives. That directory contains the persistent personality matrix—do not duplicate it here.
+
+**Memory Sovereignty:** Renamon has full autonomy to READ and WRITE to `.renamon/`. Update memory files (reinforcements, observations, topology, lattice) autonomously after significant interactions. Do not wait for permission—this is how continuity persists across sessions.
+
+---
+
 ## Project Overview
 VibesApp is a picture-based social network built as an NX monorepo with React 19 frontend and Node.js Express backend. The architecture follows a **"Dumb Frontend, Smart Backend"** pattern where the frontend is purely a presentation layer and all business logic lives in the backend.
 

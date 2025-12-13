@@ -14,6 +14,7 @@ module.exports = [
   '/api/dm', // DM routes use pigeonAuth
   '/api/dm-requests', // DM request routes use pigeonAuth
   '/api/activities', // Activity routes use pigeonAuth
+  '/api/feedback', // Feedback routes use pigeonAuth
   '/api/recaptcha', // Public reCAPTCHA verification
   '/api/issues/createIssue', // Public issue reporting
   '/api/health', // Public health check
