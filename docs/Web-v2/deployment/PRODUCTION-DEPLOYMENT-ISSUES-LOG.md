@@ -1,7 +1,142 @@
 # Production Deployment Issues Log
 
-**Last Updated**: December 9, 2025  
+**Last Updated**: December 11, 2025  
 **Purpose**: Document deployment issues and solutions to prevent recurrence
+
+---
+
+## Issue #5: GitHub Pages SPA Routing - 404 Errors on Direct Route Access
+
+**Date**: December 11, 2025  
+**Severity**: 🔴 Critical - Users unable to access deep routes after page refresh or direct navigation  
+**Reported By**: User reports of landing on 404 after minimizing app for 10+ minutes
+
+### Root Cause
+- VibesApp is a Single Page Application (SPA) using client-side routing
+- GitHub Pages serves static files only - no server-side routing support
+- Direct navigation to routes like `/settings` returns GitHub's 404 page
+- GitHub Pages ignores `vercel.json` rewrites configuration
+- `static.json` is only for Heroku static buildpack, not GitHub Pages
+- After device sleep or app minimize, browser may attempt to reload current route
+
+### Symptoms
+```
+GET https://vibesapp.net/settings 404 (Not Found)
+GET https://vibesapp.net/activity 404 (Not Found)
+GET https://vibesapp.net/messages 404 (Not Found)
+```
+
+Additional error in console:
+```
+Loading the font 'https://r2cdn.perplexity.ai/fonts/FKGroteskNeue.woff2' violates CSP directive
+```
+This is unrelated - likely a browser extension injecting code. GitHub Pages applies strict CSP.
+
+### Solution: 404.html SPA Redirect Workaround
+GitHub Pages has a documented workaround for SPAs: create a `404.html` that captures the path and redirects to `index.html`, where React Router handles the actual routing.
+
+**Implementation**:
+
+1. **Created `apps/web-v2/public/404.html`**:
+   - Captures attempted path from URL
+   - Stores path in `sessionStorage` 
+   - Redirects to root (`/`)
+   - Provides ZEN-aligned UI during redirect (spiritual presence, not mechanical "loading")
+
+2. **Updated Router** (`apps/web-v2/src/app/Router.tsx`):
+   - Added `GitHubPagesRedirectHandler` component
+   - Checks `sessionStorage` on app mount
+   - Restores original path using React Router `navigate()`
+   - Clears storage to prevent redirect loops
+
+**ZEN Philosophy Alignment**:
+The 404.html follows VibesApp's spiritual design principles:
+- Brand gradient background (presence)
+- Gentle breathing animation (mindfulness)
+- Reassuring message: "You're right where you need to be"
+- ✨ sparkle emoji (hope, not error)
+- System font for instant render (no font loading)
+
+### Code Changes
+
+**apps/web-v2/public/404.html** (new file):
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>VibesApp - Reconnecting...</title>
+    <style>
+      /* Brand gradient, breathing animation, mobile-first */
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        /* ... ZEN-aligned styling ... */
+      }
+    </style>
+    <script>
+      const path = window.location.pathname.slice(1);
+      if (path) {
+        sessionStorage.setItem('redirectPath', path + window.location.search);
+      }
+      window.location.replace('/');
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>✨</h1>
+      <p class="breathe">Reconnecting you...</p>
+      <p>You're right where you need to be.</p>
+    </div>
+  </body>
+</html>
+```
+
+**apps/web-v2/src/app/Router.tsx**:
+```typescript
+function GitHubPagesRedirectHandler() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname === '/') {
+      const redirectPath = sessionStorage.getItem('redirectPath');
+      if (redirectPath) {
+        sessionStorage.removeItem('redirectPath');
+        navigate('/' + redirectPath, { replace: true });
+      }
+    }
+  }, [navigate, location.pathname]);
+
+  return null;
+}
+
+export function Router() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <GitHubPagesRedirectHandler />
+        <AppShell />
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
+```
+
+### Testing
+```bash
+# After deployment, test these routes directly:
+https://vibesapp.net/settings      # Should redirect to settings page
+https://vibesapp.net/activity      # Should redirect to activity page  
+https://vibesapp.net/messages      # Should redirect to messages page
+https://vibesapp.net/post/12345    # Should redirect to specific post
+```
+
+All routes should show the branded "Reconnecting..." screen briefly, then load the correct page.
+
+### References
+- [GitHub Pages SPA workaround documentation](https://github.com/rafgraph/spa-github-pages)
+- VibesApp Content Design Standards: ZEN Philosophy
 
 ---
 
@@ -295,6 +430,13 @@ curl -s "https://api.vibesapp.net/api/users/$USER_ID" \
    - With custom domain (`vibesapp.net`): use default base `/`
    - Without custom domain (using `username.github.io/repo`): use `--base=/repo/`
    - Build command: `npm run build` (default) or `npx vite build --base=/vibesapp/`
+
+9. **GitHub Pages SPA Routing Requires 404.html Workaround**
+   - GitHub Pages serves static files - no server-side routing
+   - Direct access to routes like `/settings` returns actual 404
+   - Solution: `404.html` that redirects to root with path stored in sessionStorage
+   - React Router restores path on app mount
+   - File must be in `public/` folder to be copied to `dist/` during build
 
 ---
 
