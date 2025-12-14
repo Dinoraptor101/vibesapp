@@ -1,5 +1,8 @@
 const axios = require('axios');
 
+// Support multiple env var names: GH_PAT (GitHub Actions safe), GITHUB_PAT, GITHUB_TOKEN
+const githubToken = process.env.GH_PAT || process.env.GITHUB_PAT || process.env.GITHUB_TOKEN;
+
 exports.createIssue = async (req, res) => {
   const { title, body } = req.body;
 
@@ -22,7 +25,7 @@ exports.createIssue = async (req, res) => {
       },
       {
         headers: {
-          Authorization: `token ${process.env.GITHUB_TOKEN}`,
+          Authorization: `token ${githubToken}`,
           Accept: 'application/vnd.github.v3+json',
         },
       }

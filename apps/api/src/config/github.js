@@ -1,16 +1,19 @@
 const { Octokit } = require('octokit');
 
-// Validate GITHUB_PAT is present (only required in production/development, not in tests)
-if (!process.env.GITHUB_PAT && process.env.NODE_ENV !== 'test') {
+// Support multiple env var names: GH_PAT (GitHub Actions safe), GITHUB_PAT, GITHUB_TOKEN
+const githubToken = process.env.GH_PAT || process.env.GITHUB_PAT || process.env.GITHUB_TOKEN;
+
+// Validate token is present (only required in production/development, not in tests)
+if (!githubToken && process.env.NODE_ENV !== 'test') {
   console.warn(
-    'GITHUB_PAT environment variable is not set. Feedback system will not work. Please set it in your .env file with a GitHub Personal Access Token that has "repo" scope.'
+    'GitHub PAT not set. Feedback system will not work. Set GH_PAT (or GITHUB_PAT/GITHUB_TOKEN) in your .env file with a GitHub Personal Access Token that has "repo" scope.'
   );
 }
 
 // Initialize Octokit with GitHub PAT from environment (if available)
-const octokit = process.env.GITHUB_PAT
+const octokit = githubToken
   ? new Octokit({
-      auth: process.env.GITHUB_PAT,
+      auth: githubToken,
     })
   : null;
 
