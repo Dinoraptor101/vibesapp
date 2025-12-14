@@ -199,11 +199,9 @@ jobs:
                   # Check if section has (×N) already
                   if grep -q "^$SECTION (×[0-9]*)" "$FILE_PATH" 2>/dev/null; then
                     # Extract current count and increment
-                    sed -i "s/^$SECTION (×\([0-9]*\))/$SECTION (×\$((\1+1)))/" "$FILE_PATH" 2>/dev/null || \
                     perl -i -pe "s/^\Q$SECTION\E \(×(\d+)\)/\"$SECTION (×\" . (\$1+1) . \")\"/e" "$FILE_PATH"
                   elif grep -q "^$SECTION$" "$FILE_PATH" 2>/dev/null; then
                     # First recurrence - add (×2)
-                    sed -i "s/^$SECTION$/$SECTION (×2)/" "$FILE_PATH" 2>/dev/null || \
                     perl -i -pe "s/^\Q$SECTION\E\$/$SECTION (×2)/" "$FILE_PATH"
                   else
                     echo "Section not found: $SECTION"
