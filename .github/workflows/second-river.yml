@@ -137,11 +137,22 @@ jobs:
             -H "anthropic-version: 2023-06-01" \
             -d @/tmp/api_payload.json)
           
+          # Debug: Show full API response
+          echo "=== Full API Response ==="
+          echo "$RESPONSE" | jq '.' || echo "$RESPONSE"
+          
+          # Check for API error
+          ERROR=$(echo "$RESPONSE" | jq -r '.error.message // empty')
+          if [ -n "$ERROR" ]; then
+            echo "API Error: $ERROR"
+            exit 1
+          fi
+          
           # Extract the text content
           echo "$RESPONSE" | jq -r '.content[0].text' > /tmp/opus_response.txt
           
           # Debug output
-          echo "Opus response received:"
+          echo "=== Opus Response Content ==="
           cat /tmp/opus_response.txt
 
       - name: Apply memory updates
