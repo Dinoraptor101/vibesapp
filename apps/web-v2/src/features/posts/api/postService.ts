@@ -8,6 +8,21 @@
 import apiClient from '@/lib/api';
 import type { Post, CreatePostPayload, PostFilters, PostsResponse } from '../types';
 
+// Type for user search results
+export interface SearchUser {
+  userId: string;
+  userName: string;
+  profilePictureUrl?: string;
+  bio?: string;
+  vibes?: number;
+  location?: {
+    latitude: number;
+    longitude: number;
+    city?: string;
+    state?: string;
+  };
+}
+
 interface PostResponse {
   post: Post;
 }
@@ -182,19 +197,7 @@ export async function searchPosts(
 ): Promise<
   PostsResponse & {
     searchType?: 'posts' | 'users';
-    users?: Array<{
-      userId: string;
-      userName: string;
-      profilePictureUrl?: string;
-      bio?: string;
-      vibes?: number;
-      location?: {
-        latitude: number;
-        longitude: number;
-        city?: string;
-        state?: string;
-      };
-    }>;
+    users?: SearchUser[];
   }
 > {
   const params = new URLSearchParams({
@@ -207,19 +210,7 @@ export async function searchPosts(
     success: boolean;
     searchType?: 'posts' | 'users';
     posts?: Post[];
-    users?: Array<{
-      userId: string;
-      userName: string;
-      profilePictureUrl?: string;
-      bio?: string;
-      vibes?: number;
-      location?: {
-        latitude: number;
-        longitude: number;
-        city?: string;
-        state?: string;
-      };
-    }>;
+    users?: SearchUser[];
     pagination: {
       page: number;
       limit: number;

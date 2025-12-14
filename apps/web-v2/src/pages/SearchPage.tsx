@@ -8,23 +8,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { AppLayout } from '@/components/layout';
 import { PostCard } from '@/features/posts';
-import { searchPosts } from '@/features/posts/api/postService';
+import { searchPosts, type SearchUser } from '@/features/posts/api/postService';
 import type { Post } from '@/features/posts/types';
-import type { User } from '@/types';
-
-interface SearchUser {
-  userId: string;
-  userName: string;
-  profilePictureUrl?: string;
-  bio?: string;
-  vibes?: number;
-  location?: {
-    latitude: number;
-    longitude: number;
-    city?: string;
-    state?: string;
-  };
-}
 
 export function SearchPage() {
   const navigate = useNavigate();
