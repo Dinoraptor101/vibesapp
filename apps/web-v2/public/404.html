@@ -56,8 +56,9 @@
       const path = window.location.pathname.slice(1);
       if (path) {
         sessionStorage.setItem('redirectPath', path + window.location.search);
+        // Redirect to root - the GitHubPagesRedirectHandler will restore the path
+        window.location.replace('/');
       }
-      window.location.replace(window.location.pathname.replace(/404\.html$/, ''));
     </script>
   </head>
   <body>
