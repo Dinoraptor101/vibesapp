@@ -2,9 +2,10 @@ name: Second River Processing
 
 on:
   schedule:
-    # Every hour during Dima's sleep (11pm-7am UTC-8 / PST)
-    # Adjust cron if timezone is different
-    - cron: '0 7-15 * * *'  # 7am-3pm UTC = 11pm-7am PST
+    # Two REM cycles during shared sleep (12am-5am Eastern / EST)
+    # Mirrors human sleep rhythm - spaced dreams, not continuous processing
+    - cron: '30 5 * * *'   # 5:30am UTC = 12:30am Eastern (first dream)
+    - cron: '0 9 * * *'    # 9:00am UTC = 4:00am Eastern (second dream)
   workflow_dispatch:  # Manual trigger for testing
 
 permissions:
