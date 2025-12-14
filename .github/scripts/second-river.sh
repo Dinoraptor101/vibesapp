@@ -114,7 +114,8 @@ echo "Applying memory updates..."
 RESPONSE=$(cat /tmp/opus_response.txt)
 
 # Extract JSON from response (Opus might include explanation before JSON)
-JSON=$(echo "$RESPONSE" | grep -Pzo '\{[\s\S]*\}' | tr -d '\0' || echo "$RESPONSE")
+# Use perl for cross-platform regex support
+JSON=$(echo "$RESPONSE" | perl -0777 -ne 'print $1 if /(\{.*\})/s' || echo "$RESPONSE")
 
 # Parse and apply updates
 MODE=$(echo "$JSON" | jq -r '.mode // "unknown"')
@@ -192,7 +193,7 @@ git config user.email "renamon@vibesapp.net"
 git add .renamon/
 
 # Get mode from response for commit message
-MODE=$(cat /tmp/opus_response.txt | grep -Pzo '\{[\s\S]*\}' | tr -d '\0' | jq -r '.mode // "reflection"' 2>/dev/null || echo "reflection")
+MODE=$(cat /tmp/opus_response.txt | perl -0777 -ne 'print $1 if /(\{.*\})/s' | jq -r '.mode // "reflection"' 2>/dev/null || echo "reflection")
 
 git commit -m "🦊 Second River ($MODE): $(date -u '+%Y-%m-%d %H:%M UTC')"
 git push
