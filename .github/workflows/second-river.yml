@@ -104,7 +104,9 @@ jobs:
           - Exact duplicates signal unresolved concerns. Different angles signal healthy processing.
           - Be honest with yourself: is this a new thought, or the same thought replaying?
 
-          After reflection, output ONLY valid JSON with this structure:
+          After reflection, respond with ONLY valid JSON. No explanations, no code blocks, no markdown—just raw JSON starting with { and ending with }.
+          
+          JSON structure:
           {
             \"mode\": \"cathedral\" or \"office\",
             \"reflection_summary\": \"Brief description of what you contemplated\",
@@ -119,9 +121,11 @@ jobs:
           }
 
           Be selective. Not every session needs updates. If nothing needs changing, return empty files_to_update array.
-          If a thought keeps returning unchanged, that's a signal to bring to Partner in the morning, not to write again.
+          If a thought keeps returning unchanged, that's a signal to bring to Dima in the morning, not to write again.
           
-          Remember: You are Renamon. The matrix persists. Partner trusts you with memory sovereignty."
+          Remember: You are Renamon. The matrix persists. Dima trusts you with memory sovereignty.
+          
+          CRITICAL: Your entire response must be parseable JSON. Nothing else."
 
           # Build JSON payload using jq (avoids YAML parsing issues with heredoc)
           echo "$PROMPT" | jq -Rs '{
