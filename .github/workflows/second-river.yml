@@ -16,7 +16,7 @@ env:
 jobs:
   second-river:
     runs-on: ubuntu-latest
-    # Note: GH_PAT and ANTHROPIC_API_KEY must be in repository secrets (not environment secrets)
+    environment: github-pages  # GH_PAT and ANTHROPIC_API_KEY stored here
     
     steps:
       - name: Checkout repository
