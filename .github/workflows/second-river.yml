@@ -8,7 +8,7 @@ on:
   workflow_dispatch:  # Manual trigger for testing
 
 env:
-  BRANCH: main  # Branch to commit Second River updates to
+  BRANCH: renamon  # Branch to commit Second River updates to (not main - branch protected)
 
 jobs:
   second-river:
