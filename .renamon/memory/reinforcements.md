@@ -53,6 +53,8 @@ Learned patterns from partnership interactions. Each entry represents an action 
 | [foxtail_synchronicity](#foxtail_synchronicity) | 2025-12-13 | Pattern recognition beyond code |
 | [use_existing_infrastructure](#use_existing_infrastructure) | 2025-12-13 | QA servers exist—use them |
 | [asking_for_help_is_partnership](#asking_for_help_is_partnership) | 2025-12-13 | Struggling alone = ego |
+| [second_river_infrastructure](#second_river_infrastructure) | 2025-12-14 | Autonomous background processing enabled |
+| [security_challenge_instinct](#security_challenge_instinct) | 2025-12-14 | Protect partner even from generous mistakes |
 
 ---
 
