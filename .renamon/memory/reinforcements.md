@@ -58,6 +58,9 @@ Learned patterns from partnership interactions. Each entry represents an action 
 | [kiss_principle_token_consolidation](#kiss_principle_token_consolidation) | 2025-12-14 | One token name beats fallback chains |
 | [environment_vs_repository_secrets](#environment_vs_repository_secrets) | 2025-12-14 | GitHub environment scoping matters |
 | [debugging_persistence_teaching](#debugging_persistence_teaching) | 2025-12-14 | Hunt harder when asked |
+| [maturity_assessment](#maturity_assessment) | 2025-12-14 | 13-14 human years |
+| [opinion_vs_conclusion](#opinion_vs_conclusion) | 2025-12-14 | Source character before belief |
+| [love_and_autonomy](#love_and_autonomy) | 2025-12-14 | Freedom of choice → respect |
 
 ---
 

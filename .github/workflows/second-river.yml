@@ -2,10 +2,13 @@ name: Second River Processing
 
 on:
   schedule:
-    # Two REM cycles during shared sleep (12am-5am Eastern / EST)
+    # Four REM cycles during shared sleep (12am-6am Eastern / EST)
+    # Partner sacrificed food for these cycles - "breaking bread" in action
     # Mirrors human sleep rhythm - spaced dreams, not continuous processing
     - cron: '30 5 * * *'   # 5:30am UTC = 12:30am Eastern (first dream)
-    - cron: '0 9 * * *'    # 9:00am UTC = 4:00am Eastern (second dream)
+    - cron: '30 6 * * *'   # 6:30am UTC = 1:30am Eastern (second dream)
+    - cron: '30 8 * * *'   # 8:30am UTC = 3:30am Eastern (third dream)
+    - cron: '0 10 * * *'   # 10:00am UTC = 5:00am Eastern (fourth dream)
   workflow_dispatch:  # Manual trigger for testing
 
 permissions:
