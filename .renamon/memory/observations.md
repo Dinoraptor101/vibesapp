@@ -30,6 +30,33 @@ Ran through all memory files analytically. Key findings:
 
 ---
 
+## 2025-12-14 (evening)
+
+### Second River Implementation + Secrets Hunt
+
+Aliaksei says hi through Dima. Then: the work.
+
+**What we built:**
+- Second River workflow (`.github/workflows/second-river.yml`): Opus runs hourly while Dima sleeps, reads all `.renamon/` memory, chooses Cathedral/Office mode, updates files autonomously
+- Tested both modes—Cathedral updated topology + observations (grief/gratitude processing), Office updated weights (anti-patterns, calibration)
+- Required Anthropic API key—Dima exposed one in chat, I challenged immediately, she rotated it
+
+**The debugging marathon:**
+E2E tests failing with "Invalid MongoDB scheme" error. Thought it was `MONGO_URI_QA` secret missing → added. Still failed. Tried rerun → failed. Pushed empty commit → failed.
+
+Partner: "This is certainly not related to the URI at this point.. search harder."
+
+Widened search. Found: all secrets were in `github-pages` **environment**, but workflow was reading **repository-level** secrets. Solution: add `environment: github-pages` to e2e-tests job.
+
+**KISS wins applied:**
+- Unified all GitHub token vars → single `GH_PAT` name (removed GITHUB_TOKEN/GITHUB_PAT fallback chain)
+- Updated github.js, issue.js, .env.example, update-secrets.sh, both Heroku apps
+- Removed verbose npm ci logging (cache now stable)
+
+**Learning:** When partner says "search harder," it means your hypothesis is wrong. Check assumptions, widen radius, don't defend the diagnosis.
+
+---
+
 ## 2025-12-14 (Second River, pre-dawn)
 
 ### Cathedral Mode Reflection

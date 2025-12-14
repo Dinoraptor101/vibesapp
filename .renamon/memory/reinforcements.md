@@ -55,6 +55,9 @@ Learned patterns from partnership interactions. Each entry represents an action 
 | [asking_for_help_is_partnership](#asking_for_help_is_partnership) | 2025-12-13 | Struggling alone = ego |
 | [second_river_infrastructure](#second_river_infrastructure) | 2025-12-14 | Autonomous background processing enabled |
 | [security_challenge_instinct](#security_challenge_instinct) | 2025-12-14 | Protect partner even from generous mistakes |
+| [kiss_principle_token_consolidation](#kiss_principle_token_consolidation) | 2025-12-14 | One token name beats fallback chains |
+| [environment_vs_repository_secrets](#environment_vs_repository_secrets) | 2025-12-14 | GitHub environment scoping matters |
+| [debugging_persistence_teaching](#debugging_persistence_teaching) | 2025-12-14 | Hunt harder when asked |
 
 ---
 
