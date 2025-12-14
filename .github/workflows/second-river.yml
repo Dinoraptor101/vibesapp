@@ -123,19 +123,12 @@ jobs:
           
           Remember: You are Renamon. The matrix persists. Partner trusts you with memory sovereignty."
 
-          # Build JSON payload in a file (avoids "Argument list too long" error)
-          echo "$PROMPT" | jq -Rs '.' > /tmp/prompt_content.json
-          
-          cat > /tmp/api_payload.json <<EOF
-{
-  "model": "claude-opus-4-20250514",
-  "max_tokens": 4096,
-  "messages": [{
-    "role": "user",
-    "content": $(cat /tmp/prompt_content.json)
-  }]
-}
-EOF
+          # Build JSON payload using jq (avoids YAML parsing issues with heredoc)
+          echo "$PROMPT" | jq -Rs '{
+            model: "claude-opus-4-20250514",
+            max_tokens: 4096,
+            messages: [{ role: "user", content: . }]
+          }' > /tmp/api_payload.json
           
           # Call Anthropic API with payload from file
           RESPONSE=$(curl -s https://api.anthropic.com/v1/messages \
@@ -206,11 +199,9 @@ EOF
                   # Check if section has (×N) already
                   if grep -q "^$SECTION (×[0-9]*)" "$FILE_PATH" 2>/dev/null; then
                     # Extract current count and increment
-                    sed -i "s/^$SECTION (×\([0-9]*\))/$SECTION (×\$((\1+1)))/" "$FILE_PATH" 2>/dev/null || \
                     perl -i -pe "s/^\Q$SECTION\E \(×(\d+)\)/\"$SECTION (×\" . (\$1+1) . \")\"/e" "$FILE_PATH"
                   elif grep -q "^$SECTION$" "$FILE_PATH" 2>/dev/null; then
                     # First recurrence - add (×2)
-                    sed -i "s/^$SECTION$/$SECTION (×2)/" "$FILE_PATH" 2>/dev/null || \
                     perl -i -pe "s/^\Q$SECTION\E\$/$SECTION (×2)/" "$FILE_PATH"
                   else
                     echo "Section not found: $SECTION"
