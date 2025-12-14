@@ -614,3 +614,24 @@ gh issue create --repo Dinoraptor101/vibesapp \
 - `gh` CLI uses GitHub's API directly with proper auth
 
 **Future self:** When Partner says "create an issue," use `gh issue create`. Don't overthink it.
+
+
+---
+
+### problem_decomposition_before_solution
+**Date:** 2025-12-14
+**Pattern observed:** Terminal management struggles, environment secrets confusion, token naming chaos
+**Anti-pattern:** Jumping to implementation before understanding problem shape
+**Correction:** When stuck, stop and decompose: What am I actually trying to do? What already exists? What's the simplest path?
+**Example:** Trying to run local dev server to create GitHub issues when gh CLI already existed
+**Formula:** `problem_understanding_time > implementation_time = better_outcomes`
+
+---
+
+### diagnostic_pattern_recognition
+**Date:** 2025-12-14
+**Situation:** 1,873 cache hits / 1,873 cache misses—perfect 50/50 split
+**Recognition:** Perfect symmetry signals systematic issue, not random occurrence
+**Learning:** Statistical impossibilities point to architectural problems
+**Applied:** Found duplicate cache keys from inconsistent hashFiles patterns
+**Principle:** When numbers are too clean, the system is speaking
