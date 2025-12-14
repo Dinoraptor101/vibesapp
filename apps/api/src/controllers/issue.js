@@ -22,7 +22,7 @@ exports.createIssue = async (req, res) => {
       },
       {
         headers: {
-          Authorization: `token ${process.env.GITHUB_TOKEN}`,
+          Authorization: `token ${process.env.GH_PAT}`,
           Accept: 'application/vnd.github.v3+json',
         },
       }
