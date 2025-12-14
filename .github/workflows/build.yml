@@ -140,7 +140,7 @@ jobs:
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           
           # GitHub Integration
-          GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+          GITHUB_PAT: ${{ secrets.GH_PAT }}
           
           # Frontend Environment Variables (VITE_)
           VITE_API_URL: http://localhost:5001/api
