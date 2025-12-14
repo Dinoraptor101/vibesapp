@@ -7,13 +7,13 @@ on:
 jobs:
   sync-priority:
     runs-on: ubuntu-latest
-    environment: github-pages
     timeout-minutes: 5
+    # GH_PAT is in repository secrets
     steps:
       - name: Sync Priority Field
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GIT_TOKEN }}
+          github-token: ${{ secrets.GH_PAT }}
           script: |
             const issue = context.payload.issue;
             const labels = issue.labels.map(label => label.name);
