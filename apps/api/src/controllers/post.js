@@ -991,8 +991,55 @@ const searchPosts = async (req, res) => {
     const pageNumber = parseInt(page, 10) || 1;
     const limitNumber = parseInt(limit, 10) || 20;
 
-    // Build search query
-    // Search in post text field using case-insensitive regex
+    // Check if searching for users (starts with "@")
+    const isUsernameSearch = searchTerm.startsWith('@');
+
+    if (isUsernameSearch) {
+      // Username search: case-insensitive exact match
+      const username = searchTerm.slice(1); // Remove "@" prefix
+
+      // Find users with exact username match (case-insensitive)
+      const users = await User.find({
+        userName: { $regex: `^${username}$`, $options: 'i' },
+        isDeleted: false,
+        isBanned: false,
+      })
+        .skip((pageNumber - 1) * limitNumber)
+        .limit(limitNumber);
+
+      // Get total count for pagination
+      const total = await User.countDocuments({
+        userName: { $regex: `^${username}$`, $options: 'i' },
+        isDeleted: false,
+        isBanned: false,
+      });
+
+      // Calculate pagination info
+      const totalPages = Math.ceil(total / limitNumber);
+      const hasMore = pageNumber < totalPages;
+
+      return res.status(200).json({
+        success: true,
+        searchType: 'users',
+        users: users.map((user) => ({
+          userId: user.userId,
+          userName: user.userName,
+          profilePictureUrl: user.profilePictureUrl,
+          bio: user.bio,
+          vibes: user.vibes,
+          location: user.location,
+        })),
+        pagination: {
+          page: pageNumber,
+          limit: limitNumber,
+          total,
+          totalPages,
+          hasMore,
+        },
+      });
+    }
+
+    // Post caption search: case-insensitive substring match
     const searchQuery = {
       text: { $regex: searchTerm, $options: 'i' },
       isHidden: false, // Only show visible posts
@@ -1017,6 +1064,7 @@ const searchPosts = async (req, res) => {
 
     return res.status(200).json({
       success: true,
+      searchType: 'posts',
       posts: transformedPosts.map((post) => ({
         ...post,
         post: post._id, // Map _id to post field for frontend compatibility

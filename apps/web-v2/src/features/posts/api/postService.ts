@@ -173,9 +173,30 @@ export async function getPostsByMBTI(
 }
 
 /**
- * Search posts globally by text
+ * Search posts globally by text or users by username
  */
-export async function searchPosts(query: string, page = 1, limit = 20): Promise<PostsResponse> {
+export async function searchPosts(
+  query: string,
+  page = 1,
+  limit = 20
+): Promise<
+  PostsResponse & {
+    searchType?: 'posts' | 'users';
+    users?: Array<{
+      userId: string;
+      userName: string;
+      profilePictureUrl?: string;
+      bio?: string;
+      vibes?: number;
+      location?: {
+        latitude: number;
+        longitude: number;
+        city?: string;
+        state?: string;
+      };
+    }>;
+  }
+> {
   const params = new URLSearchParams({
     q: query,
     page: page.toString(),
@@ -184,7 +205,21 @@ export async function searchPosts(query: string, page = 1, limit = 20): Promise<
 
   const response = await apiClient.get<{
     success: boolean;
-    posts: Post[];
+    searchType?: 'posts' | 'users';
+    posts?: Post[];
+    users?: Array<{
+      userId: string;
+      userName: string;
+      profilePictureUrl?: string;
+      bio?: string;
+      vibes?: number;
+      location?: {
+        latitude: number;
+        longitude: number;
+        city?: string;
+        state?: string;
+      };
+    }>;
     pagination: {
       page: number;
       limit: number;
@@ -196,7 +231,9 @@ export async function searchPosts(query: string, page = 1, limit = 20): Promise<
 
   // Transform to match our PostsResponse interface
   return {
-    posts: response.posts,
+    searchType: response.searchType,
+    posts: response.posts || [],
+    users: response.users || [],
     pagination: {
       page: response.pagination.page,
       limit: response.pagination.limit,

@@ -125,6 +125,9 @@ const UserSchema = new mongoose.Schema({
 // Using 2d index (supports { lat, lon } format)
 UserSchema.index({ 'location.lat': 1, 'location.lon': 1 });
 
+// Create case-insensitive index for username search (Phase 4: Username Search)
+UserSchema.index({ userName: 1 });
+
 // SECURITY: Ensure pigeonId is never exposed in JSON responses
 UserSchema.set('toJSON', {
   transform: (_doc, ret) => {
