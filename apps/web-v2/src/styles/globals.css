@@ -34,6 +34,11 @@
     --glass-border: rgba(255, 255, 255, 0.3);
     --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
 
+    /* Gradient background - Light theme (soft blue to light purple) */
+    --gradient-from: #e0f2fe;
+    --gradient-via: #f0e6ff;
+    --gradient-to: #fce7f3;
+
     /* MBTI category colors - Light theme */
     --mbti-analyst-bg: #faf5ff;
     --mbti-analyst-border: #e9d5ff;
@@ -73,6 +78,11 @@
     --glass-border: rgba(255, 255, 255, 0.1);
     --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.15);
 
+    /* Gradient background - Dim theme (muted purple to teal) */
+    --gradient-from: #374151;
+    --gradient-via: #4c1d95;
+    --gradient-to: #134e4a;
+
     /* MBTI category colors - Dim theme */
     --mbti-analyst-bg: rgba(139, 92, 246, 0.15);
     --mbti-analyst-border: rgba(139, 92, 246, 0.3);
@@ -105,6 +115,11 @@
     --glass-bg: rgba(26, 26, 26, 0.8);
     --glass-border: rgba(255, 255, 255, 0.08);
     --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
+
+    /* Gradient background - Dark theme (deep purple to dark blue) */
+    --gradient-from: #0f172a;
+    --gradient-via: #1e1b4b;
+    --gradient-to: #042f2e;
 
     /* MBTI category colors - Dark theme */
     --mbti-analyst-bg: rgba(139, 92, 246, 0.2);

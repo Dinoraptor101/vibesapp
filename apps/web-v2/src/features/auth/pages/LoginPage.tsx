@@ -30,7 +30,7 @@ export function LoginPage() {
   // Show offline icon if backend unreachable
   if (!backendOnline) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-surface">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[var(--gradient-from)] via-[var(--gradient-via)] to-[var(--gradient-to)]">
         <Unplug className="w-32 h-32 text-text-tertiary opacity-40" strokeWidth={1.5} />
       </div>
     );
@@ -38,7 +38,7 @@ export function LoginPage() {
 
   // Show login form if backend online
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-surface p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[var(--gradient-from)] via-[var(--gradient-via)] to-[var(--gradient-to)] p-4">
       <LoginForm />
 
       {/* reCAPTCHA disclosure - required by Google ToS */}

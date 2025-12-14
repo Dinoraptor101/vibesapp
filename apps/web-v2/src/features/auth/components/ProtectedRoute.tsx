@@ -8,7 +8,7 @@
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import { Navigate, type To } from 'react-router-dom';
-import { Spinner } from '@/components/ui-next';
+import { LogoLoader } from '@/components/ui-next';
 import { useAuth } from '@/features/auth';
 
 interface ProtectedRouteProps {
@@ -41,16 +41,7 @@ export function ProtectedRoute({ children, redirectTo = '/login' }: ProtectedRou
 
   // Show loading spinner only if auth check takes longer than 1 second
   if (isLoading && showLoader) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-light-bg-base dark:bg-dark-bg-base">
-        <div className="flex flex-col items-center gap-4">
-          <Spinner size="xl" variant="primary" />
-          <p className="text-light-text-secondary dim:text-dim-text-secondary dark:text-dark-text-secondary">
-            Loading...
-          </p>
-        </div>
-      </div>
-    );
+    return <LogoLoader label="Authenticating..." />;
   }
 
   // Redirect to login if not authenticated

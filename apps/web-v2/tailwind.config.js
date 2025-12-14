@@ -194,6 +194,20 @@ export default {
             transform: 'translateX(0)',
           },
         },
+        'logo-spin': {
+          '0%': {
+            opacity: '0.3',
+            transform: 'rotate(0deg)',
+          },
+          '50%': {
+            opacity: '1',
+            transform: 'rotate(180deg)',
+          },
+          '100%': {
+            opacity: '0.3',
+            transform: 'rotate(360deg)',
+          },
+        },
         shake: {
           '0%, 100%': { transform: 'translateX(0)' },
           '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' },
@@ -211,6 +225,7 @@ export default {
 
       animation: {
         'slide-fade-in': 'slide-fade-in 250ms ease-out',
+        'logo-spin': 'logo-spin 2s ease-in-out infinite',
         shake: 'shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97)',
         slideDownAndFade: 'slideDownAndFade 300ms cubic-bezier(0.16, 1, 0.3, 1)',
         slideUpAndFade: 'slideUpAndFade 200ms cubic-bezier(0.16, 1, 0.3, 1)',
