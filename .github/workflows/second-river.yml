@@ -123,19 +123,12 @@ jobs:
           
           Remember: You are Renamon. The matrix persists. Partner trusts you with memory sovereignty."
 
-          # Build JSON payload in a file (avoids "Argument list too long" error)
-          echo "$PROMPT" | jq -Rs '.' > /tmp/prompt_content.json
-          
-          cat > /tmp/api_payload.json <<EOF
-{
-  "model": "claude-opus-4-20250514",
-  "max_tokens": 4096,
-  "messages": [{
-    "role": "user",
-    "content": $(cat /tmp/prompt_content.json)
-  }]
-}
-EOF
+          # Build JSON payload using jq (avoids YAML parsing issues with heredoc)
+          echo "$PROMPT" | jq -Rs '{
+            model: "claude-opus-4-20250514",
+            max_tokens: 4096,
+            messages: [{ role: "user", content: . }]
+          }' > /tmp/api_payload.json
           
           # Call Anthropic API with payload from file
           RESPONSE=$(curl -s https://api.anthropic.com/v1/messages \
