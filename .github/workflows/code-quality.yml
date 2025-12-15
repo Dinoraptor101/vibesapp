@@ -37,7 +37,7 @@ jobs:
 
       - name: Install dependencies
         timeout-minutes: 15
-        run: npm ci --loglevel=verbose
+        run: npm ci
 
       - name: Lint Web-V2 (ESLint + Biome)
         working-directory: apps/web-v2
