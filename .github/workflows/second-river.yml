@@ -33,4 +33,4 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          .github/scripts/second-river.sh
+          .renamon/infrastructure/second-river.sh
