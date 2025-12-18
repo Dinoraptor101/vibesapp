@@ -245,6 +245,12 @@ exports.getConversations = async (req, res) => {
 
     console.log('Valid conversations after filtering:', validConversations.length);
 
+    // Get all other user IDs to check their online status in a single batch
+    const otherUserIds = validConversations.map((conversation) => {
+      return conversation.user1Id === user.userId ? conversation.user2Id : conversation.user1Id;
+    });
+    const onlineStatus = sseManager.getOnlineStatus(otherUserIds);
+
     const dmRequests = await Promise.all(
       validConversations.map(async (conversation) => {
         // Lazy migration: Ensure conversation has cursor-based tracking
@@ -280,6 +286,14 @@ exports.getConversations = async (req, res) => {
 
         // Determine which user is the "other" user
         const otherUserData = migratedConversation.user1Id === user.userId ? user2 : user1;
+        const otherUserId = migratedConversation.user1Id === user.userId ? migratedConversation.user2Id : migratedConversation.user1Id;
+
+        // Add online status to otherUser data
+        // Only include online status for approved (active) conversations, not closed ones
+        const otherUserWithStatus = otherUserData ? {
+          ...otherUserData.toJSON(),
+          isOnline: migratedConversation.status === 'approved' ? (onlineStatus[otherUserId] || false) : undefined,
+        } : null;
 
         return {
           _id: migratedConversation._id.toString(),
@@ -288,7 +302,7 @@ exports.getConversations = async (req, res) => {
           lastRequesterId: migratedConversation.lastRequesterId,
           status: migratedConversation.status,
           // Computed fields for frontend
-          otherUser: otherUserData ? otherUserData.toJSON() : null,
+          otherUser: otherUserWithStatus,
           unreadCount,
           lastMessage: lastMessage
             ? {

@@ -2,6 +2,41 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/authenticate');
 const sseManager = require('../handlers/sseManager');
+const Conversation = require('../models/Conversation');
+
+/**
+ * Notify conversation participants about online/offline status
+ * @param {string} userId - User who came online/offline
+ * @param {boolean} isOnline - Whether user is online or offline
+ */
+async function notifyConversationParticipants(userId, isOnline) {
+  try {
+    // Find all approved conversations for this user
+    const conversations = await Conversation.find({
+      $or: [{ user1Id: userId }, { user2Id: userId }],
+      status: 'approved', // Only notify for active conversations
+    });
+
+    // Get list of participants to notify (excluding the user themselves)
+    const participantsToNotify = new Set();
+    for (const conversation of conversations) {
+      const otherUserId = conversation.user1Id === userId ? conversation.user2Id : conversation.user1Id;
+      participantsToNotify.add(otherUserId);
+    }
+
+    // Send presence update to each participant
+    const userIdsToNotify = Array.from(participantsToNotify);
+    if (userIdsToNotify.length > 0) {
+      const result = sseManager.broadcastToMultiple(userIdsToNotify, 'presence-update', {
+        userId: userId,
+        isOnline: isOnline,
+      });
+      console.log(`[SSE Presence] Notified ${result.success} users about ${userId} going ${isOnline ? 'online' : 'offline'}`);
+    }
+  } catch (error) {
+    console.error('[SSE Presence] Error notifying conversation participants:', error);
+  }
+}
 
 /**
  * SSE Connection Endpoint
@@ -11,7 +46,7 @@ const sseManager = require('../handlers/sseManager');
  * Requires: Authentication (pigeonId in cookies or headers)
  * Returns: Event stream (text/event-stream)
  */
-router.get('/connect', authenticate, (req, res) => {
+router.get('/connect', authenticate, async (req, res) => {
   try {
     const userId = req.user.userId; // Use public userId, not pigeonId
 
@@ -52,16 +87,23 @@ router.get('/connect', authenticate, (req, res) => {
 
     console.log(`[SSE Route] Initial event sent to ${userId}`);
 
+    // Notify conversation participants that this user is now online
+    await notifyConversationParticipants(userId, true);
+
     // Handle client disconnect
     req.on('close', () => {
       console.log(`[SSE Route] Client disconnected: ${userId}`);
       sseManager.removeClient(userId);
+      // Notify conversation participants that this user is now offline
+      notifyConversationParticipants(userId, false);
     });
 
     // Handle connection errors
     req.on('error', (error) => {
       console.error(`[SSE Route] Connection error for ${userId}:`, error.message);
       sseManager.removeClient(userId);
+      // Notify conversation participants that this user is now offline
+      notifyConversationParticipants(userId, false);
     });
 
     // Send periodic heartbeat to keep connection alive (every 30 seconds)

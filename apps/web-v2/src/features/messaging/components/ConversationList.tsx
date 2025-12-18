@@ -87,7 +87,7 @@ export function ConversationList() {
                 e.stopPropagation();
                 if (otherUser?.userId) navigate(`/profile/${otherUser.userId}`);
               }}
-              className="hover:opacity-80 transition-opacity"
+              className="relative hover:opacity-80 transition-opacity"
             >
               <div className={isClosed ? 'grayscale' : ''}>
                 <Avatar
@@ -96,6 +96,14 @@ export function ConversationList() {
                   size="md"
                 />
               </div>
+              {/* Online status indicator - only show for approved (active) conversations */}
+              {!isClosed && otherUser?.isOnline && (
+                <span
+                  className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white dim:border-gray-800 dark:border-gray-900"
+                  data-testid="online-indicator"
+                  title="Online"
+                />
+              )}
             </button>
 
             {/* Content - clickable to conversation */}

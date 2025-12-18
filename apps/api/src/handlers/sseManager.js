@@ -257,6 +257,33 @@ class SSEManager {
   }
 
   /**
+   * Get online status for multiple users
+   * @param {string[]} userIds - Array of user IDs to check
+   * @returns {Object.<string, boolean>} - Map of userId to online status
+   */
+  getOnlineStatus(userIds) {
+    if (!Array.isArray(userIds)) {
+      console.error('[SSEManager] Invalid userIds array for getOnlineStatus');
+      return {};
+    }
+
+    const onlineStatus = {};
+    for (const userId of userIds) {
+      onlineStatus[userId] = this.isConnected(userId);
+    }
+
+    return onlineStatus;
+  }
+
+  /**
+   * Get all currently online user IDs
+   * @returns {string[]} - Array of online user IDs
+   */
+  getOnlineUserIds() {
+    return Array.from(this.connections.keys());
+  }
+
+  /**
    * Clean up all connections (useful for graceful shutdown)
    */
   cleanup() {

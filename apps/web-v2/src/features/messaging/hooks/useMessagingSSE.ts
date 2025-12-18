@@ -25,6 +25,11 @@ interface ReadStatusEvent {
   messageIds: string[];
 }
 
+interface PresenceUpdateEvent {
+  userId: string;
+  isOnline: boolean;
+}
+
 /**
  * Hook to listen for real-time messaging events
  * Automatically updates React Query cache when events arrive
@@ -171,14 +176,52 @@ export function useMessagingSSE(userId: string | undefined) {
       }
     };
 
+    /**
+     * Handle presence-update event
+     * Updates online status for conversation participants
+     */
+    const handlePresenceUpdate = (rawData: unknown) => {
+      try {
+        const { userId: targetUserId, isOnline } = rawData as PresenceUpdateEvent;
+
+        console.log('[useMessagingSSE] Presence update:', targetUserId, isOnline ? 'online' : 'offline');
+
+        // Update conversations list cache (update isOnline for matching otherUser)
+        queryClient.setQueryData(
+          ['conversations', userId],
+          (oldData: Conversation[] | undefined) => {
+            if (!oldData) return oldData;
+
+            return oldData.map((conv) => {
+              // Only update if this is an approved conversation with the target user
+              if (conv.status === 'approved' && conv.otherUser?.userId === targetUserId) {
+                return {
+                  ...conv,
+                  otherUser: {
+                    ...conv.otherUser,
+                    isOnline,
+                  },
+                };
+              }
+              return conv;
+            });
+          }
+        );
+      } catch (error) {
+        console.error('[useMessagingSSE] Error handling presence-update:', error);
+      }
+    };
+
     // Register event handlers
     addEventListener('new-message', handleNewMessage);
     addEventListener('read-status', handleReadStatus);
+    addEventListener('presence-update', handlePresenceUpdate);
 
     // Cleanup
     return () => {
       removeEventListener('new-message', handleNewMessage);
       removeEventListener('read-status', handleReadStatus);
+      removeEventListener('presence-update', handlePresenceUpdate);
     };
   }, [userId, addEventListener, removeEventListener, queryClient]);
 
