@@ -95,7 +95,10 @@ router.get('/connect', authenticate, async (req, res) => {
       console.log(`[SSE Route] Client disconnected: ${userId}`);
       sseManager.removeClient(userId);
       // Notify conversation participants that this user is now offline
-      notifyConversationParticipants(userId, false);
+      // Note: Not awaited as this is a cleanup callback
+      notifyConversationParticipants(userId, false).catch(err => {
+        console.error('[SSE Route] Error notifying disconnect:', err);
+      });
     });
 
     // Handle connection errors
@@ -103,7 +106,10 @@ router.get('/connect', authenticate, async (req, res) => {
       console.error(`[SSE Route] Connection error for ${userId}:`, error.message);
       sseManager.removeClient(userId);
       // Notify conversation participants that this user is now offline
-      notifyConversationParticipants(userId, false);
+      // Note: Not awaited as this is an error callback
+      notifyConversationParticipants(userId, false).catch(err => {
+        console.error('[SSE Route] Error notifying error disconnect:', err);
+      });
     });
 
     // Send periodic heartbeat to keep connection alive (every 30 seconds)

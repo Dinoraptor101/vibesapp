@@ -290,10 +290,11 @@ exports.getConversations = async (req, res) => {
 
         // Add online status to otherUser data
         // Only include online status for approved (active) conversations, not closed ones
-        const otherUserWithStatus = otherUserData ? {
-          ...otherUserData.toJSON(),
-          isOnline: migratedConversation.status === 'approved' ? (onlineStatus[otherUserId] || false) : undefined,
-        } : null;
+        const otherUserJson = otherUserData ? otherUserData.toJSON() : null;
+        const otherUserWithStatus = otherUserJson && migratedConversation.status === 'approved' ? {
+          ...otherUserJson,
+          isOnline: onlineStatus[otherUserId] || false,
+        } : otherUserJson;
 
         return {
           _id: migratedConversation._id.toString(),

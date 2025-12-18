@@ -99,9 +99,10 @@ export function ConversationList() {
               {/* Online status indicator - only show for approved (active) conversations */}
               {!isClosed && otherUser?.isOnline && (
                 <span
-                  className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white dim:border-gray-800 dark:border-gray-900"
+                  className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-vibe-positive border-2 border-white dim:border-gray-800 dark:border-gray-900"
                   data-testid="online-indicator"
                   title="Online"
+                  aria-label="User is online"
                 />
               )}
             </button>
