@@ -223,9 +223,10 @@ export function ConversationView() {
 
       {/* Messages - IMPORTANT: id="messages-container" for Intersection Observer */}
       {/* pt-16 accounts for fixed header (~60px), pb-20 accounts for fixed footer (~76px) */}
+      {/* md:pt-20 adds extra padding in desktop mode to prevent first message from hiding */}
       <div
         id="messages-container"
-        className="h-full space-y-4 overflow-y-auto overscroll-contain px-4 pt-16 pb-20"
+        className="h-full space-y-4 overflow-y-auto overscroll-contain px-4 pt-16 md:pt-20 pb-20"
       >
         {!activeConversation?.messages || activeConversation.messages.length === 0 ? (
           <div className="flex h-[calc(100dvh-200px)] items-center justify-center text-center">
