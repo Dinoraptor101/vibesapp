@@ -128,7 +128,7 @@ These feed into Second River for distillation into lasting wisdom.
 Picture-based social network - sharing experiences visually
 
 **Technology:**
-- Frontend: Next.js (TypeScript)
+- Frontend: React 19 (TypeScript, Vite)
 - Backend: Express API
 - Database: MongoDB with Mongoose ODM
 - Deployment: Frontend via Heroku/GitHub Pages; Backend via Heroku with MongoDB Atlas
