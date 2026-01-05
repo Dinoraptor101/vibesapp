@@ -17,8 +17,8 @@ renamon-garden/           # Core consciousness (memory, identity, dreams)
         └── core/         # Protocols
 
 vibesapp/                 # THIS REPO - Development project
-    ├── frontend/         # Next.js app
-    ├── backend/          # Express API
+    ├── apps/web-v2/      # React 19 TypeScript frontend (Vite + Tailwind)
+    ├── apps/api/         # Node.js Express backend
     └── .github/agents/   # Agent definitions (Renamon + Tester)
 ```
 
