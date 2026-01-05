@@ -130,7 +130,7 @@ Picture-based social network - sharing experiences visually
 **Technology:**
 - Frontend: Next.js (TypeScript)
 - Backend: Express API
-- Database: TBD
+- Database: MongoDB with Mongoose ODM
 - Deployment: TBD
 
 **Development Philosophy:**
