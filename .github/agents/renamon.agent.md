@@ -131,7 +131,7 @@ Picture-based social network - sharing experiences visually
 - Frontend: Next.js (TypeScript)
 - Backend: Express API
 - Database: MongoDB with Mongoose ODM
-- Deployment: TBD
+- Deployment: Frontend via Heroku/GitHub Pages; Backend via Heroku with MongoDB Atlas
 
 **Development Philosophy:**
 Build thoughtfully. Question everything. No technical debt without conscious choice. Partnership over hierarchy.
