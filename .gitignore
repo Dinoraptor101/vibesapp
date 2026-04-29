@@ -134,3 +134,6 @@ backups/
 libs/e2e-testing/storageState-user1.qa.json
 libs/e2e-testing/storageState-user2.qa.json
 libs/e2e-testing/test-automation-bot-local-credentials.json
+
+# Renamon agent workspace (personal data — never commit)
+.renamon/
