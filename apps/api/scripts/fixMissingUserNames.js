@@ -3,11 +3,14 @@
  * This fixes the production issue where posts don't show user names
  */
 
+require('dotenv').config();
 const mongoose = require('mongoose');
 
-const uri =
-  process.env.MONGO_URI ||
-  'mongodb+srv://logosilappuser:***REMOVED***@cluster0.2xkguvj.mongodb.net/prod?retryWrites=true&w=majority';
+const uri = process.env.MONGO_URI;
+if (!uri) {
+  console.error('MONGO_URI env var is required. Refusing to run without it.');
+  process.exit(1);
+}
 
 async function fixMissingUserNames() {
   try {
