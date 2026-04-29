@@ -10,7 +10,7 @@ All environment URLs are defined in `libs/e2e-testing/.env`:
 
 ```bash
 # Backend API Key for authenticated test cleanup
-BACKEND_API_KEY=***REMOVED***
+BACKEND_API_KEY=<your-backend-api-key>  # set in your local .env, never commit
 
 # Localhost URLs (default)
 LOCAL_FRONTEND_URL=http://localhost:5173
