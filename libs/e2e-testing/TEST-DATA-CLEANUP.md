@@ -78,11 +78,11 @@ You can manually trigger cleanup via API:
 ```bash
 # Using curl
 curl -X DELETE http://localhost:5001/api/admin/cleanup-test-data \
-  -H "x-api-key: DxgVLXfMi4uJCk"
+  -H "x-api-key: $BACKEND_API_KEY"
 
 # For QA environment
 curl -X DELETE https://qa.vibesapp.net/api/admin/cleanup-test-data \
-  -H "x-api-key: DxgVLXfMi4uJCk"
+  -H "x-api-key: $BACKEND_API_KEY"
 ```
 
 ## Writing Tests That Follow Cleanup Convention
