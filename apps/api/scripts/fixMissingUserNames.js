@@ -3,6 +3,7 @@
  * This fixes the production issue where posts don't show user names
  */
 
+require('dotenv').config();
 const mongoose = require('mongoose');
 
 const uri = process.env.MONGO_URI;
