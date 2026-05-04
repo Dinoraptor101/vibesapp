@@ -72,7 +72,7 @@
     "@biomejs/cli-linux-arm64-musl": "2.3.8",
     "@biomejs/cli-linux-x64": "2.3.8",
     "@biomejs/cli-linux-x64-musl": "2.3.8",
-    "@biomejs/cli-win32-arm64": "2.3.8",
+    "@biomejs/cli-win32-arm64": "2.4.14",
     "@biomejs/cli-win32-x64": "2.3.8",
     "@nx/nx-linux-x64-gnu": "22.0.2"
   },
