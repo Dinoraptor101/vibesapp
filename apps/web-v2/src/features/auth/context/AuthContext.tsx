@@ -6,12 +6,14 @@
  */
 
 import { useQueryClient } from '@tanstack/react-query';
+import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import type { ReactNode } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GlobalSSE } from '@/components/GlobalSSE';
 import { clearAllScrollPositions } from '@/hooks/useScrollRestoration';
 import { deleteCookie, getCookie, setCookie } from '@/lib/api';
+import { getFirebaseAuth } from '@/lib/firebase';
 import type { User } from '@/types';
 import { authApi } from '../services/authApi';
 import { AuthContext, type AuthContextType } from './types';
@@ -22,6 +24,7 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -143,6 +146,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     initializeAuth();
   }, [initializeAuth]);
 
+  /**
+   * Subscribe to Firebase auth state. No-op if Firebase isn't configured
+   * (env vars missing) — legacy pigeonId path keeps working untouched.
+   */
+  useEffect(() => {
+    const auth = getFirebaseAuth();
+    if (!auth) return;
+
+    const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
+      setFirebaseUser(fbUser);
+    });
+
+    return unsubscribe;
+  }, []);
+
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
@@ -150,6 +168,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     login,
     logout,
     refreshUser,
+    firebaseUser,
   };
 
   return (

@@ -5,6 +5,7 @@
  */
 
 import axios, { type AxiosError, type AxiosInstance } from 'axios';
+import { getFirebaseAuth } from './firebase';
 
 // Cookie utility functions
 function getCookie(name: string): string | undefined {
@@ -70,7 +71,7 @@ class ApiClient {
   private setupInterceptors(): void {
     // Request interceptor - Add auth headers
     this.client.interceptors.request.use(
-      (config) => {
+      async (config) => {
         // SECURITY FIX: Never send API key from browser
         // It would expose the key in DevTools and allow attackers to bypass auth
         // The apiKey middleware checks for this header, but since excludedRoutes
@@ -80,17 +81,29 @@ class ApiClient {
         //   config.headers['X-Api-Key'] = this.apiKey;
         // }
 
-        // Add Pigeon ID from cookie (primary browser auth mechanism)
+        // Add Pigeon ID from cookie (legacy auth, kept during migration window)
         const pigeonId = getCookie('pigeonId');
         if (pigeonId) {
           config.headers['X-Pigeon-Id'] = pigeonId;
           if (import.meta.env.VITE_DEBUG) {
             console.log(`[API] Adding pigeonId header: ${pigeonId.substring(0, 8)}...`);
           }
-        } else {
-          if (import.meta.env.VITE_DEBUG) {
-            console.warn('[API] No pigeonId cookie found - request will be unauthenticated');
+        }
+
+        // Add Firebase ID token (parallel with pigeonId during migration).
+        // getIdToken() returns the cached token and silently refreshes near expiry.
+        const firebaseAuth = getFirebaseAuth();
+        if (firebaseAuth?.currentUser) {
+          try {
+            const idToken = await firebaseAuth.currentUser.getIdToken();
+            config.headers['Authorization'] = `Bearer ${idToken}`;
+          } catch (err) {
+            console.warn('[API] Failed to get Firebase ID token:', err);
           }
+        }
+
+        if (!pigeonId && !firebaseAuth?.currentUser && import.meta.env.VITE_DEBUG) {
+          console.warn('[API] No auth credential found - request will be unauthenticated');
         }
 
         // Add Admin Token from cookie (for admin routes)
