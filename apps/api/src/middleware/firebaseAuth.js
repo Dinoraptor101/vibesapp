@@ -1,12 +1,15 @@
 const { getFirebaseAdmin } = require('../config/firebase');
 const User = require('../models/User');
 
+// Tolerant Bearer extraction: case-insensitive scheme, trims whitespace,
+// accepts arbitrary whitespace between scheme and token.
+const BEARER_RE = /^Bearer\s+(.+)$/i;
+
 function extractBearerToken(req) {
   const header = req.headers.authorization || req.headers.Authorization;
   if (!header || typeof header !== 'string') return null;
-  const [scheme, token] = header.split(' ');
-  if (scheme !== 'Bearer' || !token) return null;
-  return token;
+  const match = header.trim().match(BEARER_RE);
+  return match ? match[1].trim() : null;
 }
 
 module.exports = async (req, res, next) => {
@@ -16,9 +19,11 @@ module.exports = async (req, res, next) => {
     return next();
   }
 
+  // If the SDK isn't initialized, firebase.js already warned once at boot.
+  // Don't log per-request — requests with Bearer tokens simply fall through
+  // to legacy auth.
   const adminSdk = getFirebaseAdmin();
   if (!adminSdk) {
-    console.warn('[firebaseAuth] Token present but Admin SDK not initialized; skipping');
     return next();
   }
 

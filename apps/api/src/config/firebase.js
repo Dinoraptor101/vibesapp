@@ -1,6 +1,7 @@
 const admin = require('firebase-admin');
 
 let initialized = false;
+let warnedMissingConfig = false;
 
 function getServiceAccount() {
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
@@ -20,9 +21,13 @@ function initFirebase() {
   const serviceAccount = getServiceAccount();
 
   if (!serviceAccount) {
-    if (process.env.NODE_ENV !== 'test') {
+    // Log once per process. Without a service account the middleware
+    // silently skips token verification and lets requests fall through
+    // to legacy auth — it does not reject tokens.
+    if (!warnedMissingConfig && process.env.NODE_ENV !== 'test') {
+      warnedMissingConfig = true;
       console.warn(
-        '[firebase] FIREBASE_SERVICE_ACCOUNT_JSON not set. Firebase Auth verification will reject every token. Set it in .env to enable Firebase login.'
+        '[firebase] FIREBASE_SERVICE_ACCOUNT_JSON not set. Firebase token verification is disabled; Bearer tokens are ignored and requests fall through to legacy auth. Set this env var to enable Firebase login.'
       );
     }
     return null;

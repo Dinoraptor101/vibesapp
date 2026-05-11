@@ -23,7 +23,15 @@ let auth: Auth | null = null;
 let warned = false;
 
 function isConfigured(): boolean {
-  return Boolean(firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId);
+  // authDomain is required by Firebase Auth for redirect/popup flows;
+  // a partial config silently breaks sign-in at runtime, so treat it as
+  // not-configured rather than half-enabling the SDK.
+  return Boolean(
+    firebaseConfig.apiKey &&
+      firebaseConfig.authDomain &&
+      firebaseConfig.projectId &&
+      firebaseConfig.appId
+  );
 }
 
 export function getFirebaseApp(): FirebaseApp | null {

@@ -98,7 +98,12 @@ class ApiClient {
             const idToken = await firebaseAuth.currentUser.getIdToken();
             config.headers['Authorization'] = `Bearer ${idToken}`;
           } catch (err) {
-            console.warn('[API] Failed to get Firebase ID token:', err);
+            // Token-refresh failures are recoverable on the next request;
+            // don't spam prod logs. Surface details only with VITE_DEBUG.
+            if (import.meta.env.VITE_DEBUG) {
+              const msg = err instanceof Error ? err.message : String(err);
+              console.warn('[API] Failed to get Firebase ID token:', msg);
+            }
           }
         }
 
