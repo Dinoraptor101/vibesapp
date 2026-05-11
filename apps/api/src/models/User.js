@@ -16,6 +16,21 @@ const UserSchema = new mongoose.Schema({
     index: true,
     select: false, // SECURITY: Never include pigeonId in query results by default
   },
+  firebaseUid: {
+    type: String,
+    unique: true,
+    sparse: true,
+    index: true,
+    select: false, // SECURITY: Backend-only identity; never expose in API responses
+  },
+  email: {
+    type: String,
+    lowercase: true,
+    trim: true,
+    unique: true,
+    sparse: true,
+    index: true,
+  },
   userName: {
     type: String,
     required: [true, 'User name is required'],
@@ -129,6 +144,7 @@ UserSchema.index({ 'location.lat': 1, 'location.lon': 1 });
 UserSchema.set('toJSON', {
   transform: (_doc, ret) => {
     delete ret.pigeonId; // Remove pigeonId from JSON output
+    delete ret.firebaseUid; // Remove firebaseUid from JSON output
     // userName stays as-is (camelCase is our standard)
 
     // Transform location field names: lat/lon → latitude/longitude (frontend expectation)
@@ -149,6 +165,7 @@ UserSchema.set('toJSON', {
 UserSchema.set('toObject', {
   transform: (_doc, ret) => {
     delete ret.pigeonId; // Remove pigeonId from object output
+    delete ret.firebaseUid; // Remove firebaseUid from object output
     // userName stays as-is (camelCase is our standard)
 
     // Transform location field names: lat/lon → latitude/longitude (frontend expectation)
