@@ -80,8 +80,9 @@ const s3Routes = require('./routes/s3');
 const issueRoutes = require('./routes/issue');
 const activityRouter = require('./routes/activity');
 const adminRouter = require('./routes/admin');
-const groupChatRoutes = require('./routes/groupchat');
-const messageRoutes = require('./routes/message');
+// DEAD CODE - V1 group chat system, replaced by DM system. Safe to delete after 2026-06-01.
+// const groupChatRoutes = require('./routes/groupchat');
+// const messageRoutes = require('./routes/message');
 const recaptchaRoutes = require('./routes/recaptcha');
 const dmRoutes = require('./routes/dm');
 const dmRequestRoutes = require('./routes/dmRequest');
@@ -101,12 +102,13 @@ function useRoute(path, router) {
 useRoute('/api/users', userRoutes);
 useRoute('/api/posts', postRoutes);
 useRoute('/api/comments', commentRoutes);
-useRoute('/api/messages', messageRoutes);
+// DEAD CODE - V1 group chat system, replaced by DM system. Safe to delete after 2026-06-01.
+// useRoute('/api/messages', messageRoutes);
 useRoute('/api/s3', s3Routes);
 useRoute('/api/issues', issueRoutes);
 useRoute('/api/activities', activityRouter);
 useRoute('/api/admin', adminRouter);
-useRoute('/api/groupChats', groupChatRoutes);
+// useRoute('/api/groupChats', groupChatRoutes);
 useRoute('/api/recaptcha', recaptchaRoutes);
 useRoute('/api/dm', dmRoutes);
 useRoute('/api/dm-requests', dmRequestRoutes);
