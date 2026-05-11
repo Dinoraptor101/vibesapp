@@ -11,7 +11,7 @@
  */
 
 import { expect, test } from '@playwright/test';
-import { isQAEnvironment, getSecondUserCredentials } from './helpers/test-post';
+import { isQAEnvironment } from './helpers/test-post';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -32,58 +32,83 @@ function getApiHeaders(pigeonId: string) {
   };
 }
 
-function getUser1Credentials() {
+interface UserCredentials {
+  pigeonId: string;
+  userId: string;
+  isValid: boolean;
+}
+
+function getUserCredentials(user: 'user1' | 'user2'): UserCredentials {
   try {
     const env = isQAEnvironment() ? 'qa' : 'local';
-    const storageStatePath = path.join(__dirname, '../', `storageState-user1.${env}.json`);
+    const storageStatePath = path.join(__dirname, '../', `storageState-${user}.${env}.json`);
     const storageState = JSON.parse(fs.readFileSync(storageStatePath, 'utf-8'));
     const pigeonIdCookie = storageState.cookies?.find(
       (c: { name: string }) => c.name === 'pigeonId'
     );
     const userIdCookie = storageState.cookies?.find((c: { name: string }) => c.name === 'userId');
+
+    const pigeonId = pigeonIdCookie?.value || '';
+    const userId = userIdCookie?.value || '';
+
+    // Check for placeholder values that indicate missing/invalid credentials
+    const isPlaceholder =
+      pigeonId === 'test-pigeon-id' ||
+      userId === 'test-user-id' ||
+      pigeonId.startsWith('test-') ||
+      !pigeonId ||
+      !userId;
+
     return {
-      pigeonId: pigeonIdCookie?.value || '',
-      userId: userIdCookie?.value || '',
+      pigeonId,
+      userId,
+      isValid: !isPlaceholder && pigeonId.length > 0 && userId.length > 0,
     };
   } catch {
-    return { pigeonId: '', userId: '' };
+    return { pigeonId: '', userId: '', isValid: false };
   }
 }
 
-test.describe('DM Request Flow', () => {
+/**
+ * Full DM Flow Test Suite
+ * Tests run serially to maintain state (dmRequestId, conversationId) across tests
+ */
+test.describe('DM Full Flow - Request to Conversation', () => {
   test.describe.configure({ mode: 'serial' });
 
-  let user1: { pigeonId: string; userId: string };
-  let user2: { pigeonId: string; userId: string };
+  let user1: UserCredentials;
+  let user2: UserCredentials;
   let dmRequestId: string;
   let conversationId: string;
 
   test.beforeAll(() => {
-    user1 = getUser1Credentials();
-    user2 = getSecondUserCredentials();
+    user1 = getUserCredentials('user1');
+    user2 = getUserCredentials('user2');
 
-    if (!user1.pigeonId || !user2.pigeonId) {
-      console.warn('Test users not configured - some tests may be skipped');
+    if (!user1.isValid || !user2.isValid) {
+      console.warn('Test users not properly configured:');
+      console.warn(`  User1 valid: ${user1.isValid} (pigeonId: ${user1.pigeonId ? '***' : 'missing'})`);
+      console.warn(`  User2 valid: ${user2.isValid} (pigeonId: ${user2.pigeonId ? '***' : 'missing'})`);
     }
   });
 
+  // === DM Request Phase ===
+
   test('should check DM request status before sending', async ({ request }) => {
-    test.skip(!user1.pigeonId || !user2.userId, 'Test users not configured');
+    test.skip(!user1.isValid || !user2.isValid, 'Test users not properly configured');
 
     const response = await request.get(`${API_BASE_URL}/api/dm-requests/status/${user2.userId}`, {
       headers: getApiHeaders(user1.pigeonId),
     });
 
-    expect([200, 404]).toContain(response.status());
-
-    if (response.status() === 200) {
-      const data = await response.json();
-      expect(data).toHaveProperty('canSend');
-    }
+    // Require 200 - endpoint must exist and work
+    expect(response.status()).toBe(200);
+    const data = await response.json();
+    expect(data).toHaveProperty('canSend');
   });
 
   test('should send DM request from User1 to User2', async ({ request }) => {
-    test.skip(!user1.pigeonId || !user2.userId, 'Test users not configured');
+    test.skip(!user1.isValid || !user2.isValid, 'Test users not properly configured');
 
     const response = await request.post(`${API_BASE_URL}/api/dm-requests/${user2.userId}`, {
       headers: getApiHeaders(user1.pigeonId),
@@ -92,7 +117,7 @@ test.describe('DM Request Flow', () => {
       },
     });
 
-    // Could be 201 (created) or 400 (already exists) or 200 (success)
+    // 201 (created) or 400 (already exists/pending)
     expect([200, 201, 400]).toContain(response.status());
 
     if (response.status() === 201 || response.status() === 200) {
@@ -104,7 +129,7 @@ test.describe('DM Request Flow', () => {
   });
 
   test('should get pending DM requests as recipient (User2)', async ({ request }) => {
-    test.skip(!user2.pigeonId, 'User2 not configured');
+    test.skip(!user2.isValid, 'User2 not properly configured');
 
     const response = await request.get(`${API_BASE_URL}/api/dm-requests`, {
       headers: getApiHeaders(user2.pigeonId),
@@ -114,7 +139,7 @@ test.describe('DM Request Flow', () => {
     const requests = await response.json();
     expect(Array.isArray(requests)).toBe(true);
 
-    // Find request from user1 if it exists
+    // Find request from user1 if it exists (updates dmRequestId if found)
     const fromUser1 = requests.find(
       (r: { sender?: { userId: string } }) => r.sender?.userId === user1.userId
     );
@@ -124,7 +149,7 @@ test.describe('DM Request Flow', () => {
   });
 
   test('should accept DM request (User2 accepts User1)', async ({ request }) => {
-    test.skip(!user2.pigeonId || !dmRequestId, 'No DM request to accept');
+    test.skip(!user2.isValid || !dmRequestId, 'No DM request to accept');
 
     const response = await request.post(`${API_BASE_URL}/api/dm-requests/${dmRequestId}/accept`, {
       headers: getApiHeaders(user2.pigeonId),
@@ -137,25 +162,15 @@ test.describe('DM Request Flow', () => {
       const data = await response.json();
       if (data.conversation?._id) {
         conversationId = data.conversation._id;
+        console.log(`Conversation created: ${conversationId}`);
       }
     }
   });
-});
 
-test.describe('DM Conversation Flow (Post-Approval)', () => {
-  test.describe.configure({ mode: 'serial' });
-
-  let user1: { pigeonId: string; userId: string };
-  let user2: { pigeonId: string; userId: string };
-  let conversationId: string;
-
-  test.beforeAll(() => {
-    user1 = getUser1Credentials();
-    user2 = getSecondUserCredentials();
-  });
+  // === Conversation Phase (uses conversationId from accept) ===
 
   test('should get conversations for User1', async ({ request }) => {
-    test.skip(!user1.pigeonId || !user1.userId, 'User1 not configured');
+    test.skip(!user1.isValid, 'User1 not properly configured');
 
     const response = await request.get(`${API_BASE_URL}/api/dm/conversations/${user1.userId}`, {
       headers: getApiHeaders(user1.pigeonId),
@@ -165,21 +180,23 @@ test.describe('DM Conversation Flow (Post-Approval)', () => {
     const conversations = await response.json();
     expect(Array.isArray(conversations)).toBe(true);
 
-    // Find conversation with user2
-    const withUser2 = conversations.find(
-      (c: { user1Id?: string; user2Id?: string; otherUser?: { userId: string } }) =>
-        c.otherUser?.userId === user2.userId ||
-        c.user1Id === user2.userId ||
-        c.user2Id === user2.userId
-    );
-
-    if (withUser2) {
-      conversationId = withUser2._id;
+    // If we don't have conversationId from accept, try to find it here
+    if (!conversationId) {
+      const withUser2 = conversations.find(
+        (c: { user1Id?: string; user2Id?: string; otherUser?: { userId: string } }) =>
+          c.otherUser?.userId === user2.userId ||
+          c.user1Id === user2.userId ||
+          c.user2Id === user2.userId
+      );
+      if (withUser2) {
+        conversationId = withUser2._id;
+        console.log(`Found existing conversation: ${conversationId}`);
+      }
     }
   });
 
   test('should send message in approved conversation', async ({ request }) => {
-    test.skip(!user1.pigeonId || !conversationId, 'No conversation available');
+    test.skip(!user1.isValid || !conversationId, 'No conversation available');
 
     const response = await request.post(`${API_BASE_URL}/api/dm/message`, {
       headers: getApiHeaders(user1.pigeonId),
@@ -199,7 +216,7 @@ test.describe('DM Conversation Flow (Post-Approval)', () => {
   });
 
   test('should get specific conversation by ID', async ({ request }) => {
-    test.skip(!user1.pigeonId || !conversationId, 'No conversation available');
+    test.skip(!user1.isValid || !conversationId, 'No conversation available');
 
     const response = await request.get(`${API_BASE_URL}/api/dm/conversation/${conversationId}`, {
       headers: getApiHeaders(user1.pigeonId),
@@ -213,7 +230,7 @@ test.describe('DM Conversation Flow (Post-Approval)', () => {
   });
 
   test('should mark messages as read', async ({ request }) => {
-    test.skip(!user2.pigeonId || !conversationId, 'No conversation available');
+    test.skip(!user2.isValid || !conversationId, 'No conversation available');
 
     const response = await request.post(
       `${API_BASE_URL}/api/dm/conversation/${conversationId}/markAsRead`,
@@ -226,7 +243,7 @@ test.describe('DM Conversation Flow (Post-Approval)', () => {
   });
 
   test('should get conversation status between users', async ({ request }) => {
-    test.skip(!user1.pigeonId || !user1.userId || !user2.userId, 'Users not configured');
+    test.skip(!user1.isValid || !user2.isValid, 'Users not properly configured');
 
     const response = await request.get(`${API_BASE_URL}/api/dm/status`, {
       headers: getApiHeaders(user1.pigeonId),
@@ -243,10 +260,10 @@ test.describe('DM Conversation Flow (Post-Approval)', () => {
 });
 
 test.describe('DM Security - Authorization Checks', () => {
-  let user1: { pigeonId: string; userId: string };
+  let user1: UserCredentials;
 
   test.beforeAll(() => {
-    user1 = getUser1Credentials();
+    user1 = getUserCredentials('user1');
   });
 
   test('should prevent sending message without authentication', async ({ request }) => {
@@ -305,7 +322,7 @@ test.describe('DM Security - Authorization Checks', () => {
   });
 
   test('should prevent message to non-existent conversation', async ({ request }) => {
-    test.skip(!user1.pigeonId, 'User1 not configured');
+    test.skip(!user1.isValid, 'User1 not properly configured');
 
     const response = await request.post(`${API_BASE_URL}/api/dm/message`, {
       headers: getApiHeaders(user1.pigeonId),
@@ -322,8 +339,8 @@ test.describe('DM Security - Authorization Checks', () => {
 
 test.describe('DM Request Decline Flow', () => {
   test('should handle declining a DM request', async ({ request }) => {
-    const user2 = getSecondUserCredentials();
-    test.skip(!user2.pigeonId, 'User2 not configured');
+    const user2 = getUserCredentials('user2');
+    test.skip(!user2.isValid, 'User2 not properly configured');
 
     // First get pending requests
     const listResponse = await request.get(`${API_BASE_URL}/api/dm-requests`, {
@@ -339,7 +356,7 @@ test.describe('DM Request Decline Flow', () => {
     const pendingRequest = requests.find((r: { status: string }) => r.status === 'pending');
 
     if (!pendingRequest) {
-      // No pending request to decline - that's okay, just verify the endpoint works
+      // No pending request to decline - verify endpoint returns proper error
       const response = await request.post(
         `${API_BASE_URL}/api/dm-requests/000000000000000000000000/decline`,
         {
@@ -347,7 +364,7 @@ test.describe('DM Request Decline Flow', () => {
         }
       );
 
-      // Should fail with 404 (not found) rather than server error
+      // Should fail with 400/404 (not found) rather than server error
       expect([400, 404]).toContain(response.status());
     } else {
       // Actually decline the request
