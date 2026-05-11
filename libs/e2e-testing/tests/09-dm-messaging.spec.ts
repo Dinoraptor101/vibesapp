@@ -19,6 +19,8 @@ const API_BASE_URL = isQAEnvironment()
   ? process.env.QA_BACKEND_BASE
   : process.env.LOCAL_BACKEND_BASE;
 
+// Note: Intentionally not using shared helpers to add explicit isValid validation
+// for credential detection. Consider extracting to shared helper if pattern is reused.
 function getApiHeaders(pigeonId: string) {
   const apiKey = process.env.BACKEND_API_KEY;
   if (!apiKey) {
@@ -51,18 +53,13 @@ function getUserCredentials(user: 'user1' | 'user2'): UserCredentials {
     const pigeonId = pigeonIdCookie?.value || '';
     const userId = userIdCookie?.value || '';
 
-    // Check for placeholder values that indicate missing/invalid credentials
-    const isPlaceholder =
-      pigeonId === 'test-pigeon-id' ||
-      userId === 'test-user-id' ||
-      pigeonId.startsWith('test-') ||
-      !pigeonId ||
-      !userId;
+    // Only reject exact fallback values from test-post.ts, not valid test-* IDs
+    const isExactFallback = pigeonId === 'test-pigeon-id' || userId === 'test-user-id';
 
     return {
       pigeonId,
       userId,
-      isValid: !isPlaceholder && pigeonId.length > 0 && userId.length > 0,
+      isValid: !isExactFallback && pigeonId.length > 0 && userId.length > 0,
     };
   } catch {
     return { pigeonId: '', userId: '', isValid: false };
