@@ -9,8 +9,7 @@ module.exports = [
   '/api/posts', // Post routes use pigeonAuth
   '/api/comments', // Comment routes use pigeonAuth
   '/api/reactions', // Reaction routes use pigeonAuth
-  '/api/messages', // Message routes use pigeonAuth
-  '/api/messaging', // Messaging routes use pigeonAuth
+  // V1 message routes removed - replaced by /api/dm system
   '/api/dm', // DM routes use pigeonAuth
   '/api/dm-requests', // DM request routes use pigeonAuth
   '/api/activities', // Activity routes use pigeonAuth

@@ -30,21 +30,14 @@ export const API_ENDPOINTS = {
     COMMENT: '/api/posts/comment',
   },
 
-  // Messages
-  MESSAGES: {
-    CONVERSATIONS: '/api/messages/conversations',
-    SEND: '/api/messages/send',
-    MARK_READ: '/api/messages/read',
-    DELETE: '/api/messages/delete',
-  },
-
-  // Group Chats
-  GROUP_CHATS: {
-    CREATE: '/api/groupchats',
-    JOIN: '/api/groupchats/join',
-    LEAVE: '/api/groupchats/leave',
-    MESSAGES: '/api/groupchats/messages',
-    MEMBERS: '/api/groupchats/members',
+  // DM (Direct Messages) - replaced V1 messages/groupchats system
+  DM: {
+    REQUESTS: '/api/dm-requests',
+    REQUEST_STATUS: '/api/dm-requests/status',
+    CONVERSATIONS: '/api/dm/conversations',
+    CONVERSATION: '/api/dm/conversation',
+    MESSAGE: '/api/dm/message',
+    STATUS: '/api/dm/status',
   },
 
   // Activities
