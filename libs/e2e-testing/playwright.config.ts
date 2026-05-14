@@ -74,7 +74,7 @@ export default defineConfig({
     },
     {
       name: 'ux',
-      testMatch: ['**/06-*.spec.ts', '**/07-*.spec.ts', '**/08-*.spec.ts'],
+      testMatch: ['**/06-*.spec.ts', '**/07-*.spec.ts', '**/08-*.spec.ts', '**/09-*.spec.ts'],
       dependencies: ['core', 'integration'],
       use: { browserName: 'chromium' },
     },
